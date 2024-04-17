@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
+import com.enterpriseapplicationsproject.ecommerce.data.domain.Status;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -25,7 +26,8 @@ public class Transactions {
     private double amount;
 
     @Column(name = "PAYMENT_STATUS")
-    private String paymentStatus;
+    @Enumerated(EnumType.STRING)
+    private Status paymentStatus;
 
     @Column(name = "DATE")
     private LocalDate date;
