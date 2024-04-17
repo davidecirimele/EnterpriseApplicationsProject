@@ -1,11 +1,13 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "CartItems")
+@Data
 public class CartItems {
 
     @Id

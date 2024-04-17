@@ -1,9 +1,11 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
 @Table(name = "Addresses")
+@Data
 public class Addresses {
 
 

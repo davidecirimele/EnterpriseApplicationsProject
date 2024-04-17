@@ -2,10 +2,12 @@ package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import com.enterpriseapplicationsproject.ecommerce.data.domain.Email;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 
 @Entity
+@Data
 @Table(name = "Users")
 public class Users {
 
@@ -29,13 +31,8 @@ public class Users {
     @Column(name = "PROPIC")
     private byte[] profilepPicture;
 
-    @Basic(optional = false)
-    @Column(name = "EMAIL")
-    private String email;
-
-    @Basic(optional = false)
-    @Column(name = "PASSWORD")
-    private String password;
+    @Embedded
+    private Credential credential;
 
     @Basic(optional = false)
     @Column(name = "DEFAULT_ADDRESS")
