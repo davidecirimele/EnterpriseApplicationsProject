@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint( columnNames = {"ORDER_ID", "PRODUCT_ID"}))
+
 public class OrderItems {
 
     @Id
@@ -13,11 +15,11 @@ public class OrderItems {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ORDER_ID", nullable = false)
-    private Orders orderId;
+    private Orders order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PRODUCT_ID", nullable = false)
-    private Products productId;
+    private Products product;
 
     @Column(name = "QUANTITY")
     private int quantity;

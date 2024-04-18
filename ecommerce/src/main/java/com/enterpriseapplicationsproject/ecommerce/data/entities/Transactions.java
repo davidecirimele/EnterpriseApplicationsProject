@@ -15,15 +15,15 @@ public class Transactions {
 
     @JoinColumn(name = "USER_ID", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    private Users userId;
+    private Users user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ORDER_ID", nullable = false)
-    private Orders orderId;
+    private Orders order;
 
     @JoinColumn(name = "PAYMENT_METHOD_ID", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    private PaymentMethods paymentMethodId;
+    private PaymentMethods paymentMethod;
 
 
     @Column(name = "AMOUNT")

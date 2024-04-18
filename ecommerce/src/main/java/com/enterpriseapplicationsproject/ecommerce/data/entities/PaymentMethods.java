@@ -14,7 +14,7 @@ public class PaymentMethods {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = false)
-    private Users userId;
+    private Users user;
 
     @Column(name = "TYPE")
     private String type;
@@ -31,10 +31,10 @@ public class PaymentMethods {
     @Column(name = "paypal")
     private String paypal;
 
-    @OneToMany(mappedBy =  "transactionId")
+    @OneToMany(mappedBy =  "transaction")
     private List<Transactions> transactions;
 
-    @OneToMany(mappedBy = "orderId")
+    @OneToMany(mappedBy = "order")
     private List<Orders> orders;
 
 

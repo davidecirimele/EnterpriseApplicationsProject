@@ -16,11 +16,11 @@ public class Orders {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = false)
-    private Users userId;
+    private Users user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ADDRESS_ID", nullable = false)
-    private Addresses addressId;
+    private Addresses address;
 
     @Column(name = "ORDER_DATE")
     private LocalDate orderDate;
@@ -34,7 +34,7 @@ public class Orders {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PAYMENT_METHOD_ID", nullable = false)
-    private PaymentMethods paymentMethodId;
+    private PaymentMethods paymentMethod;
 
     @OneToMany(mappedBy = "orderItemId")
     private List<OrderItems> orderItems;
