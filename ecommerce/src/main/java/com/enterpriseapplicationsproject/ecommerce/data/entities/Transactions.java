@@ -27,7 +27,7 @@ public class Transactions {
 
 
     @Column(name = "AMOUNT")
-    private double amount;
+    private Double amount;
 
     @Column(name = "PAYMENT_STATUS")
     @Enumerated(EnumType.STRING)
