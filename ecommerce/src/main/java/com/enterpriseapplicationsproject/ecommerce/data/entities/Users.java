@@ -39,7 +39,7 @@ public class Users {
     private String defaultAddress;
 
     @Basic(optional = false)
-    @Column(name = "PHONE_NUMBER")
+    @Column(name = "PHONE_NUMBER", unique = true)
     private String phoneNumber;
 
     @Basic(optional = false)
