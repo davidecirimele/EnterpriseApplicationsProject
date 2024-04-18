@@ -18,10 +18,17 @@ public class WishlistItems {
     private long wishlistItemId;
 
     @ManyToOne
-    @JoinColumn(referencedColumnName = "wishlistId")
-    private List<Wishlist> wishlistId = new ArrayList<>();
+    @JoinColumn(
+            name = "wishlistId",
+            referencedColumnName = "wishlistId"
+    )
+    private Wishlist wishlist;
 
     @ManyToOne
-    private long productId;
+    @JoinColumn(
+            name = "productId",
+            referencedColumnName = "productId"
+    )
+    private Product product;
 
 }
