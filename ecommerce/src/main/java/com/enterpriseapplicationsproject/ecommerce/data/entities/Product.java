@@ -38,4 +38,7 @@ public class Product {
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<Review> reviews = new ArrayList<>();
 
+    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
+    private List<OrderItems> orderItems = new ArrayList<>();
+
 }
