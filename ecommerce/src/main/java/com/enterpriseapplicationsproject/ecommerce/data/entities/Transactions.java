@@ -13,18 +13,18 @@ public class Transactions {
     @Column(name = "TRANSACTION_ID")
     private Long transactionId;
 
-    @Column(name = "USER_ID", nullable = false)
+    @JoinColumn(name = "USER_ID", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Users userId;
 
-    @Column(name = "ORDER_ID")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ORDER_ID", nullable = false)
     private Orders orderId;
 
-    @Column(name = "PAYMENT_METHOD_ID", nullable = false)
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PAYMENT_METHOD_ID", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     private PaymentMethods paymentMethodId;
+
 
     @Column(name = "AMOUNT")
     private double amount;
@@ -35,14 +35,5 @@ public class Transactions {
 
     @Column(name = "DATE")
     private LocalDate date;
-
-
-
-
-
-
-
-
-
 
 }
