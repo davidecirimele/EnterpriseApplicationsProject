@@ -1,7 +1,6 @@
-package com.enterpriseapplicationsproject.ecommerce.Data.Entities;
+package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 
-import com.enterpriseapplicationsproject.ecommerce.Data.*;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
