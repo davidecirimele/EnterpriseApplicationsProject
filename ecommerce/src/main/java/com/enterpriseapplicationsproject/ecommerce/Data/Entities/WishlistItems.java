@@ -1,16 +1,14 @@
 package com.enterpriseapplicationsproject.ecommerce.Data.Entities;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "WishlistItems")
 @Data
 public class WishlistItems {
 
@@ -19,15 +17,15 @@ public class WishlistItems {
 
     @ManyToOne
     @JoinColumn(
-            name = "wishlistId",
-            referencedColumnName = "wishlistId"
+            name = "WISHLIST_ID",
+            referencedColumnName = "ID"
     )
     private Wishlist wishlist;
 
     @ManyToOne
     @JoinColumn(
-            name = "productId",
-            referencedColumnName = "productId"
+            name = "PRODUCT_ID",
+            referencedColumnName = "ID"
     )
     private Product product;
 

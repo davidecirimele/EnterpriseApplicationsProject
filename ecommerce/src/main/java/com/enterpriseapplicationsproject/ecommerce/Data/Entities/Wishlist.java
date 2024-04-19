@@ -10,27 +10,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Table(name= "wishlists", uniqueConstraints =
+@Table(name= "Wishlist", uniqueConstraints =
 @UniqueConstraint(
-        columnNames = {"userId", "groupId"}
+        columnNames = {"USER_ID", "GROUP_ID"}
 ))
 @Entity
 public class Wishlist {
     @Id
     private long wishlistId;
 
-    @OneToMany(mappedBy = "wishlistId")//mappedby indica il nome del campo nella tabella WishlistItems
+    @OneToMany(mappedBy = "WISHLIST_ID")//mappedby indica il nome del campo nella tabella WishlistItems
     private List<WishlistItems> items = new ArrayList<>();
 
 
     @ManyToOne()
-    @JoinColumn(referencedColumnName = "userId")
+    @JoinColumn(
+            name = "USER_ID",
+            referencedColumnName = "ID"
+    )
     private Users userId;//pk
 
-    @OneToOne(mappedBy = "groupId", optional = false)//optional indica
+    @OneToOne(mappedBy = "GROUP_ID", optional = false)//optional indica
     @JoinColumn(
-            name = "groupId",
-            referencedColumnName = "groupId"
+            name = "GROUP_ID",
+            referencedColumnName = "ID"
     )
     private Groups group;//pk
     //non posso mettere long perchè
