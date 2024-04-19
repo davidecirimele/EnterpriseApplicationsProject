@@ -31,10 +31,10 @@ public class PaymentMethods {
     @Column(name = "paypal")
     private String paypal;
 
-    @OneToMany(mappedBy =  "transaction")
+    @OneToMany(mappedBy =  "paymentMethod")
     private List<Transactions> transactions;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "paymentMethod")
     private List<Orders> orders;
 
 
