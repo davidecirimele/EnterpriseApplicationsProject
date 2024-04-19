@@ -36,7 +36,7 @@ public class Orders {
     @JoinColumn(name = "PAYMENT_METHOD_ID", nullable = false)
     private PaymentMethods paymentMethod;
 
-    @OneToMany(mappedBy = "orderItemId")
+    @OneToMany(mappedBy = "order")
     private List<OrderItems> orderItems;
 
 
