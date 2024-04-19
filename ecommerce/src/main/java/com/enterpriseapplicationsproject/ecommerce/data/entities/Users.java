@@ -1,6 +1,5 @@
-package com.enterpriseapplicationsproject.ecommerce.data.entities;
+package com.enterpriseapplicationsproject.ecommerce.Data.Entities;
 
-import com.enterpriseapplicationsproject.ecommerce.data.domain.Email;
 import jakarta.persistence.*;
 import lombok.Data;
 
