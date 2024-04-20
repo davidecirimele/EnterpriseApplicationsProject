@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
+import com.enterpriseapplicationsproject.ecommerce.data.entities.Users;
 import jakarta.persistence.*;
 import lombok.Data;
 

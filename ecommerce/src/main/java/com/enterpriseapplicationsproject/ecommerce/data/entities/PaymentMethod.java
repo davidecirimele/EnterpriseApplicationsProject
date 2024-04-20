@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-public class PaymentMethod {
+public class PaymentMethods {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -14,7 +14,7 @@ public class PaymentMethod {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = false)
-    private User user;
+    private Users user;
 
     @Column(name = "TYPE")
     private String type;
@@ -31,11 +31,11 @@ public class PaymentMethod {
     @Column(name = "paypal")
     private String paypal;
 
-    @OneToMany(mappedBy =  "transactionId")
-    private List<Transaction> transactions;
+    @OneToMany(mappedBy =  "paymentMethod")
+    private List<Transactions> transactions;
 
-    @OneToMany(mappedBy = "orderId")
-    private List<Order> orders;
+    @OneToMany(mappedBy = "paymentMethod")
+    private List<Orders> orders;
 
 
 
