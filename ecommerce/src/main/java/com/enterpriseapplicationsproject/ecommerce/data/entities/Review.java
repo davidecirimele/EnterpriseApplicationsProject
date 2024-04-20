@@ -26,6 +26,6 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "USER_ID", referencedColumnName = "ID")
-    private Users user;
+    private User user;
 
 }
