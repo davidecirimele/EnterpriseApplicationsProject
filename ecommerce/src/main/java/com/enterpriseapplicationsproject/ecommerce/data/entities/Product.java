@@ -1,9 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.Data.Entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -12,6 +9,8 @@ import lombok.Data;
 public abstract class Product {
 
     @Id
-    private long productId;
+    @GeneratedValue()
+    @Column(name = "ID")
+    private Long id;
 
 }
