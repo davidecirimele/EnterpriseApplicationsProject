@@ -1,13 +1,15 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Groups {
 
     @Id
-    private long groupId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
+    private Long id;
 
+    @Column(name = "GROUP_NAME")
     private String groupName;
 }

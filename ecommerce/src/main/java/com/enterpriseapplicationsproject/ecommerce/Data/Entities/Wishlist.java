@@ -8,18 +8,19 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
-@Table(name= "Wishlist", uniqueConstraints =
+@Table(name= "Wishlists", uniqueConstraints =
 @UniqueConstraint(
         columnNames = {"USER_ID", "GROUP_ID"}
 ))
 @Entity
 public class Wishlist {
     @Id
-    private long wishlistId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
+    private Long id;
 
-    @OneToMany(mappedBy = "WISHLIST_ID")//mappedby indica il nome del campo nella tabella WishlistItems
-    private List<WishlistItems> items = new ArrayList<>();
+    @OneToMany(mappedBy = "id")//mappedby indica il nome del campo nella tabella WishlistItems
+    private List<WishlistItem> items = new ArrayList<>();
 
 
     @ManyToOne()
@@ -27,9 +28,9 @@ public class Wishlist {
             name = "USER_ID",
             referencedColumnName = "ID"
     )
-    private Users userId;//pk
+    private User userId;//pk
 
-    @OneToOne(mappedBy = "GROUP_ID", optional = false)//optional indica
+    @OneToOne(optional = false)//optional indica
     @JoinColumn(
             name = "GROUP_ID",
             referencedColumnName = "ID"

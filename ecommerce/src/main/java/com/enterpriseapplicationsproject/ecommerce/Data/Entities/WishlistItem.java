@@ -4,16 +4,14 @@ package com.enterpriseapplicationsproject.ecommerce.data.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Table(name = "WishlistItems")
-@Data
-public class WishlistItems {
+public class WishlistItem {
 
     @Id
-    private long wishlistItemId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
+    private Long id;
 
     @ManyToOne
     @JoinColumn(
