@@ -10,9 +10,6 @@ import java.sql.Date;
 @Entity
 public class Books extends Product{
 
-    @Id
-    @Column(name = "BOOK_ID")
-    private long bookId;
     //private String category;
     //private String weight;
     //private Date insertDate;

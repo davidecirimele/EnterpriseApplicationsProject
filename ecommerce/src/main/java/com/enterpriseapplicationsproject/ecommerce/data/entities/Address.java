@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Entity
 @Table(name = "Addresses")
-@Data
 public class Address {
 
 
@@ -15,7 +14,7 @@ public class Address {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "USER_ID", referencedColumnName = "ID")
+    @JoinColumn(name = "USER_ID")
     private User userId;
 
     @Column(name = "STREET")

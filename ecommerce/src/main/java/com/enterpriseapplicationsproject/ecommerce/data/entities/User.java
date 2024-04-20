@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-@Data
 @Table(name = "Users")
 public class User {
 
@@ -37,7 +36,7 @@ public class User {
     @OneToMany(mappedBy = "userId")
     private List<Address> addresses;
 
-    @Basic(optional = false)
+    @Basic(optional = true)
     @Column(name = "DEFAULT_ADDRESS")
     private Long defaultAddress;
 
@@ -49,12 +48,12 @@ public class User {
     @Column(name = "ROLE")
     private String role;
 
-    @PrePersist
+    /*@PrePersist
     public void prePersist() {
         if (addresses != null && !addresses.isEmpty()) {
             defaultAddress = addresses.get(0).getId();
         }
-    }
+    }*/
 
     public void setId(Long id) {
         this.id = id;
