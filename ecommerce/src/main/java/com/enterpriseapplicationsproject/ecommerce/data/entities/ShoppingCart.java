@@ -6,7 +6,7 @@ import lombok.Data;
 @Entity
 @Table(name = "ShoppingCarts")
 @Data
-public class ShoppingCarts {
+public class ShoppingCart {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,7 +15,7 @@ public class ShoppingCarts {
 
     @OneToOne
     @JoinColumn(name = "USER_ID", referencedColumnName = "ID")
-    private Users user_id;
+    private User user_id;
 
     public void setId(Long id) {
         this.id = id;

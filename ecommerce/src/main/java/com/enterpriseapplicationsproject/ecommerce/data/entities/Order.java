@@ -1,14 +1,13 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import com.enterpriseapplicationsproject.ecommerce.data.domain.OrderStatus;
-import com.enterpriseapplicationsproject.ecommerce.data.domain.Status;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-public class Orders {
+public class Order {
 
     @Id
     @GeneratedValue( strategy = GenerationType.SEQUENCE)
@@ -16,11 +15,11 @@ public class Orders {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = false)
-    private Users user;
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ADDRESS_ID", nullable = false)
-    private Addresses address;
+    private Address address;
 
     @Column(name = "ORDER_DATE")
     private LocalDate orderDate;
@@ -34,10 +33,10 @@ public class Orders {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PAYMENT_METHOD_ID", nullable = false)
-    private PaymentMethods paymentMethod;
+    private PaymentMethod paymentMethod;
 
     @OneToMany(mappedBy = "orderItemId")
-    private List<OrderItems> orderItems;
+    private List<OrderItem> orderItems;
 
 
 }

@@ -6,7 +6,7 @@ import lombok.Data;
 @Entity
 @Table(name = "Addresses")
 @Data
-public class Addresses {
+public class Address {
 
 
     @Id
@@ -16,7 +16,7 @@ public class Addresses {
 
     @ManyToOne
     @JoinColumn(name = "USER_ID", referencedColumnName = "ID")
-    private Users userId;
+    private User userId;
 
     @Column(name = "STREET")
     private String street;
