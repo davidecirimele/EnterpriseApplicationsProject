@@ -2,13 +2,13 @@ package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import lombok.Data;
+import jakarta.persistence.Table;
 
 import java.sql.Date;
 
 @Entity
-public class Books extends Product{
+@Table(name = "Book")
+public class Book extends Product{
 
     //private String category;
     //private String weight;

@@ -35,7 +35,7 @@ public class Wishlist {
             name = "GROUP_ID",
             referencedColumnName = "ID"
     )
-    private Groups group;//pk
+    private Group group;//pk
     //non posso mettere long perchè
 
     @Basic(optional = false)

@@ -3,7 +3,7 @@ package com.enterpriseapplicationsproject.ecommerce.data.entities;
 import jakarta.persistence.*;
 
 @Entity
-public class Groups {
+public class Group {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
