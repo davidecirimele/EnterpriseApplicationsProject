@@ -1,4 +1,4 @@
-package com.enterpriseapplicationsproject.ecommerce.Data.Entities;
+package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -9,8 +9,6 @@ import lombok.Data;
 public abstract class Product {
 
     @Id
-    @GeneratedValue()
-    @Column(name = "ID")
-    private Long id;
+    private long productId;
 
 }

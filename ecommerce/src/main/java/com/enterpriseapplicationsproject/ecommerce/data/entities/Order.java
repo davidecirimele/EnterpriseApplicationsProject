@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity
+@Table(name = "Order_table")
 public class Order {
 
     @Id
