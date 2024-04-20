@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-public class Transactions {
+public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -15,15 +15,15 @@ public class Transactions {
 
     @JoinColumn(name = "USER_ID", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    private Users user;
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ORDER_ID", nullable = false)
-    private Orders order;
+    private Order order;
 
     @JoinColumn(name = "PAYMENT_METHOD_ID", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    private PaymentMethods paymentMethod;
+    private PaymentMethod paymentMethod;
 
 
     @Column(name = "AMOUNT")

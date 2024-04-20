@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "CartItems")
 @Data
-public class CartItems {
+public class CartItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,11 +17,11 @@ public class CartItems {
 
     @ManyToOne
     @JoinColumn(name = "CART_ID", referencedColumnName = "ID")
-    private ShoppingCarts cartId;
+    private ShoppingCart cartId;
 
-    /*@ManyToOne
+    @ManyToOne
     @JoinColumn(name = "PRODUCT_ID", referencedColumnName = "ID")
-    private Products productId;*/
+    private Product productId;
 
     @Column(name = "QUANTITY")
     private Integer quantity;

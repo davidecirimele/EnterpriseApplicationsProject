@@ -1,4 +1,4 @@
-package com.enterpriseapplicationsproject.ecommerce.data.entities;
+package com.enterpriseapplicationsproject.ecommerce.Data.Entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -13,8 +13,5 @@ public abstract class Product {
 
     @Id
     private long productId;
-
-    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
-    private List<OrderItems> orderItems = new ArrayList<>();
 
 }

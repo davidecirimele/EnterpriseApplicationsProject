@@ -1,15 +1,15 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
-import com.enterpriseapplicationsproject.ecommerce.data.domain.Email;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Data
 @Table(name = "Users")
-public class Users {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,9 +34,12 @@ public class Users {
     @Embedded
     private Credential credential;
 
+    @OneToMany(mappedBy = "userId")
+    private List<Address> addresses;
+
     @Basic(optional = false)
     @Column(name = "DEFAULT_ADDRESS")
-    private String defaultAddress;
+    private Long defaultAddress;
 
     @Basic(optional = false)
     @Column(name = "PHONE_NUMBER", unique = true)
@@ -45,6 +48,13 @@ public class Users {
     @Basic(optional = false)
     @Column(name = "ROLE")
     private String role;
+
+    @PrePersist
+    public void prePersist() {
+        if (addresses != null && !addresses.isEmpty()) {
+            defaultAddress = addresses.get(0).getId();
+        }
+    }
 
     public void setId(Long id) {
         this.id = id;
