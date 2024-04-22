@@ -22,9 +22,9 @@ public class Group {
     private String groupName;
 
     @ManyToMany()
-    @JoinTable( name = "GroupsMemberships",
+    @JoinTable( name = "Groups_Memberships",
             joinColumns = @JoinColumn(name = "GROUP_ID"),
             inverseJoinColumns = @JoinColumn(name = "USER_ID")
     )
-    private List<User> members;
+    private List<User> members = new ArrayList<>();
 }
