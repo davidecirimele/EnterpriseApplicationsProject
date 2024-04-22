@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -54,6 +55,9 @@ public class User {
             defaultAddress = addresses.get(0).getId();
         }
     }*/
+
+    @ManyToMany(mappedBy = "members")
+    private List<Group> groups = new ArrayList<>();
 
     public void setId(Long id) {
         this.id = id;

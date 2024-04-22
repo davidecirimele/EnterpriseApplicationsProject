@@ -2,13 +2,17 @@ package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
-public class Books extends Product{
+@Data
+@NoArgsConstructor
+public class Book extends Product{
 
     //private String category;
     //private String weight;
