@@ -4,10 +4,13 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "Users")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "ROLE", discriminatorType = DiscriminatorType.STRING)
 public class User {
 
     @Id
@@ -44,16 +47,15 @@ public class User {
     @Column(name = "PHONE_NUMBER", unique = true)
     private String phoneNumber;
 
-    @Basic(optional = false)
-    @Column(name = "ROLE")
-    private String role;
-
-    /*@PrePersist
+    @PrePersist
     public void prePersist() {
         if (addresses != null && !addresses.isEmpty()) {
             defaultAddress = addresses.get(0).getId();
         }
-    }*/
+    }
+
+    @ManyToMany(mappedBy = "members")
+    private List<Group> groups = new ArrayList<>();
 
     public void setId(Long id) {
         this.id = id;

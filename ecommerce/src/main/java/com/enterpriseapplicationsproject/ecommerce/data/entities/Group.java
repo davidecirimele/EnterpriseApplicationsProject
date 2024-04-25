@@ -1,8 +1,16 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Table(name = "Groups")
+@Data
+@NoArgsConstructor
 public class Group {
 
     @Id
@@ -12,4 +20,11 @@ public class Group {
 
     @Column(name = "GROUP_NAME")
     private String groupName;
+
+    @ManyToMany()
+    @JoinTable( name = "Groups_Memberships",
+            joinColumns = @JoinColumn(name = "GROUP_ID"),
+            inverseJoinColumns = @JoinColumn(name = "USER_ID")
+    )
+    private List<User> members = new ArrayList<>();
 }
