@@ -1,6 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
-import com.enterpriseapplicationsproject.ecommerce.data.domain.Status;
+import com.enterpriseapplicationsproject.ecommerce.data.Status;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
