@@ -2,6 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.data.dao;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Address;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

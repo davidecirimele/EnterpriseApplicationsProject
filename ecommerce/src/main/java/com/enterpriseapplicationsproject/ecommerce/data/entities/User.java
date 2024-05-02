@@ -39,20 +39,9 @@ public class User {
     @OneToMany(mappedBy = "userId")
     private List<Address> addresses;
 
-    @Basic(optional = true)
-    @Column(name = "DEFAULT_ADDRESS")
-    private Long defaultAddress;
-
     @Basic(optional = false)
     @Column(name = "PHONE_NUMBER", unique = true)
     private String phoneNumber;
-
-    @PrePersist
-    public void prePersist() {
-        if (addresses != null && !addresses.isEmpty()) {
-            defaultAddress = addresses.get(0).getId();
-        }
-    }
 
     @ManyToMany(mappedBy = "members")
     private List<Group> groups = new ArrayList<>();
