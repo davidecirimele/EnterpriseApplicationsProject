@@ -2,18 +2,22 @@ package com.enterpriseapplicationsproject.ecommerce.data.dao;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Address;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface UsersDao extends JpaRepository<User, Long> {
 
     //Visualizzare lista indirizzi associati
     List<Address> findAddressesById(Long userId);
+
+    List<User> findAll();
+
+
+    Optional<User> findByCredentialEmail(String email);
 
     //Visualizzare lista persone con cui ha condiviso una lista dei desideri
 
