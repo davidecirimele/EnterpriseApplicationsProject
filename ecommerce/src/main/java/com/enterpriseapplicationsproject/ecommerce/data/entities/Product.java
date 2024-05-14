@@ -20,6 +20,8 @@ public class Product {
     @Column(name = "CATEGORY")
     private String category;
 
+    //TODO immagine
+
     @Column(name = "WEIGHT")
     private Double weight;
 
