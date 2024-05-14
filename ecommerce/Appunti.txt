@@ -1,0 +1,22 @@
+Tutte le transazioni per utente
+Ordini per utente
+Review per utente
+Review per prodotto
+Metodi pagamento per utente
+Indirizzi per utente (Put get e modifica default)
+Elementi carrello per utente
+Wishlist per utente
+Lista utenti
+Pagina Home -> Selezione di prodotti in evidenza (Basati su recensione, ultimi aggiunti, consigliati, categorie), barra di ricerca, filtro ricerche, accesso all'account, carrello
+Pagina account -> aggiunta/modifica indirizzo, password, immagine profilo, accesso a wishlist, accesso a ordini, inserire/cambiare metodi di pagamento, link su pagina recensioni, eliminazione account
+Pagina wishlist -> condivisione wishlist, aggiunta/rimozione prodotti alla lista, aggiunta/rimozione amici wishlist
+Pagina prodotto -> info prodotto, aggiunta al carrello, correlati in base ad autore genere ecc, recensioni del prodotto, inserimento recensioni
+Pagina carrello -> visualizzazione prodotti carrello, rimozione, cambio quantità, conferma pagamento
+Pagina pagamento -> selezione/aggiunta metodo pagamento, cambiamento/aggiunta indirizzo, visualizzazione totale
+Pagina ordini -> ordini cancellati, ordini non spediti, possibilità di rifare ordine
+
+Pagina admin -> aggiunta/rimozione prodotti, visualizzazione lista utenti, rimozione utenti, visualizzazione ordini per utente, filtraggio e statistiche sui prodotti, gestione dati utenti (anagrafica)
+
+Recupero credenziali (?)
+
+
