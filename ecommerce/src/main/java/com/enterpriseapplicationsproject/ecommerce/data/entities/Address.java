@@ -35,6 +35,9 @@ public class Address {
     @Column(name = "ADDITIONAL_INFO")
     private String additionalInfo;
 
+    @Column(name = "DEFAULT_ADDRESS")
+    private boolean default_address;
+
 
 
     public void setId(Long id) {
