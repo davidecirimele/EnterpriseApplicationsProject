@@ -13,6 +13,8 @@ import java.util.List;
         columnNames = {"USER_ID", "GROUP_ID"}
 ))
 @Entity
+@Data
+@NoArgsConstructor
 public class Wishlist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
