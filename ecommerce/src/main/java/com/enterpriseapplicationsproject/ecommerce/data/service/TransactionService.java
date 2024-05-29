@@ -10,4 +10,6 @@ public interface TransactionService {
     public TransactionDto addTransactionDto(TransactionDto transactionDto);
 
     public List<TransactionDto> getAllTransactionByUserId(Long userId);
+
+    public List<TransactionDto> getAllTransactionByUserEmail(String email);
 }
