@@ -10,11 +10,13 @@ public interface BooksService {
 
     Book getBookById(Long id);
 
-    Book save(Book book);
+    BookDto getBookDtoById(Long id);
+
+    BookDto save(BookDto bookDto);
 
     List<BookDto> getBookDto();
 
     Collection<Book> getAll();
 
-
+    void deleteBook(Long id);
 }

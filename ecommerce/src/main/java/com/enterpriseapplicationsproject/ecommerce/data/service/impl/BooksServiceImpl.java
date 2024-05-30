@@ -6,6 +6,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -25,9 +26,19 @@ public class BooksServiceImpl implements BooksService {
     }
 
     @Override
-    public Book save(Book book) {
-        return booksDao.save(book);
+    public BookDto getBookDtoById(Long id) {
+        return booksDao.findById(id)
+                .map(book -> modelMapper.map(book, BookDto.class))
+                .orElse(null);
     }
+
+    @Override
+    public BookDto save(BookDto bookDto) {
+        Book book = modelMapper.map(bookDto, Book.class);
+        Book b = booksDao.save(book);
+        return modelMapper.map(b, BookDto.class);
+    }
+
 
     @Override
     public List<BookDto> getBookDto() {
@@ -37,5 +48,15 @@ public class BooksServiceImpl implements BooksService {
     @Override
     public Collection<Book> getAll() {
         return booksDao.findAll();
+    }
+
+    public List<BookDto> getAllSorted() {
+        return booksDao.findAll(Sort.by(Sort.Order.asc("author").ignoreCase()
+                .nullsFirst()).and(Sort.by(Sort.Order.asc("title").ignoreCase()
+                        .nullsFirst()).and(Sort.by(Sort.Order.asc("price")
+                        .nullsFirst()))))
+                .stream()
+                .map(book -> modelMapper.map(book, BookDto.class))
+                .toList();
     }
 }
