@@ -2,10 +2,12 @@ package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import com.enterpriseapplicationsproject.ecommerce.data.Status;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 
 @Entity
+@Data
 public class Transaction {
 
     @Id

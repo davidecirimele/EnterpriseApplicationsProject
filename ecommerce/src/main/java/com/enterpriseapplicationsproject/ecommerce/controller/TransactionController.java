@@ -1,6 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
-import com.enterpriseapplicationsproject.ecommerce.data.service.TransactionService;
+import com.enterpriseapplicationsproject.ecommerce.data.service.TransactionsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.TransactionDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,18 +15,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransactionController {
 
-    private final TransactionService transactionService;
+    private final TransactionsService transactionsService;
 
     @PostMapping(consumes =  "application/json", path = "/add")
     public ResponseEntity<TransactionDto> addTransaction(@RequestBody TransactionDto transactionDto){
-        TransactionDto addeddTransaction = transactionService.addTransactionDto(transactionDto);
+        TransactionDto addeddTransaction = transactionsService.addTransactionDto(transactionDto);
         return new ResponseEntity<>(addeddTransaction, HttpStatus.CREATED);
 
     }
 
-    @GetMapping(consumes =  "application/json", path = "/get/{email}")
-    public ResponseEntity<List<TransactionDto>> getUserTransactions(@PathVariable String email){
-        List<TransactionDto> transactions = transactionService.getAllTransactionByUserEmail(email);
+    @GetMapping(consumes =  "application/json", path = "/get/{userId}")
+    public ResponseEntity<List<TransactionDto>> getUserTransactions(@PathVariable Long userId){
+        List<TransactionDto> transactions = transactionsService.getAllTransactionByUserId(userId);
         return new ResponseEntity<>(transactions, HttpStatus.OK);
     }
 }

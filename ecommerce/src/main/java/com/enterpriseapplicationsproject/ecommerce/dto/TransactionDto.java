@@ -10,7 +10,7 @@ public class TransactionDto {
 
     private Long id;
 
-    private String userEmail;
+    private UserDto user;
 
     //private OrderDto order;
 

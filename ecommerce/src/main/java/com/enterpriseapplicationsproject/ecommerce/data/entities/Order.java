@@ -2,12 +2,14 @@ package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import com.enterpriseapplicationsproject.ecommerce.data.domain.OrderStatus;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Entity
 @Table(name = "Order_table")
+@Data
 public class Order {
 
     @Id
