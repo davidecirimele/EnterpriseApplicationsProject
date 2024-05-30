@@ -4,6 +4,8 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
+import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -15,15 +17,23 @@ public interface WishlistsService {
 
     List<Wishlist> getAll();
 
-    Wishlist save(Wishlist wishlist);
+    void save(Wishlist wishlist);
 
-    Group getGroupByWishlist(Wishlist wishlist);
+    WishlistDto save(WishlistDto wishlistDto);
 
-    Boolean shareWishlist(Wishlist wishlist, Group group);
+    Group getGroupByWishlistId(Long wishlistId);
 
-    Boolean unshareWishlist(Wishlist wishlist,Group group);
+    WishlistDto updateWishlist(Long id, WishlistDto wishlistDto);
+
+    @Transactional
+    Boolean shareWishlist(Long wishlistId, Group group);
+
+    @Transactional
+    Boolean unshareWishlist(Long wishlistId);
 
     WishlistDto getById(Long id);
 
     List<WishlistDto> getByLastname(String name);
+
+    void deleteWishlist(Long id);
 }

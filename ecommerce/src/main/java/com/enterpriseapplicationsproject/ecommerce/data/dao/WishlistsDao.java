@@ -1,11 +1,14 @@
 package com.enterpriseapplicationsproject.ecommerce.data.dao;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,13 +18,14 @@ import java.util.List;
 public interface WishlistsDao extends JpaRepository<Wishlist, Long>,
         JpaSpecificationExecutor<Wishlist> {
 
-    List<Wishlist> findByUserId(Long userId);
 
-    Group getGroupByWishlist(Wishlist wishlist);
+    @Query("SELECT w FROM Wishlist w WHERE w.userId.id = :userId")
+    List<Wishlist> findByUserId(@Param("userId") Long userId);
 
-    Boolean shareWishlist(Wishlist wishlist, Group group);
+    @Query("SELECT w.group FROM Wishlist w WHERE w.id = :wishlistId")
+    Group getGroupByWishlistId(@Param("wishlistId") Long wishlistId);
 
-    Boolean unshareWishlist(Wishlist wishlist, Group group);
+
 
 
 }

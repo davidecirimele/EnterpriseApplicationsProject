@@ -6,8 +6,11 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.impl.WishlistsSe
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -28,9 +31,28 @@ public class WishlistController {
     @GetMapping("/wishlists/{idWishlist}")
     public ResponseEntity<WishlistDto> getById(@PathVariable("idWishlist") Long id) {
         WishlistDto w = wishlistService.getById(id);
-        if(w==null)
+        if(w == null)
             return ResponseEntity.notFound().build(); // meglio farlo nel service e gestire l'eccezione con l'handler
         return ResponseEntity.ok(w);
+    }
+
+    @PostMapping("/wishlists")
+    public ResponseEntity<WishlistDto> add(@RequestBody WishlistDto wDto) {
+        WishlistDto w = wishlistService.save(wDto);
+        return ResponseEntity.ok(w);
+    }
+
+    /*
+    @PutMapping("/wishlists/{idWishlist}") // indica che il metodo risponde a una richiesta di tipo PUT
+    public ResponseEntity<WishlistDto> update(@PathVariable("idWishlist") Long id, @RequestBody WishlistDto wDto) {
+        WishlistDto w = wishlistService.updateWishlist(id,wDto);
+        return ResponseEntity.ok(w);
+    }*/
+
+    @DeleteMapping("/wishlists/{idWishlist}")
+    public HttpStatus delete(@PathVariable("idWishlist") Long id) {
+        wishlistService.deleteWishlist(id);
+        return HttpStatus.OK;
     }
 
     @GetMapping("/wishlists/test")

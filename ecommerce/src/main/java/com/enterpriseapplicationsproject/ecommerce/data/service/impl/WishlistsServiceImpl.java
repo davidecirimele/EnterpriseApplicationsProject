@@ -8,6 +8,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
@@ -21,16 +22,18 @@ import java.util.stream.Collectors;
 public class WishlistsServiceImpl implements WishlistsService {
 
     private final WishlistsDao wishlistsDao;
-    private final ModelMapper modelMapper;
+    private final ModelMapper modelMapper; // serve per fare il mapping tra due oggetti
     private final GroupsDao groupsDao;
 
     @Override
-    public List<WishlistDto> getAllSorted() {
+    public List<WishlistDto> getAllSorted() { // restituisce la lista di tutti i wishlists ordinata per privacySetting
         return wishlistsDao.findAll(Sort.by(Sort.Order.asc("privacySetting")))
                 .stream()
                 .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
                 .collect(Collectors.toList());
     }
+
+
 
     @Override
     public List<Wishlist> getWishlistsByUser(User user) {
@@ -43,23 +46,43 @@ public class WishlistsServiceImpl implements WishlistsService {
     }
 
     @Override
-    public Wishlist save(Wishlist wishlist) {
-        return wishlistsDao.save(wishlist);
+    public void save(Wishlist wishlist) {
+       wishlistsDao.save(wishlist);
     }
 
     @Override
-    public Group getGroupByWishlist(Wishlist wishlist) {
-        return wishlistsDao.getGroupByWishlist(wishlist);
+    public WishlistDto save(WishlistDto wishlistDto) {
+        Wishlist wishlist = modelMapper.map(wishlistDto, Wishlist.class);
+        Wishlist w = wishlistsDao.save(wishlist);
+        return modelMapper.map(w, WishlistDto.class);
+    }
+
+
+    @Override
+    public Group getGroupByWishlistId(Long wishlistId) {
+        return wishlistsDao.getGroupByWishlistId(wishlistId);
     }
 
     @Override
-    public Boolean shareWishlist(Wishlist wishlist, Group group) {
-        return wishlistsDao.shareWishlist(wishlist, group);
+    @Transactional
+    public Boolean shareWishlist(Long wishlistId, Group group) {
+        Wishlist wishlist = wishlistsDao.findById(wishlistId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID"));
+
+        wishlist.setGroup(group);
+        wishlistsDao.save(wishlist);
+        return true;
     }
 
     @Override
-    public Boolean unshareWishlist(Wishlist wishlist, Group group) {
-        return wishlistsDao.unshareWishlist(wishlist, group);
+    @Transactional
+    public Boolean unshareWishlist(Long wishlistId) {
+        Wishlist wishlist = wishlistsDao.findById(wishlistId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID"));
+
+        wishlist.setGroup(null);
+        wishlistsDao.save(wishlist);
+        return true;
     }
 
     @Override
@@ -71,6 +94,14 @@ public class WishlistsServiceImpl implements WishlistsService {
     public List<WishlistDto> getByLastname(String name) {
         return List.of();
     }
+
+    @Override
+    public void deleteWishlist(Long id) {
+        wishlistsDao.deleteById(id);
+    }
+
+    @Transactional
+    @Override
     public WishlistDto updateWishlist(Long id, WishlistDto wishlistDto) {
         return wishlistsDao.findById(id)
                 .map(wishlist -> {
