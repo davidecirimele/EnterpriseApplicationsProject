@@ -10,4 +10,8 @@ import java.util.List;
 public interface OrdersDao  extends JpaRepository<Order, Long> {
 
     List<Order> findAllByUserId(Long userId);
+
+    List<Order> findAllCancelledOrdersByUserId(Long userId);
+
+    List<Order> findAllConfirmedOrdersByUserId(Long userId);
 }

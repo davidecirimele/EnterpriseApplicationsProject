@@ -40,6 +40,18 @@ public class OrdersServiceImpl implements OrdersService {
         return modelMapper.map(o, OrderDto.class);
     }
 
+    @Override
+    public List<OrderDto> getAllConfirmedOrdersByUserId(Long userId) {
+        List<Order> orders = ordersDao.findAllConfirmedOrdersByUserId(userId);
+        return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
+    }
+
+    @Override
+    public List<OrderDto> getAllCancelledOrdersByUserId(Long userId) {
+        List<Order> orders = ordersDao.findAllCancelledOrdersByUserId(userId);
+        return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
+    }
+
 
 
 

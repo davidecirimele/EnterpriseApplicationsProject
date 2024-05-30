@@ -9,7 +9,7 @@ import java.util.List;
 
 public class OrderItem {
 
-    @Id
+        @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long orderItemId;
 

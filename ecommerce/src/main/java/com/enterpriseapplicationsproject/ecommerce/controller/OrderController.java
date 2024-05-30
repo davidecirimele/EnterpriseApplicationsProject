@@ -32,7 +32,7 @@ public class OrderController {
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
-    @PutMapping(consumes = "application/json", path = "/cancelled/{orderId}")
+    @PutMapping(consumes = "application/json", path = "/cancel/{orderId}")
     public ResponseEntity<OrderDto> cancelOrder(@PathVariable Long orderId) {
         OrderDto cancelledOrder = ordersService.setOrderStatusToCancelled(orderId);
         return new ResponseEntity<>(cancelledOrder, HttpStatus.OK);
@@ -43,6 +43,14 @@ public class OrderController {
         List<OrderDto> orders = ordersService.getAllConfirmedOrdersByUserId(userId);
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
+
+    @GetMapping(consumes = "application/json", path = "/cancelled/{userId}")
+    public ResponseEntity<List<OrderDto>> getAllCancelledOrders(@PathVariable Long userId) {
+        List<OrderDto> orders = ordersService.getAllCancelledOrdersByUserId(userId);
+        return new ResponseEntity<>(orders, HttpStatus.OK);
+    }
+
+
 
 
 }

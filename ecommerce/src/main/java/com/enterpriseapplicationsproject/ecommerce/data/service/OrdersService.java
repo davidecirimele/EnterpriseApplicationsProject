@@ -15,4 +15,5 @@ public interface OrdersService {
 
     List<OrderDto> getAllConfirmedOrdersByUserId(Long userId);
 
+    List<OrderDto> getAllCancelledOrdersByUserId(Long userId);
 }

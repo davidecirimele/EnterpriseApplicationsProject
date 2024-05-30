@@ -38,7 +38,7 @@ public class Order {
     @JoinColumn(name = "PAYMENT_METHOD_ID", nullable = false)
     private PaymentMethod paymentMethod;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems;
 
 
