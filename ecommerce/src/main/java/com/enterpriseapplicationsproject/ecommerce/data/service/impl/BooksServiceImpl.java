@@ -50,6 +50,11 @@ public class BooksServiceImpl implements BooksService {
         return booksDao.findAll();
     }
 
+    @Override
+    public void deleteBook(Long id) {
+        booksDao.deleteById(id);
+    }
+
     public List<BookDto> getAllSorted() {
         return booksDao.findAll(Sort.by(Sort.Order.asc("author").ignoreCase()
                 .nullsFirst()).and(Sort.by(Sort.Order.asc("title").ignoreCase()

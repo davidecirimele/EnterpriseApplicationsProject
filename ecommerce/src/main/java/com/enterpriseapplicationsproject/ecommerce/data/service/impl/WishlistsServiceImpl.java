@@ -106,7 +106,7 @@ public class WishlistsServiceImpl implements WishlistsService {
         return wishlistsDao.findById(id)
                 .map(wishlist -> {
                     wishlist.setGroup(wishlistDto.getGroup());
-                    wishlist.setItems(wishlistDto.getItems());
+                    wishlist.setItems(wishlistDto.getItems()); //tecnicamente lo fa gia' WishlitstItem server, dovrei lasciarlo?
                     wishlist.setPrivacySetting(wishlistDto.getPrivacySetting());
                     return modelMapper.map(wishlistsDao.save(wishlist), WishlistDto.class);
                 })

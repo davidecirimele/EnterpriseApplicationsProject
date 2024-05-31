@@ -42,12 +42,12 @@ public class WishlistController {
         return ResponseEntity.ok(w);
     }
 
-    /*
+
     @PutMapping("/wishlists/{idWishlist}") // indica che il metodo risponde a una richiesta di tipo PUT
     public ResponseEntity<WishlistDto> update(@PathVariable("idWishlist") Long id, @RequestBody WishlistDto wDto) {
         WishlistDto w = wishlistService.updateWishlist(id,wDto);
         return ResponseEntity.ok(w);
-    }*/
+    }
 
     @DeleteMapping("/wishlists/{idWishlist}")
     public HttpStatus delete(@PathVariable("idWishlist") Long id) {
