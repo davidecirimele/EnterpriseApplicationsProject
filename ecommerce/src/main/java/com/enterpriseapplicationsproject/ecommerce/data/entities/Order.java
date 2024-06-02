@@ -14,6 +14,7 @@ public class Order {
 
     @Id
     @GeneratedValue( strategy = GenerationType.SEQUENCE)
+    @Column(name = "ORDER_ID")
     private Long orderId;
 
     @ManyToOne(fetch = FetchType.LAZY)

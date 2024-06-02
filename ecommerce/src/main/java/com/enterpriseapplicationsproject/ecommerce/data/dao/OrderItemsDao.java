@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface OrderItemsDao extends JpaRepository<OrderItem, Long> {
 
-    List<OrderItem> findAllByOrderId(Long orderId);
+    List<OrderItem> findAllByOrderOrderId(Long orderId);
 }

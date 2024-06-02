@@ -21,7 +21,7 @@ public class OrderItemServiceImpl  implements OrderItemsService {
 
     @Override
     public List<OrderItemDto> getOrderItemsByOrderId(Long orderId) {
-        List<OrderItem> orderItems = orderItemsDao.findAllByOrderId(orderId);
+        List<OrderItem> orderItems = orderItemsDao.findAllByOrderOrderId(orderId);
         return orderItems.stream().map(oi -> modelMapper.map(oi, OrderItemDto.class)).toList();
     }
 }

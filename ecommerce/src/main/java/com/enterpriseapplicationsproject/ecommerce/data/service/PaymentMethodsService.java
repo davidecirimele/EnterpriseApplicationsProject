@@ -8,5 +8,5 @@ public interface PaymentMethodsService {
 
     public PaymentMethodDto getPaymentMethodByUserId(Long userId);
 
-    PaymentMethodDto deletePaymentMethodByUserId(Long userId);
+    public PaymentMethodDto deletePaymentMethodByUserId(Long userId);
 }
