@@ -23,37 +23,43 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
 
     @Override
-    public User getById(Long id) {
-        return userDao.findById(id).get();
+    public UserDto getById(Long id) {
+        Optional<User> optionalUser = userDao.findById(id);
+
+        if(optionalUser.isPresent())
+        {
+            User user = optionalUser.get();
+            return modelMapper.map(user, UserDto.class);
+        }
+        else{
+            throw new RuntimeException("User with id " + id + " not found");
+        }
     }
 
     @Override
-    public User save(User user) {
-        return userDao.save(user);
+    public UserDto save(User user) {
+        User savedUser = userDao.save(user);
+        return modelMapper.map(savedUser, UserDto.class);
     }
 
     @Override
-    public Optional<User> getByEmail(String email) {
-        return userDao.findByCredentialEmail(email);
+    public UserDto getByEmail(String email) {
+        Optional<User> optionalUser = userDao.findByCredentialEmail(email);
+
+        if(optionalUser.isPresent())
+        {
+            User user = optionalUser.get();
+            return modelMapper.map(user, UserDto.class);
+        }
+        else{
+            throw new RuntimeException("User with email " + email + " not found");
+        }
+
     }
 
     @Override
-    public Collection<User> getAll(Specification<User> spec) {
-        //return userDao.findAll(spec);
-        return null;
-    }
-
-    @Override
-    public Collection<User> getAll() {
-        return userDao.findAll();
-    }
-
-    @Override
-    public List<UserDto> getUserDto() {
-        if(userDao == null)
-            throw new NullPointerException();
+    public List<UserDto> getAll() {
         List<User> users = userDao.findAll();
-        return users.stream().map(s ->
-                modelMapper.map(s, UserDto.class)).collect(Collectors.toList());
+        return users.stream().map(user1 -> modelMapper.map(user1 , UserDto.class)).toList();
     }
 }

@@ -6,18 +6,14 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
 
-    User getById(Long id);
+    UserDto getById(Long id);
 
-    User save(User user);
+    UserDto save(User user);
 
-    Optional<User> getByEmail(String email);
+    UserDto getByEmail(String email);
 
-    Collection<User> getAll(Specification<User> spec);
-
-    Collection<User> getAll();
-    List<UserDto> getUserDto();
+    List<UserDto> getAll();
 }

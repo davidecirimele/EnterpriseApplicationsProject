@@ -20,7 +20,7 @@ public class UserDto {
 
     private CredentialDto credential;
 
-    private List<Address> addresses;
+    private List<AddressDto> addresses;
 
     private String phoneNumber;
 

@@ -19,4 +19,13 @@ public class AddressDto {
 
     private String additionalInfo;
 
+    private boolean default_address;
+
+    public void UpdateDefaultAddress(boolean value) {
+        this.default_address = value;
+    }
+
+    public boolean getDefaultAddress() {
+        return this.default_address;
+    }
 }

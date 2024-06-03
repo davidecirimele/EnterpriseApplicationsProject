@@ -38,13 +38,15 @@ public class Address {
     @Column(name = "DEFAULT_ADDRESS")
     private boolean default_address;
 
-
-
     public void setId(Long id) {
         this.id = id;
     }
 
     public Long getId() {
         return id;
+    }
+
+    public void setDefaultAddress(boolean value) {
+        this.default_address = value;
     }
 }
