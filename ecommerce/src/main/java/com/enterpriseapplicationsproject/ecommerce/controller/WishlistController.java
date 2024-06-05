@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/wishlist-api")// indica che
+@RequestMapping(value = "/api/v1/wishlists", produces = "application/json")// indica che
 @CrossOrigin(origins = "*", allowedHeaders = "*") // indica
 @RequiredArgsConstructor
 @Slf4j // indica che il logger è di tipo log4j
@@ -23,42 +23,49 @@ public class WishlistController {
 
     private final WishlistsService wishlistService;
 
-    @GetMapping("/wishlists")
+    @GetMapping(consumes = "application/json",path= "/get/all")
     public ResponseEntity<List<WishlistDto>> all() {
-        return ResponseEntity.ok(wishlistService.getAllSorted());
+        List<WishlistDto> wishlists = wishlistService.getAllSorted();
+        if (wishlists.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(wishlists, HttpStatus.OK);
     }
 
-    @GetMapping("/wishlists/{idWishlist}")
-    public ResponseEntity<WishlistDto> getById(@PathVariable("idWishlist") Long id) {
+    @GetMapping(consumes = "application/json", path = "/get/{idWishlist}")
+    public ResponseEntity<WishlistDto> getById(@PathVariable Long id) {
         WishlistDto w = wishlistService.getById(id);
         if(w == null)
-            return ResponseEntity.notFound().build(); // meglio farlo nel service e gestire l'eccezione con l'handler
-        return ResponseEntity.ok(w);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // meglio farlo nel service e gestire l'eccezione con l'handler
+        return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
-    @PostMapping("/wishlists")
+    @PostMapping(consumes =  "application/json", path = "/add")
     public ResponseEntity<WishlistDto> add(@RequestBody WishlistDto wDto) {
         WishlistDto w = wishlistService.save(wDto);
-        return ResponseEntity.ok(w);
+        if (w == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
-
-    @PutMapping("/wishlists/{idWishlist}") // indica che il metodo risponde a una richiesta di tipo PUT
+    @PutMapping(consumes =  "application/json", path = "/update/{idWishlist}") // indica che il metodo risponde a una richiesta di tipo PUT
     public ResponseEntity<WishlistDto> update(@PathVariable("idWishlist") Long id, @RequestBody WishlistDto wDto) {
         WishlistDto w = wishlistService.updateWishlist(id,wDto);
-        return ResponseEntity.ok(w);
+        if (w == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
-    @DeleteMapping("/wishlists/{idWishlist}")
+    @DeleteMapping(path = "/delete/{idWishlist}")
     public HttpStatus delete(@PathVariable("idWishlist") Long id) {
         wishlistService.deleteWishlist(id);
         return HttpStatus.OK;
     }
+    /*
 
     @GetMapping("/wishlists/test")
     public ResponseEntity<List<WishlistDto>> test(@RequestParam("name") String name) {
         return ResponseEntity.ok(wishlistService.getByLastname(name));
-    }
+    }*/
 
 
 

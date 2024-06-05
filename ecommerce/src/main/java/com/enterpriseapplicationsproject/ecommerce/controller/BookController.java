@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/books-api")
+@RequestMapping(value = "/api/v1/books", produces = "application/json")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 @Slf4j
@@ -21,25 +21,31 @@ public class BookController {
 
     private final BooksService booksService;
 
-    @GetMapping("/books")
+    @GetMapping(consumes = "application/json", path = "/get/all")
     public ResponseEntity<List<BookDto>> all() {
-        return ResponseEntity.ok(booksService.getBookDto());
+        List<BookDto> books = booksService.getAllSorted();
+        if (books.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
-    @GetMapping("/books/{idBook}")
+    @GetMapping(consumes = "application/json", path = "/get/{idBook}")
     public ResponseEntity<BookDto> getById(@PathVariable("idBook") Long id) {
         BookDto b = booksService.getBookDtoById(id);
         if(b == null)
-            return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(b); // ritorna ok se la richiesta è andata a buon fine
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(b, HttpStatus.OK);
     }
 
+    @PostMapping(consumes = "application/json", path = "/add")
     public ResponseEntity<BookDto> add(@RequestBody BookDto bDto) {
         BookDto b = booksService.save(bDto);
-        return ResponseEntity.ok(b);
+        if (b == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(b, HttpStatus.OK);
     }
 
-    @DeleteMapping("/books/{idBook}")
+    @DeleteMapping(path = "/delete/{idBook}")
     public HttpStatus delete(@PathVariable("idBook") Long id) {
         booksService.deleteBook(id);
         return HttpStatus.OK;

@@ -19,4 +19,6 @@ public interface BooksService {
     Collection<Book> getAll();
 
     void deleteBook(Long id);
+
+    List<BookDto> getAllSorted();
 }
