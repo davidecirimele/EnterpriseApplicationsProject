@@ -23,7 +23,6 @@ public class OrderController {
 
     @PostMapping(consumes = "application/json", path = "/add")
     public ResponseEntity<OrderDto> addOrder(@RequestBody  OrderDto orderDto) {
-        System.out.println("l' ID dell'ordine e': " + orderDto.getOrderId());
         OrderDto addedOrder = ordersService.addOrder(orderDto);
         return new ResponseEntity<>(addedOrder, HttpStatus.CREATED);
     }

@@ -56,14 +56,16 @@ public class OrdersServiceImpl implements OrdersService {
         }).collect(Collectors.toList());
 
         order.setOrderItems(orderItems);
-        final Order savedOr = ordersDao.save(order);
+        Order savedOr = ordersDao.save(order);
         return modelMapper.map(savedOr, OrderDto.class);
     }
 
     @Override
     public List<OrderDto> getAllOrdersByUserId(Long userId) {
         List<Order> orders = ordersDao.findAllByUserId(userId);
-        return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
+
+
+        return orders.stream().map( o -> modelMapper.map(o, OrderDto.class)).toList();
     }
 
     @Override
