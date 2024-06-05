@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
+import com.enterpriseapplicationsproject.ecommerce.data.domain.OrderStatus;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -13,17 +14,17 @@ public class OrderDto {
 
     private UserIdDto user;
 
-    private AddressIdDto address;
+    private AddressDto address;
 
     private LocalDate date;
 
     private double totalAmount;
 
-    private String orderStatus;
+    private OrderStatus orderStatus;
 
     private PaymentMethodIdDto paymentMethod;
 
-    private List<OrderItemDto> orderItems;
+    private List<OrderItemWithoutIDDto> orderItems;
 
 
 }
