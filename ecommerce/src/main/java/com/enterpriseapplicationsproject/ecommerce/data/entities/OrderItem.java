@@ -1,10 +1,12 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.util.List;
 
 @Entity
+@Data
 @Table(uniqueConstraints = @UniqueConstraint( columnNames = {"ORDER_ID", "PRODUCT_ID"}))
 
 public class OrderItem {

@@ -33,23 +33,13 @@ public class PaymentMethod {
     @Column(name = "paypal")
     private String paypal;
 
-    @OneToMany(mappedBy =  "paymentMethod")
+   /* @OneToMany(mappedBy =  "paymentMethod")
     private List<Transaction> transactions;
 
     @OneToMany(mappedBy = "paymentMethod")
     private List<Order> orders;
 
 
-
-
-
-
-
-
-
-
-
-
-
+    */
 
 }

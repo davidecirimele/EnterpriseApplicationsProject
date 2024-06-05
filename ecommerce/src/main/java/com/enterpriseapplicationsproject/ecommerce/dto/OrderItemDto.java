@@ -1,12 +1,15 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
+import lombok.Data;
+
+@Data
 public class OrderItemDto {
 
     private Long orderItemId;
 
-    private OrderDto order;
-
     //private ProductDto product;
+
+    private Long productId;
 
     private int quantity;
 }

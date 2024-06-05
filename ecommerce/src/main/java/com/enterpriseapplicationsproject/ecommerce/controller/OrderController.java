@@ -1,6 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
 import com.enterpriseapplicationsproject.ecommerce.data.dao.OrdersDao;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.Address;
 import com.enterpriseapplicationsproject.ecommerce.data.service.OrdersService;
 import com.enterpriseapplicationsproject.ecommerce.dto.OrderDto;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class OrderController {
 
     @PostMapping(consumes = "application/json", path = "/add")
     public ResponseEntity<OrderDto> addOrder(@RequestBody  OrderDto orderDto) {
+        System.out.println("l' ID dell'ordine e': " + orderDto.getOrderId());
         OrderDto addedOrder = ordersService.addOrder(orderDto);
         return new ResponseEntity<>(addedOrder, HttpStatus.CREATED);
     }
