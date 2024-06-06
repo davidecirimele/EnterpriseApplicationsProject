@@ -36,4 +36,10 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<UserDto> addUser(@RequestBody UserDto userDto){
+        UserDto addedUser = userService.addUser(userDto);
+        return new ResponseEntity<>(addedUser, HttpStatus.CREATED);
+    }
+
 }

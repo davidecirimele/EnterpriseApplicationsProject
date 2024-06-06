@@ -21,11 +21,17 @@ public class AddressDto {
 
     private boolean default_address;
 
+    private boolean is_valid;
+
     public void UpdateDefaultAddress(boolean value) {
         this.default_address = value;
     }
 
     public boolean getDefaultAddress() {
         return this.default_address;
+    }
+
+    public boolean isValid(){
+        return this.is_valid;
     }
 }

@@ -38,6 +38,9 @@ public class Address {
     @Column(name = "DEFAULT_ADDRESS")
     private boolean default_address;
 
+    @Column(name = "IS_VALID")
+    private boolean is_valid;
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -49,4 +52,6 @@ public class Address {
     public void setDefaultAddress(boolean value) {
         this.default_address = value;
     }
+
+    public void setIsValidAddress(boolean value) {this.is_valid = value;}
 }

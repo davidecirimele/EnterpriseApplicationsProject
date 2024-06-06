@@ -11,6 +11,4 @@ public interface AddressesDao extends JpaRepository<Address, Long> {
 
     List<Address> findAddressesByUserId(Long id);
 
-
-
 }
