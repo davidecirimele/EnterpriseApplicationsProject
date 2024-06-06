@@ -2,6 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.data.service;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Order;
 import com.enterpriseapplicationsproject.ecommerce.dto.OrderDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.OrderWithItemsIdDto;
 
 import java.util.List;
 
@@ -9,11 +10,11 @@ public interface OrdersService {
 
     OrderDto addOrder(OrderDto orderDto);
 
-    List<OrderDto> getAllOrdersByUserId(Long userId);
+    List<OrderWithItemsIdDto> getAllOrdersByUserId(Long userId);
 
-    OrderDto setOrderStatusToCancelled(Long orderId);
+    OrderWithItemsIdDto setOrderStatusToCancelled(Long orderId);
 
-    List<OrderDto> getAllConfirmedOrdersByUserId(Long userId);
+    List<OrderWithItemsIdDto> getAllConfirmedOrdersByUserId(Long userId);
 
-    List<OrderDto> getAllCancelledOrdersByUserId(Long userId);
+    List<OrderWithItemsIdDto> getAllCancelledOrdersByUserId(Long userId);
 }

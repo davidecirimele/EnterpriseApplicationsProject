@@ -9,6 +9,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
 import com.enterpriseapplicationsproject.ecommerce.data.service.OrdersService;
 import com.enterpriseapplicationsproject.ecommerce.dto.AddressDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.OrderDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.OrderWithItemsIdDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -61,31 +62,31 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public List<OrderDto> getAllOrdersByUserId(Long userId) {
+    public List<OrderWithItemsIdDto> getAllOrdersByUserId(Long userId) {
         List<Order> orders = ordersDao.findAllByUserId(userId);
 
 
-        return orders.stream().map( o -> modelMapper.map(o, OrderDto.class)).toList();
+        return orders.stream().map( o -> modelMapper.map(o, OrderWithItemsIdDto.class)).toList();
     }
 
     @Override
-    public OrderDto setOrderStatusToCancelled(Long orderId) {
+    public OrderWithItemsIdDto setOrderStatusToCancelled(Long orderId) {
         Order order = ordersDao.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
         order.setOrderStatus(OrderStatus.CANCELLED);
         Order o = ordersDao.save(order);
-        return modelMapper.map(o, OrderDto.class);
+        return modelMapper.map(o, OrderWithItemsIdDto.class);
     }
 
     @Override
-    public List<OrderDto> getAllConfirmedOrdersByUserId(Long userId) {
+    public List<OrderWithItemsIdDto> getAllConfirmedOrdersByUserId(Long userId) {
         List<Order> orders = ordersDao.findAllConfirmedOrdersByUserId(userId);
-        return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
+        return orders.stream().map(o -> modelMapper.map(o, OrderWithItemsIdDto.class)).toList();
     }
 
     @Override
-    public List<OrderDto> getAllCancelledOrdersByUserId(Long userId) {
+    public List<OrderWithItemsIdDto> getAllCancelledOrdersByUserId(Long userId) {
         List<Order> orders = ordersDao.findAllCancelledOrdersByUserId(userId);
-        return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
+        return orders.stream().map(o -> modelMapper.map(o, OrderWithItemsIdDto.class)).toList();
     }
 
 
