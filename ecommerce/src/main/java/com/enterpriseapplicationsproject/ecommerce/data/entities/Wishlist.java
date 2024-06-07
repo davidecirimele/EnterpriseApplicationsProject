@@ -21,7 +21,7 @@ public class Wishlist {
     @Column(name = "ID")
     private Long id;
 
-    @OneToMany(mappedBy = "id")//mappedby indica il nome del campo nella tabella WishlistItems
+    @OneToMany(mappedBy = "wishlist")//mappedBy indica il nome dell'attributo nella classe WishlistItem
     private List<WishlistItem> items = new ArrayList<>();
 
 

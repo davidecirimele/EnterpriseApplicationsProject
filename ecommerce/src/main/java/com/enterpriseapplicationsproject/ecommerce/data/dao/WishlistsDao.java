@@ -25,7 +25,6 @@ public interface WishlistsDao extends JpaRepository<Wishlist, Long>,
     @Query("SELECT w.group FROM Wishlist w WHERE w.id = :wishlistId")
     Group getGroupByWishlistId(@Param("wishlistId") Long wishlistId);
 
-
-
-
+    @Query("DELETE FROM Wishlist w WHERE w.id = :id")
+    WishlistDto deleteWishlistById(Long id);
 }

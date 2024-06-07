@@ -50,10 +50,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getUserDto() {
-        if(userDao == null)
+        if(userDao == null) {
+            System.out.println("userDao is null!");
             throw new NullPointerException();
+        }
         List<User> users = userDao.findAll();
-        return users.stream().map(s ->
-                modelMapper.map(s, UserDto.class)).collect(Collectors.toList());
+        if(users == null || users.isEmpty()) {
+            System.out.println("No users found!");
+        } else {
+            System.out.println("Users found: " + users.size());
+        }
+        return users.stream()
+                .map(s -> modelMapper.map(s, UserDto.class))
+                .collect(Collectors.toList());
     }
 }

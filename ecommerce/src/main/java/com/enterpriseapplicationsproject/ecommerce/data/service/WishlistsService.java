@@ -36,4 +36,5 @@ public interface WishlistsService {
     List<WishlistDto> getByLastname(String name);
 
     void deleteWishlist(Long id);
+    WishlistDto deleteWishlistByID(Long id);
 }

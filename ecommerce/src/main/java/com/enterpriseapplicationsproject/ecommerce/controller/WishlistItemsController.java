@@ -30,24 +30,26 @@ public class WishlistItemsController {
     }
 
     @GetMapping(consumes = "application/json", path = "/get/{idWishlistItem}")
-    public ResponseEntity<WishlistItem> getById(@PathVariable("idWishlistItem") Long id) {
-        WishlistItem w = wishlistItemsService.getById(id);
-        if (w == null)
+    public ResponseEntity<WishlistItemDto> getById(@PathVariable("idWishlistItem") Long id) {
+        WishlistItemDto wi = wishlistItemsService.getById(id);
+        if (wi == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        return new ResponseEntity<>(w, HttpStatus.OK);
+        return new ResponseEntity<>(wi, HttpStatus.OK);
     }
 
     @PostMapping(consumes = "application/json", path = "/add/{wishlistId}")
-    public ResponseEntity<WishlistItem> addItemToWishlist(@RequestBody Long wishlistId, WishlistItem wishlistItem) {
-        WishlistItem w = wishlistItemsService.addItemToWishlist(wishlistId, wishlistItem);
-        if (w == null)
+    public ResponseEntity<WishlistItemDto> addItemToWishlist(@RequestBody Long wishlistId, WishlistItem wishlistItem) {
+        WishlistItemDto wi = wishlistItemsService.addItemToWishlist(wishlistId, wishlistItem);
+        if (wi == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        return new ResponseEntity<>(w, HttpStatus.OK);
+        return new ResponseEntity<>(wi, HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "/delete/{idWishlistItem}")
-    public HttpStatus delete(@RequestBody Long wishlistId, WishlistItem wishlistItem ) {
-        wishlistItemsService.deleteByIdAndWishlistId(wishlistItem.getId(), wishlistId);
-        return HttpStatus.OK;
+    @DeleteMapping(consumes = "application/json", path = "/delete/{idWishlistItem}")
+    public ResponseEntity<WishlistItemDto> delete(@RequestBody Long wishlistId, WishlistItem wishlistItem ) {
+        WishlistItemDto wi = wishlistItemsService.deleteByIdAndWishlistId(wishlistItem.getId(), wishlistId);
+        if (wi == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(wi, HttpStatus.OK);
     }
 }

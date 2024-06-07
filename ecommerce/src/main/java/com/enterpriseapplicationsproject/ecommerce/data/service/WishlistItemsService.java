@@ -7,14 +7,14 @@ import java.util.List;
 
 public interface WishlistItemsService {
 
-    WishlistItem addItemToWishlist(Long wishlistId, WishlistItem wishlistItem);
+    WishlistItemDto addItemToWishlist(Long wishlistId, WishlistItem wishlistItem);
 
-    Boolean deleteByIdAndWishlistId(Long id, Long wishlistId);
+    WishlistItemDto deleteByIdAndWishlistId(Long id, Long wishlistId);
 
-    List<WishlistItem> getItemsByWishlistId(Long wishlistId);
+    List<WishlistItemDto> getItemsByWishlistId(Long wishlistId);
 
 
     List<WishlistItemDto> getAllSorted();
 
-    WishlistItem getById(Long id);
+    WishlistItemDto getById(Long id);
 }

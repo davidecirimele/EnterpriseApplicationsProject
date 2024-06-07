@@ -5,7 +5,6 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistItem;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistItemsService;
-import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistItemDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -25,7 +24,7 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
 
 
     @Override
-    public WishlistItem addItemToWishlist(Long wishlistId, WishlistItem wishlistItem) {
+    public WishlistItemDto addItemToWishlist(Long wishlistId, WishlistItem wishlistItem) {
         Wishlist wishlist = wishlistsDao.findById(wishlistId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID"));
         wishlistItem.setWishlist(wishlist);
@@ -34,12 +33,13 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
 
 
     @Override
-    public Boolean deleteByIdAndWishlistId(Long id, Long wishlistId) {
-        return wishlistItemsDao.deleteByIdAndWishlistId(id, wishlistId);
+    public WishlistItemDto deleteByIdAndWishlistId(Long id, Long wishlistId) {
+        WishlistItemDto wi =  wishlistItemsDao.deleteByIdAndWishlistId(id, wishlistId);
+        return wi;
     }
 
     @Override
-    public List<WishlistItem> getItemsByWishlistId(Long wishlistId) {
+    public List<WishlistItemDto> getItemsByWishlistId(Long wishlistId) {
         return wishlistItemsDao.findByWishlistId(wishlistId);
     }
 
@@ -52,7 +52,7 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
     }
 
     @Override
-    public WishlistItem getById(Long id) {
+    public WishlistItemDto getById(Long id) {
         return wishlistItemsDao.findById(id).orElse(null);
     }
 

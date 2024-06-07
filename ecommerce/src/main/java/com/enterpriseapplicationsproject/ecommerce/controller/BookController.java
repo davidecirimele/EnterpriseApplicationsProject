@@ -45,9 +45,11 @@ public class BookController {
         return new ResponseEntity<>(b, HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "/delete/{idBook}")
-    public HttpStatus delete(@PathVariable("idBook") Long id) {
-        booksService.deleteBook(id);
-        return HttpStatus.OK;
+    @DeleteMapping(consumes = "application/json", path = "/delete/{idBook}")
+    public ResponseEntity<BookDto> delete(@PathVariable("idBook") Long id) {
+        BookDto b = booksService.deleteBook(id);
+        if (b == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(b, HttpStatus.OK);
     }
 }

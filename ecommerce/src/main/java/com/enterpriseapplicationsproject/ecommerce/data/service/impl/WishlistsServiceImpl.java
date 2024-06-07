@@ -102,6 +102,12 @@ public class WishlistsServiceImpl implements WishlistsService {
         wishlistsDao.deleteById(id);
     }
 
+    @Override
+    public WishlistDto deleteWishlistByID(Long id) {
+        WishlistDto w  = wishlistsDao.deleteWishlistById(id);
+        return w;
+    }
+
     @Transactional
     @Override
     public WishlistDto updateWishlist(Long id, WishlistDto wishlistDto) {

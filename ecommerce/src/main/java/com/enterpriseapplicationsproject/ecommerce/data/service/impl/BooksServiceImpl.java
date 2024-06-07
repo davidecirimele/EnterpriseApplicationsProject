@@ -51,8 +51,9 @@ public class BooksServiceImpl implements BooksService {
     }
 
     @Override
-    public void deleteBook(Long id) {
+    public BookDto deleteBook(Long id) {
         booksDao.deleteById(id);
+        return null;
     }
 
     @Override
