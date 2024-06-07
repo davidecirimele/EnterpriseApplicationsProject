@@ -18,4 +18,9 @@ public interface WishlistItemsDao extends JpaRepository<WishlistItem, Long> {
     @Query("DELETE FROM WishlistItem w WHERE w.id = :id AND w.wishlist.id = :wishlistId")
     WishlistItemDto deleteByIdAndWishlistId(Long id, Long wishlistId);
 
+
+
+    @Query("SELECT w FROM WishlistItem w WHERE w.id = :id")
+    WishlistItemDto findByIdDto(Long id);
+
 }

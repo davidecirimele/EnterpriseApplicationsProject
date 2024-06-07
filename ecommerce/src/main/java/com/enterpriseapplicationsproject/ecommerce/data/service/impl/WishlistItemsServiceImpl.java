@@ -28,7 +28,9 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
         Wishlist wishlist = wishlistsDao.findById(wishlistId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID"));
         wishlistItem.setWishlist(wishlist);
-        return wishlistItemsDao.save(wishlistItem);
+        WishlistItem wi = wishlistItemsDao.save(wishlistItem);
+        return modelMapper.map(wi, WishlistItemDto.class);
+
     }
 
 
@@ -53,7 +55,7 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
 
     @Override
     public WishlistItemDto getById(Long id) {
-        return wishlistItemsDao.findById(id).orElse(null);
+        return wishlistItemsDao.findByIdDto(id);
     }
 
 

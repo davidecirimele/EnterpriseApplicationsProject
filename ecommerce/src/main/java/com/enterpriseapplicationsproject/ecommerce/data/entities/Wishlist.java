@@ -24,13 +24,12 @@ public class Wishlist {
     @OneToMany(mappedBy = "wishlist")//mappedBy indica il nome dell'attributo nella classe WishlistItem
     private List<WishlistItem> items = new ArrayList<>();
 
-
     @ManyToOne()
     @JoinColumn(
             name = "USER_ID",
             referencedColumnName = "ID"
     )
-    private User userId;//pk
+    private User userId;//
 
     @OneToOne(optional = false)//optional indica
     @JoinColumn(
