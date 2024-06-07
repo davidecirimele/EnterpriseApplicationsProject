@@ -21,7 +21,7 @@ public class BookController {
 
     private final BooksService booksService;
 
-    @GetMapping(consumes = "application/json", path = "/get/all")
+    @GetMapping(consumes = "application/json", path = "/getAll")
     public ResponseEntity<List<BookDto>> all() {
         List<BookDto> books = booksService.getAllSorted();
         if (books.isEmpty())

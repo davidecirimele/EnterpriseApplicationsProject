@@ -23,7 +23,7 @@ public class WishlistController {
 
     private final WishlistsService wishlistService;
 
-    @GetMapping(consumes = "application/json",path= "/get/all")
+    @GetMapping(consumes = "application/json",path= "/getAll")
     public ResponseEntity<List<WishlistDto>> all() {
         List<WishlistDto> wishlists = wishlistService.getAllSorted();
         if (wishlists.isEmpty())

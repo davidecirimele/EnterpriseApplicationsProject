@@ -87,9 +87,11 @@ public class WishlistsServiceImpl implements WishlistsService {
 
     @Override
     public WishlistDto getById(Long id) {
+        return wishlistsDao.findById(id).stream().map(wishlist -> modelMapper.map(wishlist, WishlistDto.class)).toList().get(0);
+    /*
         return wishlistsDao.findById(id)
                 .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
-                .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));*/
     }
 
     @Override
