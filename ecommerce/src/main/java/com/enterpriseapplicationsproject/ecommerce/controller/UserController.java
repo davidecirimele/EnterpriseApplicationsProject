@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users-api")
+@RequestMapping(path = "/api/v1/users-api", produces = "application/json")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/users")
+    @GetMapping(produces = "application/json",  path = "/all")
     public ResponseEntity<List<UserDto>> all() {
         List<UserDto> users = userService.getUserDto();
         if (users.isEmpty())

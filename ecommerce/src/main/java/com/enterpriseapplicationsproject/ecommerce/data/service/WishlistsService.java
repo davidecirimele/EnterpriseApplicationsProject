@@ -1,11 +1,9 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import jakarta.transaction.Transactional;
-import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -13,7 +11,7 @@ public interface WishlistsService {
 
 
     List<WishlistDto> getAllSorted();
-    List<Wishlist> getWishlistsByUser(User user);
+    List<WishlistDto> getWishlistsByUser(Long userId);
 
     List<Wishlist> getAll();
 

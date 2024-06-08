@@ -3,7 +3,6 @@ package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.GroupsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
@@ -36,8 +35,11 @@ public class WishlistsServiceImpl implements WishlistsService {
 
 
     @Override
-    public List<Wishlist> getWishlistsByUser(User user) {
-        return wishlistsDao.findByUserId(user.getId());
+    public List<WishlistDto> getWishlistsByUser(Long userId) {
+        return wishlistsDao.findByUserId(userId)
+                .stream()
+                .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -87,7 +89,9 @@ public class WishlistsServiceImpl implements WishlistsService {
 
     @Override
     public WishlistDto getById(Long id) {
-        return wishlistsDao.findById(id).stream().map(wishlist -> modelMapper.map(wishlist, WishlistDto.class)).toList().get(0);
+        return wishlistsDao.findById(id).stream()
+                .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
+                .toList().get(0);
     /*
         return wishlistsDao.findById(id)
                 .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
