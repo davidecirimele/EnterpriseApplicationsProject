@@ -13,4 +13,10 @@ public class Credential {
     @Column(name="PASSWORD")
     private String password;
 
+    public void setUsername(String email) {
+        this.email = email;
+    }
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

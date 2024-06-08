@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -61,5 +62,34 @@ public class User {
 
     public String getLastName() {
         return lastName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setBirthDate(LocalDate date) {
+        this.birthDate = date;
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Credential getCredential() {
+        if(this.credential == null)
+            this.credential = new Credential();
+        return this.credential;
+    }
+
+    public void setCredentials(String username, String password) {
+        this.credential = new Credential();
+        this.credential.setUsername(username);
+        this.credential.setPassword(password);
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

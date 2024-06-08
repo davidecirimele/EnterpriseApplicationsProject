@@ -54,4 +54,34 @@ public class Address {
     }
 
     public void setIsValidAddress(boolean value) {this.is_valid = value;}
+
+    public void setUser(User userId) {
+
+        System.out.println("USEEEER : "+userId);
+        this.userId = userId;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public void setProvince(String province) {
+        this.province = province;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public void setZipCode(String zipCode) {
+        this.postalCode = zipCode;
+    }
+
+    public void setAdditionalInfo(String additionalInfo) {
+        this.additionalInfo = additionalInfo;
+    }
 }

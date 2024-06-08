@@ -4,15 +4,13 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -64,10 +62,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
+    public User getUserById(Long id) {
+        return userDao.findByIdWithAddresses(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    }
+
+    @Override
     public UserDto addUser(UserDto userDto) {
         User user = modelMapper.map(userDto, User.class);
 
         User savedUser = userDao.save(user);
         return modelMapper.map(savedUser, UserDto.class);
+    }
+
+    public User convertDto(UserDto userDto) {
+        User user = modelMapper.map(userDto, User.class);
+
+        return user;
     }
 }

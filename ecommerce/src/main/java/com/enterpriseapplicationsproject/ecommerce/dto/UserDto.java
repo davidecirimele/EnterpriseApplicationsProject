@@ -18,7 +18,9 @@ public class UserDto {
 
     private byte[] profilepPicture;
 
-    private CredentialDto credential;
+    private String email;
+
+    private String password;
 
     private List<AddressDto> addresses;
 

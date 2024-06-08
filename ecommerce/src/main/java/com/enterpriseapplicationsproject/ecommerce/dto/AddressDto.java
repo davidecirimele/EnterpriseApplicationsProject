@@ -18,7 +18,7 @@ public class AddressDto {
     private String postalCode;
 
     private String additionalInfo;
-
+    
     private boolean default_address;
 
     private boolean is_valid;

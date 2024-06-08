@@ -17,10 +17,10 @@ public class CartItemsController {
 
     private final CartItemsService cartItemsService;
 
-    @GetMapping("/{id}")
+    //@GetMapping("/{id}")
 //    @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<CartItemDto> getUserById(@PathVariable long id) {
-        List<ProductDto> cartitems = cartItemsService.getProductByCartId(id);
-        return new ResponseEntity<>(cartitems, HttpStatus.OK);
-    }
+    //public ResponseEntity<CartItemDto> getUserById(@PathVariable long id) {
+        //List<ProductDto> cartitems = cartItemsService.getProductByCartId(id);
+        //return new ResponseEntity<>(cartitems, HttpStatus.OK);
+    //}
 }
