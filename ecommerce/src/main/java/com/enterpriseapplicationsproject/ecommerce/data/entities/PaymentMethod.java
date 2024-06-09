@@ -2,12 +2,14 @@ package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Entity
 @Data
+@NoArgsConstructor
 public class PaymentMethod {
 
     @Id
@@ -28,18 +30,8 @@ public class PaymentMethod {
     private String cardNumber;
 
     @Column(name = "EXPIRY_DATE", nullable = false)
-    private LocalDate expiryDate;
+    private LocalDate expirationDate;
 
     @Column(name = "paypal")
-    private String paypal;
-
-   /* @OneToMany(mappedBy =  "paymentMethod")
-    private List<Transaction> transactions;
-
-    @OneToMany(mappedBy = "paymentMethod")
-    private List<Order> orders;
-
-
-    */
-
+    private String paypalEmail;
 }
