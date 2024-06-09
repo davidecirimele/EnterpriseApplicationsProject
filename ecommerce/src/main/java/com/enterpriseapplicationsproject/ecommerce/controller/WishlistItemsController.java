@@ -16,7 +16,7 @@ import java.util.List;
 @RequestMapping(value = "/api/v1/wishlist-items", produces = "application/json") //indica che la classe risponde a richieste REST sulla base path "/api/v1/wishlist-items" e che produce risposte in formato JSON
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor //indica che il costruttore è generato automaticamente
-
+@Slf4j
 public class WishlistItemsController {
 
     private final WishlistItemsService wishlistItemsService;
@@ -24,10 +24,11 @@ public class WishlistItemsController {
     @GetMapping(consumes = "application/json", path = "/getAll")
     public ResponseEntity<List<WishlistItemDto>> allSorted() {
         List<WishlistItemDto> wishlistItems = wishlistItemsService.getAllSorted();
-        if (wishlistItems == null || wishlistItems.isEmpty())
+        if (wishlistItems.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(wishlistItems, HttpStatus.OK);
     }
+
     @GetMapping(consumes = "application/json", path = "/getByWishlistId/{idWishlist}")
     public ResponseEntity<List<WishlistItemDto>> getByWishlistId(@PathVariable Long idWishlist) {
         List<WishlistItemDto> wishlistItems = wishlistItemsService.getItemsByWishlistId(idWishlist);

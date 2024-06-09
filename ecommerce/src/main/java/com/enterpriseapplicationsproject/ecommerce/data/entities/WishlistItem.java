@@ -1,6 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,11 +17,12 @@ public class WishlistItem {
     @Column(name = "ID")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "WISHLIST_ID",
-            referencedColumnName = "ID"
+            referencedColumnName = "ID" // indica la colonna a cui fa riferimento
     )
+    @JsonBackReference
     private Wishlist wishlist;
 
     @ManyToOne

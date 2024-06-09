@@ -66,8 +66,8 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
             System.out.println("wishlistItems found!");
         }
         return wishlistItems.stream()
-                .map(s -> modelMapper.map(s, WishlistItemDto.class))
-                .collect(Collectors.toList());
+                .map(wi -> modelMapper.map(wi, WishlistItemDto.class))
+                .toList();
     }
 
 
