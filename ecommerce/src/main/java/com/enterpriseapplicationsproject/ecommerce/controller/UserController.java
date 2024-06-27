@@ -3,6 +3,7 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +22,9 @@ public class UserController {
 
     @GetMapping("/users")
     public ResponseEntity<List<UserDto>> all() {
-        return ResponseEntity.ok(userService.getUserDto());
+        List<UserDto> users = userService.getUserDto();
+        if (users.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); //codice 204
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 }

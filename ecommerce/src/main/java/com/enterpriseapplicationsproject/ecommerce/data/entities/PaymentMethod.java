@@ -1,11 +1,15 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Entity
+@Data
+@NoArgsConstructor
 public class PaymentMethod {
 
     @Id
@@ -16,38 +20,18 @@ public class PaymentMethod {
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 
-    @Column(name = "TYPE")
+    @Column(name = "TYPE", nullable = false)
     private String type;
 
-    @Column(name = "PROVIDER")
+    @Column(name = "PROVIDER", nullable = false)
     private String provider;
 
-    @Column(name = "CARD_NUMBER")
+    @Column(name = "CARD_NUMBER", nullable = false)
     private String cardNumber;
 
-    @Column(name = "EXPIRY_DATE")
-    private LocalDate expiryDate;
+    @Column(name = "EXPIRY_DATE", nullable = false)
+    private LocalDate expirationDate;
 
     @Column(name = "paypal")
-    private String paypal;
-
-    @OneToMany(mappedBy =  "paymentMethod")
-    private List<Transaction> transactions;
-
-    @OneToMany(mappedBy = "paymentMethod")
-    private List<Order> orders;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    private String paypalEmail;
 }

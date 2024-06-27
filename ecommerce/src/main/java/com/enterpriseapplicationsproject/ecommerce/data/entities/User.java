@@ -31,19 +31,19 @@ public class User {
     private LocalDate birthDate;
 
     @Column(name = "PROPIC")
-    private byte[] profilepPicture;
+    private byte[] profilePicture;
 
     @Embedded
     private Credential credential;
 
-    @OneToMany(mappedBy = "userId")
+    @OneToMany(mappedBy = "userId") // mappedBy indica il nome dell'attributo nella classe Address
     private List<Address> addresses;
 
     @Basic(optional = false)
     @Column(name = "PHONE_NUMBER", unique = true)
     private String phoneNumber;
 
-    @ManyToMany(mappedBy = "members")
+    @ManyToMany(mappedBy = "members") // mappedBy indica il nome dell'attributo nella classe Group
     private List<Group> groups = new ArrayList<>();
 
     public void setId(Long id) {

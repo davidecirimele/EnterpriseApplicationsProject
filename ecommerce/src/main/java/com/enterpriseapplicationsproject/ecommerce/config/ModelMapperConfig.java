@@ -1,11 +1,15 @@
 package com.enterpriseapplicationsproject.ecommerce.config;
 
+import com.enterpriseapplicationsproject.ecommerce.data.entities.Order;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
+import com.enterpriseapplicationsproject.ecommerce.dto.OrderDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import static org.modelmapper.Converters.Collection.map;
 
 @Configuration
 public class ModelMapperConfig {
@@ -22,6 +26,14 @@ public class ModelMapperConfig {
                         // Map the compliete source here
                         .map(source, destination.getFullName());
             }
+        });
+
+        modelMapper.addMappings(new PropertyMap<Order, OrderDto>(){
+            @Override
+            protected void configure() {
+                map().getAddress().setStreet(source.getAddress().getStreet());
+            }
+
         });
 
         return modelMapper;
