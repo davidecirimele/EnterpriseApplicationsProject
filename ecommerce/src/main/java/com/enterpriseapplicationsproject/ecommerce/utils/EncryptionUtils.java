@@ -1,4 +1,4 @@
-package com.enterpriseapplicationsproject.ecommerce.config;
+package com.enterpriseapplicationsproject.ecommerce.utils;
 
 
 import javax.crypto.Cipher;

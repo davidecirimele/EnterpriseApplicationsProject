@@ -1,8 +1,10 @@
 package com.enterpriseapplicationsproject.ecommerce.config;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Order;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.PaymentMethod;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.dto.OrderDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.PaymentMethodDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
@@ -34,6 +36,13 @@ public class ModelMapperConfig {
                 map().getAddress().setStreet(source.getAddress().getStreet());
             }
 
+        });
+
+        modelMapper.addMappings(new PropertyMap<PaymentMethodDto, PaymentMethod>() {
+            @Override
+            protected void configure(){
+                skip(destination.getCardNumber());
+            }
         });
 
         return modelMapper;

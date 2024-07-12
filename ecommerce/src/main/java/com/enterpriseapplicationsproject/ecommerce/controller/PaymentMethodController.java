@@ -3,9 +3,11 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 
 import com.enterpriseapplicationsproject.ecommerce.data.service.PaymentMethodsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.PaymentMethodDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,15 +17,18 @@ import org.springframework.web.bind.annotation.*;
 
 public class PaymentMethodController {
 
+
     private final PaymentMethodsService paymentMethodService;
 
     @PostMapping(consumes = "application/json", path = "/add")
-    public ResponseEntity<PaymentMethodDto> addPaymentMethod(@RequestBody PaymentMethodDto paymentMethodDto) {
+    public ResponseEntity<PaymentMethodDto> addPaymentMethod( @Valid @RequestBody PaymentMethodDto paymentMethodDto) {
+        System.out.println("PaymentMethodDto: " + paymentMethodDto.toString());
+
         PaymentMethodDto paymentMethod = paymentMethodService.addPaymentMethod(paymentMethodDto);
         return new ResponseEntity<>(paymentMethod, HttpStatus.CREATED);
     }
 
-    @PostMapping(consumes = "application/json", path = "/get/{userId}")
+    @GetMapping(consumes = "application/json", path = "/get/{userId}")
     public ResponseEntity<PaymentMethodDto> getPaymentMethodByUserId(@PathVariable Long userId) {
         PaymentMethodDto paymentMethod = paymentMethodService.getPaymentMethodByUserId(userId);
         return new ResponseEntity<>(paymentMethod, HttpStatus.OK);

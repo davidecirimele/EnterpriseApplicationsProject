@@ -25,13 +25,13 @@ public class Order {
     @JoinColumn(name = "ADDRESS_ID", nullable = false)
     private Address address;
 
-    @Column(name = "ORDER_DATE")
+    @Column(name = "ORDER_DATE", nullable = false)
     private LocalDate orderDate;
 
-    @Column(name = "TOTAL_AMOUNT")
+    @Column(name = "TOTAL_AMOUNT", nullable = false)
     private double totalAmount;
 
-    @Column(name = "ORDER_STATUS")
+    @Column(name = "ORDER_STATUS", nullable = false)
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 

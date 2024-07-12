@@ -20,8 +20,11 @@ public class PaymentMethod {
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 
+    @Column(name = "Card Holder Name", nullable = false)
+    private String cardHolderName;
+
     @Column(name = "TYPE", nullable = false)
-    private String type;
+    private String paymentMethodType;
 
     @Column(name = "PROVIDER", nullable = false)
     private String provider;
@@ -30,7 +33,7 @@ public class PaymentMethod {
     private String cardNumber;
 
     @Column(name = "EXPIRY_DATE", nullable = false)
-    private LocalDate expirationDate;
+    private String expirationDate;
 
     @Column(name = "paypal")
     private String paypalEmail;
