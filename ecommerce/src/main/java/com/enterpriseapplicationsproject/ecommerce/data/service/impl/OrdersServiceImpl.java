@@ -7,9 +7,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.domain.OrderStatus;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
 import com.enterpriseapplicationsproject.ecommerce.data.service.OrdersService;
-import com.enterpriseapplicationsproject.ecommerce.dto.AddressDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.OrderDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.OrderWithItemsIdDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -32,33 +30,34 @@ public class OrdersServiceImpl implements OrdersService {
     private final ProductsDao productDao;
 
 
-
-
-
     @Override
-    public OrderDto addOrder(OrderDto orderDto) {
+    public OrderDto addOrder(SaveOrderDto orderDto) {
+            if (!validateOrder(orderDto)) {
+                throw new RuntimeException("Not enough stock for some products");
+            }
 
-        Order order = modelMapper.map(orderDto, Order.class);
-        User user = usersDao.findById(orderDto.getUser().getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
-        order.setUser(user);
-        PaymentMethod paymentMethod = paymentMethodsDao.findById(orderDto.getPaymentMethod().getPaymentMethodId()).orElseThrow(() -> new RuntimeException("Payment method not found"));
-        order.setPaymentMethod(paymentMethod);
 
-        List<OrderItem> orderItems = orderDto.getOrderItems().stream().map(itemDTO -> {
-            OrderItem item = new OrderItem();
-            item.setOrder(order);
-            item.setQuantity(itemDTO.getQuantity());
+            Order order = modelMapper.map(orderDto, Order.class);
+            User user = usersDao.findById(orderDto.getUser().getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
+            order.setUser(user);
+            PaymentMethod paymentMethod = paymentMethodsDao.findById(orderDto.getPaymentMethod().getPaymentMethodId()).orElseThrow(() -> new RuntimeException("Payment method not found"));
+            order.setPaymentMethod(paymentMethod);
 
-            Product product = productDao.findById(itemDTO.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
-            item.setProduct(product);
+            List<OrderItem> orderItems = orderDto.getOrderItems().stream().map(itemDTO -> {
+                OrderItem item = new OrderItem();
+                item.setOrder(order);
+                item.setQuantity(itemDTO.getQuantity());
 
-            return item;
-        }).collect(Collectors.toList());
+                Product product = productDao.findById(itemDTO.getProductId())
+                        .orElseThrow(() -> new RuntimeException("Product not found"));
+                item.setProduct(product);
 
-        order.setOrderItems(orderItems);
-        Order savedOr = ordersDao.save(order);
-        return modelMapper.map(savedOr, OrderDto.class);
+                return item;
+            }).collect(Collectors.toList());
+
+            order.setOrderItems(orderItems);
+            Order savedOr = ordersDao.save(order);
+            return modelMapper.map(savedOr, OrderDto.class);
     }
 
     @Override
@@ -66,7 +65,7 @@ public class OrdersServiceImpl implements OrdersService {
         List<Order> orders = ordersDao.findAllByUserId(userId);
 
 
-        return orders.stream().map( o -> modelMapper.map(o, OrderWithItemsIdDto.class)).toList();
+        return orders.stream().map(o -> modelMapper.map(o, OrderWithItemsIdDto.class)).toList();
     }
 
     @Override
@@ -90,8 +89,13 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
 
-
-
-
-
+    private boolean validateOrder(SaveOrderDto orderDto) {
+        for (OrderItemWithoutIDDto item : orderDto.getOrderItems()) {
+            Product product = productDao.findById(item.getProductId()).orElseThrow(() -> new RuntimeException("Product not found"));
+            if (product.getStock() < item.getQuantity()) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

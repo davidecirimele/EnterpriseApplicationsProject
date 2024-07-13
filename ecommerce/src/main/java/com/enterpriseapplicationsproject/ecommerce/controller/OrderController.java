@@ -5,6 +5,8 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.Address;
 import com.enterpriseapplicationsproject.ecommerce.data.service.OrdersService;
 import com.enterpriseapplicationsproject.ecommerce.dto.OrderDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.OrderWithItemsIdDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.SaveOrderDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +25,7 @@ public class OrderController {
     private final OrdersService ordersService;
 
     @PostMapping(consumes = "application/json", path = "/add")
-    public ResponseEntity<OrderDto> addOrder(@RequestBody   OrderDto orderDto) {
+    public ResponseEntity<OrderDto> addOrder(@Valid @RequestBody SaveOrderDto orderDto) {
          OrderDto addedOrder = ordersService.addOrder(orderDto);
         return new ResponseEntity<>(addedOrder, HttpStatus.CREATED);
     }
