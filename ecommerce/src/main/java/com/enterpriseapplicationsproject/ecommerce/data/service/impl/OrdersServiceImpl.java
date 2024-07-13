@@ -10,6 +10,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.OrdersService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public class OrdersServiceImpl implements OrdersService {
 
 
     @Override
-    public OrderDto addOrder(SaveOrderDto orderDto) {
+    public SaveOrderDto addOrder(SaveOrderDto orderDto) {
             if (!validateOrder(orderDto)) {
                 throw new RuntimeException("Not enough stock for some products");
             }
@@ -48,7 +49,7 @@ public class OrdersServiceImpl implements OrdersService {
                 item.setOrder(order);
                 item.setQuantity(itemDTO.getQuantity());
 
-                Product product = productDao.findById(itemDTO.getProductId())
+                Product product = productDao.findById(itemDTO.getProduct().getId())
                         .orElseThrow(() -> new RuntimeException("Product not found"));
                 item.setProduct(product);
 
@@ -57,41 +58,41 @@ public class OrdersServiceImpl implements OrdersService {
 
             order.setOrderItems(orderItems);
             Order savedOr = ordersDao.save(order);
-            return modelMapper.map(savedOr, OrderDto.class);
+            return modelMapper.map(savedOr, SaveOrderDto.class);
     }
 
     @Override
-    public List<OrderWithItemsIdDto> getAllOrdersByUserId(Long userId) {
-        List<Order> orders = ordersDao.findAllByUserId(userId);
+    public List<OrderDto> getAllOrdersByUserId(Long userId) {
+        List<Order> orders = ordersDao.findAllByUserId(userId, Sort.by(Sort.Order.desc("ordedDate")));
 
 
-        return orders.stream().map(o -> modelMapper.map(o, OrderWithItemsIdDto.class)).toList();
+        return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
     }
 
     @Override
-    public OrderWithItemsIdDto setOrderStatusToCancelled(Long orderId) {
+    public OrderDto setOrderStatusToCancelled(Long orderId) {
         Order order = ordersDao.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
         order.setOrderStatus(OrderStatus.CANCELLED);
         Order o = ordersDao.save(order);
-        return modelMapper.map(o, OrderWithItemsIdDto.class);
+        return modelMapper.map(o, OrderDto.class);
     }
 
     @Override
-    public List<OrderWithItemsIdDto> getAllConfirmedOrdersByUserId(Long userId) {
-        List<Order> orders = ordersDao.findAllConfirmedOrdersByUserId(userId);
-        return orders.stream().map(o -> modelMapper.map(o, OrderWithItemsIdDto.class)).toList();
+    public List<OrderDto> getAllConfirmedOrdersByUserId(Long userId) {
+        List<Order> orders = ordersDao.findAllConfirmedOrdersByUserId(userId, Sort.by(Sort.Order.desc("orderDate")));
+        return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
     }
 
     @Override
-    public List<OrderWithItemsIdDto> getAllCancelledOrdersByUserId(Long userId) {
-        List<Order> orders = ordersDao.findAllCancelledOrdersByUserId(userId);
-        return orders.stream().map(o -> modelMapper.map(o, OrderWithItemsIdDto.class)).toList();
+    public List<OrderDto> getAllCancelledOrdersByUserId(Long userId) {
+        List<Order> orders = ordersDao.findAllCancelledOrdersByUserId(userId, Sort.by(Sort.Order.desc("orderDate")));
+        return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
     }
 
 
     private boolean validateOrder(SaveOrderDto orderDto) {
-        for (OrderItemWithoutIDDto item : orderDto.getOrderItems()) {
-            Product product = productDao.findById(item.getProductId()).orElseThrow(() -> new RuntimeException("Product not found"));
+        for (SaveOrderItemDto item : orderDto.getOrderItems()) {
+            Product product = productDao.findById(item.getProduct().getId()).orElseThrow(() -> new RuntimeException("Product not found"));
             if (product.getStock() < item.getQuantity()) {
                 return false;
             }

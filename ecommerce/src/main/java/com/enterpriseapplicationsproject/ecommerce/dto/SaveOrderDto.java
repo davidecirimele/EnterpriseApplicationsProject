@@ -25,12 +25,13 @@ import java.util.List;
         private double totalAmount;
 
 
+
         private OrderStatus orderStatus;
 
 
         private PaymentMethodIdDto paymentMethod;
 
-        private List<OrderItemWithoutIDDto> orderItems;
+        private List<SaveOrderItemDto> orderItems;
 
 
     }

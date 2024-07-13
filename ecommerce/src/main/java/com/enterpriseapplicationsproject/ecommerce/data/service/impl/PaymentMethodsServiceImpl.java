@@ -1,6 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 
 import com.enterpriseapplicationsproject.ecommerce.config.EncryptionConfig;
+import com.enterpriseapplicationsproject.ecommerce.dto.SavePaymentMethodDto;
 import com.enterpriseapplicationsproject.ecommerce.utils.EncryptionUtils;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.PaymentMethodsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
@@ -25,7 +26,7 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
 
 
     @Override
-    public PaymentMethodDto addPaymentMethod(PaymentMethodDto paymentMethodDto) {
+    public SavePaymentMethodDto addPaymentMethod(SavePaymentMethodDto paymentMethodDto) {
 
         System.out.println("PaymentMethodDto: " + paymentMethodDto.toString());
 
@@ -46,7 +47,7 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
         System.out.println("PaymentMethod: " + paymentMethod.toString());
         paymentMethod.setCardNumber(encryptedCardNumber);
         PaymentMethod pm = paymentMethodsDao.save(paymentMethod);
-        return modelMapper.map(pm, PaymentMethodDto.class);
+        return modelMapper.map(pm, SavePaymentMethodDto.class);
     }
 
     @Override

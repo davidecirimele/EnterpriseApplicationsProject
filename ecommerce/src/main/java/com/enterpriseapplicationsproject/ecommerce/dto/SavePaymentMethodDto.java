@@ -1,19 +1,13 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
-
-
 import com.enterpriseapplicationsproject.ecommerce.validation.ValidExpirationYear;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-import org.hibernate.validator.constraints.CreditCardNumber;
-
-import java.time.LocalDate;
 
 @Data
-public class PaymentMethodDto {
+public class SavePaymentMethodDto {
+    private Long paymentMethodId;
 
     private UserIdDto user;
 
@@ -32,3 +26,4 @@ public class PaymentMethodDto {
 
     private  String paypalEmail;
 }
+

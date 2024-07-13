@@ -1,6 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
 import com.enterpriseapplicationsproject.ecommerce.data.domain.OrderStatus;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Positive;
@@ -28,12 +29,13 @@ public class OrderDto {
     private double totalAmount;
 
 
+    @Enumerated(jakarta.persistence.EnumType.STRING)
     private OrderStatus orderStatus;
 
 
     private PaymentMethodIdDto paymentMethod;
 
-    private List<OrderItemWithoutIDDto> orderItems;
+    private List<SaveOrderItemDto> orderItems;
 
 
 }

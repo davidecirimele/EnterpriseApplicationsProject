@@ -3,6 +3,7 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 
 import com.enterpriseapplicationsproject.ecommerce.data.service.PaymentMethodsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.PaymentMethodDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.SavePaymentMethodDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,10 +22,10 @@ public class PaymentMethodController {
     private final PaymentMethodsService paymentMethodService;
 
     @PostMapping(consumes = "application/json", path = "/add")
-    public ResponseEntity<PaymentMethodDto> addPaymentMethod( @Valid @RequestBody PaymentMethodDto paymentMethodDto) {
+    public ResponseEntity<SavePaymentMethodDto> addPaymentMethod( @Valid @RequestBody SavePaymentMethodDto paymentMethodDto) {
         System.out.println("PaymentMethodDto: " + paymentMethodDto.toString());
 
-        PaymentMethodDto paymentMethod = paymentMethodService.addPaymentMethod(paymentMethodDto);
+        SavePaymentMethodDto paymentMethod = paymentMethodService.addPaymentMethod(paymentMethodDto);
         return new ResponseEntity<>(paymentMethod, HttpStatus.CREATED);
     }
 
