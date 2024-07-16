@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +26,7 @@ public class OrdersServiceImpl implements OrdersService {
 
     private final PaymentMethodsDao paymentMethodsDao;
 
-    private final ProductsDao productDao;
+    private final ProductsDao productsDao;
 
     private final ShoppingCartsDao shoppingCartDao;
 
@@ -34,41 +35,13 @@ public class OrdersServiceImpl implements OrdersService {
     public SaveOrderDto addOrder(CheckoutRequestDto orderDto) {
         User user = usersDao.findById(orderDto.getUserId().getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
         ShoppingCart shoppingCart = shoppingCartDao.findByUserId(user.getId()).orElseThrow(() -> new RuntimeException("Shopping cart  not found"));
-        List<OrderItem> orderItems = shoppingCart.getShoppingCartItems().stream().map(item -> {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setProduct(item.getProduct());
-            orderItem.setQuantity(item.getQuantity());
-            return orderItem;
-        }).collect(Collectors.toList());
-        Order order = modelMapper.map(orderDto, Order.class);
-        System.out.println("Address:" + order.getAddress());
-        System.out.println("OrderDto: " + orderDto.toString());
-        if (!validateOrder(orderDto)) {
+        if (!validateOrder(shoppingCart)) {
             throw new RuntimeException("Not enough stock for some products");
         }
-
-
-
-
-        order.setUser(user);
-
-
-        List<OrderItem> orderItems = orderDto.getOrderItems().stream().map(itemDTO -> {
-            OrderItem item = new OrderItem();
-            item.setOrder(order);
-            item.setQuantity(itemDTO.getQuantity());
-
-
-            Product product = productDao.findById(itemDTO.getProduct().getId())
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
-            item.setProduct(product);
-
-            return item;
-            }).collect(Collectors.toList());
-
-            order.setOrderItems(orderItems);
-            Order savedOr = ordersDao.save(order);
-            return modelMapper.map(savedOr, SaveOrderDto.class);
+        Order order = setOrder(shoppingCart, user, orderDto);
+        //TODO logica di pagamento e cambio stato ordine ed stock
+        Order savedOr = ordersDao.save(order);
+        return modelMapper.map(savedOr, SaveOrderDto.class);
     }
 
     @Override
@@ -99,11 +72,30 @@ public class OrdersServiceImpl implements OrdersService {
         return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
     }
 
+    private Order setOrder( ShoppingCart shoppingCart, User user, CheckoutRequestDto orderDto) {
+        Order order = new Order();
+        List<OrderItem> orderItems = shoppingCart.getCartItems().stream().map(item -> {
+            OrderItem orderItem = new OrderItem();
+            orderItem.setProduct(item.getProductId());
+            orderItem.setQuantity(item.getQuantity());
+            return orderItem;
+        }).collect(Collectors.toList());
+        order.setOrderStatus(OrderStatus.PENDING);
+        PaymentMethod paymentMethod = paymentMethodsDao.findById(orderDto.getPaymentMethodId().getPaymentMethodId()).orElseThrow(() -> new RuntimeException("Payment method not found"));
+        order.setPaymentMethod(paymentMethod);
+
+        order.setTotalAmount(shoppingCart.getTotal());
+        order.setOrderDate(LocalDate.now());
+        order.setUser(user);
+        order.setOrderItems(orderItems);
+        return order;
+    }
 
 
-    private boolean validateOrder(SaveOrderDto orderDto) {
-        for (SaveOrderItemDto item : orderDto.getOrderItems()) {
-            Product product = productDao.findById(item.getProduct().getId()).orElseThrow(() -> new RuntimeException("Product not found"));
+
+    private boolean validateOrder(ShoppingCart shoppingCart) {
+        for (CartItem item : shoppingCart.getCartItems()) {
+            Product product = productsDao.findById(item.getProductId().getId()).orElseThrow(() -> new RuntimeException("Product not found"));
             if (product.getStock() < item.getQuantity()) {
                 return false;
             }
