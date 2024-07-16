@@ -10,6 +10,7 @@ import java.util.List;
 @Entity
 @Data
 @NoArgsConstructor
+@Table(name = "Payment_Methods")
 public class PaymentMethod {
 
     @Id
@@ -20,7 +21,7 @@ public class PaymentMethod {
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 
-    @Column(name = "Card Holder Name", nullable = false)
+    @Column(name = "CARD_HOLDER_NAME", nullable = false)
     private String cardHolderName;
 
     @Column(name = "TYPE", nullable = false)

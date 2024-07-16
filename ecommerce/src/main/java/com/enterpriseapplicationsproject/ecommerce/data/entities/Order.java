@@ -22,7 +22,7 @@ public class Order {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ADDRESS_ID", nullable = false)
+    @JoinColumn(name = "ADDRESS_ID")
     private Address address;
 
     @Column(name = "ORDER_DATE", nullable = false)
@@ -36,7 +36,7 @@ public class Order {
     private OrderStatus orderStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PAYMENT_METHOD_ID", nullable = false)
+    @JoinColumn(name = "PAYMENT_METHOD_ID")
     private PaymentMethod paymentMethod;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)

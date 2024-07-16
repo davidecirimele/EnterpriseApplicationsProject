@@ -11,6 +11,7 @@ public class SavePaymentMethodDto {
 
     private UserIdDto user;
 
+    @NotBlank(message = "Card holder name is required")
     private String cardHolderName;
 
     private String  paymentMethodType;

@@ -2,7 +2,9 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 
 import com.enterpriseapplicationsproject.ecommerce.data.dao.OrdersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.service.OrdersService;
+import com.enterpriseapplicationsproject.ecommerce.dto.CheckoutRequestDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.OrderDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.OrderRequestDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveOrderDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,7 @@ public class OrderController {
     private final OrdersService ordersService;
 
     @PostMapping(consumes = "application/json", path = "/add")
-    public ResponseEntity<SaveOrderDto> addOrder(@Valid @RequestBody SaveOrderDto orderDto) {
+    public ResponseEntity<SaveOrderDto> addOrder(@Valid @RequestBody CheckoutRequestDto orderDto) {
          SaveOrderDto addedOrder = ordersService.addOrder(orderDto);
         return new ResponseEntity<>(addedOrder, HttpStatus.CREATED);
     }

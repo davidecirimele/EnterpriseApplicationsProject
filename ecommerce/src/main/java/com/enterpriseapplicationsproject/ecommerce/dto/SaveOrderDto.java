@@ -24,10 +24,7 @@ import java.util.List;
         @PositiveOrZero(message = "The total amount must be positive")
         private double totalAmount;
 
-
-
         private OrderStatus orderStatus;
-
 
         private PaymentMethodIdDto paymentMethod;
 

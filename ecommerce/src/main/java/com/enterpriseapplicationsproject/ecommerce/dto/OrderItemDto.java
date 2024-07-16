@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
+import jakarta.validation.constraints.Null;
 import lombok.Data;
 import lombok.NonNull;
 

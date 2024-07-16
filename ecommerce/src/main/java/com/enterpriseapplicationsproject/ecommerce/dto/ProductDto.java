@@ -20,5 +20,5 @@ public class ProductDto {
 
     private Double price;
 
-    private List<Review> reviews;
+    //private List<Review> reviews;
 }
