@@ -35,7 +35,4 @@ public class PaymentMethod {
 
     @Column(name = "EXPIRY_DATE", nullable = false)
     private String expirationDate;
-
-    @Column(name = "paypal")
-    private String paypalEmail;
 }

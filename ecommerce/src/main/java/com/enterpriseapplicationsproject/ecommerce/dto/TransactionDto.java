@@ -12,9 +12,9 @@ public class TransactionDto {
 
     private UserDto user;
 
-    //private OrderDto order;
+    private OrderDto order;
 
-    //private PaymentMethodDto paymentMethod;
+    private PaymentMethodDto paymentMethod;
 
     private double amount;
 

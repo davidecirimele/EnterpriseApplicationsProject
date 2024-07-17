@@ -10,5 +10,4 @@ public interface TransactionsService {
 
     public List<TransactionDto> getAllTransactionByUserId(Long userId);
 
-    //public List<TransactionDto> getAllTransactionByUserEmail(String email);
 }

@@ -5,6 +5,9 @@ import com.enterpriseapplicationsproject.ecommerce.data.domain.OrderStatus;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
 import com.enterpriseapplicationsproject.ecommerce.data.service.OrdersService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
+import com.enterpriseapplicationsproject.ecommerce.exception.OrderNotFoundException;
+import com.enterpriseapplicationsproject.ecommerce.exception.OutOfStockException;
+import com.enterpriseapplicationsproject.ecommerce.exception.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
@@ -30,13 +33,16 @@ public class OrdersServiceImpl implements OrdersService {
 
     private final ShoppingCartsDao shoppingCartDao;
 
+    private final AddressesDao addressesDao;
+
 
     @Override
     public SaveOrderDto addOrder(CheckoutRequestDto orderDto) {
         User user = usersDao.findById(orderDto.getUserId().getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
         ShoppingCart shoppingCart = shoppingCartDao.findByUserId(user.getId()).orElseThrow(() -> new RuntimeException("Shopping cart  not found"));
+        Address address = addressesDao.findById(orderDto.getAddress().getId()).orElseThrow(() -> new RuntimeException("Address not found"));
         if (!validateOrder(shoppingCart)) {
-            throw new RuntimeException("Not enough stock for some products");
+            throw new OutOfStockException("Products out of stock");
         }
         Order order = setOrder(shoppingCart, user, orderDto);
         //TODO logica di pagamento e cambio stato ordine ed stock
@@ -49,12 +55,13 @@ public class OrdersServiceImpl implements OrdersService {
         List<Order> orders = ordersDao.findAllByUserId(userId, Sort.by(Sort.Order.desc("ordedDate")));
 
 
+
         return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
     }
 
     @Override
     public OrderDto setOrderStatusToCancelled(Long orderId) {
-        Order order = ordersDao.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+        Order order = ordersDao.findById(orderId).orElseThrow(() -> new OrderNotFoundException("Order not found"));
         order.setOrderStatus(OrderStatus.CANCELLED);
         Order o = ordersDao.save(order);
         return modelMapper.map(o, OrderDto.class);
@@ -95,7 +102,7 @@ public class OrdersServiceImpl implements OrdersService {
 
     private boolean validateOrder(ShoppingCart shoppingCart) {
         for (CartItem item : shoppingCart.getCartItems()) {
-            Product product = productsDao.findById(item.getProductId().getId()).orElseThrow(() -> new RuntimeException("Product not found"));
+            Product product = productsDao.findById(item.getProductId().getId()).orElseThrow(() -> new ProductNotFoundException("Product not found"));
             if (product.getStock() < item.getQuantity()) {
                 return false;
             }
