@@ -11,6 +11,6 @@ public class SaveOrderItemDto {
     private ProductDto product;
 
     @Positive
-    private int quantity;
+    private Integer quantity;
 
 }

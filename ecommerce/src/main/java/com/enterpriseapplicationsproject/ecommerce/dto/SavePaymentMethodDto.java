@@ -25,6 +25,5 @@ public class SavePaymentMethodDto {
     @ValidExpirationYear
     private String expirationDate;
 
-    private  String paypalEmail;
 }
 

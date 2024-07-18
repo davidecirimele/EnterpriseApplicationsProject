@@ -30,5 +30,4 @@ public class PaymentMethodDto {
     @ValidExpirationYear
     private String expirationDate;
 
-    private  String paypalEmail;
 }

@@ -26,7 +26,7 @@ public class OrderDto {
     private LocalDate date;
 
     @PositiveOrZero(message = "The total amount must be positive")
-    private double totalAmount;
+    private Double totalAmount;
 
 
     @Enumerated(jakarta.persistence.EnumType.STRING)

@@ -1,6 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
 import com.enterpriseapplicationsproject.ecommerce.data.domain.OrderStatus;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Positive;
@@ -22,8 +23,9 @@ import java.util.List;
         private LocalDate date;
 
         @PositiveOrZero(message = "The total amount must be positive")
-        private double totalAmount;
+        private Double totalAmount;
 
+        @Enumerated( jakarta.persistence.EnumType.STRING)
         private OrderStatus orderStatus;
 
         private PaymentMethodIdDto paymentMethod;

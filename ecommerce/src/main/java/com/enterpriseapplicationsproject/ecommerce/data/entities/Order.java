@@ -29,7 +29,7 @@ public class Order {
     private LocalDate orderDate;
 
     @Column(name = "TOTAL_AMOUNT", nullable = false)
-    private double totalAmount;
+    private Double totalAmount;
 
     @Column(name = "ORDER_STATUS", nullable = false)
     @Enumerated(EnumType.STRING)

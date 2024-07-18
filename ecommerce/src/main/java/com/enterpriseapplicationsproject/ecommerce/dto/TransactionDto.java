@@ -10,13 +10,13 @@ public class TransactionDto {
 
     private Long id;
 
-    private UserDto user;
+    private UserIdDto user;
 
-    private OrderDto order;
+    private OrderIdDto order;
 
-    private PaymentMethodDto paymentMethod;
+    private BasicPaymentMethodDto paymentMethod;
 
-    private double amount;
+    private Double amount;
 
     private String status;
 

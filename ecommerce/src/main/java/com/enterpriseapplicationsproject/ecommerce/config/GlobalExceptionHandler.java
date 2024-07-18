@@ -1,14 +1,14 @@
 package com.enterpriseapplicationsproject.ecommerce.config;
 
 
+import com.enterpriseapplicationsproject.ecommerce.data.entities.ShoppingCart;
 import com.enterpriseapplicationsproject.ecommerce.dto.ServiceError;
-import com.enterpriseapplicationsproject.ecommerce.exception.OrderNotFoundException;
-import com.enterpriseapplicationsproject.ecommerce.exception.OutOfStockException;
-import com.enterpriseapplicationsproject.ecommerce.exception.ProductNotFoundException;
+import com.enterpriseapplicationsproject.ecommerce.exception.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -25,20 +25,46 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ProductNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ServiceError onResourceNotFoundException(WebRequest req, ProductNotFoundException ex){
-        return errorResponse(req, ex.getMessage());
+        return errorResponse(HttpStatus.valueOf(HttpStatus.NOT_FOUND.value()), req, ex.getMessage());
     }
 
     @ExceptionHandler(OrderNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ServiceError onResourceNotFoundException(WebRequest req, OrderNotFoundException ex){
-        return errorResponse(req, ex.getMessage());
+        return errorResponse(HttpStatus.valueOf(HttpStatus.BAD_REQUEST.value()), req, ex.getMessage());
     }
 
     @ExceptionHandler(OutOfStockException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ServiceError onResourceNotFoundException(WebRequest req, OutOfStockException ex){
-        return errorResponse(req, ex.getMessage());
+        return errorResponse(HttpStatus.valueOf(HttpStatus.CONFLICT.value()), req, ex.getMessage());
     }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ServiceError onResourceNotFoundException(WebRequest req, UserNotFoundException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.NOT_FOUND.value()), req, ex.getMessage());
+    }
+
+    @ExceptionHandler(ShoppingCartNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ServiceError onResourceNotFoundException(WebRequest req, ShoppingCartNotFoundException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.NOT_FOUND.value()), req, ex.getMessage());
+    }
+
+    @ExceptionHandler(AddressNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ServiceError onResourceNotFoundException(WebRequest req, AddressNotFoundException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.NOT_FOUND.value()), req, ex.getMessage());
+    }
+
+    @ExceptionHandler(EncryptionErrorException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ServiceError onResourceNotFoundException(WebRequest req, EncryptionErrorException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()), req, ex.getMessage());
+    }
+
+
 
 
 
@@ -53,25 +79,25 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ServiceError onMethodArgumentNotValid(WebRequest req, MethodArgumentNotValidException ex){
+    public ServiceError onMethodArgumentNotValid(HttpStatus httpStatus, WebRequest req, MethodArgumentNotValidException ex){
 
         String message = ex.getBindingResult().getFieldErrors().stream()
                                             .map(viol -> viol.getField().concat(" : ")
                                                 .concat(viol.getDefaultMessage()))
                                             .collect(Collectors.joining(" , "));
-        return errorResponse(req, message);
+        return errorResponse(httpStatus, req, message);
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ServiceError defaultErrorHandler(WebRequest req ,Exception ex){
-        return errorResponse(req, ex.getMessage());
+    public ServiceError defaultErrorHandler(HttpStatus httpStatus, WebRequest req ,Exception ex){
+        return errorResponse(httpStatus, req, ex.getMessage());
     }
 
 
-    private ServiceError errorResponse (WebRequest req, String message) {
+    private ServiceError errorResponse (HttpStatus httpStatus, WebRequest req, String message) {
         HttpServletRequest httpreq = (HttpServletRequest) req.resolveReference("request");
-        final ServiceError output = new ServiceError(new Date(), httpreq.getRequestURI(), message);
+        final ServiceError output = new ServiceError(httpStatus.value() ,  new Date(), httpreq.getRequestURI(), message);
         log.error("Exception handler :::: {}", output.toString());
         return output;
 

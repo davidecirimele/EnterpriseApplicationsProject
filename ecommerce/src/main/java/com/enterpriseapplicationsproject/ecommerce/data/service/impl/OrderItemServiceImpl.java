@@ -4,6 +4,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.OrderItemsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.OrderItem;
 import com.enterpriseapplicationsproject.ecommerce.data.service.OrderItemsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.OrderItemDto;
+import com.enterpriseapplicationsproject.ecommerce.exception.OrderNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,9 @@ public class OrderItemServiceImpl  implements OrderItemsService {
     @Override
     public List<OrderItemDto> getOrderItemsByOrderId(Long orderId) {
         List<OrderItem> orderItems = orderItemsDao.findAllByOrderOrderId(orderId);
+        if (orderItems.isEmpty()) {
+            throw  new OrderNotFoundException("Order not found");
+        }
         return orderItems.stream().map(oi -> modelMapper.map(oi, OrderItemDto.class)).toList();
     }
 }

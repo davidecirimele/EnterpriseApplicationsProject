@@ -4,6 +4,9 @@ import com.enterpriseapplicationsproject.ecommerce.config.EncryptionConfig;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.PaymentMethod;
 
 import com.enterpriseapplicationsproject.ecommerce.dto.SavePaymentMethodDto;
+import com.enterpriseapplicationsproject.ecommerce.exception.DecryptionErrorException;
+import com.enterpriseapplicationsproject.ecommerce.exception.EncryptionErrorException;
+import com.enterpriseapplicationsproject.ecommerce.exception.UserNotFoundException;
 import com.enterpriseapplicationsproject.ecommerce.utils.EncryptionUtils;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.PaymentMethodsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
@@ -29,13 +32,8 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
 
     @Override
     public SavePaymentMethodDto addPaymentMethod(SavePaymentMethodDto paymentMethodDto) {
+        userDao.findById(paymentMethodDto.getUser().getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        System.out.println("PaymentMethodDto: " + paymentMethodDto.toString());
-
-        /*User user = userDao.getById(paymentMethodDto.getUser().getId());
-        if (user == null){
-            throw  new IllegalArgumentException("User not found");
-        }*/
 
         EncryptionUtils encryptionUtils = new EncryptionUtils(encryptionConfig.getSecretKey());
         String encryptedCardNumber;
@@ -43,7 +41,7 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
             encryptedCardNumber = encryptionUtils.encrypt(paymentMethodDto.getCardNumber());
         }
         catch (Exception e){
-            throw  new RuntimeException("Error encvrypting card number", e);
+            throw  new EncryptionErrorException("Error encrypting card number");
         }
         PaymentMethod paymentMethod = modelMapper.map(paymentMethodDto, PaymentMethod.class);
         System.out.println("PaymentMethod: " + paymentMethod.toString());
@@ -61,7 +59,7 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
             decryptedCardNumber = encryptionUtils.decrypt(paymentMethod.getCardNumber());
         }
         catch (Exception e){
-            throw  new RuntimeException("Error decrypting card number", e);
+            throw  new DecryptionErrorException("Error decrypting card number");
         }
         PaymentMethodDto paymentMethodDto = modelMapper.map(paymentMethod, PaymentMethodDto.class);
         paymentMethodDto.setCardNumber(MaskCardNumber(decryptedCardNumber));

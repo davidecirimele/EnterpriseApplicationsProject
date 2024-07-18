@@ -5,9 +5,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.domain.OrderStatus;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
 import com.enterpriseapplicationsproject.ecommerce.data.service.OrdersService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
-import com.enterpriseapplicationsproject.ecommerce.exception.OrderNotFoundException;
-import com.enterpriseapplicationsproject.ecommerce.exception.OutOfStockException;
-import com.enterpriseapplicationsproject.ecommerce.exception.ProductNotFoundException;
+import com.enterpriseapplicationsproject.ecommerce.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
@@ -38,9 +36,9 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     public SaveOrderDto addOrder(CheckoutRequestDto orderDto) {
-        User user = usersDao.findById(orderDto.getUserId().getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
-        ShoppingCart shoppingCart = shoppingCartDao.findByUserId(user.getId()).orElseThrow(() -> new RuntimeException("Shopping cart  not found"));
-        Address address = addressesDao.findById(orderDto.getAddress().getId()).orElseThrow(() -> new RuntimeException("Address not found"));
+        User user = usersDao.findById(orderDto.getUserId().getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
+        ShoppingCart shoppingCart = shoppingCartDao.findByUserId(user.getId()).orElseThrow(() -> new ShoppingCartNotFoundException("Shopping cart not found"));
+        Address address = addressesDao.findById(orderDto.getAddress().getId()).orElseThrow(() -> new AddressNotFoundException("Address not found"));
         if (!validateOrder(shoppingCart)) {
             throw new OutOfStockException("Products out of stock");
         }
@@ -52,6 +50,7 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     public List<OrderDto> getAllOrdersByUserId(Long userId) {
+
         List<Order> orders = ordersDao.findAllByUserId(userId, Sort.by(Sort.Order.desc("ordedDate")));
 
 
