@@ -13,22 +13,23 @@ import java.util.List;
         columnNames = {"USER_ID", "GROUP_ID"}
 ))
 @Entity
+@Data
+@NoArgsConstructor
 public class Wishlist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
 
-    @OneToMany(mappedBy = "id")//mappedby indica il nome del campo nella tabella WishlistItems
+    @OneToMany(mappedBy = "wishlist")//mappedBy indica il nome dell'attributo nella classe WishlistItem
     private List<WishlistItem> items = new ArrayList<>();
-
 
     @ManyToOne()
     @JoinColumn(
             name = "USER_ID",
             referencedColumnName = "ID"
     )
-    private User userId;//pk
+    private User userId;//
 
     @OneToOne(optional = false)//optional indica
     @JoinColumn(

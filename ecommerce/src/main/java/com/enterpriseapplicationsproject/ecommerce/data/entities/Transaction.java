@@ -1,11 +1,13 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
-import com.enterpriseapplicationsproject.ecommerce.data.Status;
+import com.enterpriseapplicationsproject.ecommerce.data.domain.PaymentStatus;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 
 @Entity
+@Data
 public class Transaction {
 
     @Id
@@ -26,14 +28,14 @@ public class Transaction {
     private PaymentMethod paymentMethod;
 
 
-    @Column(name = "AMOUNT")
+    @Column(name = "AMOUNT", nullable = false)
     private Double amount;
 
-    @Column(name = "PAYMENT_STATUS")
+    @Column(name = "PAYMENT_STATUS", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Status paymentStatus;
+    private PaymentStatus paymentStatus;
 
-    @Column(name = "DATE")
+    @Column(name = "DATE", nullable = false)
     private LocalDate date;
 
 }

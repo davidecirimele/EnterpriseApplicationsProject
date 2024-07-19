@@ -2,9 +2,12 @@ package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "Addresses")
+@Data
+@NoArgsConstructor
 public class Address {
 
 
@@ -14,7 +17,7 @@ public class Address {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "USER_ID")
+    @JoinColumn(name = "USER_ID") // name indica il nome della colonna nella tabella Address
     private User userId;
 
     @Column(name = "STREET")
