@@ -3,9 +3,8 @@ package com.enterpriseapplicationsproject.ecommerce.data.service;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
 import jakarta.transaction.Transactional;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface UserService {
@@ -20,6 +19,8 @@ public interface UserService {
 
     @Transactional
     User getUserById(Long id);
+
+    //UserDto addUser(UserDto userDto, MultipartFile file);
 
     UserDto addUser(UserDto userDto);
 

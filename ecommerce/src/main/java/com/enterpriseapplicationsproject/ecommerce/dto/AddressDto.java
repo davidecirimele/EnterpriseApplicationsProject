@@ -34,4 +34,12 @@ public class AddressDto {
     public boolean isValid(){
         return this.is_valid;
     }
+
+    public void setDefaultAddress(boolean default_address) {
+        this.default_address = default_address;
+    }
+
+    public void setValid(boolean valid) {
+        this.is_valid = valid;
+    }
 }

@@ -1,30 +1,51 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
+import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
+import com.enterpriseapplicationsproject.ecommerce.exception.UserRegistrationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/users-api")
+@RequestMapping("api/v1/users")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/users")
+    @GetMapping("/welcome")
+    public String welcome() {
+        return "Welcome this endpoint is not secure";
+    }
+
+    @GetMapping("/all")
     public ResponseEntity<List<UserDto>> all() {
-        List<UserDto> users = userService.getUserDto();
-        if (users.isEmpty())
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); //codice 204
+        List<UserDto> users = userService.getAll();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
+
+    @GetMapping("/{id}")
+//    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public ResponseEntity<UserDto> getUserById(@PathVariable long id) {
+        UserDto user = userService.getById(id);
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<UserDto> addUser(@RequestBody UserDto userDto){
+        try{UserDto addedUser = userService.addUser(userDto);
+        return new ResponseEntity<>(addedUser, HttpStatus.CREATED);}
+        catch(UserRegistrationException e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 }

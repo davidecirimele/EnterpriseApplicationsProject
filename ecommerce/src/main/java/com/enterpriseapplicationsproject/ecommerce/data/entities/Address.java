@@ -52,6 +52,10 @@ public class Address {
         return id;
     }
 
+    public boolean is_default_address(){
+        return default_address;
+    }
+
     public void setDefaultAddress(boolean value) {
         this.default_address = value;
     }
@@ -86,5 +90,9 @@ public class Address {
 
     public void setAdditionalInfo(String additionalInfo) {
         this.additionalInfo = additionalInfo;
+    }
+
+    public boolean isValid() {
+        return this.is_valid;
     }
 }

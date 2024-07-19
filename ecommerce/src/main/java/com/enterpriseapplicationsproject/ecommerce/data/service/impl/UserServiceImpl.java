@@ -4,15 +4,13 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,45 +21,64 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
 
     @Override
-    public User getById(Long id) {
-        return userDao.findById(id).get();
-    }
+    public UserDto getById(Long id) {
+        Optional<User> optionalUser = userDao.findById(id);
 
-    @Override
-    public User save(User user) {
-        return userDao.save(user);
-    }
-
-    @Override
-    public Optional<User> getByEmail(String email) {
-        return userDao.findByCredentialEmail(email);
-    }
-
-    @Override
-    public Collection<User> getAll(Specification<User> spec) {
-        //return userDao.findAll(spec);
-        return null;
-    }
-
-    @Override
-    public Collection<User> getAll() {
-        return userDao.findAll();
-    }
-
-    @Override
-    public List<UserDto> getUserDto() {
-        if(userDao == null) {
-            System.out.println("userDao is null!");
-            throw new NullPointerException();
+        if(optionalUser.isPresent())
+        {
+            User user = optionalUser.get();
+            return modelMapper.map(user, UserDto.class);
         }
+        else{
+            throw new RuntimeException("User with id " + id + " not found");
+        }
+    }
+
+    @Override
+    public UserDto save(User user) {
+        User savedUser = userDao.save(user);
+        return modelMapper.map(savedUser, UserDto.class);
+    }
+
+    @Override
+    public UserDto getByEmail(String email) {
+        Optional<User> optionalUser = userDao.findByCredentialEmail(email);
+
+        if(optionalUser.isPresent())
+        {
+            User user = optionalUser.get();
+            return modelMapper.map(user, UserDto.class);
+        }
+        else{
+            throw new RuntimeException("User with email " + email + " not found");
+        }
+
+    }
+
+    @Override
+    public List<UserDto> getAll() {
         List<User> users = userDao.findAll();
-        if(users == null || users.isEmpty()) {
-            System.out.println("No users found!");
-        } else {
-            System.out.println("Users found: " + users.size());
-        }
-        return users.stream()
-                .map(s -> modelMapper.map(s, UserDto.class))
-                .collect(Collectors.toList());
+        return users.stream().map(user1 -> modelMapper.map(user1 , UserDto.class)).toList();
+    }
+
+    @Override
+    @Transactional
+    public User getUserById(Long id) {
+        return userDao.findByIdWithAddresses(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    }
+
+    @Override
+    public UserDto addUser(UserDto userDto) {
+        User user = modelMapper.map(userDto, User.class);
+
+        User savedUser = userDao.save(user);
+        return modelMapper.map(savedUser, UserDto.class);
+    }
+
+    public User convertDto(UserDto userDto) {
+        User user = modelMapper.map(userDto, User.class);
+
+        return user;
     }
 }
