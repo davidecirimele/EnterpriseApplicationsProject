@@ -3,10 +3,13 @@ package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
+import com.enterpriseapplicationsproject.ecommerce.dto.SaveUserDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -21,6 +24,8 @@ public class UserServiceImpl implements UserService {
     private final UsersDao userDao;
 
     private final ModelMapper modelMapper;
+
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public User getById(Long id) {
@@ -64,4 +69,13 @@ public class UserServiceImpl implements UserService {
                 .map(s -> modelMapper.map(s, UserDto.class))
                 .collect(Collectors.toList());
     }
+
+    /*@Override
+    public User authenticate(String email, String password) {
+      User user = userDao.findByCredentialEmail(email).orElseThrow(() -> new AuthenticationException("User not found") {});
+        if (!passwordEncoder.matches(password, user.getCredential().getPassword())) {
+            throw new AuthenticationException("Invalid password") {};
+        }*/
+
 }
+

@@ -19,6 +19,7 @@ import java.util.List;
 
 @Data
 
+
 public class LoggedUserDetails implements UserDetails{
 
     private String email;
@@ -49,7 +50,7 @@ public class LoggedUserDetails implements UserDetails{
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override

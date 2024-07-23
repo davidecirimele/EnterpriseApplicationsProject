@@ -2,6 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.config.security;
 
 import com.enterpriseapplicationsproject.ecommerce.config.security.filter.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,22 +27,20 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@AllArgsConstructor
 public class SecurityConfig {
 
         private final JwtAuthenticationFilter jwtAuthFilter;
         private final LoggedUserDetailsService userDetailsService;
 
-        public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, LoggedUserDetailsService userDetailsService) {
-            this.jwtAuthFilter = jwtAuthFilter;
-            this.userDetailsService = userDetailsService;
-        }
+
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             http
                     .csrf(AbstractHttpConfigurer::disable)
                     .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/api/auth/**").permitAll()
+                            .requestMatchers("/api/v1/auth/**").permitAll()
                             .requestMatchers("/api/public/**").permitAll()
                             .requestMatchers("/api/admin/**").hasRole("ADMIN")
                             .anyRequest().authenticated()
