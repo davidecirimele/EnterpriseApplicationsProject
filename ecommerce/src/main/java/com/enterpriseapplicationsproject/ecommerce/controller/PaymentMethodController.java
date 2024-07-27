@@ -32,12 +32,14 @@ public class PaymentMethodController {
     }
 
     @GetMapping(consumes = "application/json", path = "/get/{userId}")
+    @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<PaymentMethodDto> getPaymentMethodByUserId(@PathVariable Long userId) {
         PaymentMethodDto paymentMethod = paymentMethodService.getPaymentMethodByUserId(userId);
         return new ResponseEntity<>(paymentMethod, HttpStatus.OK);
     }
 
     @DeleteMapping(consumes = "application/json", path = "/delete/{userId}")
+    @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<PaymentMethodDto> deletePaymentMethodByUserId(@PathVariable Long userId) {
         PaymentMethodDto paymentMethod = paymentMethodService.deletePaymentMethodByUserId(userId);
         return new ResponseEntity<>(paymentMethod, HttpStatus.OK);
