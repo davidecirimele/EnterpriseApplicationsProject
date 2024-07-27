@@ -19,11 +19,13 @@ public class WishlistDto {
 
     private Long id;
 
-    private List<WishlistItem> items = new ArrayList<>();
+    private String name;
 
-    private User userId;
+    private List<WishlistItemDto> items = new ArrayList<>();
 
-    private Group group;
+    private UserDto user;
+
+    private GroupDto group;
 
     private String privacySetting;
 }

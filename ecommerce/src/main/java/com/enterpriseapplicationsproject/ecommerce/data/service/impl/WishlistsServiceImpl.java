@@ -3,12 +3,14 @@ package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.GroupsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistItem;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistsService;
+import com.enterpriseapplicationsproject.ecommerce.dto.GroupDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
@@ -36,8 +38,11 @@ public class WishlistsServiceImpl implements WishlistsService {
 
 
     @Override
-    public List<Wishlist> getWishlistsByUser(User user) {
-        return wishlistsDao.findByUserId(user.getId());
+    public List<WishlistDto> getWishlistsByUser(Long userId) {
+        return wishlistsDao.findByUserId(userId)
+                .stream()
+                .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -87,7 +92,9 @@ public class WishlistsServiceImpl implements WishlistsService {
 
     @Override
     public WishlistDto getById(Long id) {
-        return wishlistsDao.findById(id).stream().map(wishlist -> modelMapper.map(wishlist, WishlistDto.class)).toList().get(0);
+        return wishlistsDao.findById(id).stream()
+                .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
+                .toList().get(0);
     /*
         return wishlistsDao.findById(id)
                 .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
@@ -115,13 +122,38 @@ public class WishlistsServiceImpl implements WishlistsService {
     public WishlistDto updateWishlist(Long id, WishlistDto wishlistDto) {
         return wishlistsDao.findById(id)
                 .map(wishlist -> {
-                    wishlist.setGroup(wishlistDto.getGroup());
-                    wishlist.setItems(wishlistDto.getItems()); //tecnicamente lo fa gia' WishlitstItem server, dovrei lasciarlo?
+                    wishlist.setName(wishlistDto.getName());
                     wishlist.setPrivacySetting(wishlistDto.getPrivacySetting());
-                    return modelMapper.map(wishlistsDao.save(wishlist), WishlistDto.class);
+
+                    // Mappa gli items
+                    List<WishlistItem> updatedItems = wishlistDto.getItems().stream()
+                            .map(itemDto -> {
+                                WishlistItem item = modelMapper.map(itemDto, WishlistItem.class);
+                                item.setWishlist(wishlist);
+                                return item;
+                            })
+                            .collect(Collectors.toList());
+
+                    // Sostituisci gli items esistenti con quelli aggiornati
+                    wishlist.getItems().clear();
+                    wishlist.getItems().addAll(updatedItems);
+
+                    // Mappa il group
+                    GroupDto groupDto = wishlistDto.getGroup();
+                    if (groupDto != null && groupDto.getId() != null) {
+                        Group group = groupsDao.findById(groupDto.getId())
+                                .orElseThrow(() -> new EntityNotFoundException("Group not found"));
+                        wishlist.setGroup(group);
+                    } else {
+                        wishlist.setGroup(null);
+                    }
+
+                    Wishlist savedWishlist = wishlistsDao.save(wishlist);
+                    return modelMapper.map(savedWishlist, WishlistDto.class);
                 })
                 .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));
     }
+
 
 
 }

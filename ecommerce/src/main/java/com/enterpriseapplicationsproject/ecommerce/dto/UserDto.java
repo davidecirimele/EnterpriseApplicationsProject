@@ -16,7 +16,7 @@ public class UserDto {
 
     private LocalDate birthDate;
 
-    private String profilepPicture;
+    private String profilePicture;
 
     private CredentialDto credential;
 

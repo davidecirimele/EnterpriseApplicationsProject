@@ -1,6 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,7 +23,12 @@ public class Wishlist {
     private Long id;
 
     @OneToMany(mappedBy = "wishlist")//mappedBy indica il nome dell'attributo nella classe WishlistItem
+    @JsonManagedReference
     private List<WishlistItem> items = new ArrayList<>();
+
+    @Basic(optional = false)
+    @Column(name = "NAME")
+    private String name;
 
     @ManyToOne()
     @JoinColumn(

@@ -32,8 +32,16 @@ public class WishlistController {
     }
 
     @GetMapping(consumes = "application/json", path = "/get/{idWishlist}")
-    public ResponseEntity<WishlistDto> getById(@PathVariable Long id) {
-        WishlistDto w = wishlistService.getById(id);
+    public ResponseEntity<WishlistDto> getById(@PathVariable Long idWishlist) {
+        WishlistDto w = wishlistService.getById(idWishlist);
+        if(w == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // meglio farlo nel service e gestire l'eccezione con l'handler
+        return new ResponseEntity<>(w, HttpStatus.OK);
+    }
+
+    @GetMapping(consumes = "application/json", path = "/getByUser/{idUser}")
+    public ResponseEntity<List<WishlistDto>> getByUser(@PathVariable Long idUser) {
+        List<WishlistDto> w = wishlistService.getWishlistsByUser(idUser);
         if(w == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // meglio farlo nel service e gestire l'eccezione con l'handler
         return new ResponseEntity<>(w, HttpStatus.OK);
