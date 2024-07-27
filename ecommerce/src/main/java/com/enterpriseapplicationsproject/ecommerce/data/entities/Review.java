@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "Reviews")
 @Data
@@ -14,18 +16,28 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "RATING")
+    @Column(name = "RATING", nullable = false)
     private Integer rating;
 
-    @Column(name = "COMMENT")
+    @Column(name = "TITLE", nullable = false)
+    private String title;
+
+    @Column(name = "COMMENT", nullable = false)
     private String comment;
 
-    @ManyToOne
-    @JoinColumn(name = "PRODUCT_ID", referencedColumnName = "ID")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PRODUCT_ID", referencedColumnName = "ID", nullable = false)
     private Product product;
 
-    @ManyToOne
-    @JoinColumn(name = "USER_ID", referencedColumnName = "ID")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "USER_ID", referencedColumnName = "ID", nullable = false)
     private User user;
 
+    @Column(name = "REVIEW_DATE", nullable = false)
+    private LocalDateTime reviewDate;
+
+    @PrePersist
+    private void onCreate() {
+        this.reviewDate = LocalDateTime.now();
+    }
 }

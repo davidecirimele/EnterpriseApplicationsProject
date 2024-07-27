@@ -1,15 +1,17 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.util.List;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint( columnNames = {"ORDER_ID", "PRODUCT_ID"}))
+@Data
+@Table(uniqueConstraints = @UniqueConstraint( columnNames = {"ORDER_ID", "PRODUCT_ID"}), name = "ORDER_ITEMS")
 
 public class OrderItem {
 
-    @Id
+        @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long orderItemId;
 
@@ -21,7 +23,7 @@ public class OrderItem {
     @JoinColumn(name = "PRODUCT_ID", nullable = false)
     private Product product;
 
-    @Column(name = "QUANTITY")
+    @Column(name = "QUANTITY", nullable = false)
     private Integer quantity;
 
 }

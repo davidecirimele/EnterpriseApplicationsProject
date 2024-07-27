@@ -1,6 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.data.dao;
 
-import com.enterpriseapplicationsproject.ecommerce.data.Status;
+import com.enterpriseapplicationsproject.ecommerce.data.domain.PaymentStatus;
+
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Transaction;
 import jakarta.persistence.criteria.*;
 import lombok.Data;
@@ -18,7 +19,7 @@ public class EcommerceSpecification {
         private Long OrderId;
         private Double minAmount;
         private Double maxAmount;
-        private Status paymentStatus;
+        private PaymentStatus paymentStatus;
         private LocalDate startDate;
         private LocalDate endDate;
         private String paymentMethodType;

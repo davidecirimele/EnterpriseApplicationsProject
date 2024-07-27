@@ -11,6 +11,8 @@ import java.util.List;
 @Table(name = "Users")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "ROLE", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorValue("USER")
+@Data
 public class User {
 
     @Id
