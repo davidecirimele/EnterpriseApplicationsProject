@@ -18,7 +18,6 @@ public class LoggedUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = usersDao.findByCredentialEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        System.out.println("User: " + user);
         return new LoggedUserDetails(user);
 
     }

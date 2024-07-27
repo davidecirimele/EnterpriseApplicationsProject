@@ -24,7 +24,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping(consumes = "application/json", path = "/register")
-    public ResponseEntity<SaveUserDto> register(@RequestBody  SaveUserDto userDto) {
+    public ResponseEntity<SaveUserDto> registerUser(@RequestBody  SaveUserDto userDto) {
         return ResponseEntity.ok(authService.registerUser(userDto));
     }
 

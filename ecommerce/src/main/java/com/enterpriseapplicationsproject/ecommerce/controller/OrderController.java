@@ -19,7 +19,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderController {
 
-    private final OrdersDao orderDao;
 
     private final OrdersService ordersService;
 

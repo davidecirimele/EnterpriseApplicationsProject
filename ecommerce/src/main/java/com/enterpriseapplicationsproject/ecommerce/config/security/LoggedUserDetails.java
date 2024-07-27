@@ -22,14 +22,16 @@ import java.util.List;
 
 public class LoggedUserDetails implements UserDetails{
 
+    private Long id;
     private String email;
     private String password;
     private List<GrantedAuthority> authorities;
 
     public LoggedUserDetails(User user) {
+        this.id = user.getId();
         this.email = user.getCredential().getEmail();
         this.password = user.getCredential().getPassword();
-        this.authorities = Collections.singletonList( new SimpleGrantedAuthority("ROLE_ " + user.getClass().getAnnotation(DiscriminatorValue.class).value()));
+        this.authorities = Collections.singletonList( new SimpleGrantedAuthority("ROLE_" + user.getClass().getAnnotation(DiscriminatorValue.class).value()));
     }
 
 
