@@ -52,6 +52,7 @@ public class WishlistController {
         WishlistDto w = wishlistService.save(wDto);
         if (w == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
