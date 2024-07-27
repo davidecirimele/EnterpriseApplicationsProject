@@ -7,14 +7,13 @@ import lombok.Data;
 
 @Data
 public class SavePaymentMethodDto {
-    private Long paymentMethodId;
 
     private UserIdDto user;
 
     @NotBlank(message = "Card holder name is required")
     private String cardHolderName;
 
-    private String  paymentMethodType;
+    private String paymentMethodType;
 
     private String provider;
 

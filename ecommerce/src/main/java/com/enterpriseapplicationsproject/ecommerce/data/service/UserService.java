@@ -1,6 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
+import com.enterpriseapplicationsproject.ecommerce.dto.SaveUserDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -20,4 +21,7 @@ public interface UserService {
 
     Collection<User> getAll();
     List<UserDto> getUserDto();
+
+    //User authenticate(String email, String password);
+
 }

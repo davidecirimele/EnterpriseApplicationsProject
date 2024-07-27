@@ -5,6 +5,7 @@ import jakarta.persistence.Embeddable;
 import lombok.Data;
 
 @Embeddable
+@Data
 public class Credential {
 
     @Column(name="EMAIL", unique = true)

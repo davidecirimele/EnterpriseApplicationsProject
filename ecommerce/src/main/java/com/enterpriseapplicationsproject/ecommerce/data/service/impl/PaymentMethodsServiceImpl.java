@@ -32,7 +32,7 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
 
     @Override
     public SavePaymentMethodDto addPaymentMethod(SavePaymentMethodDto paymentMethodDto) {
-        userDao.findById(paymentMethodDto.getUser().getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
+        //userDao.findById(paymentMethodDto.getUser().getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
 
 
         EncryptionUtils encryptionUtils = new EncryptionUtils(encryptionConfig.getSecretKey());
