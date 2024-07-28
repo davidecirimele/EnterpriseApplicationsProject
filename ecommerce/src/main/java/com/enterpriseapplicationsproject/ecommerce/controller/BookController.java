@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class BookController {
     private final BooksService booksService;
 
     @GetMapping(consumes = "application/json", path = "/getAll")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<BookDto>> all() {
         List<BookDto> books = booksService.getAllSorted();
         if (books.isEmpty())
@@ -30,6 +32,7 @@ public class BookController {
     }
 
     @GetMapping(consumes = "application/json", path = "/get/{idBook}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BookDto> getById(@PathVariable("idBook") Long id) {
         BookDto b = booksService.getBookDtoById(id);
         if(b == null)
@@ -38,6 +41,7 @@ public class BookController {
     }
 
     @PostMapping(consumes = "application/json", path = "/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BookDto> add(@RequestBody BookDto bDto) {
         BookDto b = booksService.save(bDto);
         if (b == null)
@@ -46,6 +50,7 @@ public class BookController {
     }
 
     @DeleteMapping(consumes = "application/json", path = "/delete/{idBook}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BookDto> delete(@PathVariable("idBook") Long id) {
         BookDto b = booksService.deleteBook(id);
         if (b == null)
