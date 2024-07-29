@@ -3,17 +3,17 @@ package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
-import com.enterpriseapplicationsproject.ecommerce.dto.*;
-import com.enterpriseapplicationsproject.ecommerce.exception.UserNotFoundException;
-import com.enterpriseapplicationsproject.ecommerce.utils.BCryptPasswordEncoder;
-import jakarta.transaction.Transactional;
+import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +22,9 @@ public class UserServiceImpl implements UserService {
     private final UsersDao userDao;
 
     private final ModelMapper modelMapper;
-    @Autowired
-    private final BCryptPasswordEncoder passwordEncoder;
 
+    private PasswordEncoder passwordEncoder;
+   
     @Override
     public UserDto getById(Long id) {
         Optional<User> optionalUser = userDao.findById(id);
@@ -44,8 +44,6 @@ public class UserServiceImpl implements UserService {
         User savedUser = userDao.save(user);
         return modelMapper.map(savedUser, UserDto.class);
     }
-
-    @Override
     public UserDto getByEmail(String email) {
         Optional<User> optionalUser = userDao.findByCredentialEmail(email);
 
@@ -57,33 +55,28 @@ public class UserServiceImpl implements UserService {
         else{
             throw new RuntimeException("User with email " + email + " not found");
         }
-
-    }
-
-    @Override
+        
     public List<UserDto> getAll() {
         List<User> users = userDao.findAll();
         return users.stream().map(user1 -> modelMapper.map(user1 , UserDto.class)).toList();
-    }
-
-    @Override
+        
+        
     @Transactional
     public User getUserById(Long id) {
         return userDao.findByIdWithAddresses(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
-    @Override
+
     public UserDto addUser(UserDto userDto) {
         User user = modelMapper.map(userDto, User.class);
 
         user.getCredential().setPassword(passwordEncoder.encode(userDto.getCredentials().getPassword()));
         User savedUser = userDao.save(user);
 
-        return modelMapper.map(savedUser, UserDto.class);
-    }
+        return modelMapper.map(savedUser, UserDto.class)}
 
-    @Override
+
     public UserDto updatePassword(PasswordUserDto userDto) {
 
         User user = userDao.findById(userDto.getId())
@@ -91,7 +84,7 @@ public class UserServiceImpl implements UserService {
 
         if (!passwordEncoder.matches(userDto.getOldPassword(), user.getCredential().getPassword())) {
             throw new IllegalArgumentException("Old password is incorrect");
-        }
+
 
         user.getCredential().setPassword(passwordEncoder.encode(userDto.getNewPassword()));
         userDao.save(user);
@@ -132,9 +125,6 @@ public class UserServiceImpl implements UserService {
         {
             userDao.delete(optionalUser.get());
             return true;
-        }
         else{
             throw new RuntimeException("Item with id " + userId.getUserId() + " not found");
         }
-    }
-}

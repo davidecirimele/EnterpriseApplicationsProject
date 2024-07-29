@@ -1,7 +1,5 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
-import com.enterpriseapplicationsproject.ecommerce.dto.AddressDto;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -13,6 +11,8 @@ import java.util.List;
 @Table(name = "Users")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "ROLE", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorValue("USER")
+@Data
 public class User {
 
     @Id
@@ -21,12 +21,12 @@ public class User {
     private Long id;
 
     @Basic(optional = false)
-    @Column(name = "FIRSTNAME")
-    private String firstName;
-
-    @Basic(optional = false)
     @Column(name = "LASTNAME")
     private String lastName;
+
+    @Basic(optional = false)
+    @Column(name = "FIRSTNAME")
+    private String firstName;
 
     @Basic(optional = false)
     @Column(name = "BIRTHDATE")
@@ -35,14 +35,14 @@ public class User {
     @Embedded
     private Credential credential;
 
-    @OneToMany(mappedBy = "userId")
+    @OneToMany(mappedBy = "userId") // mappedBy indica il nome dell'attributo nella classe Address
     private List<Address> addresses;
 
     @Basic(optional = false)
     @Column(name = "PHONE_NUMBER", unique = true)
     private String phoneNumber;
 
-    @ManyToMany(mappedBy = "members")
+    @ManyToMany(mappedBy = "members") // mappedBy indica il nome dell'attributo nella classe Group
     private List<Group> groups = new ArrayList<>();
 
     public void setId(Long id) {
@@ -57,8 +57,6 @@ public class User {
     public String getFirstName() {
         return this.firstName;
     }
-
-    public String getLastName() {return this.lastName;}
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;

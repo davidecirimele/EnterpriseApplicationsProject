@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,14 +19,15 @@ public class TransactionController {
 
     private final TransactionsService transactionsService;
 
-    @PostMapping(consumes =  "application/json", path = "/add")
+    /*@PostMapping(consumes =  "application/json", path = "/add")
     public ResponseEntity<TransactionDto> addTransaction( @Valid @RequestBody TransactionDto transactionDto){
         TransactionDto addeddTransaction = transactionsService.addTransactionDto(transactionDto);
         return new ResponseEntity<>(addeddTransaction, HttpStatus.CREATED);
 
-    }
+    }*/
 
     @GetMapping(consumes =  "application/json", path = "/get/{userId}")
+    @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<List<TransactionDto>> getUserTransactions(@PathVariable Long userId){
         List<TransactionDto> transactions = transactionsService.getAllTransactionByUserId(userId);
         return new ResponseEntity<>(transactions, HttpStatus.OK);

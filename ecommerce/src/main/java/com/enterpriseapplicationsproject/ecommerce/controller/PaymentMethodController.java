@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ public class PaymentMethodController {
     private final PaymentMethodsService paymentMethodService;
 
     @PostMapping(consumes = "application/json", path = "/add")
+    @PreAuthorize("#paymentMethodDto.user.userId == authentication.principal.getId()")
     public ResponseEntity<SavePaymentMethodDto> addPaymentMethod( @Valid @RequestBody SavePaymentMethodDto paymentMethodDto) {
         System.out.println("PaymentMethodDto: " + paymentMethodDto.toString());
 
@@ -30,12 +32,14 @@ public class PaymentMethodController {
     }
 
     @GetMapping(consumes = "application/json", path = "/get/{userId}")
+    @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<PaymentMethodDto> getPaymentMethodByUserId(@PathVariable Long userId) {
         PaymentMethodDto paymentMethod = paymentMethodService.getPaymentMethodByUserId(userId);
         return new ResponseEntity<>(paymentMethod, HttpStatus.OK);
     }
 
     @DeleteMapping(consumes = "application/json", path = "/delete/{userId}")
+    @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<PaymentMethodDto> deletePaymentMethodByUserId(@PathVariable Long userId) {
         PaymentMethodDto paymentMethod = paymentMethodService.deletePaymentMethodByUserId(userId);
         return new ResponseEntity<>(paymentMethod, HttpStatus.OK);
