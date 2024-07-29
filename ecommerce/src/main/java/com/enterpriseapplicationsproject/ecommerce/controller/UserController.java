@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/users")
@@ -33,18 +34,9 @@ public class UserController {
 
     @GetMapping("/{id}")
 //    @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<UserDto> getUserById(@PathVariable long id) {
+    public ResponseEntity<UserDto> getUserById(@PathVariable UUID id) {
         UserDto user = userService.getById(id);
         return new ResponseEntity<>(user, HttpStatus.OK);
-    }
-
-    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserDto> addUser(@RequestBody UserDto userDto){
-        try{UserDto addedUser = userService.addUser(userDto);
-        return new ResponseEntity<>(addedUser, HttpStatus.CREATED);}
-        catch(UserRegistrationException e){
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 
     @PutMapping(value = "/change-password", consumes = MediaType.APPLICATION_JSON_VALUE)

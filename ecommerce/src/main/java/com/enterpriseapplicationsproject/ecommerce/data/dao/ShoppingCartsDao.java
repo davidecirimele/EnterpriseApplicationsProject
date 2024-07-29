@@ -7,10 +7,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface ShoppingCartsDao extends JpaRepository<ShoppingCart, Long> {
 
     @Query("SELECT s FROM ShoppingCart s WHERE s.userId.id =:userId")
-    Optional<ShoppingCart> findByUserId(@Param("userId") Long userId);
+    Optional<ShoppingCart> findByUserId(@Param("userId") UUID userId);
 }

@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/addresses")
@@ -32,7 +33,7 @@ public class AddressController {
 
     @GetMapping("/{id}")
 //    @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<List<AddressDto>> getValidAddressesByUserId(@PathVariable Long id) {
+    public ResponseEntity<List<AddressDto>> getValidAddressesByUserId(@PathVariable UUID id) {
         User user = userService.getUserById(id);
         if (user != null) {
             List<AddressDto> addresses = addressService.getValidAddressesByUserId(user.getId());
@@ -44,7 +45,7 @@ public class AddressController {
 
     @GetMapping("/all/{id}")
 //    @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<List<AddressDto>> getAddressByUserId(@PathVariable Long id) {
+    public ResponseEntity<List<AddressDto>> getAddressByUserId(@PathVariable UUID id) {
         User user = userService.getUserById(id);
         if (user != null) {
             List<AddressDto> addresses = addressService.getAddressesByUserId(user.getId());

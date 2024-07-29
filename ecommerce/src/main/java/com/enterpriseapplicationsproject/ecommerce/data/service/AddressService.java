@@ -7,15 +7,16 @@ import com.enterpriseapplicationsproject.ecommerce.dto.AddressIdDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveAddressDto;
 
 import java.util.List;
+import java.util.UUID;
 
 
 public interface AddressService {
 
-    List<AddressDto> getAddressesByUserId(Long userid);
+    List<AddressDto> getAddressesByUserId(UUID userid);
 
-    List<AddressDto> getAddressesByUserIdAndDefaultTrue(Long userid);
+    List<AddressDto> getAddressesByUserIdAndDefaultTrue(UUID userid);
 
-    List<AddressDto> getValidAddressesByUserId(Long userid);
+    List<AddressDto> getValidAddressesByUserId(UUID userid);
 
     List<AddressDto> getAddresses();
 

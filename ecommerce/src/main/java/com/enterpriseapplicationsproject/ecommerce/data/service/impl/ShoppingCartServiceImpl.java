@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +29,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
 
     @Override
-    public ShoppingCartDto getByUserId(Long userId) {
+    public ShoppingCartDto getByUserId(UUID userId) {
         Optional<ShoppingCart> optionalShoppingCart = shoppingCartDao.findByUserId(userId);
         System.out.println("OPTIONAL SHOPPING: "+optionalShoppingCart);
 

@@ -1,6 +1,5 @@
 package com.enterpriseapplicationsproject.ecommerce.config;
 
-import com.enterpriseapplicationsproject.ecommerce.utils.BCryptPasswordEncoder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +14,4 @@ public class EncryptionConfig {
         return secretKey;
     }
 
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 }

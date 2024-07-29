@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -26,19 +27,19 @@ public class AddressServiceImpl implements AddressService {
     private final ModelMapper modelMapper;
 
     @Override
-    public List<AddressDto> getAddressesByUserId(Long userid){
+    public List<AddressDto> getAddressesByUserId(UUID userid){
         List<Address> addresses = addressesDao.findByUserId(userid);
         return addresses.stream().map(address -> modelMapper.map(address , AddressDto.class)).toList();
     }
 
     @Override
-    public List<AddressDto> getAddressesByUserIdAndDefaultTrue(Long userid){
+    public List<AddressDto> getAddressesByUserIdAndDefaultTrue(UUID userid){
         List<Address> addresses = addressesDao.findAllByDefaultAddress(userid);
         return addresses.stream().map(address -> modelMapper.map(address , AddressDto.class)).toList();
     }
 
     @Override
-    public List<AddressDto> getValidAddressesByUserId(Long userid){
+    public List<AddressDto> getValidAddressesByUserId(UUID userid){
         List<Address> addresses = addressesDao.findAllByValidity(userid);
         return addresses.stream().map(address -> modelMapper.map(address , AddressDto.class)).toList();
     }

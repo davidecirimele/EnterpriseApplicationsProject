@@ -6,10 +6,11 @@ import jakarta.transaction.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface UserService {
 
-    UserDto getById(Long id);
+    UserDto getById(UUID id);
 
     UserDto save(User user);
 
@@ -18,11 +19,7 @@ public interface UserService {
     List<UserDto> getAll();
 
     @Transactional
-    User getUserById(Long id);
-
-    //UserDto addUser(UserDto userDto, MultipartFile file);
-
-    UserDto addUser(UserDto userDto);
+    User getUserById(UUID id);
 
     UserDto updatePassword(PasswordUserDto userDto);
 

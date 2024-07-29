@@ -1,12 +1,15 @@
 package com.enterpriseapplicationsproject.ecommerce;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Address;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.Product;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.AddressService;
+import com.enterpriseapplicationsproject.ecommerce.data.service.ProductsService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 
-import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
-import com.enterpriseapplicationsproject.ecommerce.utils.BCryptPasswordEncoder;
+import com.enterpriseapplicationsproject.ecommerce.dto.ProductDto;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -15,12 +18,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.io.Resource;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class DbGenerator implements ApplicationRunner {
@@ -31,15 +36,19 @@ public class DbGenerator implements ApplicationRunner {
   @Value("classpath:data/addresses.csv")
   private Resource addressesRes;
 
+  @Value("classpath:data/products.csv")
+  private Resource productsRes;
+
   @Autowired
-  private BCryptPasswordEncoder passwordEncoder;
-
-
+  private PasswordEncoder passwordEncoder;
   @Autowired
   protected UserService userService;
 
   @Autowired
   protected AddressService addressService;
+
+  @Autowired
+  protected ProductsService productsService;
 
   public void createDb() {
 
@@ -51,12 +60,12 @@ public class DbGenerator implements ApplicationRunner {
           insertUser(record.get(0));
       }
 
-      CSVParser addressesCsv = CSVFormat.DEFAULT.withDelimiter(';')
+      /*CSVParser addressesCsv = CSVFormat.DEFAULT.withDelimiter(';')
               .parse(new InputStreamReader(addressesRes.getInputStream()));
       for (CSVRecord record : addressesCsv) {
         System.out.println(record.get(0));
         insertAddress(record.get(0));
-      }
+      }*/
     } catch (IOException e) {
       throw new RuntimeException("ERROR TO GENERATE DB TEST");
     }
@@ -74,7 +83,7 @@ public class DbGenerator implements ApplicationRunner {
     String zipCode = array[5];
     String additionalInfo = array[6];
 
-    Long id = Long.parseLong(userId);
+    UUID id = UUID.fromString(userId);
     User user = userService.getUserById(id);
 
     Address address = new Address();
@@ -93,6 +102,32 @@ public class DbGenerator implements ApplicationRunner {
     addressService.save(address);
   }
 
+  private void insertProduct( String record) {
+
+    String[] array = record.split(",");
+
+    Long id = Long.parseLong(array[0]);
+
+    String category = array[1];
+
+    Double weight = Double.parseDouble(array[2]);
+
+    LocalDate insertDate = LocalDate.now();
+
+    Double price = Double.parseDouble(array[4]);
+
+    Integer stock = Integer.parseInt(array[5]);
+
+    Product product = new Product();
+    product.setCategory(category);
+    product.setWeight(weight);
+    product.setInsertDate(insertDate);
+    product.setPrice(price);
+    product.setStock(stock);
+
+    productsService.save(productsService.convertEntity(product));
+  }
+
   private void insertUser( String record) {
 
     String[] array = record.split(",");
@@ -105,6 +140,7 @@ public class DbGenerator implements ApplicationRunner {
     String phoneNumber = array[5];
 
     User user = new User();
+
     user.setFirstName(firstName);
     user.setLastName(lastName);
 

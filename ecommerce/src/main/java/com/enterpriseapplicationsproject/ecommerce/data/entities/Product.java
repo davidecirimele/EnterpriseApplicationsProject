@@ -3,6 +3,7 @@ package com.enterpriseapplicationsproject.ecommerce.data.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,7 +28,7 @@ public class Product {
 
     @Basic(optional = false)
     @Column(name = "INSERT_DATE")
-    private Date instertDate;
+    private LocalDate insertDate;
 
     @Basic(optional = false)
     @Column(name = "PRICE")

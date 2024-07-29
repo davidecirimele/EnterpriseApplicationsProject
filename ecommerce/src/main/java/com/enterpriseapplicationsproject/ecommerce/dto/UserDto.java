@@ -9,11 +9,12 @@ import org.modelmapper.TypeToken;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class UserDto {
 
-    private Long id;
+    private UUID id;
 
     @NotBlank(message = "First Name is required")
     private String firstName;
@@ -29,22 +30,5 @@ public class UserDto {
     private String phoneNumber;
 
     private List<Group> groups;
-
-    public CredentialDto getCredentials(){
-        return credentials;
-    }
-
-    public List<AddressDto> getAddresses() {
-        return addresses;
-    }
-
-    public String getFirstName() {
-        return this.firstName;
-    }
-
-    public String getLastName() {
-        return this.lastName;
-    }
-
 
 }

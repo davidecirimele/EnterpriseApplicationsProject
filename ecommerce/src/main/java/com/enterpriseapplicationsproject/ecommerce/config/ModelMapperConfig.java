@@ -41,6 +41,17 @@ public class ModelMapperConfig {
             }
         });
 
+        modelMapper.addMappings(new PropertyMap<SaveUserDto, User>() {
+            @Override
+            protected void configure() {
+                map(source.getFirstName(), destination.getFirstName());
+                map(source.getLastName(), destination.getLastName());
+                map(source.getCredentials().getEmail(), destination.getCredential().getEmail());
+                map(source.getCredentials().getPassword(), destination.getCredential().getPassword());
+                map(source.getPhoneNumber(), destination.getPhoneNumber());
+            }
+        });
+
         modelMapper.addMappings(new PropertyMap<UserDto, User>() {
             @Override
             protected void configure() {

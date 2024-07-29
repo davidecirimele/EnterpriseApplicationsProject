@@ -9,20 +9,21 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface UsersDao extends JpaRepository<User, Long> {
 
     //Visualizzare lista indirizzi associati
-    List<Address> findAddressesById(Long userId);
+    List<Address> findAddressesById(UUID userId);
 
     List<User> findAll();
 
-    Optional<User> findById(Long id);
+    Optional<User> findById(UUID id);
 
     Optional<User> findByCredentialEmail(String email);
 
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.addresses WHERE u.id = :id")
-    Optional<User> findByIdWithAddresses(@Param("id") Long id);
+    Optional<User> findByIdWithAddresses(@Param("id") UUID id);
 
 }

@@ -7,10 +7,11 @@ import com.enterpriseapplicationsproject.ecommerce.dto.ShoppingCartDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserIdDto;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface ShoppingCartService {
 
-    ShoppingCartDto getByUserId(Long userId);
+    ShoppingCartDto getByUserId(UUID userId);
 
     ShoppingCartDto save(ShoppingCart sc);
 

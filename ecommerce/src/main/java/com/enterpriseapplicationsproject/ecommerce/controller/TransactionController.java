@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(path = "/api/v1/transactions", produces = "application/json")
@@ -28,7 +29,7 @@ public class TransactionController {
 
     @GetMapping(consumes =  "application/json", path = "/get/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
-    public ResponseEntity<List<TransactionDto>> getUserTransactions(@PathVariable Long userId){
+    public ResponseEntity<List<TransactionDto>> getUserTransactions(@PathVariable UUID userId){
         List<TransactionDto> transactions = transactionsService.getAllTransactionByUserId(userId);
         return new ResponseEntity<>(transactions, HttpStatus.OK);
     }

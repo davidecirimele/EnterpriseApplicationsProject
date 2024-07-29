@@ -1,11 +1,14 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "Users")
@@ -16,9 +19,9 @@ import java.util.List;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "ID")
-    private Long id;
+    private UUID id;
 
     @Basic(optional = false)
     @Column(name = "LASTNAME")
@@ -42,34 +45,8 @@ public class User {
     @Column(name = "PHONE_NUMBER", unique = true)
     private String phoneNumber;
 
-    @ManyToMany(mappedBy = "members") // mappedBy indica il nome dell'attributo nella classe Group
+    @ManyToMany(mappedBy = "members", fetch = FetchType.EAGER) // mappedBy indica il nome dell'attributo nella classe Group
     private List<Group> groups = new ArrayList<>();
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-
-    public String getFirstName() {
-        return this.firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-        System.out.println("User Last Name: " + this.getLastName());
-    }
-
-    public void setBirthDate(LocalDate date) {
-        this.birthDate = date;
-    }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public Credential getCredential() {
@@ -84,23 +61,4 @@ public class User {
         this.credential.setPassword(password);
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public LocalDate getBirthDate() {
-        return this.birthDate;
-    }
-
-    public String getPhoneNumber() {
-        return this.phoneNumber;
-    }
-
-    public List<Group> getGroups() {
-        return this.groups;
-    }
-
-    public List<Address> getAddresses() {
-        return addresses;
-    }
 }

@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/shopping_cart")
@@ -25,7 +26,7 @@ public class ShoppingCartController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<ShoppingCartDto> get(@PathVariable Long userId) {
+    public ResponseEntity<ShoppingCartDto> get(@PathVariable UUID userId) {
         System.out.println("USER ID: "+userId);
         ShoppingCartDto shoppingCart = shoppingCartService.getByUserId(userId);
         return new ResponseEntity<>(shoppingCart, HttpStatus.OK);
