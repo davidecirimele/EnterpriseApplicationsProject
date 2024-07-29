@@ -19,27 +19,27 @@ public class AddressDto {
 
     private String additionalInfo;
     
-    private boolean default_address;
+    private boolean defaultAddress;
 
-    private boolean is_valid;
+    private boolean valid;
 
     public void UpdateDefaultAddress(boolean value) {
-        this.default_address = value;
+        this.defaultAddress = value;
     }
 
-    public boolean getDefaultAddress() {
-        return this.default_address;
+    public boolean isDefaultAddress() {
+        return this.defaultAddress;
     }
 
     public boolean isValid(){
-        return this.is_valid;
+        return this.valid;
     }
 
     public void setDefaultAddress(boolean default_address) {
-        this.default_address = default_address;
+        this.defaultAddress = default_address;
     }
 
     public void setValid(boolean valid) {
-        this.is_valid = valid;
+        this.valid = valid;
     }
 }

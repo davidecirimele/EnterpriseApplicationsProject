@@ -1,7 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import jakarta.transaction.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,5 +24,13 @@ public interface UserService {
 
     UserDto addUser(UserDto userDto);
 
+    UserDto updatePassword(PasswordUserDto userDto);
+
     User convertDto(UserDto userDto);
+
+    UserDto updateEmail(EmailUserDto userDto);
+
+    UserDto updatePhoneNumber(PhoneNumberUserDto userDto);
+
+    boolean delete(UserIdDto userId);
 }

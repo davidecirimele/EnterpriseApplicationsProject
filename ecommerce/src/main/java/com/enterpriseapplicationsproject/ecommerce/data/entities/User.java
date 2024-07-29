@@ -32,9 +32,6 @@ public class User {
     @Column(name = "BIRTHDATE")
     private LocalDate birthDate;
 
-    @Column(name = "PROPIC")
-    private byte[] profilePicture;
-
     @Embedded
     private Credential credential;
 
@@ -83,13 +80,6 @@ public class User {
         return this.credential;
     }
 
-    public void setEmail(String email) {
-        if (this.credential == null) {
-            this.credential = new Credential();
-        }
-        this.credential.setEmail(email);
-    }
-
     public void setCredentials(String email, String password) {
         this.credential = new Credential();
         this.credential.setEmail(email);
@@ -104,14 +94,6 @@ public class User {
         return this.birthDate;
     }
 
-    public byte[] getProfilePicture() {
-        return this.profilePicture;
-    }
-
-    public void setProfilePicture(byte[] profilePicture) {
-        this.profilePicture = profilePicture;
-    }
-
     public String getPhoneNumber() {
         return this.phoneNumber;
     }
@@ -120,16 +102,7 @@ public class User {
         return this.groups;
     }
 
-    public void setGroups(List<Group> groups) {
-        this.groups = groups;
-    }
-
-    // Getter e Setter per addresses
     public List<Address> getAddresses() {
         return addresses;
     }
-    public void setAddresses(List<Address> addresses) {
-        this.addresses = addresses;
-    }
-
 }

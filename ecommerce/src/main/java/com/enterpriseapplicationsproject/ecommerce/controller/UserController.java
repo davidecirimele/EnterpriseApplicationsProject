@@ -2,7 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserRegistrationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -47,5 +47,34 @@ public class UserController {
         }
     }
 
+    @PutMapping(value = "/change-password", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<UserDto> updatePassword(@RequestBody PasswordUserDto userDto){
+        try{
+            UserDto updatedUser= userService.updatePassword(userDto);
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);}
+        catch(UserRegistrationException e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping(value = "/change-email", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<UserDto> updateEmail(@RequestBody EmailUserDto userDto){
+        try{
+            UserDto updatedUser= userService.updateEmail(userDto);
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);}
+        catch(UserRegistrationException e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping(value = "/change-phone-number", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<UserDto> updatePhoneNumber(@RequestBody PhoneNumberUserDto userDto){
+        try{
+            UserDto updatedUser= userService.updatePhoneNumber(userDto);
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);}
+        catch(UserRegistrationException e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }

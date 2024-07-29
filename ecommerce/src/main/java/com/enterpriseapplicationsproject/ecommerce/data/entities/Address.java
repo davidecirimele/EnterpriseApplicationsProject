@@ -39,10 +39,10 @@ public class Address {
     private String additionalInfo;
 
     @Column(name = "DEFAULT_ADDRESS")
-    private boolean default_address;
+    private boolean defaultAddress;
 
     @Column(name = "IS_VALID")
-    private boolean is_valid;
+    private boolean valid;
 
     public void setId(Long id) {
         this.id = id;
@@ -52,15 +52,15 @@ public class Address {
         return id;
     }
 
-    public boolean is_default_address(){
-        return default_address;
+    public boolean isDefaultAddress(){
+        return defaultAddress;
     }
 
     public void setDefaultAddress(boolean value) {
-        this.default_address = value;
+        this.defaultAddress = value;
     }
 
-    public void setIsValidAddress(boolean value) {this.is_valid = value;}
+    public void setIsValidAddress(boolean value) {this.valid = value;}
 
     public void setUser(User userId) {
 
@@ -93,6 +93,6 @@ public class Address {
     }
 
     public boolean isValid() {
-        return this.is_valid;
+        return this.valid;
     }
 }

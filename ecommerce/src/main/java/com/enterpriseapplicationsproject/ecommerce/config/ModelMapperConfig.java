@@ -1,23 +1,16 @@
 package com.enterpriseapplicationsproject.ecommerce.config;
 
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Address;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Order;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.PaymentMethod;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
-import com.enterpriseapplicationsproject.ecommerce.dto.AddressDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.OrderDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.PaymentMethodDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
+import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
+import com.enterpriseapplicationsproject.ecommerce.dto.*;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
+import org.modelmapper.spi.MappingContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.lang.reflect.Type;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.enterpriseapplicationsproject.ecommerce.data.entities.User_.addresses;
+import org.springframework.context.annotation.Lazy;
 
 @Configuration
 public class ModelMapperConfig {
@@ -29,11 +22,19 @@ public class ModelMapperConfig {
                 .setFieldMatchingEnabled(true)
                 .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE);
 
+        modelMapper.addMappings(new PropertyMap<AddressDto, Address>() {
+            @Override
+            protected void configure() {
+                skip(destination.isDefaultAddress());
+                skip(destination.isValid());
+            }
+        });
+
         modelMapper.addMappings(new PropertyMap<User, UserDto>() {
             @Override
             protected void configure() {
                 map(source.getCredential().getEmail(), destination.getCredentials().getEmail());
-                map(source.getProfilePicture(), destination.getProfilePicture());
+                map(source.getCredential().getPassword(), destination.getCredentials().getPassword());
                 map(source.getPhoneNumber(), destination.getPhoneNumber());
                 map(source.getAddresses(), destination.getAddresses());
                 map(source.getGroups(), destination.getGroups());
@@ -48,7 +49,6 @@ public class ModelMapperConfig {
                 map(source.getCredentials().getEmail(), destination.getCredential().getEmail());
                 map(source.getCredentials().getPassword(), destination.getCredential().getPassword());
                 map(source.getBirthDate(), destination.getBirthDate());
-                map(source.getProfilePicture(), destination.getProfilePicture());
                 map(source.getPhoneNumber(), destination.getPhoneNumber());
                 map(source.getAddresses(), destination.getAddresses());
                 map(source.getGroups(), destination.getGroups());
@@ -69,6 +69,7 @@ public class ModelMapperConfig {
                 skip(destination.getCardNumber());
             }
         });
+
 
 
         return modelMapper;

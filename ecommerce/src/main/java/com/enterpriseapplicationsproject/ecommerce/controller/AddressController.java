@@ -4,6 +4,8 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.AddressService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.AddressDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.AddressIdDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.SaveAddressDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,6 +32,18 @@ public class AddressController {
 
     @GetMapping("/{id}")
 //    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public ResponseEntity<List<AddressDto>> getValidAddressesByUserId(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        if (user != null) {
+            List<AddressDto> addresses = addressService.getValidAddressesByUserId(user.getId());
+            return new ResponseEntity<>(addresses, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/all/{id}")
+//    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<List<AddressDto>> getAddressByUserId(@PathVariable Long id) {
         User user = userService.getUserById(id);
         if (user != null) {
@@ -40,9 +54,28 @@ public class AddressController {
         }
     }
 
-    @PostMapping("/insert")
-    public ResponseEntity<AddressDto> insertAddress(@RequestBody AddressDto addressDto){
-        AddressDto addedAddress = addressService.insertAddress(addressDto);
+    @PostMapping(consumes = "application/json", path = "/insert-address")
+    public ResponseEntity<SaveAddressDto> insertAddress(@RequestBody SaveAddressDto addressDto){
+        System.out.println("Received AddressDto: " + addressDto);
+
+        SaveAddressDto addedAddress = addressService.insertAddress(addressDto);
         return new ResponseEntity<>(addedAddress, HttpStatus.CREATED);
+    }
+
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> deleteAddress(@RequestBody AddressIdDto addressId) {
+
+        boolean isRemoved = addressService.deleteAddress(addressId);
+        if (!isRemoved) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("/update-default")
+    public ResponseEntity<AddressDto> updateDefaultAddress(@RequestBody AddressIdDto id) {
+        AddressDto updatedAddress= addressService.updateDefaultAddress(id);
+        return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
     }
 }

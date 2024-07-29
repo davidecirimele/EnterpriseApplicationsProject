@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "CartItems")
@@ -27,7 +28,7 @@ public class CartItem {
     private Integer quantity;
 
     @Column(name = "ADD_DATE")
-    private LocalDate addDate;
+    private LocalDateTime addDate;
 
     @Column(name = "PRICE")
     private Double price;

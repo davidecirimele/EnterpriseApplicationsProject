@@ -2,6 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.dto;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Address;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -14,14 +15,13 @@ public class UserDto {
 
     private Long id;
 
+    @NotBlank(message = "First Name is required")
     private String firstName;
-
+    @NotBlank(message = "Last Name is required")
     private String lastName;
 
+    @NotBlank(message = "Birth Date is required")
     private LocalDate birthDate;
-
-    private byte[] profilePicture;
-
     private CredentialDto credentials;
 
     private List<AddressDto> addresses;
@@ -30,32 +30,12 @@ public class UserDto {
 
     private List<Group> groups;
 
-    public byte[] getProfilePicture() {
-        return profilePicture;
-    }
-
     public CredentialDto getCredentials(){
         return credentials;
     }
 
-    public void setProfilePicture(byte[] profilePicture) {
-        this.profilePicture = profilePicture;
-    }
-
     public List<AddressDto> getAddresses() {
         return addresses;
-    }
-    public void setAddresses(List<Address> addresses) {
-        ModelMapper modelMapper = new ModelMapper();
-        if(addresses != null)
-            this.addresses = modelMapper.map(addresses, new TypeToken<List<AddressDto>>() {}.getType());
-    }
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
     }
 
     public String getFirstName() {

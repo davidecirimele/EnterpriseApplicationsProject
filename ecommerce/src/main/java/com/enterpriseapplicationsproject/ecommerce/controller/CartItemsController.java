@@ -1,9 +1,9 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
+import com.enterpriseapplicationsproject.ecommerce.data.entities.CartItem;
 import com.enterpriseapplicationsproject.ecommerce.data.service.CartItemsService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
-import com.enterpriseapplicationsproject.ecommerce.dto.CartItemDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,4 +23,23 @@ public class CartItemsController {
         //List<ProductDto> cartitems = cartItemsService.getProductByCartId(id);
         //return new ResponseEntity<>(cartitems, HttpStatus.OK);
     //}
+
+    @PostMapping("/insert")
+    public ResponseEntity<CartItemDto> insertItem(@RequestBody InsertCartItemDto insertCartItemDto) {
+        System.out.println("INSERTED CI: "+insertCartItemDto);
+        CartItemDto insertedItem = cartItemsService.insert(insertCartItemDto);
+        return new ResponseEntity<>(insertedItem, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/remove")
+    public ResponseEntity<CartItemDto> removeItem(@RequestBody CartItemIdDto id) {
+        System.out.println("REMOVE CI: "+id);
+
+        boolean isRemoved = cartItemsService.delete(id);
+
+        if (!isRemoved) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

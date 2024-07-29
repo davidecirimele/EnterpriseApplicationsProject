@@ -3,6 +3,7 @@ package com.enterpriseapplicationsproject.ecommerce.data.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -17,7 +18,7 @@ public class ShoppingCart {
 
     @OneToOne
     @JoinColumn(name = "USER_ID", referencedColumnName = "ID")
-    private User user_id;
+    private User userId;
 
 
     @OneToMany
@@ -28,10 +29,15 @@ public class ShoppingCart {
     @Transient
     private Double total;
 
+
     @PreUpdate
     @PrePersist
     private void calculateTotal() {
         Double totalf = 0.0;
+
+        if(cartItems == null)
+            cartItems = new ArrayList<CartItem>();
+
         for (CartItem item : cartItems) {
             total += item.getProductId().getPrice() * item.getQuantity();
         }
@@ -44,5 +50,9 @@ public class ShoppingCart {
 
     public Long getId() {
         return id;
+    }
+
+    public User getUserId() {
+        return userId;
     }
 }
