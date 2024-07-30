@@ -15,8 +15,10 @@ gradle
 .cxx
 /app/build.gradle.kts
 /build.gradle.kts
+/.idea
+
 
 
 gradle.properties
-settings.gradle.kts
-gradle/libs.versions.toml
+/settings.gradle.kts
+/gradle/libs.versions.toml
