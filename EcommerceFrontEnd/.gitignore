@@ -1,5 +1,6 @@
 *.iml
 .gradle
+gradle
 /local.properties
 /.idea/caches
 /.idea/libraries
@@ -12,8 +13,10 @@
 /captures
 .externalNativeBuild
 .cxx
-
+/app/build.gradle.kts
 /build.gradle.kts
+
+
 gradle.properties
 settings.gradle.kts
 libs.version.toml

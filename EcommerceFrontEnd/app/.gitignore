@@ -18,3 +18,5 @@ gradle.properties
 settings.gradle.kts
 /app/build.gradle.kts
 libs.version.toml
+/build.gradle.kts
+
