@@ -12,8 +12,9 @@
 /captures
 .externalNativeBuild
 .cxx
-.local.properties
-.build.gradle.kts
-.gradle.properties
-.settings.gradle.kts
+local.properties
+build.gradle.kts
+gradle.properties
+settings.gradle.kts
 /app/build.gradle.kts
+libs.version.toml
