@@ -19,4 +19,4 @@ gradle
 
 gradle.properties
 settings.gradle.kts
-libs.version.toml
+gradle/libs.versions.toml
