@@ -16,3 +16,4 @@
 .build.gradle.kts
 .gradle.properties
 .settings.gradle.kts
+/app/build.gradle.kts
