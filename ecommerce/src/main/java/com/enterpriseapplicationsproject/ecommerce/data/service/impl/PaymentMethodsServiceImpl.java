@@ -3,6 +3,7 @@ package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 import com.enterpriseapplicationsproject.ecommerce.config.EncryptionConfig;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.PaymentMethod;
 
+import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.dto.SavePaymentMethodDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.DecryptionErrorException;
 import com.enterpriseapplicationsproject.ecommerce.exception.EncryptionErrorException;
@@ -32,9 +33,7 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
 
     @Override
     public SavePaymentMethodDto addPaymentMethod(SavePaymentMethodDto paymentMethodDto) {
-        //userDao.findById(paymentMethodDto.getUser().getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
-
-
+        User user = userDao.findById(paymentMethodDto.getUser().getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
         EncryptionUtils encryptionUtils = new EncryptionUtils(encryptionConfig.getSecretKey());
         String encryptedCardNumber;
         try {
@@ -45,6 +44,7 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
         }
         PaymentMethod paymentMethod = modelMapper.map(paymentMethodDto, PaymentMethod.class);
         System.out.println("PaymentMethod: " + paymentMethod.toString());
+        paymentMethod.setUser(user);
         paymentMethod.setCardNumber(encryptedCardNumber);
         PaymentMethod pm = paymentMethodsDao.save(paymentMethod);
         return modelMapper.map(pm, SavePaymentMethodDto.class);

@@ -4,6 +4,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.ProductsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Product;
 import com.enterpriseapplicationsproject.ecommerce.data.service.ProductsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.ProductDto;
+import com.enterpriseapplicationsproject.ecommerce.exception.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.domain.Specification;
@@ -54,6 +55,14 @@ public class ProductsServiceImpl implements ProductsService {
     @Override
     public void delete(Long id) {
         productsDao.deleteById(id);
+    }
+
+    @Override
+    public void updateProductStock(Long id, int quantity) {
+        Product product = productsDao.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException(String.format("Product not found with id [%s]", id)));
+        product.setStock(product.getStock() + quantity);
+        productsDao.save(product);
     }
 
 }
