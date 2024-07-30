@@ -64,8 +64,17 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()), req, ex.getMessage());
     }
 
+    @ExceptionHandler(WishlistNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ServiceError onResourceNotFoundException(WebRequest req, WishlistNotFoundException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.NOT_FOUND.value()), req, ex.getMessage());
+    }
 
-
+    @ExceptionHandler(WishlistItemNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ServiceError onResourceNotFoundException(WebRequest req, WishlistItemNotFoundException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.NOT_FOUND.value()), req, ex.getMessage());
+    }
 
 
 

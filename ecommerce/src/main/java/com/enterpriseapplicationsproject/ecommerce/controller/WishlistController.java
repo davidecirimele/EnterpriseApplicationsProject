@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,7 @@ public class WishlistController {
     private final WishlistsService wishlistService;
 
     @GetMapping(consumes = "application/json",path= "/getAll")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<WishlistDto>> all() {
         List<WishlistDto> wishlists = wishlistService.getAllSorted();
         if (wishlists.isEmpty())
@@ -32,6 +34,7 @@ public class WishlistController {
     }
 
     @GetMapping(consumes = "application/json", path = "/get/{idWishlist}")
+    @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> getById(@PathVariable Long idWishlist) {
         WishlistDto w = wishlistService.getById(idWishlist);
         if(w == null)
@@ -40,6 +43,7 @@ public class WishlistController {
     }
 
     @GetMapping(consumes = "application/json", path = "/getByUser/{idUser}")
+    @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<WishlistDto>> getByUser(@PathVariable Long idUser) {
         List<WishlistDto> w = wishlistService.getWishlistsByUser(idUser);
         if(w == null)
@@ -48,14 +52,17 @@ public class WishlistController {
     }
 
     @PostMapping(consumes =  "application/json", path = "/add")
+    @PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> add(@RequestBody WishlistDto wDto) {
         WishlistDto w = wishlistService.save(wDto);
         if (w == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
     @PutMapping(consumes =  "application/json", path = "/update/{idWishlist}") // indica che il metodo risponde a una richiesta di tipo PUT
+    @PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> update(@PathVariable("idWishlist") Long id, @RequestBody WishlistDto wDto) {
         WishlistDto w = wishlistService.updateWishlist(id,wDto);
         if (w == null)
@@ -64,6 +71,7 @@ public class WishlistController {
     }
 
     @DeleteMapping(path = "/delete/{idWishlist}")
+    @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> delete(@PathVariable("idWishlist") Long id) {
         WishlistDto w = wishlistService.deleteWishlistByID(id);
         return new ResponseEntity<>(w, HttpStatus.OK);

@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
+
 public class JwtService {
 
     @Value("${jwt.secret-key}")
@@ -27,10 +28,12 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+    //Estrazione del Nome Utente dal Token
     public Long extractUserId(String token) {
         return Long.parseLong(extractClaim(token, claims -> claims.get("userId", String.class)));
     }
 
+    // dell id dell'utente dal token
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
@@ -54,6 +57,7 @@ public class JwtService {
             UserDetails userDetails,
             long expiration
     ) {
+        //Aggiunta delle informazioni aggiuntive al token
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
