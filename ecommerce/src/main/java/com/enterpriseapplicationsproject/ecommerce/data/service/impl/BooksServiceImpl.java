@@ -6,6 +6,8 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -52,8 +54,16 @@ public class BooksServiceImpl implements BooksService {
 
     @Override
     public BookDto deleteBook(Long id) {
-        booksDao.deleteById(id);
-        return null;
+        try {
+            booksDao.deleteById(id);
+            return getBookDtoById(id);
+        }
+        catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+        catch (DataAccessException e) {
+            return null;
+        }
     }
 
     @Override

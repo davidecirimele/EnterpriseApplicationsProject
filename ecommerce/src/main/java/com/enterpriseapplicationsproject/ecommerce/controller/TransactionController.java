@@ -27,7 +27,7 @@ public class TransactionController {
     }*/
 
     @GetMapping(consumes =  "application/json", path = "/get/{userId}")
-    @PreAuthorize("#userId == authentication.principal.getId()")
+    @PreAuthorize("#userId == authentication.principal.getId()") //
     public ResponseEntity<List<TransactionDto>> getUserTransactions(@PathVariable Long userId){
         List<TransactionDto> transactions = transactionsService.getAllTransactionByUserId(userId);
         return new ResponseEntity<>(transactions, HttpStatus.OK);
