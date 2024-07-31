@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(path = "/api/v1/orders", produces = "application/json")
@@ -32,7 +33,7 @@ public class OrderController {
 
     @GetMapping(consumes = "application/json", path = "/get/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<List<OrderDto>> getAllUserOrders(@PathVariable Long userId) {
+    public ResponseEntity<List<OrderDto>> getAllUserOrders(@PathVariable UUID userId) {
         List<OrderDto> orders = ordersService.getAllOrdersByUserId(userId);
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
@@ -46,14 +47,14 @@ public class OrderController {
 
     @GetMapping(consumes = "application/json", path = "/confirmed/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<List<OrderDto>> getAllConfirmedOrders(@PathVariable Long userId) {
+    public ResponseEntity<List<OrderDto>> getAllConfirmedOrders(@PathVariable UUID userId) {
         List<OrderDto> orders = ordersService.getAllConfirmedOrdersByUserId(userId);
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
     @GetMapping(consumes = "application/json", path = "/cancelled/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<List<OrderDto>> getAllCancelledOrders(@PathVariable Long userId) {
+    public ResponseEntity<List<OrderDto>> getAllCancelledOrders(@PathVariable UUID userId) {
         List<OrderDto> orders = ordersService.getAllCancelledOrdersByUserId(userId);
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }

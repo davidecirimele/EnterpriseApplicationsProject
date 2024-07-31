@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 
 @Service
@@ -28,7 +29,7 @@ public class TransactionsServiceImpl implements TransactionsService {
 
 
     @Override
-    public List<TransactionDto> getAllTransactionByUserId(Long userId) {
+    public List<TransactionDto> getAllTransactionByUserId(UUID userId) {
         List<Transaction> transactions = transactionsDao.findAllByUserId(userId, Sort.by("date").descending());
         return transactions.stream().map(t -> modelMapper.map(t, TransactionDto.class)).toList();
     }

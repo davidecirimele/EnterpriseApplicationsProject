@@ -16,13 +16,14 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 
 
 public class LoggedUserDetails implements UserDetails{
 
-    private Long id;
+    private UUID id;
     private String email;
     private String password;
     private List<GrantedAuthority> authorities;

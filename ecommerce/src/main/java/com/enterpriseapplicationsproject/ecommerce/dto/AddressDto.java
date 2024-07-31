@@ -18,5 +18,28 @@ public class AddressDto {
     private String postalCode;
 
     private String additionalInfo;
+    
+    private boolean defaultAddress;
 
+    private boolean valid;
+
+    public void UpdateDefaultAddress(boolean value) {
+        this.defaultAddress = value;
+    }
+
+    public boolean isDefaultAddress() {
+        return this.defaultAddress;
+    }
+
+    public boolean isValid(){
+        return this.valid;
+    }
+
+    public void setDefaultAddress(boolean default_address) {
+        this.defaultAddress = default_address;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
+    }
 }

@@ -33,13 +33,11 @@ public class AuthServiceImpl implements  AuthService{
     public SaveUserDto registerUser(SaveUserDto userDto) {
         System.out.println("UserDto: " + userDto);
 
-        userDao.findByCredentialEmail(userDto.getCredential().getEmail()).ifPresent(u -> {
+        userDao.findByCredentialEmail(userDto.getCredentials().getEmail()).ifPresent(u -> {
             throw new IllegalArgumentException("User with this email already exists");
         });
 
-        String hashedPassword = passwordEncoder.encode(userDto.getCredential().getPassword());
-
-
+        String hashedPassword = passwordEncoder.encode(userDto.getCredentials().getPassword());
 
         User user = modelMapper.map(userDto, User.class);
         user.getCredential().setPassword(hashedPassword);

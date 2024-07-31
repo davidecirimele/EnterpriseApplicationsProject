@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,7 +55,7 @@ public class ReviewsServiceImpl implements ReviewsService {
     }
 
     @Override
-    public List<ReviewDto> getReviewsByUser(Long userId) {
+    public List<ReviewDto> getReviewsByUser(UUID userId) {
         List<Review> reviews = reviewsDao.findByUserId(userId);
         return reviews.stream()
                 .map(review -> modelMapper.map(review, ReviewDto.class))

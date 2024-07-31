@@ -12,6 +12,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping(path = "/api/v1/paymentMethods", produces = "application/json")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -33,14 +35,14 @@ public class PaymentMethodController {
 
     @GetMapping(consumes = "application/json", path = "/get/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
-    public ResponseEntity<PaymentMethodDto> getPaymentMethodByUserId(@PathVariable Long userId) {
+    public ResponseEntity<PaymentMethodDto> getPaymentMethodByUserId(@PathVariable UUID userId) {
         PaymentMethodDto paymentMethod = paymentMethodService.getPaymentMethodByUserId(userId);
         return new ResponseEntity<>(paymentMethod, HttpStatus.OK);
     }
 
     @DeleteMapping(consumes = "application/json", path = "/delete/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
-    public ResponseEntity<PaymentMethodDto> deletePaymentMethodByUserId(@PathVariable Long userId) {
+    public ResponseEntity<PaymentMethodDto> deletePaymentMethodByUserId(@PathVariable UUID userId) {
         PaymentMethodDto paymentMethod = paymentMethodService.deletePaymentMethodByUserId(userId);
         return new ResponseEntity<>(paymentMethod, HttpStatus.OK);
     }

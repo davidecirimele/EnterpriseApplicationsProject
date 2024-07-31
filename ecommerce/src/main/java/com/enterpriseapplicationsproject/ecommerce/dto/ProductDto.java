@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -19,6 +20,7 @@ public class ProductDto {
     private Double weight;
 
     private Double price;
+
 
     //private List<Review> reviews;
 }

@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,8 +48,6 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     @Transactional
     public SaveOrderDto addOrder(CheckoutRequestDto orderDto) {
-
-
         User user = usersDao.findById(orderDto.getUserId().getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
         ShoppingCart shoppingCart = shoppingCartDao.findByUserId(orderDto.getUserId().getUserId()).orElseThrow(() -> new ShoppingCartNotFoundException("Shopping cart not found"));
         addressesDao.findById(orderDto.getAddress().getId()).orElseThrow(() -> new AddressNotFoundException("Address not found"));
@@ -65,8 +64,12 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public List<OrderDto> getAllOrdersByUserId(Long userId) {
+    public List<OrderDto> getAllOrdersByUserId(UUID userId) {
+
         List<Order> orders = ordersDao.findAllByUserId(userId, Sort.by(Sort.Order.desc("ordedDate")));
+
+
+
         return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
     }
 
@@ -80,13 +83,13 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public List<OrderDto> getAllConfirmedOrdersByUserId(Long userId) {
+    public List<OrderDto> getAllConfirmedOrdersByUserId(UUID userId) {
         List<Order> orders = ordersDao.findAllConfirmedOrdersByUserId(userId, Sort.by(Sort.Order.desc("orderDate")));
         return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
     }
 
     @Override
-    public List<OrderDto> getAllCancelledOrdersByUserId(Long userId) {
+    public List<OrderDto> getAllCancelledOrdersByUserId(UUID userId) {
         List<Order> orders = ordersDao.findAllCancelledOrdersByUserId(userId, Sort.by(Sort.Order.desc("orderDate")));
         return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
     }

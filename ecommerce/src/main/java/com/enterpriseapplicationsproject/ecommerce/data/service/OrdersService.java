@@ -6,18 +6,19 @@ import com.enterpriseapplicationsproject.ecommerce.dto.OrderDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveOrderDto;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface OrdersService {
 
     SaveOrderDto addOrder(CheckoutRequestDto orderDto);
 
-    List<OrderDto> getAllOrdersByUserId(Long userId);
+    List<OrderDto> getAllOrdersByUserId(UUID userId);
 
     OrderDto setOrderStatusToCancelled(Long orderId);
 
-    List<OrderDto> getAllConfirmedOrdersByUserId(Long userId);
+    List<OrderDto> getAllConfirmedOrdersByUserId(UUID userId);
 
-    List<OrderDto> getAllCancelledOrdersByUserId(Long userId);
+    List<OrderDto> getAllCancelledOrdersByUserId(UUID userId);
 
 
 }

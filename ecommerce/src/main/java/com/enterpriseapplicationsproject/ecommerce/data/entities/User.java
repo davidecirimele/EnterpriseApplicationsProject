@@ -1,11 +1,14 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "Users")
@@ -16,9 +19,9 @@ import java.util.List;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "ID")
-    private Long id;
+    private UUID id;
 
     @Basic(optional = false)
     @Column(name = "LASTNAME")
@@ -32,9 +35,6 @@ public class User {
     @Column(name = "BIRTHDATE")
     private LocalDate birthDate;
 
-    @Column(name = "PROPIC")
-    private byte[] profilePicture;
-
     @Embedded
     private Credential credential;
 
@@ -45,23 +45,20 @@ public class User {
     @Column(name = "PHONE_NUMBER", unique = true)
     private String phoneNumber;
 
-    @ManyToMany(mappedBy = "members") // mappedBy indica il nome dell'attributo nella classe Group
+    @ManyToMany(mappedBy = "members", fetch = FetchType.EAGER) // mappedBy indica il nome dell'attributo nella classe Group
     private List<Group> groups = new ArrayList<>();
 
-    public void setId(Long id) {
-        this.id = id;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public Credential getCredential() {
+        if(this.credential == null)
+            this.credential = new Credential();
+        return this.credential;
     }
 
-    public Long getId() {
-        return id;
+    public void setCredentials(String email, String password) {
+        this.credential = new Credential();
+        this.credential.setEmail(email);
+        this.credential.setPassword(password);
     }
 
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
 }

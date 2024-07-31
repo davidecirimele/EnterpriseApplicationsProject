@@ -2,25 +2,30 @@ package com.enterpriseapplicationsproject.ecommerce.dto;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Address;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class UserDto {
 
-    private Long id;
+    private UUID id;
 
-    private String fullName;
+    @NotBlank(message = "First Name is required")
+    private String firstName;
+    @NotBlank(message = "Last Name is required")
+    private String lastName;
 
+    @NotBlank(message = "Birth Date is required")
     private LocalDate birthDate;
+    private CredentialDto credentials;
 
-    private String profilePicture;
-
-    private CredentialDto credential;
-
-    private List<Address> addresses;
+    private List<AddressDto> addresses;
 
     private String phoneNumber;
 

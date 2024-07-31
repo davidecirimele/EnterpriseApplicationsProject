@@ -1,27 +1,33 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
-import com.enterpriseapplicationsproject.ecommerce.dto.SaveUserDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
-import org.springframework.data.jpa.domain.Specification;
+import com.enterpriseapplicationsproject.ecommerce.dto.*;
+import jakarta.transaction.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 public interface UserService {
 
-    User getById(Long id);
+    UserDto getById(UUID id);
 
-    User save(User user);
+    UserDto save(User user);
 
-    Optional<User> getByEmail(String email);
+    UserDto getByEmail(String email);
 
-    Collection<User> getAll(Specification<User> spec);
+    List<UserDto> getAll();
 
-    Collection<User> getAll();
-    List<UserDto> getUserDto();
+    @Transactional
+    User getUserById(UUID id);
 
-    //User authenticate(String email, String password);
+    UserDto updatePassword(PasswordUserDto userDto);
 
+    User convertDto(UserDto userDto);
+
+    UserDto updateEmail(EmailUserDto userDto);
+
+    UserDto updatePhoneNumber(PhoneNumberUserDto userDto);
+
+    boolean delete(UserIdDto userId);
 }

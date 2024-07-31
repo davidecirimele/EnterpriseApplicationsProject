@@ -1,16 +1,30 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 public class SaveUserDto {
 
-    private String lastname;
-    private String firstname;
-    private LocalDate birthdate;
-    private CredentialDto credential;
-    private String phonenumber;
+    private UUID id;
+
+    @NotBlank(message = "First Name cannot be blank")
+    private String firstName;
+
+    @NotBlank(message = "Last Name cannot be blank")
+    private String lastName;
+
+    @NotBlank(message = "Birth Data is required")
+    private LocalDate birthDate;
+
+    @NotNull(message = "Credentials are required")
+    private CredentialDto credentials;
+
+    @NotBlank(message = "Phone number is required")
+    private String phoneNumber;
 
 }

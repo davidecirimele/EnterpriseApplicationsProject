@@ -1,33 +1,68 @@
 package com.enterpriseapplicationsproject.ecommerce.config;
 
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Order;
-
-import com.enterpriseapplicationsproject.ecommerce.data.entities.PaymentMethod;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
-import com.enterpriseapplicationsproject.ecommerce.dto.OrderDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.PaymentMethodDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
+import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
+import com.enterpriseapplicationsproject.ecommerce.dto.*;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
+import org.modelmapper.spi.MappingContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import static org.modelmapper.Converters.Collection.map;
+import org.springframework.context.annotation.Lazy;
 
 @Configuration
 public class ModelMapperConfig {
-    @Bean
-    public ModelMapper getModelMapper() {
-        ModelMapper modelMapper = new ModelMapper();
-        modelMapper.getConfiguration().setFieldMatchingEnabled(true).setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE);
 
-        modelMapper.createTypeMap(User.class, UserDto.class).addMappings(new PropertyMap<User, UserDto>() {
+    @Bean
+    public ModelMapper modelMapper() {
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration()
+                .setFieldMatchingEnabled(true)
+                .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE);
+
+        modelMapper.addMappings(new PropertyMap<AddressDto, Address>() {
             @Override
             protected void configure() {
-                // define a converter that takes the whole "person"
-                using(ctx -> generateFullname(((User) ctx.getSource()).getFirstName(), ((User) ctx.getSource()).getLastName()))
-                        // Map the compliete source here
-                        .map(source, destination.getFullName());
+                skip(destination.isDefaultAddress());
+                skip(destination.isValid());
+            }
+        });
+
+        modelMapper.addMappings(new PropertyMap<User, UserDto>() {
+            @Override
+            protected void configure() {
+                map(source.getCredential().getEmail(), destination.getCredentials().getEmail());
+                map(source.getCredential().getPassword(), destination.getCredentials().getPassword());
+                map(source.getPhoneNumber(), destination.getPhoneNumber());
+                map(source.getAddresses(), destination.getAddresses());
+                map(source.getGroups(), destination.getGroups());
+            }
+        });
+
+        modelMapper.addMappings(new PropertyMap<SaveUserDto, User>() {
+            @Override
+            protected void configure() {
+                map(source.getFirstName(), destination.getFirstName());
+                map(source.getLastName(), destination.getLastName());
+                map(source.getCredentials().getEmail(), destination.getCredential().getEmail());
+                map(source.getCredentials().getPassword(), destination.getCredential().getPassword());
+                map(source.getPhoneNumber(), destination.getPhoneNumber());
+            }
+        });
+
+        modelMapper.addMappings(new PropertyMap<UserDto, User>() {
+            @Override
+            protected void configure() {
+                map(source.getFirstName(), destination.getFirstName());
+                map(source.getLastName(), destination.getLastName());
+                map(source.getCredentials().getEmail(), destination.getCredential().getEmail());
+                map(source.getCredentials().getPassword(), destination.getCredential().getPassword());
+                map(source.getBirthDate(), destination.getBirthDate());
+                map(source.getPhoneNumber(), destination.getPhoneNumber());
+                map(source.getAddresses(), destination.getAddresses());
+                map(source.getGroups(), destination.getGroups());
             }
         });
 
@@ -46,10 +81,8 @@ public class ModelMapperConfig {
             }
         });
 
-        return modelMapper;
-    }
 
-    private String generateFullname(String firstname, String lastname) {
-        return firstname + " " + lastname;
+
+        return modelMapper;
     }
 }

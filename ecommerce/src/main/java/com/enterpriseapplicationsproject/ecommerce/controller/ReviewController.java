@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/reviews")
@@ -51,7 +52,7 @@ public class ReviewController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ReviewDto>> getReviewsByUser(@PathVariable("userId") Long userId) {
+    public ResponseEntity<List<ReviewDto>> getReviewsByUser(@PathVariable("userId") UUID userId) {
         List<ReviewDto> reviews = reviewsService.getReviewsByUser(userId);
         return ResponseEntity.ok(reviews);
     }

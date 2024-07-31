@@ -7,13 +7,13 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.PaymentMethod;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.UUID;
+
 @Repository
 public interface PaymentMethodsDao extends JpaRepository<PaymentMethod, Long> {
 
 
-    PaymentMethod findByUserId(Long userId);
+    PaymentMethod findByUserId(UUID userId);
 
-    PaymentMethod deleteByUserId(Long userId);
-
-    void updatePaymentMethodStatus(Long paymentMethodId, PaymentStatus status);
+    PaymentMethod deleteByUserId(UUID userId);
 }

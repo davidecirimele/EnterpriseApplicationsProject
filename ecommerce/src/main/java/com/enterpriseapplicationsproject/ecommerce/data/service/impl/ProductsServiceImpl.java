@@ -53,6 +53,11 @@ public class ProductsServiceImpl implements ProductsService {
     }
 
     @Override
+    public ProductDto convertEntity(Product product) {
+        return modelMapper.map(product, ProductDto.class);
+    }
+
+    @Override
     public void delete(Long id) {
         productsDao.deleteById(id);
     }

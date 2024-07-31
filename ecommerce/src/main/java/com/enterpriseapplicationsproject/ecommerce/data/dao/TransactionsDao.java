@@ -6,10 +6,11 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface TransactionsDao extends CrudRepository<Transaction, Long> {
 
 
-    List<Transaction> findAllByUserId(Long userId, Sort date);
+    List<Transaction> findAllByUserId(UUID userId, Sort date);
 }

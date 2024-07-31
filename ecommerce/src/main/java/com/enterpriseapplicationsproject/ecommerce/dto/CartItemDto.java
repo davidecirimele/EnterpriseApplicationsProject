@@ -1,8 +1,10 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 public class CartItemDto {
@@ -15,7 +17,7 @@ public class CartItemDto {
 
     private Integer quantity;
 
-    private LocalDate addDate;
+    private LocalDateTime addDate;
 
     private Double price;
 }

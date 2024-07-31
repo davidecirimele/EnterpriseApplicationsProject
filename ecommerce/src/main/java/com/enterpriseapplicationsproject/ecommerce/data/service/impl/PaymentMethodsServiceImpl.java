@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class PaymentMethodsServiceImpl implements PaymentMethodsService {
@@ -51,7 +53,7 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
     }
 
     @Override
-    public PaymentMethodDto getPaymentMethodByUserId(Long userId) {
+    public PaymentMethodDto getPaymentMethodByUserId(UUID userId) {
         PaymentMethod paymentMethod = paymentMethodsDao.findByUserId(userId);
         EncryptionUtils encryptionUtils = new EncryptionUtils(encryptionConfig.getSecretKey());
         String decryptedCardNumber;
@@ -68,7 +70,7 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
     }
 
     @Override
-    public PaymentMethodDto deletePaymentMethodByUserId(Long userId) {
+    public PaymentMethodDto deletePaymentMethodByUserId(UUID userId) {
         PaymentMethod paymentMethod = paymentMethodsDao.deleteByUserId(userId);
         return modelMapper.map(paymentMethod, PaymentMethodDto.class);
     }

@@ -39,9 +39,10 @@ public class Address {
     private String additionalInfo;
 
     @Column(name = "DEFAULT_ADDRESS")
-    private boolean default_address;
+    private boolean defaultAddress;
 
-
+    @Column(name = "IS_VALID")
+    private boolean valid;
 
     public void setId(Long id) {
         this.id = id;
@@ -49,5 +50,49 @@ public class Address {
 
     public Long getId() {
         return id;
+    }
+
+    public boolean isDefaultAddress(){
+        return defaultAddress;
+    }
+
+    public void setDefaultAddress(boolean value) {
+        this.defaultAddress = value;
+    }
+
+    public void setIsValidAddress(boolean value) {this.valid = value;}
+
+    public void setUser(User userId) {
+
+        System.out.println("USEEEER : "+userId);
+        this.userId = userId;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public void setProvince(String province) {
+        this.province = province;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public void setZipCode(String zipCode) {
+        this.postalCode = zipCode;
+    }
+
+    public void setAdditionalInfo(String additionalInfo) {
+        this.additionalInfo = additionalInfo;
+    }
+
+    public boolean isValid() {
+        return this.valid;
     }
 }
