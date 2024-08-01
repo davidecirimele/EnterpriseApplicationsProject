@@ -4,19 +4,18 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
+import com.enterpriseapplicationsproject.ecommerce.exception.ResourceNotFoundException;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserNotFoundException;
+import jakarta.persistence.DiscriminatorValue;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -69,10 +68,21 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
+    @Override
+    public User getUserByEmail(String email) {
+        Optional<User> optionalUser = userDao.findByCredentialEmail(email);
+
+        if (!optionalUser.isPresent()) {
+            throw new ResourceNotFoundException("User not found with email: " + email);
+        }
+
+        return optionalUser.get();
+    }
+
 
     public UserDto updatePassword(PasswordUserDto userDto) {
 
-        User user = userDao.findById(userDto.getId())
+        User user = userDao.findById(userDto.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(userDto.getOldPassword(), user.getCredential().getPassword())) {
@@ -103,7 +113,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updatePhoneNumber(PhoneNumberUserDto userDto) {
-        User user = userDao.findById(userDto.getId())
+        User user = userDao.findById(userDto.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         user.setPhoneNumber(userDto.getNewPhoneNumber());
@@ -121,5 +131,11 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new RuntimeException("Item with id " + userId.getUserId() + " not found");
         }
+    }
+
+    @Override
+    public String getUserRole(UUID userId) {
+        User user = userDao.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return user.getClass().getAnnotation(DiscriminatorValue.class).value();
     }
 }

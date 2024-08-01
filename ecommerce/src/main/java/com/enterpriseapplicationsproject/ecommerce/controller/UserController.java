@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,20 +22,10 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/welcome")
-    public String welcome() {
-        return "Welcome this endpoint is not secure";
-    }
-
-    @GetMapping("/all")
-    public ResponseEntity<List<UserDto>> all() {
-        List<UserDto> users = userService.getAll();
-        return new ResponseEntity<>(users, HttpStatus.OK);
-    }
-
     @GetMapping("/{id}")
 //    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<UserDto> getUserById(@PathVariable UUID id) {
+        System.out.println("ROLE: "+userService.getUserRole(id));
         UserDto user = userService.getById(id);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }

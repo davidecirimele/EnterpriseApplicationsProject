@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface UsersDao extends JpaRepository<User, Long> {
+public interface UsersDao extends JpaRepository<User, UUID> {
 
     //Visualizzare lista indirizzi associati
     List<Address> findAddressesById(UUID userId);

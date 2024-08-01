@@ -41,4 +41,12 @@ public class Product {
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<Review> reviews = new ArrayList<>();
 
+
+    @PrePersist
+    protected void onCreate() {
+        if (insertDate == null) {
+            insertDate = LocalDate.now();
+        }
+    }
+
 }

@@ -38,7 +38,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         jwt = authHeader.substring(7);
+        String tokenType = jwtService.extractClaim(jwt, claims -> claims.get("type", String.class));
+
+        String requestURI = request.getRequestURI();
+
+        if ("/api/v1/auth/refreshToken".equals(requestURI)) { // Replace with your actual refresh endpoint
+            // This endpoint should only accept refresh tokens
+            if (!"refresh-token".equals(tokenType)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Invalid token type for this endpoint");
+                return;
+            }
+        } else {
+            // Other endpoints should accept only access tokens
+            if (!"access-token".equals(tokenType)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Invalid token type for this endpoint");
+                return;
+            }
+        }
+
         username = jwtService.extractUsername(jwt);
+
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             LoggedUserDetails userDetails = (LoggedUserDetails) this.userDetailsService.loadUserByUsername(username);
             System.out.println("UserDetails: " + userDetails);

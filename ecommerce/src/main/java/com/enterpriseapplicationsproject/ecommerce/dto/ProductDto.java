@@ -21,6 +21,8 @@ public class ProductDto {
 
     private Double price;
 
+    private Integer stock;
+
 
     //private List<Review> reviews;
 }

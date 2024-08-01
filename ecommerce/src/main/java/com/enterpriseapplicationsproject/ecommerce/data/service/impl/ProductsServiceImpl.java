@@ -6,7 +6,6 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.ProductsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.ProductDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -52,13 +51,14 @@ public class ProductsServiceImpl implements ProductsService {
     }
 
     @Override
-    public ProductDto convertEntity(Product product) {
-        return modelMapper.map(product, ProductDto.class);
+    public void delete(Long id) {
+        productsDao.deleteById(id);
     }
 
     @Override
-    public void delete(Long id) {
-        productsDao.deleteById(id);
+    public List<ProductDto> findAll() {
+        List<Product> products = productsDao.findAll();
+        return products.stream().map(p -> modelMapper.map(p, ProductDto.class)).collect(Collectors.toList());
     }
 
 }

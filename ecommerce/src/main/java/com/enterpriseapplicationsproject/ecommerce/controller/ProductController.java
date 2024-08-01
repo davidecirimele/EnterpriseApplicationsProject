@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/v1/products")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -14,6 +16,12 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
 
     private final ProductsService productsService;
+
+    @GetMapping("/all")
+    public ResponseEntity<List<ProductDto>> getAll(){
+        List<ProductDto> allProducts= productsService.findAll();
+        return ResponseEntity.ok(allProducts);
+    }
 
     @GetMapping("/{productId}")
     public ResponseEntity<ProductDto> getById(@PathVariable("productId") Long id) {

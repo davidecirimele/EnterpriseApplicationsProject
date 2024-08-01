@@ -40,4 +40,14 @@ public class CartItem {
     public Long getId() {
         return id;
     }
+
+    @Override
+    public String toString() {
+        return "CartItem{" +
+                "id=" + id +
+                ", productId=" + (productId != null ? productId.getId() : null) +
+                ", quantity=" + quantity +
+                ", price=" + price +
+                '}';
+    }
 }

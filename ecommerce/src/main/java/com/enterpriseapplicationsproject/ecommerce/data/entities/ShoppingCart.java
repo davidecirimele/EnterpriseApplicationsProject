@@ -55,4 +55,13 @@ public class ShoppingCart {
     public User getUserId() {
         return userId;
     }
+
+    @Override
+    public String toString() {
+        return "ShoppingCart{" +
+                "id=" + id +
+                ", userId=" + (userId != null ? userId.getId() : null) +
+                ", total=" + total +
+                '}';
+    }
 }
