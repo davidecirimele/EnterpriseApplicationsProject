@@ -2,6 +2,8 @@ package com.enterpriseapplicationsproject.ecommerce.dto;
 
 
 
+import com.enterpriseapplicationsproject.ecommerce.data.domain.CardProvider;
+import com.enterpriseapplicationsproject.ecommerce.data.domain.PaymentMethodType;
 import com.enterpriseapplicationsproject.ecommerce.validation.ValidExpirationYear;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -19,9 +21,9 @@ public class PaymentMethodDto {
 
     private String cardHolderName;
 
-    private String  paymentMethodType;
+    private PaymentMethodType  paymentMethodType;
 
-    private String provider;
+    private CardProvider provider;
 
     @NotBlank(message = "Card number is required")
     private String cardNumber;

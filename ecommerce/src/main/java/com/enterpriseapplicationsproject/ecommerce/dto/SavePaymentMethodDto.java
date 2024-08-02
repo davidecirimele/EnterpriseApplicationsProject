@@ -1,5 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
+import com.enterpriseapplicationsproject.ecommerce.data.domain.CardProvider;
+import com.enterpriseapplicationsproject.ecommerce.data.domain.PaymentMethodType;
 import com.enterpriseapplicationsproject.ecommerce.validation.ValidExpirationYear;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -13,9 +15,9 @@ public class SavePaymentMethodDto {
     @NotBlank(message = "Card holder name is required")
     private String cardHolderName;
 
-    private String paymentMethodType;
+    private PaymentMethodType paymentMethodType;
 
-    private String provider;
+    private CardProvider provider;
 
     @NotBlank(message = "Card number is required")
     private String cardNumber;

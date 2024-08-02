@@ -1,5 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
+import com.enterpriseapplicationsproject.ecommerce.data.domain.CardProvider;
+import com.enterpriseapplicationsproject.ecommerce.data.domain.PaymentMethodType;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,10 +27,10 @@ public class PaymentMethod {
     private String cardHolderName;
 
     @Column(name = "TYPE", nullable = false)
-    private String paymentMethodType;
+    private PaymentMethodType paymentMethodType;
 
     @Column(name = "PROVIDER", nullable = false)
-    private String provider;
+    private CardProvider provider;
 
     @Column(name = "CARD_NUMBER", nullable = false)
     private String cardNumber;
