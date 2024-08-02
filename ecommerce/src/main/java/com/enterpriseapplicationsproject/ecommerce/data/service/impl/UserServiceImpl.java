@@ -81,7 +81,6 @@ public class UserServiceImpl implements UserService {
 
 
     public UserDto updatePassword(PasswordUserDto userDto) {
-
         User user = userDao.findById(userDto.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 

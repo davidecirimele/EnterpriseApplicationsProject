@@ -7,6 +7,7 @@ import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,6 +26,7 @@ public class CartItemsController {
     //}
 
     @PostMapping("/insert")
+    @PreAuthorize("#insertCartItemDto.userId.userId == authentication.principal.getId()")
     public ResponseEntity<CartItemDto> insertItem(@RequestBody InsertCartItemDto insertCartItemDto) {
         System.out.println("INSERTED CI: "+insertCartItemDto);
         CartItemDto insertedItem = cartItemsService.insert(insertCartItemDto);
@@ -32,6 +34,7 @@ public class CartItemsController {
     }
 
     @DeleteMapping("/remove")
+    @PreAuthorize("#id.userId.userId == authentication.principal.getId()")
     public ResponseEntity<CartItemDto> removeItem(@RequestBody CartItemIdDto id) {
         System.out.println("REMOVE CI: "+id);
 

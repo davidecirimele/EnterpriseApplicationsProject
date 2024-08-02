@@ -22,6 +22,4 @@ public class RefreshToken {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "IS_VALID")
-    private boolean is_valid;
 }

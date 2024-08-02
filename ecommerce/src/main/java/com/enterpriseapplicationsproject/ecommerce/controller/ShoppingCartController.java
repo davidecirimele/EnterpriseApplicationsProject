@@ -6,6 +6,7 @@ import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,12 +21,14 @@ public class ShoppingCartController {
     private final ShoppingCartService shoppingCartService;
 
     @GetMapping("/all")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<ShoppingCartDto>> all() {
         List<ShoppingCartDto> shoppingCarts = shoppingCartService.getAll();
         return new ResponseEntity<>(shoppingCarts, HttpStatus.OK);
     }
 
     @GetMapping("/user/{userId}")
+    @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<ShoppingCartDto> get(@PathVariable UUID userId) {
         System.out.println("USER ID: "+userId);
         ShoppingCartDto shoppingCart = shoppingCartService.getByUserId(userId);
@@ -33,6 +36,7 @@ public class ShoppingCartController {
     }
 
     @DeleteMapping("/delete")
+    @PreAuthorize("#userId.userId == authentication.principal.getId()")
     public ResponseEntity<Void> deleteShoppingCart(@RequestBody UserIdDto userId) {
 
         boolean isRemoved = shoppingCartService.delete(userId);
@@ -43,6 +47,7 @@ public class ShoppingCartController {
     }
 
     @PostMapping("/create")
+    @PreAuthorize("#createShoppingCartDto.userId.userId == authentication.principal.getId()")
     public ResponseEntity<ShoppingCartDto> createCart(@RequestBody CreateShoppingCartDto createShoppingCartDto) {
         System.out.println("CREATED SC: "+createShoppingCartDto);
         ShoppingCartDto createdCart = shoppingCartService.createCart(createShoppingCartDto);
@@ -50,6 +55,7 @@ public class ShoppingCartController {
     }
 
     @PutMapping("/save")
+    @PreAuthorize("#saveShoppingCartDto.userId == authentication.principal.getId()")
     public ResponseEntity<ShoppingCartDto> saveCart(@RequestBody SaveShoppingCartDto saveShoppingCartDto) {
         ShoppingCartDto savedCart = shoppingCartService.saveCart(saveShoppingCartDto);
         return new ResponseEntity<>(savedCart, HttpStatus.OK);

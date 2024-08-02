@@ -44,18 +44,6 @@ public class ShoppingCart {
         this.total = totalf;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public User getUserId() {
-        return userId;
-    }
-
     @Override
     public String toString() {
         return "ShoppingCart{" +

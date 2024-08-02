@@ -38,7 +38,7 @@ public class User {
     @Embedded
     private Credential credential;
 
-    @OneToMany(mappedBy = "userId") // mappedBy indica il nome dell'attributo nella classe Address
+    @OneToMany(mappedBy = "userId", fetch = FetchType.EAGER) // mappedBy indica il nome dell'attributo nella classe Address
     private List<Address> addresses;
 
     @Basic(optional = false)

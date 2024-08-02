@@ -27,14 +27,14 @@ public class AdminController {
     private final RefreshTokenService refreshTokenService;
 
     @GetMapping("/all-users")
-    @PreAuthorize("#userId == authentication.principal.getId() or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserDto>> allUsers() {
         List<UserDto> users = userService.getAll();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @GetMapping("/all-tokens")
-    @PreAuthorize("#userId == authentication.principal.getId() or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<RefreshTokenDto>> allTokens() {
         List<RefreshTokenDto> tokens = refreshTokenService.getAll();
         return new ResponseEntity<>(tokens, HttpStatus.OK);

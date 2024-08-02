@@ -6,4 +6,6 @@ import lombok.Data;
 public class AddressIdDto {
 
     private Long addressId;
+
+    private UserIdDto userIdDto;
 }

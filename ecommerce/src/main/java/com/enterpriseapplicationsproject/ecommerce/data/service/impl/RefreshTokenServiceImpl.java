@@ -92,9 +92,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             // Imposta l'utente associato
             refreshToken.setUser(user);
 
-            // Imposta lo stato di validità (puoi decidere come impostarlo)
-            refreshToken.set_valid(true);
-
             return refreshToken;
     }
 

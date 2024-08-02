@@ -14,13 +14,15 @@ public interface AddressService {
 
     List<AddressDto> getAddressesByUserId(UUID userid);
 
-    List<AddressDto> getAddressesByUserIdAndDefaultTrue(UUID userid);
+    AddressDto getAddressById(Long addressId);
+
+    AddressDto getAddressByUserIdAndDefaultTrue(UUID userid);
 
     List<AddressDto> getValidAddressesByUserId(UUID userid);
 
     List<AddressDto> getAddresses();
 
-    AddressDto updateAddress(Long addressId, AddressDto addressDto);
+    AddressDto updateAddress(AddressDto addressDto);
 
     AddressDto save(Address address);
 
