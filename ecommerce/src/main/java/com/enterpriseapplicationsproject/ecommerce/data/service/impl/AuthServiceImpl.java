@@ -69,12 +69,11 @@ public class AuthServiceImpl implements  AuthService{
             System.out.println("UsernamePasswordAuthenticationToken created successfully");
 
             System.out.println("Attempting to authenticate");
-            Authentication authentication = authenticationManager.authenticate(authToken);
+            Authentication auth = authenticationManager.authenticate(authToken);
             System.out.println("Authentication successful");
-        Authentication auth =  authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
-        System.out.println("Auth: " + auth);
 
-        LoggedUserDetails userDetails = (LoggedUserDetails) auth.getPrincipal();
+
+           LoggedUserDetails userDetails = (LoggedUserDetails) auth.getPrincipal();
 
 
 
