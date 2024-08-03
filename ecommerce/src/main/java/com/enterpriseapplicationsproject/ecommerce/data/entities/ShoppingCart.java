@@ -39,7 +39,7 @@ public class ShoppingCart {
             cartItems = new ArrayList<CartItem>();
 
         for (CartItem item : cartItems) {
-            total += item.getProductId().getPrice() * item.getQuantity();
+            total += item.getBookId().getPrice() * item.getQuantity();
         }
         this.total = totalf;
     }
