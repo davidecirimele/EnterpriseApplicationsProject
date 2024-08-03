@@ -3,9 +3,12 @@ package com.enterpriseapplicationsproject.ecommerce.dto;
 import lombok.Data;
 
 @Data
-public class AddressIdDto {
+public class QuantityCartItemDto {
 
-    private Long addressId;
+    private Long id;
 
     private UserIdDto userId;
+
+    private Integer quantity;
+
 }

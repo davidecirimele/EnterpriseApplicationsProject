@@ -3,6 +3,7 @@ package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 import com.enterpriseapplicationsproject.ecommerce.config.security.JwtService;
 import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetails;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.Admin;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.RefreshToken;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RefreshTokenService;
@@ -55,6 +56,25 @@ public class AuthServiceImpl implements  AuthService{
         userDao.save(user);
 
         return modelMapper.map(user, SaveUserDto.class);
+    }
+
+    @Override
+    public SaveUserDto registerAdmin(SaveUserDto userDto) {
+        System.out.println("Admin UserDto: " + userDto);
+
+        userDao.findByCredentialEmail(userDto.getCredentials().getEmail()).ifPresent(u -> {
+            throw new IllegalArgumentException("Admin with this email already exists");
+        });
+
+        String hashedPassword = passwordEncoder.encode(userDto.getCredentials().getPassword());
+
+        Admin admin = modelMapper.map(userDto, Admin.class);
+        admin.getCredential().setPassword(hashedPassword);
+        System.out.println("Admin: " + admin);
+
+        userDao.save(admin);
+
+        return modelMapper.map(admin, SaveUserDto.class);
     }
 
     @Override

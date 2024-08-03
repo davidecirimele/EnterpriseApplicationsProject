@@ -68,7 +68,7 @@ public class AddressController {
 
 
     @DeleteMapping("/delete")
-    @PreAuthorize("#addressId.userIdDto.userId == authentication.principal.getId()")
+    @PreAuthorize("#addressId.userId.userId == authentication.principal.getId()")
     //@PreAuthorize("addressesDao.findUserByAddressId(#addressId.addressId).id == authentication.principal.getId()")
     public ResponseEntity<Void> deleteAddress(@RequestBody AddressIdDto addressId) {
 
@@ -80,18 +80,17 @@ public class AddressController {
     }
 
     @PutMapping("/update-default")
-    @PreAuthorize("#id.userIdDto.userId == authentication.principal.getId()")
+    @PreAuthorize("#id.userId.userId == authentication.principal.getId()")
     public ResponseEntity<AddressDto> updateDefaultAddress(@RequestBody AddressIdDto id) {
-        AddressDto updatedAddress= addressService.updateDefaultAddress(id);
+        AddressDto updatedAddress= addressService.updateDefaultAddress(id.getAddressId());
         return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
     }
 
     @PutMapping("/edit-address")
     @PreAuthorize("#addressDto.userId.userId == authentication.principal.getId()")
     public ResponseEntity<AddressDto> updateDefaultAddress(@RequestBody EditAddressDto addressDto) {
-        AddressDto address = addressService.getAddressById(addressDto.getId());
 
-        AddressDto updatedAddress = addressService.updateAddress(address);
+        AddressDto updatedAddress = addressService.updateAddress(addressDto);
         return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
     }
 }

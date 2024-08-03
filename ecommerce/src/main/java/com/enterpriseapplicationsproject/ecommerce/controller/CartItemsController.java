@@ -45,4 +45,11 @@ public class CartItemsController {
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @PutMapping("/edit-quantity")
+    @PreAuthorize("#quantityCartItemDto.userId.userId == authentication.principal.getId()")
+    public ResponseEntity<CartItemDto> updateQuantity(@RequestBody QuantityCartItemDto quantityCartItemDto) {
+        CartItemDto updatedItem = cartItemsService.updateQuantity(quantityCartItemDto);
+        return new ResponseEntity<>(updatedItem, HttpStatus.OK);
+    }
 }

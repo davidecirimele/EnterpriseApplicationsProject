@@ -1,6 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
+import com.enterpriseapplicationsproject.ecommerce.data.service.AuthService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RefreshTokenService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
@@ -22,9 +23,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AdminController {
 
+    private final AuthService authService;
     private final UserService userService;
-
     private final RefreshTokenService refreshTokenService;
+
+    @PostMapping(consumes = "application/json", path = "/register")
+    public ResponseEntity<SaveUserDto> registerUser(@RequestBody  SaveUserDto userDto) {
+        return ResponseEntity.ok(authService.registerAdmin(userDto));
+    }
 
     @GetMapping("/all-users")
     @PreAuthorize("hasRole('ADMIN')")
