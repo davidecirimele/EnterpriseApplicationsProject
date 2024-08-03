@@ -4,8 +4,12 @@ import com.enterpriseapplicationsproject.ecommerce.dto.LoginDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveUserDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserLoginDto;
 
+import java.util.Map;
+
 public interface AuthService {
     SaveUserDto registerUser(SaveUserDto userDto);
 
-    String loginUser(UserLoginDto loginDto);
+    Map<String, String> loginUser(UserLoginDto loginDto);
+
+    Map<String, String> refreshToken(String authorizationHeader, String toString);
 }

@@ -33,11 +33,13 @@ public class CartItem {
     @Column(name = "PRICE")
     private Double price;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
+    @Override
+    public String toString() {
+        return "CartItem{" +
+                "id=" + id +
+                ", productId=" + (productId != null ? productId.getId() : null) +
+                ", quantity=" + quantity +
+                ", price=" + price +
+                '}';
     }
 }

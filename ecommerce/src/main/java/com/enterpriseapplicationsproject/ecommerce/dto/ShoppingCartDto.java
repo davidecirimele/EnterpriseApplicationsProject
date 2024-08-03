@@ -10,10 +10,10 @@ import java.util.List;
 @NoArgsConstructor
 public class ShoppingCartDto {
 
-    private Long cartId;
+    private Long id;
 
-    private Long userId;
+    private UserIdDto userId;
 
-    private List<CartItem> cartItems;
+    private List<CartItemDto> cartItems;
 
 }

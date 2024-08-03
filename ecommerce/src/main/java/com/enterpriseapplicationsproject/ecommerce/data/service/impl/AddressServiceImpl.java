@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,9 +34,25 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public List<AddressDto> getAddressesByUserIdAndDefaultTrue(UUID userid){
-        List<Address> addresses = addressesDao.findAllByDefaultAddress(userid);
-        return addresses.stream().map(address -> modelMapper.map(address , AddressDto.class)).toList();
+    public AddressDto getAddressById(Long addressId) {
+        Optional<Address> optionalAddress = addressesDao.findById(addressId);
+
+        if(optionalAddress.isPresent()){
+            Address address = optionalAddress.get();
+
+            return modelMapper.map(address, AddressDto.class);
+        }
+        else{
+            throw new RuntimeException("Address with id " + addressId + " not found");
+        }
+
+
+    }
+
+    @Override
+    public AddressDto getAddressByUserIdAndDefaultTrue(UUID userid){
+        Address address = addressesDao.findByDefaultAddress(userid);
+        return modelMapper.map(address , AddressDto.class);
     }
 
     @Override
@@ -51,20 +68,26 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public AddressDto updateAddress(Long addressId, AddressDto addressDto) {
+    public AddressDto updateAddress(AddressDto addressDto) {
 
-        Optional<Address> optionalAddress = addressesDao.findById(addressId);
+        Optional<Address> optionalAddress = addressesDao.findById(addressDto.getId());
 
         if(optionalAddress.isPresent())
         {
             Address address = optionalAddress.get();
+            address.setState(addressDto.getState());
+            address.setProvince(addressDto.getProvince());
+            address.setCity(addressDto.getCity());
+            address.setPostalCode(addressDto.getPostalCode());
+            address.setAdditionalInfo(addressDto.getAdditionalInfo());
+            address.setIsValidAddress(true);
             address.setDefaultAddress(addressDto.isDefaultAddress());
 
             Address savedAddress = addressesDao.save(address);
             return modelMapper.map(savedAddress, AddressDto.class);
         }
         else{
-            throw new RuntimeException("Address with id " + addressId + " not found");
+            throw new RuntimeException("Address with id " + addressDto.getId() + " not found");
         }
     }
 
@@ -96,24 +119,19 @@ public class AddressServiceImpl implements AddressService {
         {
             Address address = optionalAddress.get();
 
-            if(address.isDefaultAddress())
-                address.setDefaultAddress(false);
-            else{
-                List<Address> defaults = addressesDao.findAllByDefaultAddress(addressesDao.findUserByAddressId(id.getAddressId()).getId());
+            List<Address> addresses = new ArrayList<>();
 
-                for (Address a : defaults){
-                    if(a.isDefaultAddress()) {
-                        a.setDefaultAddress(false);
-                        addressesDao.save(a);
-                        break;
-                    }
-                }
+            Address defaultAddress = addressesDao.findByDefaultAddress(addressesDao.findUserByAddressId(id.getAddressId()).getId());
 
-                address.setDefaultAddress(true);
-            }
+            defaultAddress.setDefaultAddress(false);
+            address.setDefaultAddress(true);
 
-            Address savedAddress = addressesDao.save(address);
-            return modelMapper.map(savedAddress, AddressDto.class);
+            addresses.add(defaultAddress);
+            addresses.add(address);
+
+            addressesDao.saveAll(addresses);
+
+            return modelMapper.map(address, AddressDto.class);
         }
         else{
             throw new RuntimeException("Address with id " + id.getAddressId() + " not found");
@@ -134,7 +152,7 @@ public class AddressServiceImpl implements AddressService {
 
 
             AddressDto newAddressDto = modelMapper.map(address, AddressDto.class);
-            updateAddress(id.getAddressId(), newAddressDto);
+            updateAddress(newAddressDto);
             return true;
         }
         else{

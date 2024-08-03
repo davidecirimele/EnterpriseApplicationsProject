@@ -21,7 +21,7 @@ public interface AddressesDao extends JpaRepository<Address, Long> {
     Optional<Address> isValidByAddressId(@Param("id") Long id);
 
     @Query("SELECT a FROM Address a WHERE a.userId.id = :userId AND a.defaultAddress = true")
-    List<Address> findAllByDefaultAddress(@Param("userId") UUID userId);
+    Address findByDefaultAddress(@Param("userId") UUID userId);
 
     @Query("SELECT a FROM Address a WHERE a.userId.id = :userId AND a.valid = true")
     List<Address> findAllByValidity(@Param("userId") UUID userid);

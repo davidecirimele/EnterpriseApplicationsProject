@@ -74,6 +74,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ShoppingCartDto createCart(CreateShoppingCartDto createShoppingCartDto) {
+        System.out.println("CREATE SHOPPING CART ID: "+createShoppingCartDto.getUserId().getUserId());
         User user = userDao.findById(createShoppingCartDto.getUserId().getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found with id " + createShoppingCartDto.getUserId()));
 

@@ -21,6 +21,8 @@ public interface UserService {
     @Transactional
     User getUserById(UUID id);
 
+    User getUserByEmail(String email);
+
     UserDto updatePassword(PasswordUserDto userDto);
 
     User convertDto(UserDto userDto);
@@ -30,4 +32,6 @@ public interface UserService {
     UserDto updatePhoneNumber(PhoneNumberUserDto userDto);
 
     boolean delete(UserIdDto userId);
+
+    String getUserRole(UUID userId);
 }

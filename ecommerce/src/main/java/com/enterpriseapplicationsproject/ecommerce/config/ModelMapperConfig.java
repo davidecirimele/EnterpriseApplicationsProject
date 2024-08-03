@@ -3,6 +3,7 @@ package com.enterpriseapplicationsproject.ecommerce.config;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
+import com.enterpriseapplicationsproject.ecommerce.dto.security.RefreshTokenDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
@@ -78,6 +79,21 @@ public class ModelMapperConfig {
             @Override
             protected void configure(){
                 skip(destination.getCardNumber());
+            }
+        });
+
+        modelMapper.addMappings(new PropertyMap<ShoppingCart, ShoppingCartDto>() {
+            @Override
+            protected void configure(){
+                map(source.getId(), destination.getId());
+                map(source.getUserId(), destination.getUserId());
+            }
+        });
+
+        modelMapper.addMappings(new PropertyMap<RefreshTokenDto, RefreshToken>() {
+            @Override
+            protected void configure(){
+                map(source.getToken(), destination.getToken());
             }
         });
 

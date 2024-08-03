@@ -8,7 +8,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,7 +21,6 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
 
     private final JwtService jwtService;
     private final LoggedUserDetailsService userDetailsService;
@@ -39,8 +37,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        jwt = authHeader.substring(7);
+        String tokenType = jwtService.extractClaim(jwt, claims -> claims.get("type", String.class));
+
+        String requestURI = request.getRequestURI();
+
+        if ("/api/v1/auth/refreshToken".equals(requestURI)) { // Replace with your actual refresh endpoint
+            // This endpoint should only accept refresh tokens
+            if (!"refresh-token".equals(tokenType)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Invalid token type for this endpoint");
+                return;
+            }
+        } else {
+            // Other endpoints should accept only access tokens
+            if (!"access-token".equals(tokenType)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Invalid token type for this endpoint");
+                return;
+            }
+        }
+
         jwt = authHeader.substring(7); //il token inizia dopo i primi 7 caratteri
         username = jwtService.extractUsername(jwt);
+
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             LoggedUserDetails userDetails = (LoggedUserDetails) this.userDetailsService.loadUserByUsername(username);
             System.out.println("UserDetails: " + userDetails);

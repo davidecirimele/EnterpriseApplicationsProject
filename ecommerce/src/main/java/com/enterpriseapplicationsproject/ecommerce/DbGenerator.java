@@ -8,6 +8,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.ProductsService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 
 import com.enterpriseapplicationsproject.ecommerce.dto.ProductDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import org.apache.commons.csv.CSVFormat;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -60,12 +62,21 @@ public class DbGenerator implements ApplicationRunner {
           insertUser(record.get(0));
       }
 
-      /*CSVParser addressesCsv = CSVFormat.DEFAULT.withDelimiter(';')
+      CSVParser productsCsv = CSVFormat.DEFAULT.withDelimiter(';')
+              .parse(new InputStreamReader(productsRes.getInputStream()));
+      for (CSVRecord record : productsCsv) {
+        System.out.println(record.get(0));
+        insertProduct(record.get(0));
+      }
+
+      CSVParser addressesCsv = CSVFormat.DEFAULT.withDelimiter(';')
               .parse(new InputStreamReader(addressesRes.getInputStream()));
       for (CSVRecord record : addressesCsv) {
         System.out.println(record.get(0));
+
         insertAddress(record.get(0));
-      }*/
+
+      }
     } catch (IOException e) {
       throw new RuntimeException("ERROR TO GENERATE DB TEST");
     }
@@ -75,7 +86,7 @@ public class DbGenerator implements ApplicationRunner {
 
     String[] array = record.split(",");
 
-    String userId = array[0];
+    int counter = Integer.parseInt(array[0])-1;
     String street = array[1];
     String province = array[2];
     String city = array[3];
@@ -83,8 +94,10 @@ public class DbGenerator implements ApplicationRunner {
     String zipCode = array[5];
     String additionalInfo = array[6];
 
-    UUID id = UUID.fromString(userId);
-    User user = userService.getUserById(id);
+    List<UserDto> allUsers = userService.getAll();
+    UserDto userDto = allUsers.get(counter);
+
+    User user = userService.getUserById(userDto.getId());
 
     Address address = new Address();
     address.setUser(user);
@@ -92,7 +105,7 @@ public class DbGenerator implements ApplicationRunner {
     address.setProvince(province);
     address.setCity(city);
     address.setState(state);
-    address.setZipCode(zipCode);
+    address.setPostalCode(zipCode);
     address.setAdditionalInfo(additionalInfo);
     address.setIsValidAddress(true);
     address.setDefaultAddress(true);
@@ -106,26 +119,37 @@ public class DbGenerator implements ApplicationRunner {
 
     String[] array = record.split(",");
 
-    Long id = Long.parseLong(array[0]);
+    System.out.println("RECORD : "+ record);
 
-    String category = array[1];
+    String category = array[0];
 
-    Double weight = Double.parseDouble(array[2]);
+    System.out.println("CATEGORY : "+ array[0]);
 
-    LocalDate insertDate = LocalDate.now();
+    Double weight = Double.parseDouble(array[1]);
 
-    Double price = Double.parseDouble(array[4]);
+    System.out.println("WEIGHT : "+ array[1]);
 
-    Integer stock = Integer.parseInt(array[5]);
+    LocalDate insertDate = LocalDate.parse(array[2]);
 
-    Product product = new Product();
+    System.out.println("DATE : "+ array[2]);
+
+    Double price = Double.parseDouble(array[3]);
+
+    System.out.println("PRICE : "+ array[3]);
+
+    Integer stock = Integer.parseInt(array[4]);
+
+    System.out.println("STOCK : "+ array[4]);
+
+    ProductDto product = new ProductDto();
     product.setCategory(category);
     product.setWeight(weight);
-    product.setInsertDate(insertDate);
     product.setPrice(price);
     product.setStock(stock);
 
-    productsService.save(productsService.convertEntity(product));
+    System.out.println("PRODUCT : "+ product);
+
+    productsService.save(product);
   }
 
   private void insertUser( String record) {

@@ -4,10 +4,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class PasswordUserDto {
 
-    private Long id;
+    private UUID userId;
     @NotBlank(message = "Old password is required")
     private String oldPassword;
 
@@ -15,16 +17,5 @@ public class PasswordUserDto {
     @Size(min = 8, message = "New password must be at least 8 characters long")
     private String newPassword;
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getOldPassword(){
-        return oldPassword;
-    }
-
-    public String getNewPassword(){
-        return newPassword;
-    }
 }
 
