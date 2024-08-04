@@ -6,6 +6,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.Address;
 import com.enterpriseapplicationsproject.ecommerce.data.service.AddressService;
 import com.enterpriseapplicationsproject.ecommerce.dto.AddressDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.AddressIdDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.EditAddressDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveAddressDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -68,20 +69,19 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public AddressDto updateAddress(AddressDto addressDto) {
+    public AddressDto updateAddress(EditAddressDto addressDto) {
 
         Optional<Address> optionalAddress = addressesDao.findById(addressDto.getId());
 
         if(optionalAddress.isPresent())
         {
             Address address = optionalAddress.get();
+            address.setStreet(addressDto.getStreet());
             address.setState(addressDto.getState());
             address.setProvince(addressDto.getProvince());
             address.setCity(addressDto.getCity());
             address.setPostalCode(addressDto.getPostalCode());
             address.setAdditionalInfo(addressDto.getAdditionalInfo());
-            address.setIsValidAddress(true);
-            address.setDefaultAddress(addressDto.isDefaultAddress());
 
             Address savedAddress = addressesDao.save(address);
             return modelMapper.map(savedAddress, AddressDto.class);
@@ -112,8 +112,8 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public AddressDto updateDefaultAddress(AddressIdDto id){
-        Optional<Address> optionalAddress = addressesDao.findById(id.getAddressId());
+    public AddressDto updateDefaultAddress(Long id){
+        Optional<Address> optionalAddress = addressesDao.findById(id);
 
         if(optionalAddress.isPresent())
         {
@@ -121,10 +121,13 @@ public class AddressServiceImpl implements AddressService {
 
             List<Address> addresses = new ArrayList<>();
 
-            Address defaultAddress = addressesDao.findByDefaultAddress(addressesDao.findUserByAddressId(id.getAddressId()).getId());
+            Address defaultAddress = addressesDao.findByDefaultAddress(addressesDao.findUserByAddressId(id).getId());
 
             defaultAddress.setDefaultAddress(false);
             address.setDefaultAddress(true);
+
+            System.out.println("VECCHIO DEFAULT: "+defaultAddress);
+            System.out.println("NUOVO DEFAULT: "+address);
 
             addresses.add(defaultAddress);
             addresses.add(address);
@@ -134,13 +137,14 @@ public class AddressServiceImpl implements AddressService {
             return modelMapper.map(address, AddressDto.class);
         }
         else{
-            throw new RuntimeException("Address with id " + id.getAddressId() + " not found");
+            throw new RuntimeException("Address with id " + id + " not found");
         }
 
     }
 
     @Override
     public boolean deleteAddress(AddressIdDto id) {
+        System.out.println("ADDRESS DA ELIMINARE: "+id.getAddressId());
         Optional<Address> optionalAddress = addressesDao.isValidByAddressId(id.getAddressId());
         if(optionalAddress.isPresent())
         {
@@ -151,8 +155,7 @@ public class AddressServiceImpl implements AddressService {
             address.setDefaultAddress(false);
 
 
-            AddressDto newAddressDto = modelMapper.map(address, AddressDto.class);
-            updateAddress(newAddressDto);
+            addressesDao.save(address);
             return true;
         }
         else{
@@ -165,7 +168,7 @@ public class AddressServiceImpl implements AddressService {
 
         for(Address a:valid_addresses){
             if(!a.getId().equals(id.getAddressId())) {
-                updateDefaultAddress(id);
+                updateDefaultAddress(a.getId());
                 return;
             }
         }

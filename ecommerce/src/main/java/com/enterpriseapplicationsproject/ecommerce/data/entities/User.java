@@ -61,4 +61,12 @@ public class User {
         this.credential.setPassword(password);
     }
 
+    @Override
+    public String toString() {
+        return "USER{" +
+                "id=" + id +
+                ", name=" + lastName+","+firstName +
+                '}';
+    }
+
 }

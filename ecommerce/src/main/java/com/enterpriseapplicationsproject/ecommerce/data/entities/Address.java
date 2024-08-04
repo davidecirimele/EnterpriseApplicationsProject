@@ -60,4 +60,17 @@ public class Address {
     public boolean isValid() {
         return this.valid;
     }
+
+    @Override
+    public String toString() {
+        return "ADDRESS{" +
+                "id=" + id +
+                ", userId=" + (userId != null ? userId.getId() : null) +
+                ", street=" + street +
+                ", province=" + province +
+                ", state=" + state +
+                ", postalcode=" + postalCode +
+                ", default=" + defaultAddress +
+                '}';
+    }
 }
