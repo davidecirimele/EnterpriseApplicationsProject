@@ -19,13 +19,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
 import coil.compose.rememberAsyncImagePainter
+import com.example.ecommercefront_end.model.CartItem
 import com.example.ecommercefront_end.model.OrderItem
 
 
 
 @Composable
 fun CartItem(
-    item: OrderItem,
+    item: CartItem,
     onRemoveClick: () -> Unit,
     onQuantityChange: (Int) -> Unit
 ) {
@@ -37,37 +38,33 @@ fun CartItem(
         .padding(16.dp)
     ) {
         // Immagine del prodotto
-        Image(
-            painter = rememberAsyncImagePainter(model = item.product.imageUrl),
-            contentDescription = item.product.name,
+        //FIXME : add image url
+        /*Image(
+            //painter = rememberAsyncImagePainter(model = item.book.imgUrl),
             modifier = Modifier
                 .size(80.dp)
                 .padding(end = 16.dp)
-        )
+        )*/
 
         // Dettagli del prodotto
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = item.product.name,
+                text = item.book.title,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold)
 
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Price: ${item.product.price} €",
+                text = "Di: ${item.book.author}",
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Color: ${item.product.color}",
+                text = "Prezzo: ${item.book.price}€",
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Size: ${item.product.size}",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+
 
             // Controlli per la quantità
             Row(

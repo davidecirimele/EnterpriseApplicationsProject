@@ -10,13 +10,14 @@ import kotlinx.coroutines.launch
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ecommercefront_end.model.CartItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class CartViewModel(private val repository: CartRepository) : ViewModel() {
-    private val _cartItems = MutableStateFlow<List<OrderItem>>(emptyList())
-    val cartItems: StateFlow<List<OrderItem>> = _cartItems
+    private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
+    val cartItems: StateFlow<List<CartItem>> = _cartItems
 
     private val _totalAmount = MutableStateFlow(0.0)
     val totalAmount: StateFlow<Double> = _totalAmount
@@ -37,7 +38,7 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
         }
     }
 
-    fun updateItemQuantity(item: OrderItem, newQuantity: Int) {
+    fun updateItemQuantity(item: CartItem, newQuantity: Int) {
         viewModelScope.launch {
             try {
                 val updatedItem = item.copy(quantity = newQuantity)
@@ -50,13 +51,13 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
         }
     }
 
-    fun removeItem(item: OrderItem) {
+    fun removeItem(item: CartItem) {
         // Implementare la logica di rimozione se necessario
         _cartItems.value = _cartItems.value.filterNot { it.id == item.id }
         updateTotalAmount()
     }
 
     private fun updateTotalAmount() {
-        _totalAmount.value = _cartItems.value.sumOf { it.product.price * it.quantity }
+        _totalAmount.value = _cartItems.value.sumOf { it.book.price * it.quantity }
     }
 }
