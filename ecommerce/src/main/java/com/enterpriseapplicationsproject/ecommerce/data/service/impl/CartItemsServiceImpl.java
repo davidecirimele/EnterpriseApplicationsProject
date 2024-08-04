@@ -2,7 +2,6 @@ package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 
 import com.enterpriseapplicationsproject.ecommerce.data.dao.*;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.CartItemsDao;
-import com.enterpriseapplicationsproject.ecommerce.data.dao.ProductsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.ShoppingCartsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
 import com.enterpriseapplicationsproject.ecommerce.data.service.CartItemsService;
