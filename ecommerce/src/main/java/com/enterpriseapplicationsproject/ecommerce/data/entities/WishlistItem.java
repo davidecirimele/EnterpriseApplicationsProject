@@ -27,9 +27,9 @@ public class WishlistItem {
 
     @ManyToOne
     @JoinColumn(
-            name = "PRODUCT_ID",
+            name = "BOOK_ID",
             referencedColumnName = "ID"
     )
-    private Product product;
+    private Book bokk;
 
 }

@@ -9,7 +9,7 @@ public class OrderItemDto {
 
     private Long orderItemId;
 
-    private ProductDto product;
+    private BookDto book;
 
     private int quantity;
 }

@@ -8,7 +8,7 @@ import lombok.NonNull;
 @Data
 public class SaveOrderItemDto {
 
-    private ProductDto product;
+    private BookDto book;
 
     @Positive
     private Integer quantity;
