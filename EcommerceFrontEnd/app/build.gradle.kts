@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.com.google.devtools.ksp)
-    kotlin("jvm")
 }
 
 android {
@@ -34,7 +33,7 @@ android {
     compileOptions {
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "21"
     }
     buildFeatures {
         compose = true
@@ -77,9 +76,6 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
 }
 
-repositories {
-    mavenCentral()
-}
 kotlin {
-    jvmToolchain(8)
+    jvmToolchain(21)
 }
