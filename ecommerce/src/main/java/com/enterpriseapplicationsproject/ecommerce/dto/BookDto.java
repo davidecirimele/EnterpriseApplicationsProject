@@ -8,6 +8,8 @@ import java.sql.Date;
 @Data
 public class BookDto {
 
+    private Long id;
+
     private String title;
 
     private String author;
@@ -29,5 +31,13 @@ public class BookDto {
     private int age;
 
     private Date publishDate;
+
+    private String category;
+
+    private Double weight;
+
+    private Double price;
+
+    private Integer stock;
 
 }

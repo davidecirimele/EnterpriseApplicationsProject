@@ -1,9 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 
-import com.enterpriseapplicationsproject.ecommerce.data.dao.CartItemsDao;
-import com.enterpriseapplicationsproject.ecommerce.data.dao.ProductsDao;
-import com.enterpriseapplicationsproject.ecommerce.data.dao.ShoppingCartsDao;
-import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
+import com.enterpriseapplicationsproject.ecommerce.data.dao.*;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
 import com.enterpriseapplicationsproject.ecommerce.data.service.CartItemsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
@@ -24,7 +21,7 @@ public class CartItemsServiceImpl implements CartItemsService {
     private final ShoppingCartsDao shoppingCartsDao;
     private final CartItemsDao cartItemsDao;
 
-    private final ProductsDao productsDao;
+    private final BooksDao booksDao;
 
     private final ModelMapper modelMapper;
 
@@ -43,16 +40,16 @@ public class CartItemsServiceImpl implements CartItemsService {
     @Override
     public CartItemDto insert(InsertCartItemDto insertCartItemDto) {
         Optional<ShoppingCart> optionalCart = shoppingCartsDao.findByUserId(insertCartItemDto.getUserId().getUserId());
-        Optional<Product> optionalProduct = productsDao.findById(insertCartItemDto.getProductId().getId());
-        if(optionalCart.isPresent() && optionalProduct.isPresent())
+        Optional<Book> optionalBook = booksDao.findById(insertCartItemDto.getBookId().getId());
+        if(optionalCart.isPresent() && optionalBook.isPresent())
         {
             ShoppingCart cart = optionalCart.get();
-            Product product = optionalProduct.get();
+            Book book = optionalBook.get();
 
             CartItem cartItem = new CartItem();
             cartItem.setCartId(cart);
-            cartItem.setProductId(product);
-            cartItem.setPrice(product.getPrice());
+            cartItem.setBookId(book);
+            cartItem.setPrice(book.getPrice());
             cartItem.setQuantity(insertCartItemDto.getQuantity());
             cartItem.setAddDate(LocalDateTime.now());
 

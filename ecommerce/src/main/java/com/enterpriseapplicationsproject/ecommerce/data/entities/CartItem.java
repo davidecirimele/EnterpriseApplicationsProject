@@ -37,7 +37,7 @@ public class CartItem {
     public String toString() {
         return "CartItem{" +
                 "id=" + id +
-                ", productId=" + (productId != null ? productId.getId() : null) +
+                ", bookId=" + (bookId != null ? bookId.getId() : null) +
                 ", quantity=" + quantity +
                 ", price=" + price +
                 '}';
