@@ -4,6 +4,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.*;
 import com.enterpriseapplicationsproject.ecommerce.data.domain.OrderStatus;
 import com.enterpriseapplicationsproject.ecommerce.data.domain.PaymentStatus;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
+import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.OrdersService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.ProductsService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.TransactionsService;
@@ -32,17 +33,18 @@ public class OrdersServiceImpl implements OrdersService {
 
     private final PaymentMethodsDao paymentMethodsDao;
 
-    private final ProductsDao productsDao;
 
     private final ShoppingCartsDao shoppingCartDao;
 
     private final AddressesDao addressesDao;
 
-    private final ProductsService productsService;
+    private final BooksService booksService;
 
     private final TransactionsDao transactionsDao;
 
     private final TransactionsService  transactionsService;
+
+    private final BooksDao booksDao;
 
 
     @Override
@@ -57,7 +59,7 @@ public class OrdersServiceImpl implements OrdersService {
         }
         Order order = setOrder(shoppingCart, user, paymentMethod);
         Order savedOr = ordersDao.save(order);
-        updateProductStock(shoppingCart);
+        downProductStock(shoppingCart);
         Transaction transaction = transactionsService.addTransaction(user, savedOr, paymentMethod, savedOr.getTotalAmount(), PaymentStatus.APPROVED, LocalDate.now());
         transactionsDao.save(transaction);
         return modelMapper.map(savedOr, SaveOrderDto.class);
@@ -98,7 +100,7 @@ public class OrdersServiceImpl implements OrdersService {
         Order order = new Order();
         List<OrderItem> orderItems = shoppingCart.getCartItems().stream().map(item -> {
             OrderItem orderItem = new OrderItem();
-            orderItem.setProduct(item.getProductId());
+            orderItem.setBook(item.getBookId());
             orderItem.setQuantity(item.getQuantity());
             return orderItem;
         }).collect(Collectors.toList());
@@ -111,16 +113,16 @@ public class OrdersServiceImpl implements OrdersService {
         return order;
     }
 
-    private void updateProductStock(ShoppingCart shoppingCart) {
+    private void downProductStock(ShoppingCart shoppingCart) {
         for (CartItem item : shoppingCart.getCartItems()) {
-            productsService.updateProductStock(item.getProductId().getId(), item.getQuantity());
+            booksService.downBookStock(item.getBookId().getId(), item.getQuantity());
         }
     }
 
     private boolean validateOrder(ShoppingCart shoppingCart) {
         for (CartItem item : shoppingCart.getCartItems()) {
-            Product product = productsDao.findById(item.getProductId().getId()).orElseThrow(() -> new ProductNotFoundException("Product not found"));
-            if (product.getStock() < item.getQuantity()) {
+           Book book = booksDao.findById(item.getBookId().getId()).orElseThrow(() -> new BookNotFoundException("Book not found"));
+            if (book.getStock() < item.getQuantity()) {
                 return false;
             }
         }

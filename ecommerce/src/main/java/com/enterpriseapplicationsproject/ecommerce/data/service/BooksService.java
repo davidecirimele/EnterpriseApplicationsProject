@@ -21,4 +21,6 @@ public interface BooksService {
     BookDto deleteBook(Long id);
 
     List<BookDto> getAllSorted();
+
+    void downBookStock(Long id, int quantity);
 }

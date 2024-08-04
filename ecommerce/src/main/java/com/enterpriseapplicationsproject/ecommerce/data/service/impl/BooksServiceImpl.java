@@ -4,12 +4,14 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.BooksDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
 import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
+import com.enterpriseapplicationsproject.ecommerce.exception.BookNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
@@ -75,5 +77,15 @@ public class BooksServiceImpl implements BooksService {
                 .stream()
                 .map(book -> modelMapper.map(book, BookDto.class))
                 .toList();
+    }
+
+
+    @Override
+    @Transactional
+    public void downBookStock(Long id, int quantity) {
+        Book book = booksDao.findById(id)
+                .orElseThrow(() -> new BookNotFoundException("Book not found"));
+        book.setStock(book.getStock() - quantity);
+        booksDao.save(book);
     }
 }
