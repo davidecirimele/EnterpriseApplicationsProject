@@ -1,16 +1,11 @@
 package com.enterpriseapplicationsproject.ecommerce;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Address;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Product;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.AddressService;
-import com.enterpriseapplicationsproject.ecommerce.data.service.ProductsService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 
-import com.enterpriseapplicationsproject.ecommerce.dto.ProductDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
-import jakarta.persistence.Basic;
-import jakarta.persistence.Column;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -25,9 +20,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 @Component
 public class DbGenerator implements ApplicationRunner {
@@ -50,7 +43,9 @@ public class DbGenerator implements ApplicationRunner {
   protected AddressService addressService;
 
   @Autowired
-  protected ProductsService productsService;
+  //protected ProductsService productsService;
+
+  //FIXME - BISOGNA INSERIRE LIBRI ADESSO
 
   public void createDb() {
 
@@ -141,7 +136,8 @@ public class DbGenerator implements ApplicationRunner {
 
     System.out.println("STOCK : "+ array[4]);
 
-    ProductDto product = new ProductDto();
+    //FIXME - BISOGNA INSERIRE LIBRI ADESSO
+    /*ProductDto product = new ProductDto();
     product.setCategory(category);
     product.setWeight(weight);
     product.setPrice(price);
@@ -149,7 +145,7 @@ public class DbGenerator implements ApplicationRunner {
 
     System.out.println("PRODUCT : "+ product);
 
-    productsService.save(product);
+    productsService.save(product);*/
   }
 
   private void insertUser( String record) {
