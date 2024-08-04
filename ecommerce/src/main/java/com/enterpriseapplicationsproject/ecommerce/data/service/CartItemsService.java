@@ -1,7 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.CartItem;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Product;
+
 import com.enterpriseapplicationsproject.ecommerce.data.entities.ShoppingCart;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
 
