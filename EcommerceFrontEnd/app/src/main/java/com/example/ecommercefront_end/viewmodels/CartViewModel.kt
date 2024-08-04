@@ -2,18 +2,13 @@ package com.example.ecommercefront_end.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ecommercefront_end.model.Order
-import com.example.ecommercefront_end.model.OrderItem
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.ecommercefront_end.model.CartItem
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import com.example.ecommercefront_end.repository.CartRepository
 
 class CartViewModel(private val repository: CartRepository) : ViewModel() {
     private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
