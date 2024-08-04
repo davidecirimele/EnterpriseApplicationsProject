@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/api/v1/wishlists", produces = "application/json")// indica che
@@ -44,7 +45,7 @@ public class WishlistController {
 
     @GetMapping(consumes = "application/json", path = "/getByUser/{idUser}")
     @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<List<WishlistDto>> getByUser(@PathVariable Long idUser) {
+    public ResponseEntity<List<WishlistDto>> getByUser(@PathVariable UUID idUser) {
         List<WishlistDto> w = wishlistService.getWishlistsByUser(idUser);
         if(w == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // meglio farlo nel service e gestire l'eccezione con l'handler

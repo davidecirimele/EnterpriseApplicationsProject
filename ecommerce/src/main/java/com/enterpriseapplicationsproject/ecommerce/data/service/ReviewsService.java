@@ -14,7 +14,7 @@ public interface ReviewsService {
 
     void delete(Long id);
 
-    List<ReviewDto> getReviewsByProduct(Long productId);
+    List<ReviewDto> getReviewsByBook(Long bookId);
 
     List<ReviewDto> getReviewsByUser(UUID userId);
 }

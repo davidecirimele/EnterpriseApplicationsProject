@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +39,7 @@ public class WishlistsServiceImpl implements WishlistsService {
 
 
     @Override
-    public List<WishlistDto> getWishlistsByUser(Long userId) {
+    public List<WishlistDto> getWishlistsByUser(UUID userId) {
         return wishlistsDao.findByUserId(userId)
                 .stream()
                 .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))

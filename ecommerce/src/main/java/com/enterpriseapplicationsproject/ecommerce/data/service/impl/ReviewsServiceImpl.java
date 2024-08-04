@@ -47,8 +47,8 @@ public class ReviewsServiceImpl implements ReviewsService {
     }
 
     @Override
-    public List<ReviewDto> getReviewsByProduct(Long productId) {
-        List<Review> reviews = reviewsDao.findByProductId(productId);
+    public List<ReviewDto> getReviewsByBook(Long bookId) {
+        List<Review> reviews = reviewsDao.findByBookId(bookId);
         return reviews.stream()
                 .map(review -> modelMapper.map(review, ReviewDto.class))
                 .collect(Collectors.toList());

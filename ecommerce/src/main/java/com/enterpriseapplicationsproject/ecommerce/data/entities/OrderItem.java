@@ -7,7 +7,7 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(uniqueConstraints = @UniqueConstraint( columnNames = {"ORDER_ID", "PRODUCT_ID"}), name = "ORDER_ITEMS")
+@Table(uniqueConstraints = @UniqueConstraint( columnNames = {"ORDER_ID", "BOOK_ID"}), name = "ORDER_ITEMS")
 
 public class OrderItem {
 

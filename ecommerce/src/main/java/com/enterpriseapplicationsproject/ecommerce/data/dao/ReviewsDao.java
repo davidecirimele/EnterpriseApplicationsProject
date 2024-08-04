@@ -9,6 +9,6 @@ import java.util.UUID;
 
 @Repository
 public interface ReviewsDao extends JpaRepository<Review, Long> {
-    List<Review> findByProductId(Long productId);
+    List<Review> findByBookId(Long bookId);
     List<Review> findByUserId(UUID userId);
 }

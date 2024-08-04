@@ -1,8 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.data.dao;
 
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Product;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.RefreshToken;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

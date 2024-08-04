@@ -45,9 +45,9 @@ public class ReviewController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/product/{productId}")
-    public ResponseEntity<List<ReviewDto>> getReviewsByProduct(@PathVariable("productId") Long productId) {
-        List<ReviewDto> reviews = reviewsService.getReviewsByProduct(productId);
+    @GetMapping("/book/{bookId}")
+    public ResponseEntity<List<ReviewDto>> getReviewsByBook(@PathVariable("bookId") Long bookId) {
+        List<ReviewDto> reviews = reviewsService.getReviewsByBook(bookId);
         return ResponseEntity.ok(reviews);
     }
 

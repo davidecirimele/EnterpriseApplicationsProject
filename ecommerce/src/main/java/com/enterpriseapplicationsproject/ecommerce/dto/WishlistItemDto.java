@@ -1,6 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Product;
+
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistItem;
 import com.fasterxml.jackson.annotation.JsonIgnore;

@@ -10,11 +10,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode()
 @Entity
 @Data
 @NoArgsConstructor
-public class Book extends Product{
+public class Book{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
@@ -65,7 +65,7 @@ public class Book extends Product{
     @Column(name = "PUBLISH_DATE")
     private Date publishDate;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
     private List<Review> reviews = new ArrayList<>();
 
 }

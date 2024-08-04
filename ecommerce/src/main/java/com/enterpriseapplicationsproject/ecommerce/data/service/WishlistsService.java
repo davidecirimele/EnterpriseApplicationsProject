@@ -6,12 +6,13 @@ import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface WishlistsService {
 
 
     List<WishlistDto> getAllSorted();
-    List<WishlistDto> getWishlistsByUser(Long userId);
+    List<WishlistDto> getWishlistsByUser(UUID userId);
 
     List<Wishlist> getAll();
 
