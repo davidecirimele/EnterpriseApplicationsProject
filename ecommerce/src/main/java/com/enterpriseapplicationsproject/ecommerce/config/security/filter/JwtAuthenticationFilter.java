@@ -58,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        jwt = authHeader.substring(7); //il token inizia dopo i primi 7 caratteri
+
         username = jwtService.extractUsername(jwt);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
