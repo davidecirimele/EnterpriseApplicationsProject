@@ -13,8 +13,6 @@ import java.util.UUID;
 
 public interface TransactionsService {
 
-    public TransactionDto addTransactionDto(TransactionDto transactionDto);
-
     public List<TransactionDto> getAllTransactionByUserId(UUID userId);
 
     public Transaction addTransaction(User user, Order order, PaymentMethod paymentMethod, Double amount, PaymentStatus paymentStatus, LocalDate date);
