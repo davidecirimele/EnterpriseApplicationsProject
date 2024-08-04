@@ -48,7 +48,7 @@ public class CartItemsServiceImpl implements CartItemsService {
 
             for(CartItem c : cart.getCartItems())
             {
-                if(c.getProductId().getId().equals(product.getId())){
+                if(c.getBookId().getId().equals(book.getId())){
                     c.setQuantity(c.getQuantity()+insertCartItemDto.getQuantity());
                     cartItemsDao.save(c);
                     return modelMapper.map(c, CartItemDto.class);
