@@ -1,0 +1,9 @@
+/.idea/**
+/vs.code/**
+/EcommerceFrontEnd/.idea/**
+/EcommerceFrontEnd/.gradle/**
+/EcommerceFrontEnd/app/.idea/**
+
+
+
+/EcommerceFrontEnd/app/src/main/AndroidManifest.xml
