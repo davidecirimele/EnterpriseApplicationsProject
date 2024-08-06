@@ -1,4 +1,4 @@
-package com.example.myapp
+package com.example.ecommercefront_end
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.BottomAppBar
@@ -30,25 +29,20 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.example.ecommercefront_end.HomeProducts
-import com.example.ecommercefront_end.R
+import com.example.ecommercefront_end.ui.cart.CartScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
+import com.example.ecommercefront_end.viewmodels.CartViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -78,7 +72,9 @@ fun NavigationView(navHostController: NavHostController) {
             UserScreen()
         }
         composable("cart") {
-            CartScreen()
+            CartScreen(viewModel = CartViewModel(), onCheckoutClick = { /* Add your action here */ })
+
+            }
         }
         composable("favorite") {
             CartScreen()
@@ -174,10 +170,10 @@ fun UserScreen() {
     Text(text = "User Screen")
 }
 
-@Composable
+/*@Composable
 fun CartScreen() {
     Text(text = "Cart Screen")
-}
+}*/
 @Composable
 fun FavoriteScreen() {
     Text(text = "Favorite Screen")
