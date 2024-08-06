@@ -3,7 +3,7 @@
 /EcommerceFrontEnd/.idea/**
 /EcommerceFrontEnd/.gradle/**
 /EcommerceFrontEnd/app/.idea/**
-/EcommerceFrontEnd/app/AndroidManifest.xml
 
 
 
+/EcommerceFrontEnd/app/src/main/AndroidManifest.xml
