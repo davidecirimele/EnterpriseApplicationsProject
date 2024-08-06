@@ -1,4 +1,9 @@
-/.idea/.name
-/.idea/misc.xml
-/.idea/vcs.xml
-/.idea/workspace.xml
+/.idea/**
+/vs.code/**
+/EcommerceFrontEnd/.idea/**
+/EcommerceFrontEnd/.gradle/**
+/EcommerceFrontEnd/app/.idea/**
+/EcommerceFrontEnd/app/AndroidManifest.xml
+
+
+
