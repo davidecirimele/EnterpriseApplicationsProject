@@ -4,15 +4,14 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.GroupsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.data.service.GroupsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.GroupDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,27 +58,27 @@ public class GroupsServiceImpl implements GroupsService {
     }
 
 
-//    @Override
-//    public void addUserToGroup(Long groupId, Long userId) {
-//        Group group = groupDao.findById(groupId)
-//                .orElseThrow(() -> new RuntimeException(String.format("Group not found with id [%s]", groupId)));
-//        User user = userDao.findById(userId)
-//                .orElseThrow(() -> new RuntimeException(String.format("User not found with id [%s]", userId)));
-//
-//        group.getMembers().add(user);
-//        groupDao.save(group);
-//    }
-//
-//    @Override
-//    public void removeUserFromGroup(Long groupId, Long userId) {
-//        Group group = groupDao.findById(groupId)
-//                .orElseThrow(() -> new RuntimeException(String.format("Group not found with id [%s]", groupId)));
-//        User user = userDao.findById(userId)
-//                .orElseThrow(() -> new RuntimeException(String.format("User not found with id [%s]", userId)));
-//
-//        group.getMembers().remove(user);
-//        groupDao.save(group);
-//    } Vedere se usare id con long u uuid
+    @Override
+    public void addUserToGroup(Long groupId, UUID userId) {
+        Group group = groupDao.findById(groupId)
+                .orElseThrow(() -> new RuntimeException(String.format("Group not found with id [%s]", groupId)));
+        User user = userDao.findById(userId)
+                .orElseThrow(() -> new RuntimeException(String.format("User not found with id [%s]", userId)));
+
+        group.getMembers().add(user);
+        groupDao.save(group);
+    }
+
+    @Override
+    public void removeUserFromGroup(Long groupId, UUID userId) {
+        Group group = groupDao.findById(groupId)
+                .orElseThrow(() -> new RuntimeException(String.format("Group not found with id [%s]", groupId)));
+        User user = userDao.findById(userId)
+                .orElseThrow(() -> new RuntimeException(String.format("User not found with id [%s]", userId)));
+
+        group.getMembers().remove(user);
+        groupDao.save(group);
+    }
 
 
 

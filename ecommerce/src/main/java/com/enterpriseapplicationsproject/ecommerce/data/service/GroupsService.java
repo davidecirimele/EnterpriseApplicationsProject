@@ -1,9 +1,9 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service;
 
 import com.enterpriseapplicationsproject.ecommerce.dto.GroupDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface GroupsService {
     GroupDto createGroup(GroupDto groupDto);
@@ -16,7 +16,7 @@ public interface GroupsService {
 
     List<GroupDto> getAllGroups();
 
-//    void addUserToGroup(Long groupId, Long userId);
-//
-//    void removeUserFromGroup(Long groupId, Long userId);
+    void addUserToGroup(Long groupId, UUID userId);
+
+    void removeUserFromGroup(Long groupId, UUID userId);
 }

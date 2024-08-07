@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("api/v1/groups")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -42,13 +44,13 @@ public class GroupsController {
     }
 
     @PostMapping("/{groupId}/users/{userId}")
-    public ResponseEntity<Void> addUserToGroup(@PathVariable("groupId") Long groupId, @PathVariable("userId") Long userId) {
+    public ResponseEntity<Void> addUserToGroup(@PathVariable("groupId") Long groupId, @PathVariable("userId") UUID userId) {
         groupsService.addUserToGroup(groupId, userId);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{groupId}/users/{userId}")
-    public ResponseEntity<Void> removeUserFromGroup(@PathVariable("groupId") Long groupId, @PathVariable("userId") Long userId) {
+    public ResponseEntity<Void> removeUserFromGroup(@PathVariable("groupId") Long groupId, @PathVariable("userId") UUID userId) {
         groupsService.removeUserFromGroup(groupId, userId);
         return ResponseEntity.ok().build();
     }
