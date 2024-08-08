@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface CartItemsDao extends JpaRepository<CartItem, Long> {
-    List<Book> findByCartId(ShoppingCart cartId);
+    List<CartItem> findByCartId(ShoppingCart cartId);
 
     @Query("SELECT s FROM ShoppingCart s JOIN s.cartItems c WHERE c.id = :cartItemId")
     ShoppingCart findShoppingCartByCartItem(@Param("cartItemId") Long cartItemId);
