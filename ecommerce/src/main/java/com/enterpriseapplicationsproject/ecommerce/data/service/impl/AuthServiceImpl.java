@@ -5,11 +5,14 @@ import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDet
 import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Admin;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.RefreshToken;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.ShoppingCart;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RefreshTokenService;
 import com.enterpriseapplicationsproject.ecommerce.dto.LoginDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveUserDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.RefreshTokenDto;
+import com.enterpriseapplicationsproject.ecommerce.exception.UserAlreadyExistsException;
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 
 import com.enterpriseapplicationsproject.ecommerce.data.service.AuthService;
@@ -40,11 +43,11 @@ public class AuthServiceImpl implements  AuthService{
 
 
     @Override
-    public SaveUserDto registerUser(SaveUserDto userDto) {
+    public SaveUserDto registerUser( @Valid SaveUserDto userDto) {
         System.out.println("UserDto: " + userDto);
 
         userDao.findByCredentialEmail(userDto.getCredentials().getEmail()).ifPresent(u -> {
-            throw new IllegalArgumentException("User with this email already exists");
+            throw new UserAlreadyExistsException("User with this email already exists");
         });
 
         String hashedPassword = passwordEncoder.encode(userDto.getCredentials().getPassword());
@@ -53,9 +56,10 @@ public class AuthServiceImpl implements  AuthService{
         user.getCredential().setPassword(hashedPassword);
         System.out.println("User: " + user);
 
-        userDao.save(user);
+         User savedUser = userDao.save(user);
 
-        return modelMapper.map(user, SaveUserDto.class);
+
+        return modelMapper.map(savedUser, SaveUserDto.class);
     }
 
     @Override
