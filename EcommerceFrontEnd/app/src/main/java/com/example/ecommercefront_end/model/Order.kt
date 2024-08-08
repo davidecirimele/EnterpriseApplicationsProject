@@ -2,7 +2,6 @@ package com.example.ecommercefront_end.model
 
 import java.time.LocalDate
 
-
 data class Order(
 
     val id: Long,

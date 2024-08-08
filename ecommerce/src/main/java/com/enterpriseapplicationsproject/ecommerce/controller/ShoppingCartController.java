@@ -46,18 +46,10 @@ public class ShoppingCartController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/create")
-    @PreAuthorize("#createShoppingCartDto.userId.userId == authentication.principal.getId()")
-    public ResponseEntity<ShoppingCartDto> createCart(@RequestBody CreateShoppingCartDto createShoppingCartDto) {
-        System.out.println("CREATED SC: "+createShoppingCartDto);
-        ShoppingCartDto createdCart = shoppingCartService.createCart(createShoppingCartDto);
-        return new ResponseEntity<>(createdCart, HttpStatus.CREATED);
-    }
-
     @PutMapping("/save")
-    @PreAuthorize("#saveShoppingCartDto.userId == authentication.principal.getId()")
-    public ResponseEntity<ShoppingCartDto> saveCart(@RequestBody SaveShoppingCartDto saveShoppingCartDto) {
-        ShoppingCartDto savedCart = shoppingCartService.saveCart(saveShoppingCartDto);
+    @PreAuthorize("#ShoppingCartDto.userId == authentication.principal.getId()")
+    public ResponseEntity<ShoppingCartDto> saveCart(@RequestBody ShoppingCartDto ShoppingCartDto) {
+        ShoppingCartDto savedCart = shoppingCartService.saveCart(ShoppingCartDto);
         return new ResponseEntity<>(savedCart, HttpStatus.OK);
     }
 }

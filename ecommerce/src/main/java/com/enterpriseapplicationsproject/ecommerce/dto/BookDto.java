@@ -2,8 +2,10 @@ package com.enterpriseapplicationsproject.ecommerce.dto;
 
 import jakarta.persistence.Column;
 import lombok.Data;
+import lombok.ToString;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 @Data
 public class BookDto {
@@ -21,6 +23,8 @@ public class BookDto {
     private String edition;
 
     private String format;
+
+    private LocalDate insertDate;
 
     private String genre;
 

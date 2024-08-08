@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
 
     private final ModelMapper modelMapper;
 
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserDto getById(UUID id) {
