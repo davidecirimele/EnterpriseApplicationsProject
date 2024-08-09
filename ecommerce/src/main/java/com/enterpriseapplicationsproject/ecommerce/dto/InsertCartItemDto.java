@@ -20,8 +20,4 @@ public class InsertCartItemDto {
 
     @NotBlank
     private Integer quantity;
-
-    @NotBlank
-    private LocalDate addDate;
-
 }

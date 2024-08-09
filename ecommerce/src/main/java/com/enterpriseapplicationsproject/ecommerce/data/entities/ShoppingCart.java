@@ -20,11 +20,8 @@ public class ShoppingCart {
     @JoinColumn(name = "USER_ID", referencedColumnName = "ID")
     private User userId;
 
-
-    @OneToMany
-    @JoinColumn(name = "CART_ID", referencedColumnName = "ID")
+    @OneToMany(mappedBy = "cartId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> cartItems;
-
 
     @Transient
     private Double total;
