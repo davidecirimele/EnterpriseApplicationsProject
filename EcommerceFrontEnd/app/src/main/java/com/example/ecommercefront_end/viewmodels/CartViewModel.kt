@@ -2,13 +2,16 @@ package com.example.ecommercefront_end.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ecommercefront_end.SessionManager
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 import com.example.ecommercefront_end.model.CartItem
+import com.example.ecommercefront_end.model.UserId
 import com.example.ecommercefront_end.repository.CartRepository
+import java.util.UUID
 
 class CartViewModel(private val repository: CartRepository) : ViewModel() {
     private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
@@ -24,7 +27,8 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     private fun loadCartItems() {
         viewModelScope.launch {
             try {
-                val cart = repository.getCart()
+
+                val cart = repository.getCart(getUser().id)
                 _cartItems.value = cart.items
                 updateTotalAmount()
             } catch (e: Exception) {
@@ -36,8 +40,9 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     fun updateItemQuantity(item: CartItem, newQuantity: Int) {
         viewModelScope.launch {
             try {
+                val userId = getUser()
                 val updatedItem = item.copy(quantity = newQuantity)
-                repository.updateQuantity(updatedItem.id, updatedItem.)
+                repository.updateQuantity(updatedItem.id, updatedItem.quantity, userId )
                 // Ricarica gli articoli dopo l'aggiornamento
                 _cartItems.value = _cartItems.value.map { currentItem ->
                     if (currentItem.id == updatedItem.id) updatedItem else currentItem
@@ -51,12 +56,26 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     }
 
     fun removeItem(item: CartItem) {
-        // Implementare la logica di rimozione se necessario
-        _cartItems.value = _cartItems.value.filterNot { it.id == item.id }
+        viewModelScope.launch {
+            try {
+                val userId = getUser()
+                repository.removeItem(item.id, userId)
+                _cartItems.value = _cartItems.value.filterNot { it.id == item.id }
+
+            } catch (e: Exception) {
+                // Gestire l'errore
+            }
+        }
         updateTotalAmount()
     }
 
     private fun updateTotalAmount() {
         _totalAmount.value = _cartItems.value.sumOf { it.book.price * it.quantity }
+    }
+
+
+    private fun getUser(): UserId {
+       val user = UserId(SessionManager.user?.id ?: throw IllegalStateException("User not logged in"))
+        return user
     }
 }

@@ -4,6 +4,6 @@ data class CartItem(
     val id: Long,
     val cartId : Long,
     val book : Book,
-    val quantity: Int,
+    var quantity: Int,
     val totalPrice: Double
 )
