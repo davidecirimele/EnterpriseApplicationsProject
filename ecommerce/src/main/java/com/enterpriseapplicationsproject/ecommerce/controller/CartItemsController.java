@@ -1,6 +1,8 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
+import com.enterpriseapplicationsproject.ecommerce.data.dao.ShoppingCartsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.CartItem;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.ShoppingCart;
 import com.enterpriseapplicationsproject.ecommerce.data.service.CartItemsService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
@@ -10,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("api/v1/cart")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -18,12 +23,22 @@ public class CartItemsController {
 
     private final CartItemsService cartItemsService;
 
+    private final ShoppingCartsDao shoppingCartsDao;
+
     //@GetMapping("/{id}")
 //    @PreAuthorize("hasAuthority('ROLE_USER')")
     //public ResponseEntity<CartItemDto> getUserById(@PathVariable long id) {
         //List<ProductDto> cartitems = cartItemsService.getProductByCartId(id);
         //return new ResponseEntity<>(cartitems, HttpStatus.OK);
     //}
+
+    @GetMapping("/shopping_cart/{cartId}")
+    @PreAuthorize("#cartId.userId.userId == authentication.principal.getId()")
+    public ResponseEntity<List<CartItemDto>> insertItem(@RequestBody ShoppingCartIdDto cartId) {
+        List<CartItemDto> items = cartItemsService.getCartItemsByCartId(cartId);
+        return new ResponseEntity<>(items, HttpStatus.OK);
+    }
+
 
     @PostMapping("/insert")
     @PreAuthorize("#insertCartItemDto.userId.userId == authentication.principal.getId()")

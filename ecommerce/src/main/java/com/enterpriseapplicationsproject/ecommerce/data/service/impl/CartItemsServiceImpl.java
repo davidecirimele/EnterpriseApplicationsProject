@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,11 +25,22 @@ public class CartItemsServiceImpl implements CartItemsService {
 
     private final ModelMapper modelMapper;
 
-    //@Override
-    //public List<ProductDto> getProductByCartId(ShoppingCart cartId) {
-     //   List<Product> products = cartItemsDao.findProductsbyCartId(cartId);
-     //   return products.stream().map(product -> modelMapper.map(product , ProductDto.class)).toList();
-    //}
+    @Override
+    public List<CartItemDto> getCartItemsByCartId(ShoppingCartIdDto cartId) {
+
+        Optional<ShoppingCart> optionalCart = shoppingCartsDao.findByUserId(cartId.getUserId().getUserId());
+
+        if(optionalCart.isPresent()){
+            ShoppingCart cart = optionalCart.get();
+
+            List<CartItem> cartItems = cartItemsDao.findByCartId(cart);
+
+            return cartItems.stream().map(cartItem -> modelMapper.map(cartItem , CartItemDto.class)).toList();
+        }
+        else{
+            throw new RuntimeException("No cart found with id "+cartId.getCartId());
+        }
+    }
 
     @Override
     public CartItemDto save(CartItem cartitem) {

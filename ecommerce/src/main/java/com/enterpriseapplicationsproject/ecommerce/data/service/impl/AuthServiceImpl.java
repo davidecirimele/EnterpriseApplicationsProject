@@ -2,6 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 
 import com.enterpriseapplicationsproject.ecommerce.config.security.JwtService;
 import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetails;
+import com.enterpriseapplicationsproject.ecommerce.data.dao.ShoppingCartsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Admin;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.RefreshToken;
@@ -25,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 @Service
@@ -32,6 +34,8 @@ import java.util.Map;
 public class AuthServiceImpl implements  AuthService{
 
     private final UsersDao userDao;
+
+    private final ShoppingCartsDao shoppingCartsDao;
     private final ModelMapper modelMapper;
     private final JwtService jwtService;
 
@@ -56,10 +60,16 @@ public class AuthServiceImpl implements  AuthService{
         user.getCredential().setPassword(hashedPassword);
         System.out.println("User: " + user);
 
-         User savedUser = userDao.save(user);
+        userDao.save(user);
 
+        System.out.println("CREATE SHOPPING CART USER ID: "+user.getId());
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setUserId(user); // Imposta l'utente trovato nel carrello
+        shoppingCart.setCartItems(new ArrayList<>()); // Inizializza la lista degli articoli del carrello
 
-        return modelMapper.map(savedUser, SaveUserDto.class);
+        shoppingCartsDao.save(shoppingCart);
+
+        return modelMapper.map(user, SaveUserDto.class);
     }
 
     @Override
