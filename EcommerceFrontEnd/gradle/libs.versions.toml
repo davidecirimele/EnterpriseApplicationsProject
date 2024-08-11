@@ -1,5 +1,7 @@
 [versions]
 agp = "8.5.1"
+converterGson = "2.9.0"
+gson = "2.10.1"
 kotlin = "1.9.23"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -11,10 +13,11 @@ composeBom = "2024.05.00"
 roomVersion = "2.6.1"
 navigationRuntimeKtx = "2.7.7"
 browser = "1.8.0"
-firebaseFirestoreKtx = "25.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -36,7 +39,7 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 androidx-compose-material = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.6.7" }
 androidx-activity = { group = "androidx.activity", name="activity", version.ref="activityCompose"}
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
-firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "converterGson" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
