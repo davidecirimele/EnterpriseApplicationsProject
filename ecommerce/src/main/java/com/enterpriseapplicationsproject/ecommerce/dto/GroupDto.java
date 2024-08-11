@@ -1,11 +1,10 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
-
+import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -14,6 +13,8 @@ import java.util.List;
 public class GroupDto {
 
     private Long id;
+
     private String groupName;
-    private List<UserDto> members = new ArrayList<>();
+
+    private List<UserDto> members;
 }
