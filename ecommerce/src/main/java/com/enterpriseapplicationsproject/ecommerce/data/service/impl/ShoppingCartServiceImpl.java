@@ -51,8 +51,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    public boolean delete(UserIdDto id){
-        Optional<ShoppingCart> optionalSC = shoppingCartDao.findByUserId(id.getUserId());
+    public boolean delete(UUID id){
+        Optional<ShoppingCart> optionalSC = shoppingCartDao.findByUserId(id);
 
         if(optionalSC.isPresent())
         {
@@ -63,7 +63,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             return true;
         }
         else{
-            throw new RuntimeException("Cart for User with id " + id.getUserId() + " not found");
+            throw new RuntimeException("Cart for User with id " + id + " not found");
         }
     }
 
