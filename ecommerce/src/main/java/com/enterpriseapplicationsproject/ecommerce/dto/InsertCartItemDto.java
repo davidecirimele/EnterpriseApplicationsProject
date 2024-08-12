@@ -16,8 +16,5 @@ public class InsertCartItemDto {
     private UserIdDto userId;
 
     @NotBlank
-    private BookIdDto bookId;
-
-    @NotBlank
     private Integer quantity;
 }
