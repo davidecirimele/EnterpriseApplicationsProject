@@ -40,9 +40,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.ecommercefront_end.ui.cart.CartScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
-import com.example.ecommercefront_end.viewmodels.CartViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -72,9 +70,8 @@ fun NavigationView(navHostController: NavHostController) {
             UserScreen()
         }
         composable("cart") {
-            CartScreen(viewModel = CartViewModel(), onCheckoutClick = { /* Add your action here */ })
+            CartScreen()//viewModel = CartViewModel(), onCheckoutClick = { /* Add your action here */ })
 
-            }
         }
         composable("favorite") {
             CartScreen()
@@ -82,6 +79,10 @@ fun NavigationView(navHostController: NavHostController) {
     }
 }
 
+/*
+fun CartViewModel(): CartViewModel {
+
+}*/
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -168,6 +169,11 @@ fun HomeScreen() {
 @Composable
 fun UserScreen() {
     Text(text = "User Screen")
+}
+
+@Composable
+fun CartScreen() {
+    Text(text = "Cart Screen")
 }
 
 /*@Composable
