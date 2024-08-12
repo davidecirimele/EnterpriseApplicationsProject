@@ -40,6 +40,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.ecommercefront_end.network.CartApiService
+import com.example.ecommercefront_end.network.RetrofitClient
+import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.ui.cart.CartScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.viewmodels.CartViewModel
@@ -72,15 +75,19 @@ fun NavigationView(navHostController: NavHostController) {
             UserScreen()
         }
         composable("cart") {
-            CartScreen(viewModel = CartViewModel(), onCheckoutClick = { /* Add your action here */ })
+            val _cartApiService = RetrofitClient.cartApiService
+
+            val repository = CartRepository(_cartApiService)
+
+            CartScreen(viewModel = CartViewModel(repository), onCheckoutClick = { /* Add your action here */ })
 
             }
         }
-        composable("favorite") {
+        /*composable("favorite") {
             CartScreen()
-        }
+        }*/
     }
-}
+
 
 
 
