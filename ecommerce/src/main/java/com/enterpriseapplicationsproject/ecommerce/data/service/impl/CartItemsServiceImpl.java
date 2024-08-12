@@ -49,9 +49,9 @@ public class CartItemsServiceImpl implements CartItemsService {
     }
 
     @Override
-    public CartItemDto insert(InsertCartItemDto insertCartItemDto) {
+    public CartItemDto insert(InsertCartItemDto insertCartItemDto, Long bookId) {
         Optional<ShoppingCart> optionalCart = shoppingCartsDao.findByUserId(insertCartItemDto.getUserId().getUserId());
-        Optional<Book> optionalBook = booksDao.findById(insertCartItemDto.getBookId().getId());
+        Optional<Book> optionalBook = booksDao.findById(bookId);
         if(optionalCart.isPresent() && optionalBook.isPresent())
         {
             ShoppingCart cart = optionalCart.get();
@@ -81,8 +81,8 @@ public class CartItemsServiceImpl implements CartItemsService {
     }
 
     @Override
-    public boolean delete(CartItemIdDto id) {
-        Optional<CartItem> optionalCartItem = cartItemsDao.findById(id.getId());
+    public boolean delete(Long id) {
+        Optional<CartItem> optionalCartItem = cartItemsDao.findById(id);
 
         if(optionalCartItem.isPresent())
         {
@@ -90,13 +90,13 @@ public class CartItemsServiceImpl implements CartItemsService {
             return true;
         }
         else{
-            throw new RuntimeException("Item with id " + id.getId() + " not found");
+            throw new RuntimeException("Item with id " + id + " not found");
         }
     }
 
     @Override
-    public CartItemDto updateQuantity(QuantityCartItemDto quantityCartItem){
-        Optional<CartItem> optionalCartItem = cartItemsDao.findById(quantityCartItem.getId());
+    public CartItemDto updateQuantity(Long id, QuantityCartItemDto quantityCartItem){
+        Optional<CartItem> optionalCartItem = cartItemsDao.findById(id);
 
         if(optionalCartItem.isPresent())
         {
@@ -115,7 +115,7 @@ public class CartItemsServiceImpl implements CartItemsService {
 
         }
         else{
-            throw new RuntimeException("Item with id " + quantityCartItem.getId() + " not found");
+            throw new RuntimeException("Item with id " + id + " not found");
         }
     }
 }

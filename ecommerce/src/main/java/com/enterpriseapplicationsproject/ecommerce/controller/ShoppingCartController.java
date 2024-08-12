@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1/shopping_cart")
+@RequestMapping("api/v1/shopping-cart")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 public class ShoppingCartController {
@@ -35,9 +35,9 @@ public class ShoppingCartController {
         return new ResponseEntity<>(shoppingCart, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete")
-    @PreAuthorize("#userId.userId == authentication.principal.getId()")
-    public ResponseEntity<Void> deleteShoppingCart(@RequestBody UserIdDto userId) {
+    @DeleteMapping("{userId}/clear")
+    @PreAuthorize("#userId == authentication.principal.getId()")
+    public ResponseEntity<Void> deleteShoppingCart(@PathVariable UUID userId) {
 
         boolean isRemoved = shoppingCartService.delete(userId);
         if (!isRemoved) {
@@ -46,12 +46,12 @@ public class ShoppingCartController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping("/save")
+    /*@PutMapping("/save")
     @PreAuthorize("#ShoppingCartDto.userId == authentication.principal.getId()")
     public ResponseEntity<ShoppingCartDto> saveCart(@RequestBody ShoppingCartDto ShoppingCartDto) {
         ShoppingCartDto savedCart = shoppingCartService.saveCart(ShoppingCartDto);
         return new ResponseEntity<>(savedCart, HttpStatus.OK);
-    }
+    }*/
 }
 
 
