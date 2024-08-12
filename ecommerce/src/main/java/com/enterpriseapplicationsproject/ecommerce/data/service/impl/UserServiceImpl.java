@@ -80,8 +80,8 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    public UserDto updatePassword(PasswordUserDto userDto) {
-        User user = userDao.findById(userDto.getUserId())
+    public UserDto updatePassword(UUID userId, PasswordUserDto userDto) {
+        User user = userDao.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(userDto.getOldPassword(), user.getCredential().getPassword())) {
@@ -101,8 +101,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto updateEmail(EmailUserDto userDto) {
-        User user = userDao.findById(userDto.getId())
+    public UserDto updateEmail(UUID userId, EmailUserDto userDto) {
+        User user = userDao.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         user.getCredential().setEmail(userDto.getNewEmail());
@@ -111,8 +111,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto updatePhoneNumber(PhoneNumberUserDto userDto) {
-        User user = userDao.findById(userDto.getUserId())
+    public UserDto updatePhoneNumber(UUID userId, PhoneNumberUserDto userDto) {
+        User user = userDao.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         user.setPhoneNumber(userDto.getNewPhoneNumber());
@@ -121,14 +121,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean delete(UserIdDto userId) {
-        Optional<User> optionalUser = userDao.findById(userId.getUserId());
+    public boolean delete(UUID userId) {
+        Optional<User> optionalUser = userDao.findById(userId);
 
         if (optionalUser.isPresent()) {
             userDao.delete(optionalUser.get());
             return true;
         } else {
-            throw new RuntimeException("Item with id " + userId.getUserId() + " not found");
+            throw new RuntimeException("Item with id " + userId + " not found");
         }
     }
 

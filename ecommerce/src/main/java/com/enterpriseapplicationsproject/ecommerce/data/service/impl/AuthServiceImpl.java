@@ -2,6 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 
 import com.enterpriseapplicationsproject.ecommerce.config.security.JwtService;
 import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetails;
+import com.enterpriseapplicationsproject.ecommerce.data.dao.ShoppingCartsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Admin;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.RefreshToken;
@@ -32,6 +33,8 @@ import java.util.Map;
 public class AuthServiceImpl implements  AuthService{
 
     private final UsersDao userDao;
+
+    private final ShoppingCartsDao shoppingCartsDao;
     private final ModelMapper modelMapper;
     private final JwtService jwtService;
 
@@ -56,8 +59,11 @@ public class AuthServiceImpl implements  AuthService{
         user.getCredential().setPassword(hashedPassword);
         System.out.println("User: " + user);
 
-         User savedUser = userDao.save(user);
+        User savedUser = userDao.save(user);
 
+        ShoppingCart cart = new ShoppingCart();
+        cart.setUserId(user);
+        shoppingCartsDao.save(cart);
 
         return modelMapper.map(savedUser, SaveUserDto.class);
     }

@@ -3,6 +3,7 @@ package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.AddressesDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Address;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.AddressService;
 import com.enterpriseapplicationsproject.ecommerce.dto.AddressDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.AddressIdDto;
@@ -69,9 +70,9 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public AddressDto updateAddress(EditAddressDto addressDto) {
+    public AddressDto updateAddress(Long addressId, SaveAddressDto addressDto) {
 
-        Optional<Address> optionalAddress = addressesDao.findById(addressDto.getId());
+        Optional<Address> optionalAddress = addressesDao.findById(addressId);
 
         if(optionalAddress.isPresent())
         {
@@ -87,7 +88,7 @@ public class AddressServiceImpl implements AddressService {
             return modelMapper.map(savedAddress, AddressDto.class);
         }
         else{
-            throw new RuntimeException("Address with id " + addressDto.getId() + " not found");
+            throw new RuntimeException("Address with id " + addressId + " not found");
         }
     }
 
@@ -98,12 +99,12 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public SaveAddressDto insertAddress(SaveAddressDto addressDto) {
-        userDao.findById(addressDto.getUser().getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
-
+    public SaveAddressDto insertAddress(UUID userId, SaveAddressDto addressDto) {
+        User user = userDao.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         Address address = modelMapper.map(addressDto, Address.class);
-        List<Address> addressess = addressesDao.findAllByValidity(addressDto.getUser().getUserId());
+        address.setUser(user);
+        List<Address> addressess = addressesDao.findAllByValidity(userId);
         if(addressess.isEmpty())
             address.setDefaultAddress(true);
         address.setIsValidAddress(true);
@@ -126,9 +127,6 @@ public class AddressServiceImpl implements AddressService {
             defaultAddress.setDefaultAddress(false);
             address.setDefaultAddress(true);
 
-            System.out.println("VECCHIO DEFAULT: "+defaultAddress);
-            System.out.println("NUOVO DEFAULT: "+address);
-
             addresses.add(defaultAddress);
             addresses.add(address);
 
@@ -143,9 +141,9 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public boolean deleteAddress(AddressIdDto id) {
-        System.out.println("ADDRESS DA ELIMINARE: "+id.getAddressId());
-        Optional<Address> optionalAddress = addressesDao.isValidByAddressId(id.getAddressId());
+    public boolean deleteAddress(Long id) {
+        System.out.println("ADDRESS DA ELIMINARE: "+id);
+        Optional<Address> optionalAddress = addressesDao.isValidByAddressId(id);
         if(optionalAddress.isPresent())
         {
             Address address = optionalAddress.get();
@@ -159,15 +157,15 @@ public class AddressServiceImpl implements AddressService {
             return true;
         }
         else{
-            throw new RuntimeException("Address with id " + id.getAddressId() + " not found");
+            throw new RuntimeException("Address with id " + id + " not found");
         }
     }
 
-    private void assignNewDefault(AddressIdDto id){
-        List<Address> valid_addresses = addressesDao.findAllByValidity(addressesDao.findUserByAddressId(id.getAddressId()).getId());
+    private void assignNewDefault(Long id){
+        List<Address> valid_addresses = addressesDao.findAllByValidity(addressesDao.findUserByAddressId(id).getId());
 
         for(Address a:valid_addresses){
-            if(!a.getId().equals(id.getAddressId())) {
+            if(!a.getId().equals(id)) {
                 updateDefaultAddress(a.getId());
                 return;
             }

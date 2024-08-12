@@ -57,20 +57,19 @@ public class AddressController {
         }
     }
 
-    @PostMapping(consumes = "application/json", path = "/insert-address")
-    @PreAuthorize("#addressDto.user.userId == authentication.principal.getId()")
-    public ResponseEntity<SaveAddressDto> insertAddress(@RequestBody SaveAddressDto addressDto){
+    @PostMapping(consumes = "application/json", path = "/{userId}/insert-address")
+    @PreAuthorize("#userId == authentication.principal.getId()")
+    public ResponseEntity<SaveAddressDto> insertAddress(@PathVariable UUID userId, @RequestBody SaveAddressDto addressDto){
         System.out.println("Received AddressDto: " + addressDto);
 
-        SaveAddressDto addedAddress = addressService.insertAddress(addressDto);
+        SaveAddressDto addedAddress = addressService.insertAddress(userId, addressDto);
         return new ResponseEntity<>(addedAddress, HttpStatus.CREATED);
     }
 
 
-    @DeleteMapping("/delete")
-    @PreAuthorize("#addressId.userId.userId == authentication.principal.getId()")
-    //@PreAuthorize("addressesDao.findUserByAddressId(#addressId.addressId).id == authentication.principal.getId()")
-    public ResponseEntity<Void> deleteAddress(@RequestBody AddressIdDto addressId) {
+    @DeleteMapping("/{addressId}/delete")
+    @PreAuthorize("#userId.userId == authentication.principal.getId()")
+    public ResponseEntity<Void> deleteAddress(@PathVariable Long addressId, @RequestBody UserIdDto userId) {
 
         boolean isRemoved = addressService.deleteAddress(addressId);
         if (!isRemoved) {
@@ -79,18 +78,19 @@ public class AddressController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping("/update-default")
-    @PreAuthorize("#id.userId.userId == authentication.principal.getId()")
-    public ResponseEntity<AddressDto> updateDefaultAddress(@RequestBody AddressIdDto id) {
-        AddressDto updatedAddress= addressService.updateDefaultAddress(id.getAddressId());
+    @PutMapping("/{addressId}/update-default")
+    @PreAuthorize("#userId.userId == authentication.principal.getId()")
+    public ResponseEntity<AddressDto> updateDefaultAddress(@PathVariable Long addressId, @RequestBody UserIdDto userId) {
+        AddressDto updatedAddress= addressService.updateDefaultAddress(addressId);
         return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
     }
 
-    @PutMapping("/edit-address")
-    @PreAuthorize("#addressDto.userId.userId == authentication.principal.getId()")
-    public ResponseEntity<AddressDto> updateDefaultAddress(@RequestBody EditAddressDto addressDto) {
+    @PutMapping("/{userId}/{addressId}/edit-address")
+    @PreAuthorize("#userId == authentication.principal.getId()")
+    public ResponseEntity<AddressDto> updateDefaultAddress(@PathVariable UUID userId, @PathVariable Long addressId, @RequestBody SaveAddressDto addressDto) {
 
-        AddressDto updatedAddress = addressService.updateAddress(addressDto);
+
+        AddressDto updatedAddress = addressService.updateAddress(addressId, addressDto);
         return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
     }
 }
