@@ -34,3 +34,23 @@ build/
 
 # application.properties
 application.properties
+
+# Gradle specific
+.gradle/
+out/
+!gradle/wrapper/gradle-wrapper.jar
+.gradle/caches/
+.gradle/gradle-app.setting
+.gradle/gradle.property
+gradle.properties
+
+# Kotlin specific
+*.class
+*.kt~
+*.log
+*.lock
+*.swp
+
+# MacOS specific
+.DS_Store
+
