@@ -2,6 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.data.service;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
 
 import java.util.Collection;
 import java.util.List;
@@ -12,7 +13,7 @@ public interface BooksService {
 
     BookDto getBookDtoById(Long id);
 
-    BookDto save(BookDto bookDto);
+    BookDto save(SaveBookDto bookDto);
 
     List<BookDto> getBookDto();
 

@@ -4,6 +4,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.BooksDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
 import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.BookNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -37,7 +38,7 @@ public class BooksServiceImpl implements BooksService {
     }
 
     @Override
-    public BookDto save(BookDto bookDto) {
+    public BookDto save(SaveBookDto bookDto) {
         Book book = modelMapper.map(bookDto, Book.class);
         Book b = booksDao.save(book);
         return modelMapper.map(b, BookDto.class);
