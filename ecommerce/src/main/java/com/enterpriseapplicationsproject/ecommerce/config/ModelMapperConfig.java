@@ -37,8 +37,6 @@ public class ModelMapperConfig {
                 map(source.getCredential().getEmail(), destination.getCredentials().getEmail());
                 map(source.getCredential().getPassword(), destination.getCredentials().getPassword());
                 map(source.getPhoneNumber(), destination.getPhoneNumber());
-                map(source.getAddresses(), destination.getAddresses());
-                map(source.getGroups(), destination.getGroups());
             }
         });
 
@@ -62,8 +60,6 @@ public class ModelMapperConfig {
                 map(source.getCredentials().getPassword(), destination.getCredential().getPassword());
                 map(source.getBirthDate(), destination.getBirthDate());
                 map(source.getPhoneNumber(), destination.getPhoneNumber());
-                map(source.getAddresses(), destination.getAddresses());
-                map(source.getGroups(), destination.getGroups());
             }
         });
 

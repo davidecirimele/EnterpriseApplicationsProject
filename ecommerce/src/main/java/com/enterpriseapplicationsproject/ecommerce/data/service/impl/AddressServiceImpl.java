@@ -116,7 +116,7 @@ public class AddressServiceImpl implements AddressService {
     public AddressDto updateDefaultAddress(Long id){
         Optional<Address> optionalAddress = addressesDao.findById(id);
 
-        if(optionalAddress.isPresent())
+        if(optionalAddress.isPresent() && optionalAddress.get().isValid())
         {
             Address address = optionalAddress.get();
 
@@ -142,7 +142,6 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public boolean deleteAddress(Long id) {
-        System.out.println("ADDRESS DA ELIMINARE: "+id);
         Optional<Address> optionalAddress = addressesDao.isValidByAddressId(id);
         if(optionalAddress.isPresent())
         {

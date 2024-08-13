@@ -16,19 +16,14 @@ public class UserDto {
 
     private UUID id;
 
-    @NotBlank(message = "First Name is required")
     private String firstName;
-    @NotBlank(message = "Last Name is required")
+
     private String lastName;
 
-    @NotBlank(message = "Birth Date is required")
     private LocalDate birthDate;
+
     private CredentialDto credentials;
 
-    private List<AddressDto> addresses;
-
     private String phoneNumber;
-
-    private List<Group> groups;
 
 }
