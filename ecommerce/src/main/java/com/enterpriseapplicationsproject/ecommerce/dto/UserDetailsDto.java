@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
-public class SaveUserDto {
+public class UserDetailsDto {
 
     private UUID id;
 
@@ -18,19 +18,10 @@ public class SaveUserDto {
     @NotBlank(message = "Last Name cannot be blank")
     private String lastName;
 
-    @NotBlank(message = "Birth Data is required")
-    private LocalDate birthDate;
-
     @NotNull(message = "Credentials are required")
-    private CredentialDto credential;
+    private String email;
 
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
-
-    public CredentialDto getCredential(){
-        if(credential==null)
-            credential = new CredentialDto();
-        return credential;
-    }
 
 }

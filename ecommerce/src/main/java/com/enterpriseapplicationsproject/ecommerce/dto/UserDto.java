@@ -22,7 +22,7 @@ public class UserDto {
 
     private LocalDate birthDate;
 
-    private CredentialDto credentials;
+    private CredentialDto credential;
 
     private String phoneNumber;
 

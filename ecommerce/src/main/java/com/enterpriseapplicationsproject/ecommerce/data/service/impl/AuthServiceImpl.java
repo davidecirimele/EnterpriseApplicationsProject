@@ -9,15 +9,13 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.RefreshToken;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.ShoppingCart;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RefreshTokenService;
-import com.enterpriseapplicationsproject.ecommerce.dto.LoginDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.SaveUserDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.RefreshTokenDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserAlreadyExistsException;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 
 import com.enterpriseapplicationsproject.ecommerce.data.service.AuthService;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserLoginDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -46,14 +44,14 @@ public class AuthServiceImpl implements  AuthService{
 
 
     @Override
-    public SaveUserDto registerUser( @Valid SaveUserDto userDto) {
+    public UserDetailsDto registerUser(@Valid SaveUserDto userDto) {
         System.out.println("UserDto: " + userDto);
 
-        userDao.findByCredentialEmail(userDto.getCredentials().getEmail()).ifPresent(u -> {
+        userDao.findByCredentialEmail(userDto.getCredential().getEmail()).ifPresent(u -> {
             throw new UserAlreadyExistsException("User with this email already exists");
         });
 
-        String hashedPassword = passwordEncoder.encode(userDto.getCredentials().getPassword());
+        String hashedPassword = passwordEncoder.encode(userDto.getCredential().getPassword());
 
         User user = modelMapper.map(userDto, User.class);
         user.getCredential().setPassword(hashedPassword);
@@ -65,18 +63,18 @@ public class AuthServiceImpl implements  AuthService{
         cart.setUserId(user);
         shoppingCartsDao.save(cart);
 
-        return modelMapper.map(savedUser, SaveUserDto.class);
+        return modelMapper.map(savedUser, UserDetailsDto.class);
     }
 
     @Override
     public SaveUserDto registerAdmin(SaveUserDto userDto) {
         System.out.println("Admin UserDto: " + userDto);
 
-        userDao.findByCredentialEmail(userDto.getCredentials().getEmail()).ifPresent(u -> {
+        userDao.findByCredentialEmail(userDto.getCredential().getEmail()).ifPresent(u -> {
             throw new IllegalArgumentException("Admin with this email already exists");
         });
 
-        String hashedPassword = passwordEncoder.encode(userDto.getCredentials().getPassword());
+        String hashedPassword = passwordEncoder.encode(userDto.getCredential().getPassword());
 
         Admin admin = modelMapper.map(userDto, Admin.class);
         admin.getCredential().setPassword(hashedPassword);
