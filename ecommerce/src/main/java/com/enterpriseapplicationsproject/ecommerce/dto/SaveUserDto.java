@@ -22,15 +22,15 @@ public class SaveUserDto {
     private LocalDate birthDate;
 
     @NotNull(message = "Credentials are required")
-    private CredentialDto credentials;
+    private CredentialDto credential;
 
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
     public CredentialDto getCredentials(){
-        if(credentials==null)
-            credentials = new CredentialDto();
-        return credentials;
+        if(credential==null)
+            credential = new CredentialDto();
+        return credential;
     }
 
 }
