@@ -3,6 +3,7 @@ package com.enterpriseapplicationsproject.ecommerce.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
 import java.sql.Date;
@@ -48,13 +49,13 @@ public class SaveBookDto {
     @NotBlank(message = "Category is mandatory")
     private String category;
 
-    @Positive(message = "Weight must be positive")
+    @PositiveOrZero(message = "Weight must be positive or zero")
     private Double weight;
 
     @Positive(message = "Price must be positive")
     private Double price;
 
-    @Positive(message = "Stock must be positive")
+    @PositiveOrZero(message = "Stock must be positive or zero")
     private Integer stock;
 
 }

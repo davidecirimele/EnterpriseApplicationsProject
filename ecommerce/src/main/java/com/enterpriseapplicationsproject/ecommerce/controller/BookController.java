@@ -42,7 +42,7 @@ public class BookController {
     }
 
     @PostMapping(consumes = "application/json", path = "/add")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') and isAuthenticated()")
     public ResponseEntity<BookDto> add(@RequestBody SaveBookDto bDto) {
         BookDto b = booksService.save(bDto);
         if (b == null)

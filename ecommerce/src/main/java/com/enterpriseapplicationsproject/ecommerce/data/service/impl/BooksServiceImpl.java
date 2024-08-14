@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -40,6 +41,7 @@ public class BooksServiceImpl implements BooksService {
     @Override
     public BookDto save(SaveBookDto bookDto) {
         Book book = modelMapper.map(bookDto, Book.class);
+        book.setInsertDate(LocalDate.now());
         Book b = booksDao.save(book);
         return modelMapper.map(b, BookDto.class);
     }
