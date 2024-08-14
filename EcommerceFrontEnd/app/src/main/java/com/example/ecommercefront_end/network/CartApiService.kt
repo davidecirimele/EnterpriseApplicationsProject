@@ -1,5 +1,7 @@
 package com.example.ecommercefront_end.network
 
+import com.example.ecommercefront_end.model.InsertCartItem
+import com.example.ecommercefront_end.model.QuantityCartItem
 import com.example.ecommercefront_end.model.ShoppingCart
 import retrofit2.http.*
 interface CartApiService {
@@ -12,6 +14,11 @@ interface CartApiService {
 
     @PUT("/cart/edit-quantity")
     suspend fun updateQuantity(@Body quantityCartItem : QuantityCartItem)
+
+
+
+
+
 
 
 }

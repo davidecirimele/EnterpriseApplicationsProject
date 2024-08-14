@@ -1,10 +1,5 @@
 package com.example.ecommercefront_end.network
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.Json
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -21,4 +16,5 @@ object RetrofitClient {
     val cartApiService: CartApiService by lazy {
         retrofit.create(CartApiService::class.java)
     }
+
 }

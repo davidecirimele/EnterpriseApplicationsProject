@@ -24,8 +24,8 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     private fun loadCartItems() {
         viewModelScope.launch {
             try {
-                val items = repository.fetchCartItems()
-                _cartItems.value = items
+                val cart = repository.getCart()
+                _cartItems.value = cart.items
                 updateTotalAmount()
             } catch (e: Exception) {
                 // Gestire l'errore, ad esempio mostrando un messaggio all'utente
@@ -37,9 +37,13 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
         viewModelScope.launch {
             try {
                 val updatedItem = item.copy(quantity = newQuantity)
-                repository.updateCartItem(updatedItem)
+                repository.updateQuantity(updatedItem.id, updatedItem.)
                 // Ricarica gli articoli dopo l'aggiornamento
-                loadCartItems()
+                _cartItems.value = _cartItems.value.map { currentItem ->
+                    if (currentItem.id == updatedItem.id) updatedItem else currentItem
+                }
+                updateTotalAmount()
+
             } catch (e: Exception) {
                 // Gestire l'errore
             }
