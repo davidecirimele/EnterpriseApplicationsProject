@@ -50,11 +50,15 @@ public class AuthServiceImpl implements  AuthService{
     public SaveUserDto registerUser( @Valid SaveUserDto userDto) {
         System.out.println("UserDto: " + userDto);
 
-        userDao.findByCredentialEmail(userDto.getCredentials().getEmail()).ifPresent(u -> {
+        userDao.findByCredentialEmail(userDto.getCredential().getEmail()).ifPresent(u -> {
             throw new UserAlreadyExistsException("User with this email already exists");
         });
 
-        String hashedPassword = passwordEncoder.encode(userDto.getCredentials().getPassword());
+        userDao.findByPhoneNumber(userDto.getPhoneNumber()).ifPresent(u -> {
+            throw new UserAlreadyExistsException("User with this phone number already exists");
+        });
+
+        String hashedPassword = passwordEncoder.encode(userDto.getCredential().getPassword());
 
         User user = modelMapper.map(userDto, User.class);
         user.getCredential().setPassword(hashedPassword);
@@ -76,15 +80,20 @@ public class AuthServiceImpl implements  AuthService{
     public SaveUserDto registerAdmin(SaveUserDto userDto) {
         System.out.println("Admin UserDto: " + userDto);
 
-        userDao.findByCredentialEmail(userDto.getCredentials().getEmail()).ifPresent(u -> {
-            throw new IllegalArgumentException("Admin with this email already exists");
+        userDao.findByCredentialEmail(userDto.getCredential().getEmail()).ifPresent(u -> {
+            throw new UserAlreadyExistsException("User with this email already exists");
         });
 
-        String hashedPassword = passwordEncoder.encode(userDto.getCredentials().getPassword());
+        userDao.findByPhoneNumber(userDto.getPhoneNumber()).ifPresent(u -> {
+            throw new UserAlreadyExistsException("Admin with this phone number already exists");
+        });
+
+        String hashedPassword = passwordEncoder.encode(userDto.getCredential().getPassword());
 
         Admin admin = modelMapper.map(userDto, Admin.class);
         admin.getCredential().setPassword(hashedPassword);
         System.out.println("Admin: " + admin);
+        System.out.println("Admin: " + admin.getCredential().getEmail());
 
         userDao.save(admin);
 
