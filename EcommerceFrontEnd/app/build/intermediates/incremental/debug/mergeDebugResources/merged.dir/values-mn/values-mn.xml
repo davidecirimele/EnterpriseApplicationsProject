@@ -48,6 +48,24 @@
     <string name="clear_text_end_icon_content_description">Текстийг арилгах</string>
     <string msgid="406453423630273620" name="close_drawer">"Навигацын цэсийг хаах"</string>
     <string msgid="7573152094250666567" name="close_sheet">"Хүснэгтийг хаах"</string>
+    <string msgid="2523291102206661146" name="common_google_play_services_enable_button">Идэвхжүүлэх</string>
+    <string msgid="227660514972886228" name="common_google_play_services_enable_text">%1$s нь Google Play үйлчилгээг идэвхжүүлэх хүртэл ажиллахгүй.</string>
+    <string msgid="5122002158466380389" name="common_google_play_services_enable_title">Google Play үйлчилгээг идэвхжүүлэх</string>
+    <string msgid="7153882981874058840" name="common_google_play_services_install_button">Суулгах</string>
+    <string name="common_google_play_services_install_text">Таны төхөөрөмжид Google Play үйлчилгээ байхгүй тул %1$s ажиллахгүй.</string>
+    <string msgid="7215213145546190223" name="common_google_play_services_install_title">Google Play үйлчилгээг авах</string>
+    <string name="common_google_play_services_notification_channel_name">Google Play-н үйлчилгээнүүдийн боломжит байдал</string>
+    <string name="common_google_play_services_notification_ticker">Google Наадаан үйлчилгээний алдаа</string>
+    <string name="common_google_play_services_unknown_issue">%1$s-г Google Play-н үйлчилгээгээр ашиглахад асуудал гарлаа. Дахин оролдоно уу.</string>
+    <string name="common_google_play_services_unsupported_text">Таны төхөөрөмж Google Play үйлчилгээг дэмждэггүй учир %1$s ажиллахгүй.</string>
+    <string msgid="6556509956452265614" name="common_google_play_services_update_button">Шинэчлэх</string>
+    <string msgid="9053896323427875356" name="common_google_play_services_update_text">%1$s нь таныг Google Play үйлчилгээнүүдийг шинэчлэхээс нааш ажиллахгүй.</string>
+    <string msgid="6006316683626838685" name="common_google_play_services_update_title">Google Play үйлчилгээг шинэчлэх</string>
+    <string name="common_google_play_services_updating_text">%1$s нь одоогоор шинэчилж буй Google Play үйлчилгээгүйгээр ажиллахгүй.</string>
+    <string name="common_google_play_services_wear_update_text">Google Play үйлчилгээний шинэ хувилбар хэрэгтэй. Энэ нь удахгүй өөрөө өөрийгөө шинэчлэх болно.</string>
+    <string name="common_open_on_phone">Утсаар нээх</string>
+    <string name="common_signin_button_text">Нэвтрэх</string>
+    <string name="common_signin_button_text_long">Google-р нэвтрэх:</string>
     <string msgid="3260749812566568062" name="copy_toast_msg">"Холбоосыг түр санах ойд хуулсан"</string>
     <string msgid="8038256446254964252" name="default_error_message">"Буруу оролт"</string>
     <string msgid="6312721426453364202" name="default_popup_window_title">"Попап цонх"</string>
@@ -181,6 +199,14 @@
     <string msgid="875452955155264703" name="off">"Унтраалттай"</string>
     <string msgid="8655164131929253426" name="on">"Асаалттай"</string>
     <string name="password_toggle_content_description">Нууц үгийг харуулах</string>
+    <string name="places_autocomplete_clear_button">Хайлтыг цэвэрлэх</string>
+    <string name="places_autocomplete_label">Газар сонгоно уу</string>
+    <string name="places_autocomplete_no_results_for_query">%1$s гэж хайхад илэрц гарч ирсэнгүй</string>
+    <string name="places_autocomplete_search_hint">Газар хайх</string>
+    <string name="places_cancel">Болих</string>
+    <string name="places_powered_by_google">Google-р дэмжигдсэн</string>
+    <string name="places_search_error">Хайлтын илэрцийг ачаалах боломжгүй байна.</string>
+    <string name="places_try_again">Дахин оролдох</string>
     <string msgid="5941395253238309765" name="range_end">"Мужийн төгсгөл"</string>
     <string msgid="7097486360902471446" name="range_start">"Мужийн эхлэл"</string>
     <string msgid="6264217191555673260" name="search_menu_title">"Хайх"</string>

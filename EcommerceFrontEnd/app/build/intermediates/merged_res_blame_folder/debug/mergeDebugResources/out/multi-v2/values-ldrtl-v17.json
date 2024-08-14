@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.ecommercefront_end.app-mergeDebugResources-69:/values-ldrtl-v17/values-ldrtl-v17.xml",
+            "outputFile": "com.example.ecommercefront_end.app-mergeDebugResources-74:/values-ldrtl-v17/values-ldrtl-v17.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\samue\\.gradle\\caches\\transforms-4\\80416a3da393cf45316d461bbe166143\\transformed\\material-1.12.0\\res\\values-ldrtl-v17\\values-ldrtl-v17.xml",
+                    "source": "C:\\Users\\samue\\.gradle\\caches\\transforms-4\\69b38008b73e5459b060cc1da02128fa\\transformed\\material-1.12.0\\res\\values-ldrtl-v17\\values-ldrtl-v17.xml",
                     "from": {
                         "startLines": "2,3",
                         "startColumns": "4,4",

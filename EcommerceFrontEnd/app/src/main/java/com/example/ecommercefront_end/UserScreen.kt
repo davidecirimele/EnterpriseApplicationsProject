@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,8 +33,11 @@ import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.*
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.ViewModel
@@ -47,7 +51,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
-
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,39 +64,44 @@ fun UserAuthScreen(navController: NavController) {
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
-            modifier= Modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            Button(
+            OutlinedButton(
                 onClick = { isLoginScreen = true },
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isLoginScreen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+                border = BorderStroke(
+                    width = if (isLoginScreen) 2.dp else 1.dp,
+                    color = if (isLoginScreen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                ),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = if (isLoginScreen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             ) {
-                Text(
-                    "Accedi",
-                    color = if (isLoginScreen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Text("Accedi")
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Button(
+            OutlinedButton(
                 onClick = { isLoginScreen = false },
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (!isLoginScreen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+                border = BorderStroke(
+                    width = if (!isLoginScreen) 2.dp else 1.dp,
+                    color = if (!isLoginScreen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                ),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = if (!isLoginScreen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             ) {
-                Text(
-                    "Registrati",
-                    color = if (!isLoginScreen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Text("Registrati")
             }
         }
+
+        // Il resto del codice per visualizzare LoginPage o RegistrationScreen
+        // ...
 
         // Il resto del codice per visualizzare LoginPage o RegistrationScreen
         if (isLoginScreen) {
@@ -194,55 +206,220 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onSwitchToLogin: () -
 }
 @Composable
 fun RegistrationStep1(onNext: () -> Unit) {
-    Column {
-        Text("Registrazione - Step 1")
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("")}
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text("Registrazione - Step 1", style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = onNext) {
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Nome e Cognome") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                        contentDescription = if (passwordVisible) "Nascondi password" else "Mostra password"
+                    )
+                }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = { Text("Conferma Password") },
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                        contentDescription = if (passwordVisible) "Nascondi password" else "Mostra password"
+                    )
+                }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                if (password == confirmPassword) {
+                    // Salva i dati nel ViewModel o esegui la logica di registrazione
+                    onNext() // Passa al prossimo step
+                } else {
+                    // Mostra un messaggio di errore: le password non corrispondono
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text("Avanti")
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistrationStep2(onNext: () -> Unit, onBack: () -> Unit) {
-    Column {
-        Text("Registrazione - Step 2")
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var phoneNumber by remember { mutableStateOf("") }
+    var street by remember { mutableStateOf("") }
+    var city by remember { mutableStateOf("") }
+    var province by remember { mutableStateOf("") }
+    var zipCode by remember { mutableStateOf("") }
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text("Registrazione - Step 2", style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = onNext) {
-            Text("Avanti")
+        // Data di nascita
+        OutlinedTextField(
+            value = selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+            onValueChange = { },
+            label = { Text("Data di nascita") },
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = true,
+            trailingIcon = {
+                IconButton(onClick = { showDatePicker = true }) {
+                    Icon(Icons.Filled.CalendarToday, contentDescription = "Seleziona data")
+                }
+            }
+        )
+        if (showDatePicker) {
+            DatePickerDialog(
+                onDismissRequest = { showDatePicker = false },
+                confirmButton = {
+                    Button(onClick = { showDatePicker = false }) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDatePicker = false }) {
+                        Text("Annulla")
+                    }
+                }
+            ) {
+                DatePicker(
+                    state = rememberDatePickerState(initialSelectedDateMillis = selectedDate.atStartOfDay(
+                        ZoneId.systemDefault()).toInstant().toEpochMilli()),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(onClick = onBack) {
-            Text("Indietro")
+        // Numero di telefono
+        OutlinedTextField(
+            value = phoneNumber,
+            onValueChange = { newValue ->
+                phoneNumber = newValue.filter { it.isDigit() } // Accetta solo numeri
+            },
+            label = { Text("Numero di telefono") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Indirizzo
+        OutlinedTextField(
+            value = street,
+            onValueChange = { street = it },
+            label = { Text("Via") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = city,
+            onValueChange = { city = it },
+            label = { Text("Città") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = province,
+            onValueChange = { province = it },
+            label = { Text("Provincia") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = zipCode,
+            onValueChange = { zipCode = it },
+            label = { Text("Codice postale") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Button(onClick = onBack) {
+                Text("Indietro")
+            }
+
+            Button(onClick = {
+                // Salva i dati nel ViewModel o esegui la logica di registrazione
+                onNext() // Passa al prossimo step
+            }) {
+                Text("Avanti")
+            }
         }
     }
 }
 
 @Composable
 fun RegistrationStep3(onComplete: () -> Unit, onBack: () -> Unit) {
+    // Implementa il terzo passaggio di registrazione qui (ad esempio, conferma dei dati)
     Column {
         Text("Registrazione - Step 3")
-
+        // Aggiungi i campi necessari per raccogliere i dati dell'utente
         Spacer(modifier = Modifier.height(16.dp))
-
         Button(onClick = onComplete) {
             Text("Completa Registrazione")
         }
-
         Spacer(modifier = Modifier.height(8.dp))
-
         Button(onClick = onBack) {
             Text("Indietro")
-        }
-    }
+        }}
 }
-
 /*
 @Composable
 fun UserDetailsScreen(navController: NavController, viewModel: RegistrationViewModel) {

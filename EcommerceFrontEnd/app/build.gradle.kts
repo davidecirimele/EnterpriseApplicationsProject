@@ -61,6 +61,8 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.browser)
     implementation(libs.material)
+    implementation(libs.places)
+    implementation(libs.androidx.core.i18n)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

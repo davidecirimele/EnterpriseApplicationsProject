@@ -44,7 +44,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
-import com.example.ecommercefront_end.ui.user.LoginPage
+
 
 
 
@@ -72,17 +72,10 @@ fun NavigationView(navController: NavHostController) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
     Scaffold(
-        topBar = {
-            if (currentRoute != "userAuth") { // Condizione per nascondere la TopBar nella schermata di autenticazione
-                TopBar(navController)
-            }
-        },
-        bottomBar = {
-            if (currentRoute != "userAuth") { // Condizione per nascondere la BottomBar nella schermata di autenticazione
-                BottomBar(selectedIndex, navController)
-            }
-        }
-    ) { innerPadding ->
+        topBar = { TopBar(navController) }, // Rimuovi la condizione
+        bottomBar = { BottomBar(selectedIndex, navController) } // Rimuovi la condizione
+    )
+    { innerPadding ->
         NavHost(navController = navController, startDestination = "home", Modifier.padding(innerPadding)) {
             composable("home") { HomePage(navController) }
             composable("cart") { CartScreen() }
