@@ -26,9 +26,9 @@ public class CartItemsServiceImpl implements CartItemsService {
     private final ModelMapper modelMapper;
 
     @Override
-    public List<CartItemDto> getCartItemsByCartId(ShoppingCartIdDto cartId) {
+    public List<CartItemDto> getCartItemsByCartId(Long cartId) {
 
-        Optional<ShoppingCart> optionalCart = shoppingCartsDao.findByUserId(cartId.getUserId().getUserId());
+        Optional<ShoppingCart> optionalCart = shoppingCartsDao.findById(cartId);
 
         if(optionalCart.isPresent()){
             ShoppingCart cart = optionalCart.get();
@@ -38,7 +38,7 @@ public class CartItemsServiceImpl implements CartItemsService {
             return cartItems.stream().map(cartItem -> modelMapper.map(cartItem , CartItemDto.class)).toList();
         }
         else{
-            throw new RuntimeException("No cart found with id "+cartId.getCartId());
+            throw new RuntimeException("No cart found with id "+cartId);
         }
     }
 

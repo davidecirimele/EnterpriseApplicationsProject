@@ -23,15 +23,15 @@ public interface UserService {
 
     User getUserByEmail(String email);
 
-    UserDto updatePassword(PasswordUserDto userDto);
+    UserDto updatePassword(UUID userId, PasswordUserDto userDto);
 
     User convertDto(UserDto userDto);
 
-    UserDto updateEmail(EmailUserDto userDto);
+    UserDto updateEmail(UUID userId, EmailUserDto userDto);
 
-    UserDto updatePhoneNumber(PhoneNumberUserDto userDto);
+    UserDto updatePhoneNumber(UUID userId, PhoneNumberUserDto userDto);
 
-    boolean delete(UserIdDto userId);
+    boolean delete(UUID userId);
 
     String getUserRole(UUID userId);
 }

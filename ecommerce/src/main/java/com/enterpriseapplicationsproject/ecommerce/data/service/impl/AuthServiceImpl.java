@@ -9,15 +9,13 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.RefreshToken;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.ShoppingCart;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RefreshTokenService;
-import com.enterpriseapplicationsproject.ecommerce.dto.LoginDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.SaveUserDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.RefreshTokenDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserAlreadyExistsException;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 
 import com.enterpriseapplicationsproject.ecommerce.data.service.AuthService;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserLoginDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -47,7 +45,7 @@ public class AuthServiceImpl implements  AuthService{
 
 
     @Override
-    public SaveUserDto registerUser( @Valid SaveUserDto userDto) {
+    public UserDetailsDto registerUser(@Valid SaveUserDto userDto) {
         System.out.println("UserDto: " + userDto);
 
         userDao.findByCredentialEmail(userDto.getCredential().getEmail()).ifPresent(u -> {
@@ -64,16 +62,13 @@ public class AuthServiceImpl implements  AuthService{
         user.getCredential().setPassword(hashedPassword);
         System.out.println("User: " + user);
 
-        userDao.save(user);
+        User savedUser = userDao.save(user);
 
-        System.out.println("CREATE SHOPPING CART USER ID: "+user.getId());
-        ShoppingCart shoppingCart = new ShoppingCart();
-        shoppingCart.setUserId(user); // Imposta l'utente trovato nel carrello
-        shoppingCart.setCartItems(new ArrayList<>()); // Inizializza la lista degli articoli del carrello
+        ShoppingCart cart = new ShoppingCart();
+        cart.setUserId(user);
+        shoppingCartsDao.save(cart);
 
-        shoppingCartsDao.save(shoppingCart);
-
-        return modelMapper.map(user, SaveUserDto.class);
+        return modelMapper.map(savedUser, UserDetailsDto.class);
     }
 
     @Override
@@ -93,7 +88,6 @@ public class AuthServiceImpl implements  AuthService{
         Admin admin = modelMapper.map(userDto, Admin.class);
         admin.getCredential().setPassword(hashedPassword);
         System.out.println("Admin: " + admin);
-        System.out.println("Admin: " + admin.getCredential().getEmail());
 
         userDao.save(admin);
 

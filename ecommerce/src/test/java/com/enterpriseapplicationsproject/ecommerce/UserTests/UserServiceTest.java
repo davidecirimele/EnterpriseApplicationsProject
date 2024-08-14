@@ -9,6 +9,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.impl.AuthService
 import com.enterpriseapplicationsproject.ecommerce.data.service.impl.UserServiceImpl;
 import com.enterpriseapplicationsproject.ecommerce.dto.CredentialDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveUserDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.UserDetailsDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,8 +45,8 @@ public class UserServiceTest {
         userDto.setFirstName("Dado");
         userDto.setLastName("Ciri");
         userDto.setBirthDate(LocalDate.parse("1998-03-05"));
-        userDto.getCredentials().setEmail("davi598@gmail.com");
-        userDto.getCredentials().setPassword("password123");
+        userDto.getCredential().setEmail("davi598@gmail.com");
+        userDto.getCredential().setPassword("password123");
         userDto.setPhoneNumber("3462819839");
 
         User user = new User();
@@ -61,12 +62,12 @@ public class UserServiceTest {
         when(modelMapper.map(any(SaveUserDto.class), any(Class.class))).thenReturn(user);
 
         // Act
-        SaveUserDto createdUser = authService.registerUser(userDto);
+        UserDetailsDto createdUser = authService.registerUser(userDto);
 
         // Assert
         assertEquals(user.getFirstName(), createdUser.getFirstName());
         assertEquals(user.getLastName(), createdUser.getLastName());
-        assertEquals(user.getCredential().getEmail(), createdUser.getCredentials().getEmail());
+        assertEquals(user.getCredential().getEmail(), createdUser.getEmail());
     }
 
     @Test
@@ -75,8 +76,8 @@ public class UserServiceTest {
         userDto.setFirstName("Dado");
         userDto.setLastName("Ciri");
         userDto.setBirthDate(LocalDate.parse("1998-03-05"));
-        userDto.getCredentials().setEmail("davi598@gmail.com");
-        userDto.getCredentials().setPassword("password123");
+        userDto.getCredential().setEmail("davi598@gmail.com");
+        userDto.getCredential().setPassword("password123");
         userDto.setPhoneNumber("3462819839");
 
         User user = new User();
@@ -92,12 +93,12 @@ public class UserServiceTest {
         when(modelMapper.map(any(SaveUserDto.class), any(Class.class))).thenReturn(user);
 
         // Act
-        SaveUserDto createdUser = authService.registerUser(userDto);
+        UserDetailsDto createdUser = authService.registerUser(userDto);
 
         // Assert
         assertEquals(user.getFirstName(), createdUser.getFirstName());
         assertEquals(user.getLastName(), createdUser.getLastName());
-        assertEquals(user.getCredential().getEmail(), createdUser.getCredentials().getEmail());
+        assertEquals(user.getCredential().getEmail(), createdUser.getEmail());
     }
 
     @Test
@@ -106,8 +107,8 @@ public class UserServiceTest {
         userDto.setFirstName("Dado");
         userDto.setLastName("Ciri");
         userDto.setBirthDate(LocalDate.parse("1998-03-05"));
-        userDto.getCredentials().setEmail("davi598@gmail.com");
-        userDto.getCredentials().setPassword("password123");
+        userDto.getCredential().setEmail("davi598@gmail.com");
+        userDto.getCredential().setPassword("password123");
         userDto.setPhoneNumber("3462819839");
 
         User user = new User();
@@ -123,12 +124,13 @@ public class UserServiceTest {
         when(modelMapper.map(any(SaveUserDto.class), any(Class.class))).thenReturn(user);
 
         // Act
-        SaveUserDto createdUser = authService.registerUser(userDto);
+        // Act
+        UserDetailsDto createdUser = authService.registerUser(userDto);
 
         // Assert
         assertEquals(user.getFirstName(), createdUser.getFirstName());
         assertEquals(user.getLastName(), createdUser.getLastName());
-        assertEquals(user.getCredential().getEmail(), createdUser.getCredentials().getEmail());
+        assertEquals(user.getCredential().getEmail(), createdUser.getEmail());
     }
 
     @Test
@@ -137,8 +139,8 @@ public class UserServiceTest {
         userDto.setFirstName("Dado");
         userDto.setLastName("Ciri");
         userDto.setBirthDate(LocalDate.parse("1998-03-05"));
-        userDto.getCredentials().setEmail("davi598@gmail.com");
-        userDto.getCredentials().setPassword("password123");
+        userDto.getCredential().setEmail("davi598@gmail.com");
+        userDto.getCredential().setPassword("password123");
         userDto.setPhoneNumber("3462819839");
 
         User user = new User();
@@ -154,12 +156,12 @@ public class UserServiceTest {
         when(modelMapper.map(any(SaveUserDto.class), any(Class.class))).thenReturn(user);
 
         // Act
-        SaveUserDto createdUser = authService.registerUser(userDto);
+        UserDetailsDto createdUser = authService.registerUser(userDto);
 
         // Assert
         assertEquals(user.getFirstName(), createdUser.getFirstName());
         assertEquals(user.getLastName(), createdUser.getLastName());
-        assertEquals(user.getCredential().getEmail(), createdUser.getCredentials().getEmail());
+        assertEquals(user.getCredential().getEmail(), createdUser.getEmail());
     }
 
 

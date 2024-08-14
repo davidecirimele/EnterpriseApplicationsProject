@@ -27,7 +27,7 @@ public class SaveUserDto {
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
-    public CredentialDto getCredentials(){
+    public CredentialDto getCredential(){
         if(credential==null)
             credential = new CredentialDto();
         return credential;

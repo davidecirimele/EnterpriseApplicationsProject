@@ -35,7 +35,7 @@ public class ShoppingCartController {
         return new ResponseEntity<>(shoppingCart, HttpStatus.OK);
     }
 
-    @DeleteMapping("{userId}/clear")
+    @DeleteMapping("/{userId}/clear")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<Void> deleteShoppingCart(@PathVariable UUID userId) {
 

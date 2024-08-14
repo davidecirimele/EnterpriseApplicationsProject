@@ -33,8 +33,8 @@ public class CartItemsController {
     //}
 
     @GetMapping("/shopping_cart/{cartId}")
-    @PreAuthorize("#cartId.userId.userId == authentication.principal.getId()")
-    public ResponseEntity<List<CartItemDto>> getItems(@RequestBody ShoppingCartIdDto cartId) {
+    @PreAuthorize("#userId.userId == authentication.principal.getId()")
+    public ResponseEntity<List<CartItemDto>> getItems(@PathVariable Long cartId, @RequestBody UserIdDto userId) {
         List<CartItemDto> items = cartItemsService.getCartItemsByCartId(cartId);
         return new ResponseEntity<>(items, HttpStatus.OK);
     }

@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface CartItemsService {
 
-    List<CartItemDto> getCartItemsByCartId(ShoppingCartIdDto cartId);
+    List<CartItemDto> getCartItemsByCartId(Long cartId);
 
     CartItemDto save(CartItem cartitem);
 

@@ -7,6 +7,4 @@ public class TokenRefreshRequest {
 
     private String refreshToken;
 
-    // Getters and Setters
-
 }

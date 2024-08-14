@@ -1,13 +1,11 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service;
 
-import com.enterpriseapplicationsproject.ecommerce.dto.LoginDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.SaveUserDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserLoginDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.*;
 
 import java.util.Map;
 
 public interface AuthService {
-    SaveUserDto registerUser(SaveUserDto userDto);
+    UserDetailsDto registerUser(SaveUserDto userDto);
 
     SaveUserDto registerAdmin(SaveUserDto userDto);
 

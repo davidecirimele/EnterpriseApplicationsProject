@@ -28,4 +28,5 @@ public interface AddressesDao extends JpaRepository<Address, Long> {
 
     @Query("SELECT u FROM User u JOIN u.addresses a WHERE a.id = :id")
     User findUserByAddressId(@Param("id") Long id);
+
 }

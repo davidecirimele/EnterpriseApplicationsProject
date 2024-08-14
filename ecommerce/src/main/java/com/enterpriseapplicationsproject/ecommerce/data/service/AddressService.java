@@ -23,13 +23,13 @@ public interface AddressService {
 
     List<AddressDto> getAddresses();
 
-    AddressDto updateAddress(EditAddressDto addressDto);
+    AddressDto updateAddress(Long addressId, SaveAddressDto addressDto);
 
     AddressDto save(Address address);
 
-    public SaveAddressDto insertAddress(SaveAddressDto addressDto);
+    public SaveAddressDto insertAddress(UUID userId, SaveAddressDto addressDto);
 
     public AddressDto updateDefaultAddress(Long id);
 
-    public boolean deleteAddress(AddressIdDto id);
+    public boolean deleteAddress(Long id);
 }
