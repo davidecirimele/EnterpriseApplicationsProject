@@ -27,6 +27,7 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     private fun loadCartItems() {
         viewModelScope.launch {
             try {
+                println("sto caricando il carrello")
 
                 val cart = repository.getCart(getUser().id)
                 _cartItems.value = cart.items
@@ -75,7 +76,9 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
 
     private fun getUser(): UserId {
-       val user = UserId(SessionManager.user?.id ?: throw IllegalStateException("User not logged in"))
+       //val user = UserId(SessionManager.user?.id ?: throw IllegalStateException("User not logged in"))
+        val  uid = UUID.fromString("4267a28a-cab9-4c68-90b1-73874a0d08cf")
+        val user = UserId(uid)
         return user
     }
 }
