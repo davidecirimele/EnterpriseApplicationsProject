@@ -17,6 +17,37 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
+val EmeraldGreen = Color(0xFF50C878)
+val Gold = Color(0xFFFFD700)
+val Black = Color(0xFF000000)
+
+private val EGBDarkColorScheme = darkColorScheme(
+    primary = EmeraldGreen,
+    secondary = Gold,
+    tertiary = Black,
+    background = Black,
+    surface = Color(0xFF121212), // Un grigio scuro per la superficie
+    onPrimary = Black,
+    onSecondary = Black,
+    onTertiary = Gold,
+    onBackground = Color.White,
+    onSurface = Color.White
+)
+
+private val EGBLightColorScheme = lightColorScheme(
+    primary = EmeraldGreen,
+    secondary = Gold,
+    tertiary = Black,
+    background = Color.White, // Sfondo bianco
+    surface = Color(0xFFF5F5F5), // Un grigio chiaro per la superficie
+    onPrimary = Black,
+    onSecondary = Black,
+    onTertiary = Gold,
+    onBackground = Black,
+    onSurface = Black
+)
+
+
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
     onPrimary = onPrimaryLight,
@@ -262,7 +293,7 @@ val unspecified_scheme = ColorFamily(
 fun EcommerceFrontEndTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable() () -> Unit
 ) {
     val colorScheme = when {
@@ -271,8 +302,8 @@ fun EcommerceFrontEndTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> darkScheme
-        else -> lightScheme
+        darkTheme -> EGBDarkColorScheme
+        else -> EGBLightColorScheme
     }
     val view = LocalView.current
     if (!view.isInEditMode) {

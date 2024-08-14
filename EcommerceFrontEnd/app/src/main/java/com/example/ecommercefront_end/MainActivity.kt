@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end
 
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -35,54 +36,51 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
+import com.example.ecommercefront_end.ui.user.LoginPage
+
 
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContent {
             EcommerceFrontEndTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomePage()
+                    val navController = rememberNavController()
+                    NavigationView(navController)
                 }
             }
         }
     }
 }
 
-@Composable
-fun NavigationView(navHostController: NavHostController) {
-    NavHost(navController = navHostController, startDestination = "home") {
-        composable("home") {
-            HomeProducts()
-        }
-        composable("user") {
-            UserScreen()
-        }
-        composable("cart") {
-            CartScreen()//viewModel = CartViewModel(), onCheckoutClick = { /* Add your action here */ })
 
-        }
-        composable("favorite") {
-            CartScreen()
-        }
+
+@Composable
+fun NavigationView(navController: NavHostController) {
+    NavHost(navController = navController, startDestination = "home") {
+        composable("home") { HomePage() }
+        composable("cart") { CartScreen() }
+        composable("favorite") { FavoriteScreen() }
+        composable("userStart") { UserStartScreen(navController) }
+        composable("login") { LoginPage(navController) }
+        composable("registrationStep1") { RegistrationStep1(navController) }
+        composable("registrationStep2") { RegistrationStep2(navController) }
+        composable("registrationStep3") { RegistrationStep3(navController) }
+        composable("registrationComplete") { RegistrationCompleteScreen(navController) }
     }
 }
-
-/*
-fun CartViewModel(): CartViewModel {
-
-}*/
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -151,7 +149,7 @@ fun HomePage() {
         floatingActionButtonPosition = FabPosition.End
     ) {
         Box(modifier = Modifier.padding(it)) {
-            NavigationView(navHostController = navHostController)
+            //NavigationView(navHostController = navHostController)
         }
     }
 }
@@ -166,10 +164,14 @@ fun AddToCartFloatingButton(onClick: () -> Unit) {
 fun HomeScreen() {
     Text(text = "Home Screen")
 }
+
+
+/*
 @Composable
-fun UserScreen() {
-    Text(text = "User Screen")
-}
+fun UserScreen(navHostController: NavHostController) {
+    Text(text = "userStart")
+
+}*/
 
 @Composable
 fun CartScreen() {
