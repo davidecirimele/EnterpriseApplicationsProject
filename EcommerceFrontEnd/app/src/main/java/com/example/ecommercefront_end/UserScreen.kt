@@ -32,6 +32,7 @@ import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -48,33 +49,73 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserStartScreen(navController: NavController) {
-    var selectedTabIndex by remember { mutableStateOf(0) }
+fun UserAuthScreen(navController: NavController) {
+    var isLoginScreen by remember { mutableStateOf(true) }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TabRow(selectedTabIndex = selectedTabIndex) {
-            Tab(
-                selected = selectedTabIndex == 0,
-                onClick = {
-                    selectedTabIndex = 0
-                    navController.navigate("login")
+        Row(
+            modifier= Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            Button(
+                onClick = { isLoginScreen = true },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isLoginScreen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Text(
+                    "Accedi",
+                    color = if (isLoginScreen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Button(
+                onClick = { isLoginScreen = false },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (!isLoginScreen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Text(
+                    "Registrati",
+                    color = if (!isLoginScreen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // Il resto del codice per visualizzare LoginPage o RegistrationScreen
+        if (isLoginScreen) {
+            LoginPage(
+                onLoginSuccess = {
+                    navController.navigate("home") {
+                        popUpTo("userAuth") { inclusive = true }
+                    }
                 },
-                text = { Text("Accedi") }
+                onSwitchToRegister = { isLoginScreen = false }
             )
-            Tab(
-                selected = selectedTabIndex == 1,
-                onClick = {
-                    selectedTabIndex = 1
-                    navController.navigate("registrationStep1")
+        } else {
+            RegistrationScreen(
+                onRegistrationComplete = {
+                    navController.navigate("home") {
+                        popUpTo("userAuth") { inclusive = true }
+                    }
                 },
-                text = { Text("Registrati") }
+                onSwitchToLogin = { isLoginScreen = true }
             )
         }
     }
 }
+
 @Composable
-fun LoginPage(navController: NavController) {
+fun LoginPage(onLoginSuccess: () -> Unit, onSwitchToRegister: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -96,7 +137,9 @@ fun LoginPage(navController: NavController) {
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth(0.9f).padding(bottom = 8.dp)
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .padding(bottom = 8.dp)
         )
 
         OutlinedTextField(
@@ -128,45 +171,79 @@ fun LoginPage(navController: NavController) {
         }
     }
 }
+
 @Composable
-fun RegistrationStep1(navController: NavController) {
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
+fun RegistrationScreen(onRegistrationComplete: () -> Unit, onSwitchToLogin: () -> Unit) {
+    var currentStep by remember { mutableStateOf(1) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Step 1: Dati di base", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(bottom = 16.dp))
+    Column(modifier = Modifier.padding(16.dp)) {
+        when (currentStep) {
+            1 -> RegistrationStep1(onNext = { currentStep = 2 })
+            2 -> RegistrationStep2(onNext = { currentStep = 3 }, onBack = { currentStep = 1 })
+            3 -> RegistrationStep3(onComplete = onRegistrationComplete, onBack = { currentStep = 2 })
+        }
 
-        OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Nome e Cognome") },
-            modifier = Modifier.fillMaxWidth(0.8f).padding(bottom = 8.dp)
-        )
+        Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth(0.8f).padding(bottom = 8.dp)
-        )
+        if (currentStep == 1) {
+            TextButton(onClick = onSwitchToLogin) {
+                Text("Hai già un account? Accedi")
+            }
+        }
+    }
+}
+@Composable
+fun RegistrationStep1(onNext: () -> Unit) {
+    Column {
+        Text("Registrazione - Step 1")
 
-        Button(
-            onClick = {
-                navController.navigate("registrationStep2")
-            },
-            modifier = Modifier.fillMaxWidth(0.6f).padding(bottom = 16.dp)
-        ) {
-            Text("Continua")
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(onClick = onNext) {
+            Text("Avanti")
         }
     }
 }
 
+@Composable
+fun RegistrationStep2(onNext: () -> Unit, onBack: () -> Unit) {
+    Column {
+        Text("Registrazione - Step 2")
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(onClick = onNext) {
+            Text("Avanti")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(onClick = onBack) {
+            Text("Indietro")
+        }
+    }
+}
+
+@Composable
+fun RegistrationStep3(onComplete: () -> Unit, onBack: () -> Unit) {
+    Column {
+        Text("Registrazione - Step 3")
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(onClick = onComplete) {
+            Text("Completa Registrazione")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(onClick = onBack) {
+            Text("Indietro")
+        }
+    }
+}
+
+/*
 @Composable
 fun UserDetailsScreen(navController: NavController, viewModel: RegistrationViewModel) {
     var name by remember { mutableStateOf(viewModel.registrationData.value.name) }
@@ -241,98 +318,9 @@ fun UserDetailsScreen(navController: NavController, viewModel: RegistrationViewM
             Text("Continua")
         }
     }
-}
+}*/
 
-@Composable
-fun RegistrationStep2(navController: NavController) {
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Step 2: Imposta la password", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(bottom = 16.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            modifier = Modifier.fillMaxWidth(0.8f).padding(bottom = 8.dp),
-            visualTransformation = PasswordVisualTransformation()
-        )
-
-        OutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = { Text("Conferma Password") },
-            modifier = Modifier.fillMaxWidth(0.8f).padding(bottom = 16.dp),
-            visualTransformation = PasswordVisualTransformation()
-        )
-
-        Button(
-            onClick = {
-                navController.navigate("registrationStep3")
-            },
-            modifier = Modifier.fillMaxWidth(0.6f).padding(bottom = 16.dp)
-        ) {
-            Text("Continua")
-        }
-    }
-}
-
-
-@Composable
-fun RegistrationStep3(navController: NavController) {
-    var address by remember { mutableStateOf("") }
-    var city by remember { mutableStateOf("") }
-    var zipCode by remember { mutableStateOf("") }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Step 3: Dettagli di indirizzo", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(bottom = 16.dp))
-
-        OutlinedTextField(
-            value = address,
-            onValueChange = { address = it },
-            label = { Text("Indirizzo") },
-            modifier = Modifier.fillMaxWidth(0.8f).padding(bottom = 8.dp)
-        )
-
-        OutlinedTextField(
-            value = city,
-            onValueChange = { city = it },
-            label = { Text("Città") },
-            modifier = Modifier.fillMaxWidth(0.8f).padding(bottom = 8.dp)
-        )
-
-        OutlinedTextField(
-            value = zipCode,
-            onValueChange = { zipCode = it },
-            label = { Text("Codice Postale") },
-            modifier = Modifier.fillMaxWidth(0.8f).padding(bottom = 16.dp)
-        )
-
-        Button(
-            onClick = {
-                navController.navigate("registrationComplete")
-            },
-            modifier = Modifier.fillMaxWidth(0.6f).padding(bottom = 16.dp)
-        ) {
-            Text("Completa Registrazione")
-        }
-    }
-}
-
-
+/*
 @Composable
 fun RegistrationCompleteScreen(navController: NavController) {
     Column(
@@ -357,16 +345,17 @@ fun RegistrationCompleteScreen(navController: NavController) {
         }
     }
 }
+*/
 
-
+/*
 @Composable
 fun UserScreen(navHostController: NavHostController) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "userStart") {
         composable("userStart") { UserStartScreen(navController) }
-        composable("login") { LoginPage(navController) }
+        composable("login") { LoginPage() }
         // Aggiungi le rotte per i passaggi di registrazione qui
     }
-}
+}*/
 
 

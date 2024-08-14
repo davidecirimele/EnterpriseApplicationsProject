@@ -66,21 +66,34 @@ class MainActivity : ComponentActivity() {
 }
 
 
-
 @Composable
 fun NavigationView(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = "home") {
-        composable("home") { HomePage() }
-        composable("cart") { CartScreen() }
-        composable("favorite") { FavoriteScreen() }
-        composable("userStart") { UserStartScreen(navController) }
-        composable("login") { LoginPage(navController) }
-        composable("registrationStep1") { RegistrationStep1(navController) }
-        composable("registrationStep2") { RegistrationStep2(navController) }
-        composable("registrationStep3") { RegistrationStep3(navController) }
-        composable("registrationComplete") { RegistrationCompleteScreen(navController) }
+    val selectedIndex = remember { mutableIntStateOf(0) }
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
+    Scaffold(
+        topBar = {
+            if (currentRoute != "userAuth") { // Condizione per nascondere la TopBar nella schermata di autenticazione
+                TopBar(navController)
+            }
+        },
+        bottomBar = {
+            if (currentRoute != "userAuth") { // Condizione per nascondere la BottomBar nella schermata di autenticazione
+                BottomBar(selectedIndex, navController)
+            }
+        }
+    ) { innerPadding ->
+        NavHost(navController = navController, startDestination = "home", Modifier.padding(innerPadding)) {
+            composable("home") { HomePage(navController) }
+            composable("cart") { CartScreen() }
+            composable("favorite") { FavoriteScreen() }
+            composable("userAuth") { UserAuthScreen(navController) }
+        }
     }
 }
+
+
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,7 +101,8 @@ fun NavigationView(navController: NavHostController) {
 fun TopBar(navHostController: NavHostController) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
-    TopAppBar(title = { Text(stringResource(R.string.app_name))},
+    TopAppBar(
+        title = { Text(stringResource(R.string.app_name)) },
         navigationIcon = {
             if (showBackIcon) {
                 IconButton(onClick = { navHostController.popBackStack() }) {
@@ -111,48 +125,59 @@ fun TopBar(navHostController: NavHostController) {
 fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostController) {
     BottomAppBar {
         NavigationBar {
-            NavigationBarItem(selected = selectedIndex.value == 0, onClick = {
-                selectedIndex.value = 0
-                navHostController.navigate("home")
-            }, icon = {
-                Icon(Icons.Filled.Home, contentDescription = stringResource(R.string.home))
-            })
-            NavigationBarItem(selected = selectedIndex.value == 1, onClick = {
-                selectedIndex.value = 1
-                navHostController.navigate("user")
-            }, icon = {
-                Icon(Icons.Filled.AccountCircle, contentDescription = stringResource(R.string.user))
-            })
-            NavigationBarItem(selected = selectedIndex.value == 2, onClick = {
-                selectedIndex.value = 2
-                navHostController.navigate("cart")
-            }, icon = {
-                Icon(Icons.Filled.ShoppingCart, contentDescription = stringResource(R.string.cart))
-            })
-            NavigationBarItem(selected = selectedIndex.value == 3, onClick = {
-                selectedIndex.value = 3
-                navHostController.navigate("favorite")
-            }, icon = {
-                Icon(Icons.Filled.Favorite, contentDescription = stringResource(R.string.favorite))
-            })
+            NavigationBarItem(
+                selected = selectedIndex.value == 0,
+                onClick = {
+                    selectedIndex.value = 0
+                    navHostController.navigate("home")
+                },
+                icon = {
+                    Icon(Icons.Filled.Home, contentDescription = stringResource(R.string.home))
+                }
+            )
+            NavigationBarItem(
+                selected = selectedIndex.value == 1,
+                onClick = {
+                    selectedIndex.value = 1
+                    navHostController.navigate("userAuth")
+                },
+                icon = {
+                    Icon(Icons.Filled.AccountCircle, contentDescription = stringResource(R.string.user))
+                }
+            )
+            NavigationBarItem(
+                selected = selectedIndex.value == 2,
+                onClick = {
+                    selectedIndex.value = 2
+                    navHostController.navigate("cart")
+                },
+                icon = {
+                    Icon(Icons.Filled.ShoppingCart, contentDescription = stringResource(R.string.cart))
+                }
+            )
+            NavigationBarItem(
+                selected = selectedIndex.value == 3,
+                onClick = {
+                    selectedIndex.value = 3
+                    navHostController.navigate("favorite")
+                },
+                icon = {
+                    Icon(Icons.Filled.Favorite, contentDescription = stringResource(R.string.favorite))
+                }
+            )
         }
     }
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomePage() {
-    val navHostController = rememberNavController()
+fun HomePage(navController: NavController) {
     val selectedIndex = remember { mutableIntStateOf(0) }
-    Scaffold(topBar = { TopBar(navHostController) },
-        bottomBar = { BottomBar(selectedIndex, navHostController) },
-        floatingActionButton = { AddToCartFloatingButton { /* Add your action here */ } },
-        floatingActionButtonPosition = FabPosition.End
-    ) {
-        Box(modifier = Modifier.padding(it)) {
-            //NavigationView(navHostController = navHostController)
-        }
-    }
+
 }
+
+
 @Composable
 fun AddToCartFloatingButton(onClick: () -> Unit) {
     FloatingActionButton(onClick = onClick) {
@@ -165,38 +190,13 @@ fun HomeScreen() {
     Text(text = "Home Screen")
 }
 
-
-/*
-@Composable
-fun UserScreen(navHostController: NavHostController) {
-    Text(text = "userStart")
-
-}*/
-
 @Composable
 fun CartScreen() {
     Text(text = "Cart Screen")
 }
 
-/*@Composable
-fun CartScreen() {
-    Text(text = "Cart Screen")
-}*/
 @Composable
 fun FavoriteScreen() {
     Text(text = "Favorite Screen")
 }
 
-/*
-sealed class Screen(val route: String, val icon: ImageVector) {
-    object Home : Screen("home", Icons.Default.Home)
-    object Cart : Screen("cart", Icons.Default.ShoppingCart)
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    EcommerceFrontEndTheme {
-        MyApp()
-    }
-}*/
