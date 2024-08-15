@@ -47,7 +47,6 @@ import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 
 
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)

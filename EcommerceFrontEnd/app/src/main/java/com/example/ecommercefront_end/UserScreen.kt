@@ -60,67 +60,38 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserAuthScreen(navController: NavController) {
-    var isLoginScreen by remember { mutableStateOf(true) }
+    var selectedTabIndex by remember { mutableStateOf(0) }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceAround
-        ) {
-            OutlinedButton(
-                onClick = { isLoginScreen = true },
-                modifier = Modifier.weight(1f),
-                border = BorderStroke(
-                    width = if (isLoginScreen) 2.dp else 1.dp,
-                    color = if (isLoginScreen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-                ),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = if (isLoginScreen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                )
-            ) {
-                Text("Accedi")
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            OutlinedButton(
-                onClick = { isLoginScreen = false },
-                modifier = Modifier.weight(1f),
-                border = BorderStroke(
-                    width = if (!isLoginScreen) 2.dp else 1.dp,
-                    color = if (!isLoginScreen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-                ),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = if (!isLoginScreen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                )
-            ) {
-                Text("Registrati")
-            }
+        TabRow(selectedTabIndex = selectedTabIndex) {Tab(
+            selected = selectedTabIndex == 0,
+            onClick = { selectedTabIndex = 0 },
+            text = { Text("Accedi") }
+        )
+            Tab(
+                selected = selectedTabIndex == 1,
+                onClick = { selectedTabIndex = 1 },
+                text = { Text("Registrati") }
+            )
         }
 
         // Il resto del codice per visualizzare LoginPage o RegistrationScreen
-        // ...
-
-        // Il resto del codice per visualizzare LoginPage o RegistrationScreen
-        if (isLoginScreen) {
-            LoginPage(
+        when (selectedTabIndex) {
+            0 -> LoginPage(
                 onLoginSuccess = {
                     navController.navigate("home") {
                         popUpTo("userAuth") { inclusive = true }
                     }
                 },
-                onSwitchToRegister = { isLoginScreen = false }
+                onSwitchToRegister = { selectedTabIndex = 1 }
             )
-        } else {
-            RegistrationScreen(
+            1 -> RegistrationScreen(
                 onRegistrationComplete = {
                     navController.navigate("home") {
                         popUpTo("userAuth") { inclusive = true }
                     }
                 },
-                onSwitchToLogin = { isLoginScreen = true }
+                onSwitchToLogin = { selectedTabIndex = 0 }
             )
         }
     }
@@ -151,8 +122,10 @@ fun LoginPage(onLoginSuccess: () -> Unit, onSwitchToRegister: () -> Unit) {
             label = { Text("Email") },
             modifier = Modifier
                 .fillMaxWidth(0.9f)
-                .padding(bottom = 8.dp)
+                .padding(bottom = 8.dp),
+            shape = RoundedCornerShape(16.dp)
         )
+        Spacer(modifier = Modifier.height(10.dp))
 
         OutlinedTextField(
             value = password,
@@ -161,6 +134,7 @@ fun LoginPage(onLoginSuccess: () -> Unit, onSwitchToRegister: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .padding(bottom = 8.dp),
+            shape = RoundedCornerShape(16.dp),
             visualTransformation = if (passwordVisible) VisualTransformation.None
             else PasswordVisualTransformation(),
             trailingIcon = {
@@ -172,6 +146,7 @@ fun LoginPage(onLoginSuccess: () -> Unit, onSwitchToRegister: () -> Unit) {
                 }
             }
         )
+        Spacer(modifier = Modifier.height(10.dp))
 
         Button(
             onClick = { /* Logica di login */ },
@@ -192,7 +167,6 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onSwitchToLogin: () -
         when (currentStep) {
             1 -> RegistrationStep1(onNext = { currentStep = 2 })
             2 -> RegistrationStep2(onNext = { currentStep = 3 }, onBack = { currentStep = 1 })
-            3 -> RegistrationStep3(onComplete = onRegistrationComplete, onBack = { currentStep = 2 })
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -204,6 +178,7 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onSwitchToLogin: () -
         }
     }
 }
+
 @Composable
 fun RegistrationStep1(onNext: () -> Unit) {
     var name by remember { mutableStateOf("") }
@@ -212,77 +187,95 @@ fun RegistrationStep1(onNext: () -> Unit) {
     var confirmPassword by remember { mutableStateOf("")}
     var passwordVisible by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text("Registrazione - Step 1", style = MaterialTheme.typography.headlineSmall)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Nome e Cognome") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(
-                        imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                        contentDescription = if (passwordVisible) "Nascondi password" else "Mostra password"
-                    )
-                }
-            }
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = { Text("Conferma Password") },
-            modifier = Modifier.fillMaxWidth(),
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(
-                        imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                        contentDescription = if (passwordVisible) "Nascondi password" else "Mostra password"
-                    )
-                }
-            }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                if (password == confirmPassword) {
-                    // Salva i dati nel ViewModel o esegui la logica di registrazione
-                    onNext() // Passa al prossimo step
-                } else {
-                    // Mostra un messaggio di errore: le password non corrispondono
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        Column(
+            modifier = Modifier
+                .padding(top = 32.dp)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.Center,
         ) {
-            Text("Avanti")
+            Text("Step 1 su 2", style = MaterialTheme.typography.headlineSmall)
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Nome e Cognome") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                            contentDescription = if (passwordVisible) "Nascondi password" else "Mostra password"
+                        )
+                    }
+                }
+            )
+            Text(
+                text = "La password deve contenere almeno 8 caratteri, una lettera maiuscola, una lettera minuscola e un numero",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .offset(x = 8.dp),
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            OutlinedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                label = { Text("Conferma Password") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                            contentDescription = if (passwordVisible) "Nascondi password" else "Mostra password"
+                        )
+                    }
+                }
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Button(
+                onClick = {
+                    if (password == confirmPassword) {
+                        // Salva i dati nel ViewModel o esegui la logica di registrazione
+                        onNext() // Passa al prossimo step
+                    } else {
+                        // Mostra un messaggio di errore: le password non corrispondono
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Verifica Email", style = MaterialTheme.typography.bodyLarge)
+            }
         }
     }
 }
@@ -291,69 +284,102 @@ fun RegistrationStep1(onNext: () -> Unit) {
 @Composable
 fun RegistrationStep2(onNext: () -> Unit, onBack: () -> Unit) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var showDatePicker by remember { mutableStateOf(false) }
     var phoneNumber by remember { mutableStateOf("") }
+    var admin by remember { mutableStateOf("") }
+
+    /*
     var street by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
     var province by remember { mutableStateOf("") }
-    var zipCode by remember { mutableStateOf("") }
-    var showDatePicker by remember { mutableStateOf(false) }
+    var zipCode by remember { mutableStateOf("") }*/
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text("Registrazione - Step 2", style = MaterialTheme.typography.headlineSmall)
 
-        Spacer(modifier = Modifier.height(16.dp))
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        Column(
+            modifier = Modifier
+                .padding(top = 32.dp)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("Step 2 su 2", style = MaterialTheme.typography.headlineSmall)
 
-        // Data di nascita
-        OutlinedTextField(
-            value = selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
-            onValueChange = { },
-            label = { Text("Data di nascita") },
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = true,
-            trailingIcon = {
-                IconButton(onClick = { showDatePicker = true }) {
-                    Icon(Icons.Filled.CalendarToday, contentDescription = "Seleziona data")
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Data di nascita
+            OutlinedTextField(
+                value = selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                onValueChange = { },
+                label = { Text("Data di nascita") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                readOnly = true,
+                trailingIcon = {
+                    IconButton(onClick = { showDatePicker = true }) {
+                        Icon(Icons.Filled.CalendarToday, contentDescription = "Seleziona data")
+                    }
+                }
+            )
+            if (showDatePicker) {
+                DatePickerDialog(
+                    onDismissRequest = { showDatePicker = false },
+                    confirmButton = {
+                        Button(onClick = { showDatePicker = false }) {
+                            Text("OK")
+                        }
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    dismissButton = {
+                        TextButton(onClick = { showDatePicker = false }) {
+                            Text("Annulla")
+                        }
+                    }
+                ) {
+                    DatePicker(
+                        state = rememberDatePickerState(
+                            initialSelectedDateMillis = selectedDate.atStartOfDay(
+                                ZoneId.systemDefault()
+                            ).toInstant().toEpochMilli()
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
-        )
-        if (showDatePicker) {
-            DatePickerDialog(
-                onDismissRequest = { showDatePicker = false },
-                confirmButton = {
-                    Button(onClick = { showDatePicker = false }) {
-                        Text("OK")
-                    }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Numero di telefono
+            OutlinedTextField(
+                value = phoneNumber,
+                onValueChange = { newValue ->
+                    phoneNumber = newValue.filter { it.isDigit() } // Accetta solo numeri
                 },
-                dismissButton = {
-                    TextButton(onClick = { showDatePicker = false }) {
-                        Text("Annulla")
-                    }
-                }
-            ) {
-                DatePicker(
-                    state = rememberDatePickerState(initialSelectedDateMillis = selectedDate.atStartOfDay(
-                        ZoneId.systemDefault()).toInstant().toEpochMilli()),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
+                label = { Text("Numero di telefono") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        // Numero di telefono
-        OutlinedTextField(
-            value = phoneNumber,
-            onValueChange = { newValue ->
-                phoneNumber = newValue.filter { it.isDigit() } // Accetta solo numeri
-            },
-            label = { Text("Numero di telefono") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
+            OutlinedTextField(
+                value = admin,
+                onValueChange = { admin = it },
+                label = { Text("Codice ADMIN") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            )
+            Text(
+                text = "Facoltativo",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .offset(x = 8.dp),
+            )
+            Spacer(modifier = Modifier.height(10.dp))
 
-        Spacer(modifier = Modifier.height(8.dp))
 
-        // Indirizzo
+        /* Indirizzo
         OutlinedTextField(
             value = street,
             onValueChange = { street = it },
@@ -389,6 +415,8 @@ fun RegistrationStep2(onNext: () -> Unit, onBack: () -> Unit) {
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+        */
+
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Button(onClick = onBack) {
@@ -399,28 +427,13 @@ fun RegistrationStep2(onNext: () -> Unit, onBack: () -> Unit) {
                 // Salva i dati nel ViewModel o esegui la logica di registrazione
                 onNext() // Passa al prossimo step
             }) {
-                Text("Avanti")
+                Text("Completa Registrazione")
             }
         }
+      }
     }
 }
 
-@Composable
-fun RegistrationStep3(onComplete: () -> Unit, onBack: () -> Unit) {
-    // Implementa il terzo passaggio di registrazione qui (ad esempio, conferma dei dati)
-    Column {
-        Text("Registrazione - Step 3")
-        // Aggiungi i campi necessari per raccogliere i dati dell'utente
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onComplete) {
-            Text("Completa Registrazione")
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = onBack) {
-            Text("Indietro")
-        }}
-}
-/*
 @Composable
 fun UserDetailsScreen(navController: NavController, viewModel: RegistrationViewModel) {
     var name by remember { mutableStateOf(viewModel.registrationData.value.name) }
@@ -495,7 +508,7 @@ fun UserDetailsScreen(navController: NavController, viewModel: RegistrationViewM
             Text("Continua")
         }
     }
-}*/
+}
 
 /*
 @Composable
