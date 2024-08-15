@@ -3,6 +3,7 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +42,8 @@ public class BookController {
     }
 
     @PostMapping(consumes = "application/json", path = "/add")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<BookDto> add(@RequestBody BookDto bDto) {
+    @PreAuthorize("hasRole('ADMIN') and isAuthenticated()")
+    public ResponseEntity<BookDto> add(@RequestBody SaveBookDto bDto) {
         BookDto b = booksService.save(bDto);
         if (b == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
