@@ -17,4 +17,8 @@ object RetrofitClient {
         retrofit.create(CartApiService::class.java)
     }
 
+    val booksApiService: BooksApiService by lazy {
+        retrofit.create(BooksApiService::class.java)
+    }
+
 }

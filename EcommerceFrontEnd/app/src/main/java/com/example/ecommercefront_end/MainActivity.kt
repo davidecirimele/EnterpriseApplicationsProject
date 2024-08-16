@@ -46,9 +46,14 @@ import androidx.navigation.compose.rememberNavController
 import com.example.ecommercefront_end.network.CartApiService
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.CartRepository
+import com.example.ecommercefront_end.repository.HomeRepository
+import com.example.ecommercefront_end.ui.User.UserAuthScreen
 import com.example.ecommercefront_end.ui.cart.CartScreen
+import com.example.ecommercefront_end.ui.home.HomeScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.viewmodels.CartViewModel
+import com.example.ecommercefront_end.viewmodels.HomeViewModel
+import com.example.ecommercefront_end.network.BooksApiService
 
 
 class MainActivity : ComponentActivity() {
@@ -74,13 +79,18 @@ fun NavigationView(navController: NavHostController) {
     val selectedIndex = remember { mutableIntStateOf(0) }
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
+
+    val homeViewModel = HomeViewModel(repository = HomeRepository(RetrofitClient.booksApiService))
+
     Scaffold(
         topBar = { TopBar(navController) }, // Rimuovi la condizione
         bottomBar = { BottomBar(selectedIndex, navController) } // Rimuovi la condizione
     )
     { innerPadding ->
         NavHost(navController = navController, startDestination = "home", Modifier.padding(innerPadding)) {
-            composable("home") { HomePage(navController) }
+            composable("home") { HomeScreen(
+               homeViewModel = homeViewModel
+            )}
             composable("cart") {  val _cartApiService = RetrofitClient.cartApiService
 
                 val repository = CartRepository(_cartApiService)
@@ -174,13 +184,6 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HomePage(navController: NavController) {
-    val selectedIndex = remember { mutableIntStateOf(0) }
-
-}
-
 
 @Composable
 fun AddToCartFloatingButton(onClick: () -> Unit) {
@@ -189,10 +192,6 @@ fun AddToCartFloatingButton(onClick: () -> Unit) {
     }
 }
 
-@Composable
-fun HomeScreen() {
-    Text(text = "Home Screen")
-}
 
 @Composable
 fun CartScreen() {

@@ -114,6 +114,8 @@ dependencies {
 
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+
+    implementation("com.google.android.material:material:1.4.0")
 }
 
 kotlin {

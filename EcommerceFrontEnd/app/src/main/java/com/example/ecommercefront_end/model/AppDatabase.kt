@@ -11,6 +11,8 @@ Parameters:
 - version: the current version of the schema, should be changed whenever you change the schema of the database
 - exportSchema: to keep or not the backup of all versions of the schema
  */
+
+/*
 @Database(entities = [Wishlist::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() { // We have to extend RoomDatabase
     abstract fun wishlistDao(): wishlistDAO // Here we define the DAOs as abstract function
@@ -36,4 +38,4 @@ abstract class AppDatabase : RoomDatabase() { // We have to extend RoomDatabase
             }
         }
     }
-}
+}*/

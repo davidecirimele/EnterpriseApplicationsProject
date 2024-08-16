@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.ecommercefront_end.app-mergeDebugResources-74:/values-sw600dp-v13/values-sw600dp-v13.xml",
+            "outputFile": "com.example.ecommercefront_end.app-mergeDebugResources-76:/values-sw600dp-v13/values-sw600dp-v13.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\samue\\.gradle\\caches\\transforms-4\\69b38008b73e5459b060cc1da02128fa\\transformed\\material-1.12.0\\res\\values-sw600dp-v13\\values-sw600dp-v13.xml",
+                    "source": "C:\\Users\\samue\\.gradle\\caches\\transforms-4\\7339ce23e8b8cc0423b8a7591fa38088\\transformed\\material-1.12.0\\res\\values-sw600dp-v13\\values-sw600dp-v13.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,10,11,12,13,14",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4",
@@ -23,7 +23,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\samue\\.gradle\\caches\\transforms-4\\8e48873af8aaf56d2499a48db0c9d72c\\transformed\\appcompat-1.6.1\\res\\values-sw600dp-v13\\values-sw600dp-v13.xml",
+                    "source": "C:\\Users\\samue\\.gradle\\caches\\transforms-4\\e075e34aad84be944e6d5526460e3689\\transformed\\appcompat-1.6.1\\res\\values-sw600dp-v13\\values-sw600dp-v13.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
