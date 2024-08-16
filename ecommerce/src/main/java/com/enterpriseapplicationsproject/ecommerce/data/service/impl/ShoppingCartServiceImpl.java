@@ -3,17 +3,13 @@ package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.ShoppingCartsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.ShoppingCart;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.ShoppingCartService;
-import com.enterpriseapplicationsproject.ecommerce.dto.CreateShoppingCartDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.SaveShoppingCartDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.ShoppingCartDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserIdDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,7 +20,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     private final ShoppingCartsDao shoppingCartDao;
 
-    private final UsersDao userDao;
     private final ModelMapper modelMapper;
 
 
@@ -56,39 +51,25 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    public boolean delete(UserIdDto id){
-        Optional<ShoppingCart> optionalSC = shoppingCartDao.findByUserId(id.getUserId());
+    public boolean delete(UUID id){
+        Optional<ShoppingCart> optionalSC = shoppingCartDao.findByUserId(id);
 
         if(optionalSC.isPresent())
         {
             ShoppingCart shoppingCart = optionalSC.get();
             shoppingCart.getCartItems().clear();
 
-            ShoppingCart savedShoppingCart = shoppingCartDao.save(shoppingCart);
+            shoppingCartDao.save(shoppingCart);
             return true;
         }
         else{
-            throw new RuntimeException("Cart for User with id " + id.getUserId() + " not found");
+            throw new RuntimeException("Cart for User with id " + id + " not found");
         }
     }
 
     @Override
-    public ShoppingCartDto createCart(CreateShoppingCartDto createShoppingCartDto) {
-        System.out.println("CREATE SHOPPING CART ID: "+createShoppingCartDto.getUserId().getUserId());
-        User user = userDao.findById(createShoppingCartDto.getUserId().getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found with id " + createShoppingCartDto.getUserId()));
-
-        ShoppingCart shoppingCart = new ShoppingCart();
-        shoppingCart.setUserId(user); // Imposta l'utente trovato nel carrello
-        shoppingCart.setCartItems(new ArrayList<>()); // Inizializza la lista degli articoli del carrello
-
-        ShoppingCart savedCart = shoppingCartDao.save(shoppingCart);
-        return modelMapper.map(savedCart, ShoppingCartDto.class);
-    }
-
-    @Override
-    public ShoppingCartDto saveCart(SaveShoppingCartDto saveShoppingCartDto) {
-        ShoppingCart cart = modelMapper.map(saveShoppingCartDto, ShoppingCart.class);
+    public ShoppingCartDto saveCart(ShoppingCartDto shoppingCartDto) {
+        ShoppingCart cart = modelMapper.map(shoppingCartDto, ShoppingCart.class);
         ShoppingCart savedCart = shoppingCartDao.save(cart);
         return modelMapper.map(savedCart, ShoppingCartDto.class);
     }

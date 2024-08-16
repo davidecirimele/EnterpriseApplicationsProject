@@ -3,10 +3,10 @@ package com.enterpriseapplicationsproject.ecommerce.dto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class SaveAddressDto {
-
-    private UserIdDto user;
 
     @NotBlank(message = "street is required")
     private String street;

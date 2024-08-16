@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
-import coil.compose.rememberAsyncImagePainter
+
 import com.example.ecommercefront_end.model.CartItem
 import com.example.ecommercefront_end.model.OrderItem
 
@@ -28,10 +28,9 @@ import com.example.ecommercefront_end.model.OrderItem
 fun CartItem(
     item: CartItem,
     onRemoveClick: () -> Unit,
-    onQuantityChange: (Int) -> Unit
+    onQuantityChange: (Int) -> Unit,
 ) {
-    // Gestione dello stato locale per la quantità
-    var quantity by remember { mutableStateOf(item.quantity) }
+
 
     Row(modifier = Modifier
         .fillMaxWidth()
@@ -71,17 +70,17 @@ fun CartItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = {
-                    if (quantity > 1) {
-                        quantity -= 1
-                        onQuantityChange(quantity)
+                    if (item.quantity > 1) {
+                        item.quantity -= 1
+                        onQuantityChange(item.quantity)
                     }
                 }) {
                     Icon(Icons.Default.Remove, contentDescription = "Decrease quantity")
                 }
-                Text(text = "$quantity", style = MaterialTheme.typography.bodyLarge)
+                Text(text = "${item.quantity}", style = MaterialTheme.typography.bodyLarge)
                 IconButton(onClick = {
-                    quantity += 1
-                    onQuantityChange(quantity)
+                    item.quantity += 1
+                    onQuantityChange(item.quantity)
                 }) {
                     Icon(Icons.Default.Add, contentDescription = "Increase quantity")
                 }
@@ -94,4 +93,3 @@ fun CartItem(
         }
     }
 }
-

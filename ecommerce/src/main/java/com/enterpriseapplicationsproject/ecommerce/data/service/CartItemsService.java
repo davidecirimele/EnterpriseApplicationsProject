@@ -9,13 +9,13 @@ import java.util.List;
 
 public interface CartItemsService {
 
-    //List<ProductDto> getProductByCartId(ShoppingCart cartId);
+    List<CartItemDto> getCartItemsByCartId(Long cartId);
 
     CartItemDto save(CartItem cartitem);
 
-    CartItemDto insert(InsertCartItemDto insertCartItemDto);
+    CartItemDto insert(InsertCartItemDto insertCartItemDto, Long bookId);
 
-    boolean delete(CartItemIdDto id);
+    boolean delete(Long id);
 
-    CartItemDto updateQuantity(QuantityCartItemDto quantityCartItem);
+    CartItemDto updateQuantity(Long itemId, QuantityCartItemDto quantityCartItem);
 }

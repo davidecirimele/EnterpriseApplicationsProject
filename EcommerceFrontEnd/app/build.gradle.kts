@@ -50,6 +50,7 @@ android {
 
 dependencies {
 
+    implementation("com.google.code.gson:gson:2.8.2")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -63,6 +64,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.places)
     implementation(libs.androidx.core.i18n)
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -106,6 +109,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
 
 
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
 }
 
 kotlin {

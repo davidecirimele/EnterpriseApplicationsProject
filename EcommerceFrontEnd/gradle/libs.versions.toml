@@ -3,6 +3,9 @@ agp = "8.5.1"
 coilCompose = "2.4.0"
 converterGson = "2.9.0"
 gson = "2.10.1"
+agp = "8.5.2"
+converterGson = "2.9.0"
+gson = "2.10.1"
 kotlin = "1.9.23"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -12,6 +15,11 @@ lifecycleRuntimeKtx = "2.7.0"
 activityCompose = "1.9.0"
 composeBom = "2024.05.00"
 retrofit = "2.9.0"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+lifecycleRuntimeKtx = "2.8.4"
+activityCompose = "1.9.1"
+composeBom = "2024.06.00"
 roomVersion = "2.6.1"
 navigationRuntimeKtx = "2.7.7"
 browser = "1.8.0"
@@ -19,9 +27,15 @@ material = "1.12.0"
 places = "3.5.0"
 coreI18n = "1.0.0-alpha01"
 
+firebaseFirestoreKtx = "25.0.0"
+lifecycleRuntimeComposeAndroid = "2.8.4"
+
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -49,6 +63,12 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 androidx-core-i18n = { group = "androidx.core", name = "core-i18n", version.ref = "coreI18n" }
+
+firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "converterGson" }
+androidx-lifecycle-runtime-compose-android = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose-android", version.ref = "lifecycleRuntimeComposeAndroid" }
+
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

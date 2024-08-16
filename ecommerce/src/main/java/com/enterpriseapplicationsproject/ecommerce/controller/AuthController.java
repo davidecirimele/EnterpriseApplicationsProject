@@ -8,6 +8,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.AuthService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RefreshTokenService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveUserDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.UserDetailsDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserLoginDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.AuthenticationResponse;
@@ -47,7 +48,7 @@ public class AuthController {
 
 
     @PostMapping(consumes = "application/json", path = "/register")
-    public ResponseEntity<SaveUserDto> registerUser(@RequestBody  SaveUserDto userDto) {
+    public ResponseEntity<UserDetailsDto> registerUser(@RequestBody  SaveUserDto userDto) {
         return ResponseEntity.ok(authService.registerUser(userDto));
     }
 

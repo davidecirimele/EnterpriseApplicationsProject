@@ -9,7 +9,6 @@ import java.util.UUID;
 @Data
 public class PasswordUserDto {
 
-    private UUID userId;
     @NotBlank(message = "Old password is required")
     private String oldPassword;
 

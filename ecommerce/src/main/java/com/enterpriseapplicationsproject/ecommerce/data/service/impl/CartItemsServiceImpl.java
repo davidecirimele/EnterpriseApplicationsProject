@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,11 +25,22 @@ public class CartItemsServiceImpl implements CartItemsService {
 
     private final ModelMapper modelMapper;
 
-    //@Override
-    //public List<ProductDto> getProductByCartId(ShoppingCart cartId) {
-     //   List<Product> products = cartItemsDao.findProductsbyCartId(cartId);
-     //   return products.stream().map(product -> modelMapper.map(product , ProductDto.class)).toList();
-    //}
+    @Override
+    public List<CartItemDto> getCartItemsByCartId(Long cartId) {
+
+        Optional<ShoppingCart> optionalCart = shoppingCartsDao.findById(cartId);
+
+        if(optionalCart.isPresent()){
+            ShoppingCart cart = optionalCart.get();
+
+            List<CartItem> cartItems = cartItemsDao.findByCartId(cart);
+
+            return cartItems.stream().map(cartItem -> modelMapper.map(cartItem , CartItemDto.class)).toList();
+        }
+        else{
+            throw new RuntimeException("No cart found with id "+cartId);
+        }
+    }
 
     @Override
     public CartItemDto save(CartItem cartitem) {
@@ -37,9 +49,9 @@ public class CartItemsServiceImpl implements CartItemsService {
     }
 
     @Override
-    public CartItemDto insert(InsertCartItemDto insertCartItemDto) {
+    public CartItemDto insert(InsertCartItemDto insertCartItemDto, Long bookId) {
         Optional<ShoppingCart> optionalCart = shoppingCartsDao.findByUserId(insertCartItemDto.getUserId().getUserId());
-        Optional<Book> optionalBook = booksDao.findById(insertCartItemDto.getBookId().getId());
+        Optional<Book> optionalBook = booksDao.findById(bookId);
         if(optionalCart.isPresent() && optionalBook.isPresent())
         {
             ShoppingCart cart = optionalCart.get();
@@ -69,8 +81,8 @@ public class CartItemsServiceImpl implements CartItemsService {
     }
 
     @Override
-    public boolean delete(CartItemIdDto id) {
-        Optional<CartItem> optionalCartItem = cartItemsDao.findById(id.getId());
+    public boolean delete(Long id) {
+        Optional<CartItem> optionalCartItem = cartItemsDao.findById(id);
 
         if(optionalCartItem.isPresent())
         {
@@ -78,13 +90,13 @@ public class CartItemsServiceImpl implements CartItemsService {
             return true;
         }
         else{
-            throw new RuntimeException("Item with id " + id.getId() + " not found");
+            throw new RuntimeException("Item with id " + id + " not found");
         }
     }
 
     @Override
-    public CartItemDto updateQuantity(QuantityCartItemDto quantityCartItem){
-        Optional<CartItem> optionalCartItem = cartItemsDao.findById(quantityCartItem.getId());
+    public CartItemDto updateQuantity(Long id, QuantityCartItemDto quantityCartItem){
+        Optional<CartItem> optionalCartItem = cartItemsDao.findById(id);
 
         if(optionalCartItem.isPresent())
         {
@@ -103,7 +115,7 @@ public class CartItemsServiceImpl implements CartItemsService {
 
         }
         else{
-            throw new RuntimeException("Item with id " + quantityCartItem.getId() + " not found");
+            throw new RuntimeException("Item with id " + id + " not found");
         }
     }
 }

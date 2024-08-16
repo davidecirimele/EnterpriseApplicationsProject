@@ -33,35 +33,46 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
-    @PutMapping(value = "/change-password", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("#userDto.userId == authentication.principal.getId()")
-    public ResponseEntity<UserDto> updatePassword(@RequestBody PasswordUserDto userDto){
+    @PutMapping(value = "{userId}/change-password", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("#userId == authentication.principal.getId()")
+    public ResponseEntity<UserDto> updatePassword(@PathVariable UUID userId,@RequestBody PasswordUserDto userDto){
         try{
-            UserDto updatedUser= userService.updatePassword(userDto);
-            refreshTokenService.revokeRefreshTokenByUserId(userDto.getUserId());
+            UserDto updatedUser= userService.updatePassword(userId, userDto);
+            //refreshTokenService.revokeRefreshTokenByUserId(userId);
             return new ResponseEntity<>(updatedUser, HttpStatus.OK);}
         catch(UserRegistrationException e){
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @PutMapping(value = "/change-email", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("#userDto.id == authentication.principal.getId()")
-    public ResponseEntity<UserDto> updateEmail(@RequestBody EmailUserDto userDto){
+    @PutMapping(value = "{userId}/change-email", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("#userId == authentication.principal.getId()")
+    public ResponseEntity<UserDto> updateEmail(@PathVariable UUID userId,@RequestBody EmailUserDto userDto){
         try{
-            UserDto updatedUser= userService.updateEmail(userDto);
+            UserDto updatedUser= userService.updateEmail(userId, userDto);
             return new ResponseEntity<>(updatedUser, HttpStatus.OK);}
         catch(UserRegistrationException e){
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @PutMapping(value = "/change-phone-number", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("#userDto.userId == authentication.principal.getId()")
-    public ResponseEntity<UserDto> updatePhoneNumber(@RequestBody PhoneNumberUserDto userDto){
+    @PutMapping(value = "{userId}/change-phone-number", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("#userId == authentication.principal.getId()")
+    public ResponseEntity<UserDto> updatePhoneNumber(@PathVariable UUID userId,@RequestBody PhoneNumberUserDto userDto){
         try{
-            UserDto updatedUser= userService.updatePhoneNumber(userDto);
+            UserDto updatedUser= userService.updatePhoneNumber(userId, userDto);
             return new ResponseEntity<>(updatedUser, HttpStatus.OK);}
+        catch(UserRegistrationException e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping(value = "{userId}/delete-account", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("#userId == authentication.principal.getId() or hasAuthority('ADMIN')")
+    public ResponseEntity<UserDto> deleteAccount(@PathVariable UUID userId){
+        try{
+            userService.delete(userId);
+            return new ResponseEntity<>(HttpStatus.OK);}
         catch(UserRegistrationException e){
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
