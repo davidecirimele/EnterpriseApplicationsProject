@@ -9,3 +9,4 @@ data class Wishlist (
     val group: List<User> = listOf(),
     val privacySetting: String,
 )
+
