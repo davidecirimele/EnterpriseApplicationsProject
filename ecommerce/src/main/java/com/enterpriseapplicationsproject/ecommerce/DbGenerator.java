@@ -7,6 +7,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
 
 import org.apache.commons.csv.CSVFormat;
@@ -119,8 +120,6 @@ public class DbGenerator implements ApplicationRunner {
 
         Double weight = Double.parseDouble(array[1]);
 
-        LocalDate insertDate = LocalDate.parse(array[2]);
-
         Double price = Double.parseDouble(array[3]);
 
         Integer stock = Integer.parseInt(array[4]);
@@ -149,7 +148,7 @@ public class DbGenerator implements ApplicationRunner {
 
         System.out.println("RECORD : "+ record);
 
-        BookDto book = new BookDto();
+        SaveBookDto book = new SaveBookDto();
 
         book.setTitle(title);
         book.setCategory(category);
@@ -166,10 +165,8 @@ public class DbGenerator implements ApplicationRunner {
         book.setLanguage(language);
         book.setPublisher(publisher);
         book.setPublishDate(publishDate);
-        book.setInsertDate(insertDate);
 
         bookService.save(book);
-
     }
 
     private void insertUser( String record) {

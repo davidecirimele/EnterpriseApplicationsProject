@@ -43,7 +43,7 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
             try {
                 val userId = getUser()
                 val updatedItem = item.copy(quantity = newQuantity)
-                repository.updateQuantity(updatedItem.id, updatedItem.quantity, userId )
+                repository.updateQuantity(updatedItem.quantity, userId )
                 // Ricarica gli articoli dopo l'aggiornamento
                 _cartItems.value = _cartItems.value.map { currentItem ->
                     if (currentItem.id == updatedItem.id) updatedItem else currentItem

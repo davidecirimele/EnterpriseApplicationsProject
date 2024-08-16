@@ -14,8 +14,8 @@ class CartRepository(
 
     suspend fun getCart(userId : UUID) = apiService.getCart(userId)
 
-    suspend fun updateQuantity(cartItemId : Long, quantity : Int, userId: UserId) {
-        val quantityCartItem = QuantityCartItem(cartItemId, userId, quantity)
+    suspend fun updateQuantity( quantity : Int, userId: UserId) {
+        val quantityCartItem = QuantityCartItem( userId, quantity)
         apiService.updateQuantity(quantityCartItem)
     }
 
@@ -24,10 +24,5 @@ class CartRepository(
         apiService.removeItem(cartItemId)
 
     }
-
-
-
-
-
 
 }
