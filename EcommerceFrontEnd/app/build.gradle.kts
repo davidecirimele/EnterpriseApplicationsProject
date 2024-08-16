@@ -51,9 +51,9 @@ android {
 
 dependencies {
     implementation("io.ktor:ktor-client-core:2.3.4")
-    implementation("io.ktor:ktor-client-cio:2.3.4") // O il client che preferisci
-    implementation("io.ktor:ktor-client-serialization:2.3.4") // Per la serializzazione
-    implementation("io.ktor:ktor-client-logging:2.3.4") // Per il logging
+    implementation("io.ktor:ktor-client-cio:2.3.4")
+    implementation("io.ktor:ktor-client-serialization:2.3.4")
+    implementation("io.ktor:ktor-client-logging:2.3.4")
     implementation("com.google.code.gson:gson:2.8.2")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

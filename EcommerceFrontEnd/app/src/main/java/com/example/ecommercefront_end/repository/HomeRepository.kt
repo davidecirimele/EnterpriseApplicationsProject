@@ -15,7 +15,4 @@ class HomeRepository(private val apiService : BooksApiService) {
 
     suspend fun getAllBooks() = apiService.getAllBooks()
 
-    suspend fun deleteBook( bookId: Long){
-        apiService.deleteBook(bookId)
-    }
 }
