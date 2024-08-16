@@ -94,7 +94,10 @@ fun NavigationView(navController: NavHostController) {
 }
 
 
-
+@Composable
+fun HomeProducts() {
+    TODO("Not yet implemented")
+}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
