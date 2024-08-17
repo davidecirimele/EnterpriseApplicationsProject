@@ -24,7 +24,7 @@ public class BookController {
     private final BooksService booksService;
 
     @GetMapping(consumes = "application/json", path = "/getAll")
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<BookDto>> getAll() {
         List<BookDto> books = booksService.getAllSorted();
         if (books.isEmpty())
