@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+
+
 class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
     private val _products = MutableStateFlow<List<Book>>(emptyList())
     val products: StateFlow<List<Book>> = _products.asStateFlow()
@@ -30,13 +32,11 @@ class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true // Imposta isLoading a true prima del caricamento
             try {
-                _products.value = repository.getAllBooks() // Aggiorna _products con i libri caricati
+                _products.value = createTestBooks() //repository.getAllBooks() // Aggiorna _products con i libri caricati
                 if (_products.value.isEmpty()) {
                     _error.value = "Nessun libro trovato" // Imposta un messaggio di errore se non ci sono libri
                 }
-                else {
-                    _error.value = "libri presi" // Azzera il messaggio di errore se ci sono libri
-                }
+
             } catch (e: Exception) {
                 _error.value = "Errore durante il caricamento dei libri: ${e.message}" // Imposta il messaggio di errore
             } finally {
