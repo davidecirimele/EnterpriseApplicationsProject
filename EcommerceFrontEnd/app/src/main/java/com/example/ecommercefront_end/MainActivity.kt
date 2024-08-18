@@ -29,6 +29,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -40,21 +41,25 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.ecommercefront_end.network.CartApiService
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.repository.HomeRepository
 import com.example.ecommercefront_end.ui.User.UserAuthScreen
 import com.example.ecommercefront_end.ui.cart.CartScreen
-import com.example.ecommercefront_end.ui.home.HomeScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.viewmodels.CartViewModel
 import com.example.ecommercefront_end.viewmodels.HomeViewModel
 import com.example.ecommercefront_end.network.BooksApiService
+import com.example.ecommercefront_end.ui.home.BookDetailsScreen
+import com.example.ecommercefront_end.ui.home.HomeScreen
+import androidx.compose.runtime.collectAsState
 
 
 class MainActivity : ComponentActivity() {
@@ -84,6 +89,7 @@ fun NavigationView(navController: NavHostController) {
     val homeViewModel = remember { HomeViewModel(repository = HomeRepository(RetrofitClient.booksApiService)) }
     val cartViewModel = remember { CartViewModel(repository = CartRepository(RetrofitClient.cartApiService)) }
 
+
     Scaffold(
         topBar = { TopBar(navController) },
         bottomBar = { BottomBar(selectedIndex, navController) }
@@ -95,8 +101,25 @@ fun NavigationView(navController: NavHostController) {
         ) {
             composable("home") {
                 selectedIndex.value = 0
-                HomeScreen(homeViewModel = homeViewModel)
+                HomeScreen(homeViewModel = homeViewModel, navController)
             }
+
+            composable("/books_details/{idBook}", arguments = listOf(navArgument("idBook") { type = NavType.LongType })) { backStackEntry ->
+                val idBook = backStackEntry.arguments?.getLong("idBook") ?: 0L
+
+                // Carica il libro corrispondente all'id
+                LaunchedEffect(idBook) {
+                    homeViewModel.loadBook(idBook)
+                }
+
+                // Osserva i cambiamenti del libro
+                val book by homeViewModel.bookFlow.collectAsState()
+
+                book?.let {
+                    BookDetailsScreen(book = it)
+                } ?: Text("Libro non trovato")
+            }
+
             composable("cart") {
                 selectedIndex.value = 2
                 CartScreen(viewModel = cartViewModel, onCheckoutClick = { /* Add your action here */ })

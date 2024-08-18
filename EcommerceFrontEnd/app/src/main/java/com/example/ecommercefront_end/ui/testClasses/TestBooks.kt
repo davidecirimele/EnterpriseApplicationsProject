@@ -1,4 +1,4 @@
-package com.example.ecommercefront_end.viewmodels
+package com.example.ecommercefront_end.ui.testClasses
 
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.BookFormat

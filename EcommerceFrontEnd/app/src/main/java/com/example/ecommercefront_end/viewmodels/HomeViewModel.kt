@@ -1,14 +1,15 @@
 package com.example.ecommercefront_end.viewmodels
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.repository.HomeRepository
+import com.example.ecommercefront_end.ui.testClasses.createTestBooks
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 
@@ -42,6 +43,16 @@ class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
             } finally {
                 _isLoading.value = false // Imposta isLoading a false dopo il caricamento, indipendentemente dal risultato
             }
+        }
+    }
+
+    private val _bookFlow = MutableStateFlow<Book?>(null)
+    val bookFlow: StateFlow<Book?> = _bookFlow.asStateFlow()
+
+    fun loadBook(id: Long) {
+        viewModelScope.launch {
+            val book = _products.value.find { it.id == id }
+            _bookFlow.value = book
         }
     }
 

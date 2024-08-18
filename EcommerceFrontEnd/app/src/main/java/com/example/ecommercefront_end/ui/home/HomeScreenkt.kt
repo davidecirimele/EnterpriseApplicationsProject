@@ -1,6 +1,7 @@
 package com.example.ecommercefront_end.ui.home
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.CachePolicy
@@ -50,7 +52,7 @@ var testImgs : List<String> = listOf("https://mockuptree.com/wp-content/uploads/
     "https://images.thegreatestbooks.org/02k8grlgw3la54zif8ubgy9fiyrx")
 
 @Composable
-fun ProductCard(book: Book, height: Dp, width: Dp) {
+fun ProductCard(navController: NavController, book: Book, height: Dp, width: Dp) {
     val imageUrl = remember(book.id) {
         testImgs[book.id.hashCode() % testImgs.size]
     }
@@ -64,7 +66,8 @@ fun ProductCard(book: Book, height: Dp, width: Dp) {
         modifier = Modifier
             .padding(8.dp)
             .width(width)
-            .height(height),
+            .height(height)
+            .clickable { navController.navigate("/books_details/{idBook}") },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -102,7 +105,7 @@ fun ProductCard(book: Book, height: Dp, width: Dp) {
 
 
 @Composable
-fun ProductSection(title: String, books: List<Book>, height: Dp = 180.dp, width: Dp = 140.dp) {
+fun ProductSection(navController: NavController, title: String, books: List<Book>, height: Dp = 180.dp, width: Dp = 140.dp) {
     Column(
         modifier = Modifier
             .padding(16.dp)
@@ -113,14 +116,14 @@ fun ProductSection(title: String, books: List<Book>, height: Dp = 180.dp, width:
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(books, key = {it.id}) { book ->
-                ProductCard(book, height, width) // Aumentiamo la larghezza delle card (150 dp invece di 100 dp)
+                ProductCard(navController,book, height, width) // Aumentiamo la larghezza delle card (150 dp invece di 100 dp)
             }
         }
     }
 }
 
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel) {
+fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
     val products by homeViewModel.products.collectAsState()
     val isLoading by homeViewModel.isLoading.collectAsState()
     val error by homeViewModel.error.collectAsState()
@@ -144,6 +147,7 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 item(key = "topSection") {
                     ProductSection(
+                        navController,
                         title = "Libri Popolari",
                         books = topProducts,
                     )
@@ -163,7 +167,7 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
                         modifier = Modifier.padding(horizontal = 8.dp)
                     ) {
                         for (book in rowBooks) {
-                            ProductCard(book, height = 280.dp, width = 190.dp)
+                            ProductCard(navController, book, height = 280.dp, width = 190.dp)
                         }
                     }
                 }

@@ -182,6 +182,7 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onSwitchToLogin: () -
 @Composable
 fun RegistrationStep1(onNext: () -> Unit) {
     var name by remember { mutableStateOf("") }
+    var surname by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("")}
@@ -201,7 +202,17 @@ fun RegistrationStep1(onNext: () -> Unit) {
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Nome e Cognome") },
+                label = { Text("Nome") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Cognome") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp)
             )
