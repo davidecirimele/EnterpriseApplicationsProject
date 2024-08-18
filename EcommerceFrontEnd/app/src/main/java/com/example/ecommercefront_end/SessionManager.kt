@@ -10,6 +10,4 @@ object SessionManager {
     var authToken: String? = null
     private set
 
-
-
 }

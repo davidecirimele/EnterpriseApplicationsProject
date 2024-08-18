@@ -29,5 +29,4 @@ interface BooksApiService {
 
     @DELETE("/books/delete/{idBook}")
     suspend fun deleteBook(@Path("idBook") idBook: Long)
-
 }

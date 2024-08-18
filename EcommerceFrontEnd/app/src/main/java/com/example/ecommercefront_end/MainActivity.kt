@@ -42,9 +42,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.ecommercefront_end.network.CartApiService
 import com.example.ecommercefront_end.network.RetrofitClient
+import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.ui.cart.CartScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
+import com.example.ecommercefront_end.ui.user.AccountManagerScreen
+import com.example.ecommercefront_end.ui.user.MyAccountScreen
+import com.example.ecommercefront_end.viewmodels.AccountViewModel
 import com.example.ecommercefront_end.viewmodels.CartViewModel
 
 
@@ -67,12 +71,20 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun NavigationView(navHostController: NavHostController) {
-    NavHost(navController = navHostController, startDestination = "home") {
+    NavHost(navController = navHostController, startDestination = "account-manager") {
         composable("home") {
-            HomeProducts()
+            //HomeProducts()
         }
-        composable("user") {
-            UserScreen()
+        composable("account-manager") {
+            val _userApiService = RetrofitClient.userApiService
+            val repository = AccountRepository(_userApiService)
+            AccountManagerScreen(viewModel = AccountViewModel(repository), navHostController)
+        }
+        composable("my-account") {
+            val _userApiService = RetrofitClient.userApiService
+            val repository = AccountRepository(_userApiService)
+            MyAccountScreen(viewModel = AccountViewModel(repository), onCheckoutClick = { /* Add your action here */ })
+
         }
         composable("cart") {
             val _cartApiService = RetrofitClient.cartApiService
@@ -81,12 +93,13 @@ fun NavigationView(navHostController: NavHostController) {
 
             CartScreen(viewModel = CartViewModel(repository), onCheckoutClick = { /* Add your action here */ })
 
-            }
+        }
+    }
+
         }
         /*composable("favorite") {
             CartScreen()
         }*/
-    }
 
 @Composable
 fun HomeProducts() {
@@ -130,7 +143,7 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             })
             NavigationBarItem(selected = selectedIndex.value == 1, onClick = {
                 selectedIndex.value = 1
-                navHostController.navigate("user")
+                navHostController.navigate("account-manager")
             }, icon = {
                 Icon(Icons.Filled.AccountCircle, contentDescription = stringResource(R.string.user))
             })

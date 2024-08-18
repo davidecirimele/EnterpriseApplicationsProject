@@ -7,9 +7,7 @@ import com.example.ecommercefront_end.model.UserId
 import java.util.UUID
 
 class CartRepository(
-    private val apiService : CartApiService,
-
-
+    private val apiService : CartApiService
 ){
 
     suspend fun getCart(userId : UUID) = apiService.getCart(userId)
