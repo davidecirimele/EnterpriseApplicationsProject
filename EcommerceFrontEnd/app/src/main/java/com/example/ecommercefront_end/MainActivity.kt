@@ -77,32 +77,42 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun NavigationView(navController: NavHostController) {
-    val selectedIndex = remember { mutableIntStateOf(0) }
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    val selectedIndex = remember { mutableIntStateOf(0) }
 
-
-    val homeViewModel = HomeViewModel(repository = HomeRepository(RetrofitClient.booksApiService))
+    // Usa remember per mantenere i ViewModel
+    val homeViewModel = remember { HomeViewModel(repository = HomeRepository(RetrofitClient.booksApiService)) }
+    val cartViewModel = remember { CartViewModel(repository = CartRepository(RetrofitClient.cartApiService)) }
 
     Scaffold(
-        topBar = { TopBar(navController) }, // Rimuovi la condizione
-        bottomBar = { BottomBar(selectedIndex, navController) } // Rimuovi la condizione
-    )
-    { innerPadding ->
-        NavHost(navController = navController, startDestination = "home", Modifier.padding(innerPadding)) {
-            composable("home") { HomeScreen(
-               homeViewModel = homeViewModel
-            )}
-            composable("cart") {  val _cartApiService = RetrofitClient.cartApiService
-
-                val repository = CartRepository(_cartApiService)
-
-                CartScreen(viewModel = CartViewModel(repository), onCheckoutClick = { /* Add your action here */ })
+        topBar = { TopBar(navController) },
+        bottomBar = { BottomBar(selectedIndex, navController) }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = "home",
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable("home") {
+                selectedIndex.value = 0
+                HomeScreen(homeViewModel = homeViewModel)
             }
-            composable("favorite") { FavoriteScreen() }
-            composable("userAuth") { UserAuthScreen(navController) }
+            composable("cart") {
+                selectedIndex.value = 2
+                CartScreen(viewModel = cartViewModel, onCheckoutClick = { /* Add your action here */ })
+            }
+            composable("favorite") {
+                selectedIndex.value = 3
+                FavoriteScreen()
+            }
+            composable("userAuth") {
+                selectedIndex.value = 1
+                UserAuthScreen(navController)
+            }
         }
     }
 }
+
 
 
 @Composable
@@ -115,9 +125,18 @@ fun HomeProducts() {
 @Composable
 fun TopBar(navHostController: NavHostController) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
+    val isSearchVisible = currentRoute != "userAuth"
+
     TopAppBar(
-        title = { Text(stringResource(R.string.app_name)) },
+        title = {
+            if (isSearchVisible) {
+                SearchBar()
+            } else {
+                Text(stringResource(R.string.app_name))
+            }
+        },
         navigationIcon = {
             if (showBackIcon) {
                 IconButton(onClick = { navHostController.popBackStack() }) {
@@ -129,58 +148,101 @@ fun TopBar(navHostController: NavHostController) {
             }
         },
         actions = {
-            IconButton(onClick = {}) {
-                Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings))
+            if (isSearchVisible) {
+                IconButton(onClick = { /* Handle settings click */ }) {
+                    Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings))
+                }
             }
         }
     )
 }
 
 @Composable
+fun SearchBar() {
+    // Placeholder per la SearchBar
+    Text(text = "🔍 Search...", modifier = Modifier.padding(8.dp))
+}
+
+
+@Composable
 fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostController) {
-    BottomAppBar {
-        NavigationBar {
-            NavigationBarItem(
-                selected = selectedIndex.value == 0,
-                onClick = {
-                    selectedIndex.value = 0
-                    navHostController.navigate("home")
-                },
-                icon = {
-                    Icon(Icons.Filled.Home, contentDescription = stringResource(R.string.home))
+    NavigationBar {
+        NavigationBarItem(
+            selected = selectedIndex.value == 0,
+            onClick = {
+                selectedIndex.value = 0
+                navHostController.navigate("home") {
+                    popUpTo(navHostController.graph.startDestinationId) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
                 }
-            )
-            NavigationBarItem(
-                selected = selectedIndex.value == 1,
-                onClick = {
-                    selectedIndex.value = 1
-                    navHostController.navigate("userAuth")
-                },
-                icon = {
-                    Icon(Icons.Filled.AccountCircle, contentDescription = stringResource(R.string.user))
+            },
+            icon = {
+                Icon(
+                    Icons.Filled.Home,
+                    contentDescription = stringResource(R.string.home)
+                )
+            }
+        )
+        NavigationBarItem(
+            selected = selectedIndex.value == 1,
+            onClick = {
+                selectedIndex.value = 1
+                navHostController.navigate("userAuth") {
+                    popUpTo(navHostController.graph.startDestinationId) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
                 }
-            )
-            NavigationBarItem(
-                selected = selectedIndex.value == 2,
-                onClick = {
-                    selectedIndex.value = 2
-                    navHostController.navigate("cart")
-                },
-                icon = {
-                    Icon(Icons.Filled.ShoppingCart, contentDescription = stringResource(R.string.cart))
+            },
+            icon = {
+                Icon(
+                    Icons.Filled.AccountCircle,
+                    contentDescription = stringResource(R.string.user)
+                )
+            }
+        )
+        NavigationBarItem(
+            selected = selectedIndex.value == 2,
+            onClick = {
+                selectedIndex.value = 2
+                navHostController.navigate("cart") {
+                    popUpTo(navHostController.graph.startDestinationId) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
                 }
-            )
-            NavigationBarItem(
-                selected = selectedIndex.value == 3,
-                onClick = {
-                    selectedIndex.value = 3
-                    navHostController.navigate("favorite")
-                },
-                icon = {
-                    Icon(Icons.Filled.Favorite, contentDescription = stringResource(R.string.favorite))
+            },
+            icon = {
+                Icon(
+                    Icons.Filled.ShoppingCart,
+                    contentDescription = stringResource(R.string.cart)
+                )
+            }
+        )
+        NavigationBarItem(
+            selected = selectedIndex.value == 3,
+            onClick = {
+                selectedIndex.value = 3
+                navHostController.navigate("favorite") {
+                    popUpTo(navHostController.graph.startDestinationId) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
                 }
-            )
-        }
+            },
+            icon = {
+                Icon(
+                    Icons.Filled.Favorite,
+                    contentDescription = stringResource(R.string.favorite)
+                )
+            }
+        )
     }
 }
 

@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,27 +27,45 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
+import coil.request.CachePolicy
+import com.android.volley.toolbox.ImageRequest
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.viewmodels.HomeViewModel
 
+var testImgs : List<String> = listOf("https://mockuptree.com/wp-content/uploads/edd/2019/10/free-Book-mockup-150x150.jpg", "https://images.thegreatestbooks.org/m8kb7ah2lhy960dbp473zna11wb4",
+    "https://images.thegreatestbooks.org/e6ucr7aqiwuvqs1of4x4hlvql2x3", "https://images.thegreatestbooks.org/2msw2obu4l2xo14lgbkupce9f1y3", "https://images.thegreatestbooks.org/2msw2obu4l2xo14lgbkupce9f1y3",
+    "https://images.thegreatestbooks.org/02k8grlgw3la54zif8ubgy9fiyrx")
 
 @Composable
-fun ProductCard(book: Book, height: Dp, width: Dp ) {
-    var fakeUrl: String = "https://mockuptree.com/wp-content/uploads/edd/2019/10/free-Book-mockup-150x150.jpg"
+fun ProductCard(book: Book, height: Dp, width: Dp) {
+    val imageUrl = remember(book.id) {
+        testImgs[book.id.hashCode() % testImgs.size]
+    }
+    val imagePainter = rememberAsyncImagePainter(
+        model = imageUrl,
+        error = rememberAsyncImagePainter("https://mockuptree.com/wp-content/uploads/edd/2019/10/free-Book-mockup-150x150.jpg")
+    )
+    val isLoading = imagePainter.state is AsyncImagePainter.State.Loading
+
     Card(
         modifier = Modifier
             .padding(8.dp)
-            .width(width),
-        shape = RoundedCornerShape(8.dp),
+            .width(width)
+            .height(height),
+        shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -55,36 +74,45 @@ fun ProductCard(book: Book, height: Dp, width: Dp ) {
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = rememberAsyncImagePainter(
-                    model = fakeUrl,error = rememberAsyncImagePainter("https://mockuptree.com/wp-content/uploads/edd/2019/10/free-Book-mockup-150x150.jpg")
-                ),
-                contentDescription = book.title,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
+                    .height(height * 0.6f)
+                    .clip(RoundedCornerShape(8.dp))
+            ) {
+                Image(
+                    painter = imagePainter,
+                    contentDescription = book.title,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = book.title, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1)
-            Text(text = book.author, fontSize = 12.sp, maxLines = 1)
-            Text(text = "€${book.price}", fontSize = 12.sp)
+            Text(text = "di " + book.author, fontSize = 12.sp, maxLines = 1)
+            Text(text = "${book.price} €", fontSize = 15.sp)
         }
     }
 }
 
 
 @Composable
-fun ProductSection(title: String, books: List<Book>, height: Dp = 200.dp, width: Dp = 100.dp) {
+fun ProductSection(title: String, books: List<Book>, height: Dp = 180.dp, width: Dp = 140.dp) {
     Column(
         modifier = Modifier
             .padding(16.dp)
     ) {
         Text(text = title, fontWeight = FontWeight.Bold, fontSize = 18.sp)
         Spacer(modifier = Modifier.height(8.dp))
-        LazyRow {
-            items(books) { book ->
+        LazyRow (
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(books, key = {it.id}) { book ->
                 ProductCard(book, height, width) // Aumentiamo la larghezza delle card (150 dp invece di 100 dp)
             }
         }
@@ -96,9 +124,8 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
     val products by homeViewModel.products.collectAsState()
     val isLoading by homeViewModel.isLoading.collectAsState()
     val error by homeViewModel.error.collectAsState()
-
-    // Log per verificare il numero di libri caricati
-    println("Numero di libri caricati: ${products.size}")
+    val topProducts = remember(products) { products.take(5) }
+    val gridProducts = remember(products) { products.drop(5) } // Libri per la griglia
 
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -114,29 +141,35 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
                 Text("Nessun prodotto disponibile")
             }
         } else {
-            // Aggiunto un colore di sfondo per debug visivo
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .heightIn(max = 600.dp)
-                    .padding(16.dp)
-            ) {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    // Sezione di test con dati statici per vedere se funziona
-                    item {
-                        ProductSection(
-                            title = "Libri Popolari",
-                            books = products,
-                            height = 250.dp, // Altezze maggiori per visibilità
-                            width = 150.dp // Aumentiamo la larghezza delle card
-                        )
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                item(key = "topSection") {
+                    ProductSection(
+                        title = "Libri Popolari",
+                        books = topProducts,
+                    )
+                }
+                item {
+                    Text(
+                        text = "In base ai tuoi interessi",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+
+                items(gridProducts.chunked(2), key = { it[0].id }) { rowBooks ->
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    ) {
+                        for (book in rowBooks) {
+                            ProductCard(book, height = 280.dp, width = 190.dp)
+                        }
                     }
                 }
             }
         }
     }
 }
-
-
 
 
