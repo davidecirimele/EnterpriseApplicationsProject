@@ -67,7 +67,7 @@ fun ProductCard(navController: NavController, book: Book, height: Dp, width: Dp)
             .padding(8.dp)
             .width(width)
             .height(height)
-            .clickable { navController.navigate("/books_details/{idBook}") },
+            .clickable { navController.navigate("/books_details/${book.id}") },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
