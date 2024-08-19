@@ -46,7 +46,7 @@ public class Book{
     private String title;
     @Column(name = "AUTHOR")
     private String author;
-    @Column(name = "ISBN")
+    @Column(name = "ISBN", unique = true)
     private String ISBN;
     @Column(name = "PAGES")
     private int pages;
