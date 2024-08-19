@@ -79,6 +79,9 @@ public class JwtService {
     ) {
         extraClaims.put("userId", ((LoggedUserDetails) userDetails).getId());
         extraClaims.put("type", "access-token");
+        extraClaims.put("firstName", ((LoggedUserDetails) userDetails).getFirstName());
+        extraClaims.put("lastName", ((LoggedUserDetails) userDetails).getLastName());
+        extraClaims.put("birthdate", ((LoggedUserDetails) userDetails).getBirthDate());
 
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
@@ -88,9 +91,6 @@ public class JwtService {
         Date expiryDate = new Date(now.getTime() + expirationTimeInHours * 60 * 60 * 1000); // Imposta la durata del token
 
         extraClaims.put("userId", ((LoggedUserDetails) userDetails).getId());
-        extraClaims.put("firstName", ((LoggedUserDetails) userDetails).getFirstName());
-        extraClaims.put("lastName", ((LoggedUserDetails) userDetails).getLastName());
-
         extraClaims.put("type", "refresh-token");
 
         return Jwts

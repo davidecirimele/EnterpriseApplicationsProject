@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +29,7 @@ public class LoggedUserDetails implements UserDetails{
     private String password;
     private String firstName;
     private String lastName;
+    private LocalDate birthDate;
     private List<GrantedAuthority> authorities;
 
     public LoggedUserDetails(User user) {
@@ -37,6 +39,7 @@ public class LoggedUserDetails implements UserDetails{
         this.authorities = Collections.singletonList( new SimpleGrantedAuthority("ROLE_" + user.getClass().getAnnotation(DiscriminatorValue.class).value()));
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
+        this.birthDate = user.getBirthDate();
     }
 
 
