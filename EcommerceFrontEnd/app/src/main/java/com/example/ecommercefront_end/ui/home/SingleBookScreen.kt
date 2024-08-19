@@ -315,7 +315,7 @@ fun BookDetailsScreen(book: Book) {
                                 .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
                         )
                         Text(
-                            text = book.format?.name ?: "N/A",
+                            text = book.format?.name ?: "",
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -332,7 +332,7 @@ fun BookDetailsScreen(book: Book) {
 
                         )
                         Text(
-                            text = book.genre?.name ?: "N/A",
+                            text = book.genre?.name ?: "",
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -349,7 +349,7 @@ fun BookDetailsScreen(book: Book) {
 
                         )
                         Text(
-                            text = book.language?.name ?: "N/A",
+                            text = book.language?.name ?: "",
                             modifier = Modifier.weight(1f)
                         )
                     }

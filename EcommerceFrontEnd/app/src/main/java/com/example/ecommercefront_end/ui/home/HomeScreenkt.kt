@@ -47,8 +47,10 @@ import com.android.volley.toolbox.ImageRequest
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.viewmodels.HomeViewModel
 
-var testImgs : List<String> = listOf("https://mockuptree.com/wp-content/uploads/edd/2019/10/free-Book-mockup-150x150.jpg", "https://images.thegreatestbooks.org/m8kb7ah2lhy960dbp473zna11wb4",
-    "https://images.thegreatestbooks.org/e6ucr7aqiwuvqs1of4x4hlvql2x3", "https://images.thegreatestbooks.org/2msw2obu4l2xo14lgbkupce9f1y3", "https://images.thegreatestbooks.org/2msw2obu4l2xo14lgbkupce9f1y3",
+var testImgs : List<String> = listOf("https://mockuptree.com/wp-content/uploads/edd/2019/10/free-Book-mockup-150x150.jpg",
+    "https://images.thegreatestbooks.org/m8kb7ah2lhy960dbp473zna11wb4",
+    "https://images.thegreatestbooks.org/e6ucr7aqiwuvqs1of4x4hlvql2x3",
+    "https://images.thegreatestbooks.org/2msw2obu4l2xo14lgbkupce9f1y3", "https://images.thegreatestbooks.org/2msw2obu4l2xo14lgbkupce9f1y3",
     "https://images.thegreatestbooks.org/02k8grlgw3la54zif8ubgy9fiyrx")
 
 @Composable
@@ -98,7 +100,7 @@ fun ProductCard(navController: NavController, book: Book, height: Dp, width: Dp)
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = book.title, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1)
             Text(text = "di " + book.author, fontSize = 12.sp, maxLines = 1)
-            Text(text = "${book.price} €", fontSize = 15.sp)
+            Text(text = "${"%,.2f".format(book.price)} €", fontSize = 15.sp)
         }
     }
 }
