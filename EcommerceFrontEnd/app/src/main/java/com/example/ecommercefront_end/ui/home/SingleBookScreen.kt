@@ -1,9 +1,11 @@
 package com.example.ecommercefront_end.ui.home
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import java.time.format.DateTimeFormatter
 import com.example.ecommercefront_end.model.Book
 
 @Composable
@@ -49,7 +52,7 @@ fun BookDetailsScreen(book: Book) {
             .padding(16.dp)
     ) {
         // Titolo e descrizione allineati a sinistra
-        item{
+        item {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -82,7 +85,7 @@ fun BookDetailsScreen(book: Book) {
         }
 
         // Immagine del libro
-        item{
+        item {
             val imageUrl = remember(book.id) {
                 testImgs[book.id.hashCode() % testImgs.size]
             }
@@ -102,9 +105,8 @@ fun BookDetailsScreen(book: Book) {
         }
 
 
-
         // Prezzo e quantità: prezzo allineato a sinistra, quantità a destra
-        item{
+        item {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -144,7 +146,7 @@ fun BookDetailsScreen(book: Book) {
             }
         }
         // Indirizzo di spedizione
-        item{
+        item {
             Text(
                 text = "Invia a $shippingAddress",
                 fontSize = 14.sp,
@@ -156,10 +158,10 @@ fun BookDetailsScreen(book: Book) {
         }
 
 
-        item {  Spacer(modifier = Modifier.height(8.dp))}
+        item { Spacer(modifier = Modifier.height(8.dp)) }
 
         // Pulsanti Aggiungi al carrello e Acquista subito
-        item{
+        item {
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -172,22 +174,13 @@ fun BookDetailsScreen(book: Book) {
                 ) {
                     Text("Aggiungi al carrello")
                 }
-                Button(
-                    onClick = { /* TODO: Acquista subito */ },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(60.dp)
-                        .padding(bottom = 18.dp)
-                ) {
-                    Text("Acquista subito")
-                }
             }
         }
 
 
-        item{ Spacer(modifier = Modifier.height(25.dp)) }
+        item { Spacer(modifier = Modifier.height(25.dp)) }
         // Wishlist
-        item{
+        item {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -220,5 +213,217 @@ fun BookDetailsScreen(book: Book) {
             }
         }
 
+        item { Spacer(modifier = Modifier.height(40.dp)) }
+
+        item { // Informazioni aggiuntive
+            Text(
+                text = "Dettagli del prodotto",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+
+
+                    // Informazioni in due colonne
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                            .background(Color.LightGray.copy(alpha = 0.2f))
+                    ) {
+                        Text(
+                            text = "Autore",
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+                        )
+                        Text(
+                            text = book.author,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                    ) {
+                        Text(
+                            text = "ISBN",
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+
+                        )
+                        Text(
+                            text = book.ISBN,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                    ) {
+                        Text(
+                            text = "Pagine",
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+
+                        )
+                        Text(
+                            text = "${book.pages}",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                    ) {
+                        Text(
+                            text = "Edizione",
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+
+                        )
+                        Text(
+                            text = book.edition,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                    ) {
+                        Text(
+                            text = "Formato",
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+                        )
+                        Text(
+                            text = book.format?.name ?: "N/A",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                    ) {
+                        Text(
+                            text = "Genere",
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+
+                        )
+                        Text(
+                            text = book.genre?.name ?: "N/A",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                    ) {
+                        Text(
+                            text = "Lingua",
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+
+                        )
+                        Text(
+                            text = book.language?.name ?: "N/A",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                    ) {
+                        Text(
+                            text = "Editore",
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+
+                        )
+                        Text(
+                            text = book.publisher,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                    ) {
+                        Text(
+                            text = "Età consigliata",
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+
+                        )
+                        Text(
+                            text = "${book.age}",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                    ) {
+                        Text(
+                            text = "Data di pubblicazione",
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+
+                        )
+                        Text(
+                            text = book.publishDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                    ) {
+                        Text(
+                            text = "Peso",
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+
+                        )
+                        Text(
+                            text = "${book.weight} kg",
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+        }
     }
 }
