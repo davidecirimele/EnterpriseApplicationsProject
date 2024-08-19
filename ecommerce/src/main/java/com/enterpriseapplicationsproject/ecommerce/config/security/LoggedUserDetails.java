@@ -26,6 +26,8 @@ public class LoggedUserDetails implements UserDetails{
     private UUID id;
     private String email;
     private String password;
+    private String firstName;
+    private String lastName;
     private List<GrantedAuthority> authorities;
 
     public LoggedUserDetails(User user) {
@@ -33,6 +35,8 @@ public class LoggedUserDetails implements UserDetails{
         this.email = user.getCredential().getEmail();
         this.password = user.getCredential().getPassword();
         this.authorities = Collections.singletonList( new SimpleGrantedAuthority("ROLE_" + user.getClass().getAnnotation(DiscriminatorValue.class).value()));
+        this.firstName = user.getFirstName();
+        this.lastName = user.getLastName();
     }
 
 
