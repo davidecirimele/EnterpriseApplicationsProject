@@ -65,6 +65,9 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.browser)
+    implementation(libs.material)
+    implementation(libs.places)
+    implementation(libs.androidx.core.i18n)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose.android)
     testImplementation(libs.junit)
@@ -85,6 +88,8 @@ dependencies {
     implementation(libs.converter.gson)
     implementation (libs.androidx.security.crypto)
     implementation (libs.jwtdecode)
+
+    implementation("com.google.android.material:material:1.4.0")
 }
 
 kotlin {

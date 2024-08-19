@@ -55,6 +55,7 @@ public class SecurityConfig {
                     auth.requestMatchers("api/v1/admin/register").permitAll();
                     auth.requestMatchers("/error").permitAll();
                     auth.requestMatchers("/api/v1/books/add").authenticated();
+                    auth.requestMatchers("/api/v1/books/getAll").permitAll(); //testing homew front end
                     }
                     )
                     .sessionManagement(session -> session
@@ -87,7 +88,9 @@ public class SecurityConfig {
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
             CorsConfiguration configuration = new CorsConfiguration();
-            configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // Modifica secondo le tue esigenze
+            configuration.setAllowedOrigins(Arrays.asList("https://localhost:3000")); // Modifica secondo le tue esigenze
+            configuration.setAllowedOrigins(Arrays.asList("https://localhost:8081","https://192.168.1.54:8081", "https://93.44.97.32")); // Modifica secondo le tue esigenze
+
             configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
             configuration.setAllowedHeaders(Arrays.asList("*"));
             configuration.setAllowCredentials(true);

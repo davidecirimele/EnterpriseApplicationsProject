@@ -20,10 +20,10 @@ interface BooksApiService {
     suspend fun insertBook(insertBook: Book)
 
     @GET("/books/get/{idBook}")
-    suspend fun getBook(@Path("idBook") idBook: Long)
+    suspend fun getBook(@Path("idBook") idBook: Long) : Book
 
     @GET("/books/getAll")
-    suspend fun getAllBooks()
+    suspend fun getAllBooks() : List<Book>
 
     @DELETE("/books/delete/{idBook}")
     suspend fun deleteBook(@Path("idBook") idBook: Long)

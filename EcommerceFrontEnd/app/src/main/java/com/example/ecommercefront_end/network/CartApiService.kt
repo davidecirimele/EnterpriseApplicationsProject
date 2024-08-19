@@ -22,10 +22,4 @@ interface CartApiService {
     @DELETE("/cart/remove")
     suspend fun removeItem(@Body cartItemId: CartItemId)
 
-
-
-
-
-
-
 }
