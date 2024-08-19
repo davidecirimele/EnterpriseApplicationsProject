@@ -25,8 +25,24 @@ class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
     val error: StateFlow<String?> = _error.asStateFlow()
 
     init {
-        loadBooks() // Avvia il caricamento dei libri non appena il ViewModel viene creato
+        loadBooksFromBD() // Avvia il caricamento dei libri non appena il ViewModel viene creato
         println("ViewModel inizializzato")
+    }
+
+    private fun loadBooksFromBD() {
+        viewModelScope.launch {
+            try {
+                _products.value = repository.getAllBooks()
+                if (_products.value.isEmpty()) {
+                    _error.value = "Nessun libro trovato" // Imposta un messaggio di errore se non ci sono libri
+                }
+
+            } catch (e: Exception) {
+                _error.value = "Errore durante il caricamento dei libri: ${e.message}" // Imposta il messaggio di errore
+            } finally {
+                _isLoading.value = false // Imposta isLoading a false dopo il caricamento, indipendentemente dal risultato
+            }
+        }
     }
 
     private fun loadBooks() {
@@ -34,6 +50,7 @@ class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
             _isLoading.value = true // Imposta isLoading a true prima del caricamento
             try {
                 _products.value = createTestBooks() //repository.getAllBooks() // Aggiorna _products con i libri caricati
+
                 if (_products.value.isEmpty()) {
                     _error.value = "Nessun libro trovato" // Imposta un messaggio di errore se non ci sono libri
                 }
@@ -56,16 +73,8 @@ class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
         }
     }
 
-    /*
-    private fun loadBooks() {
-        viewModelScope.launch {
-            try {
-                val books = repository.getAllBooks()
-            } catch (e: Exception) {
-                // Gestire l'errore, ad esempio mostrando un messaggio all'utente
-            }
-        }
-    }*/
+
+
 }
 
 
