@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
 fun NavigationView(navHostController: NavHostController) {
     NavHost(navController = navHostController, startDestination = "home") {
         composable("home") {
-            HomeProducts()
+            HomeScreen()
         }
         composable("user") {
             UserScreen()
