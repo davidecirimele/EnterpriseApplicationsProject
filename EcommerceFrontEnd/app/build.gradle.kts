@@ -83,6 +83,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+    implementation (libs.androidx.security.crypto)
+    implementation (libs.jwtdecode)
 }
 
 kotlin {
