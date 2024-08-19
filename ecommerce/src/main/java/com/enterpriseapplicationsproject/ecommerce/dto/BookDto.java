@@ -1,5 +1,8 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
+import com.enterpriseapplicationsproject.ecommerce.data.entities.BookFormat;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.BookGenre;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.BookLanguage;
 import jakarta.persistence.Column;
 import lombok.Data;
 import lombok.ToString;
@@ -22,13 +25,13 @@ public class BookDto {
 
     private String edition;
 
-    private String format;
+    private BookFormat format;
 
     private LocalDate insertDate;
 
-    private String genre;
+    private BookGenre genre;
 
-    private String language;
+    private BookLanguage language;
 
     private String publisher;
 

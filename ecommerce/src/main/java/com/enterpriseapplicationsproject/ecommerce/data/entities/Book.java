@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @EqualsAndHashCode()
 @Entity
 @Data
@@ -41,7 +42,6 @@ public class Book{
     @Column(name = "STOCK")
     private Integer stock;
 
-
     @Column(name = "TITLE")
     private String title;
     @Column(name = "AUTHOR")
@@ -52,12 +52,14 @@ public class Book{
     private int pages;
     @Column(name = "EDITION")
     private String edition;
+
     @Column(name = "FORMAT")
-    private String format;
+    private BookFormat format;
     @Column(name = "GENRE")
-    private String genre;
+    private BookGenre genre;
     @Column(name = "LANGUAGE")
-    private String language;
+    private BookLanguage language;
+
     @Column(name = "PUBLISHER")
     private String publisher;
     @Column(name = "AGE")

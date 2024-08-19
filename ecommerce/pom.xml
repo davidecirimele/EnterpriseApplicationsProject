@@ -139,7 +139,11 @@
 			<artifactId>nimbus-jose-jwt</artifactId>
 			<version>9.27</version>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+    </dependencies>
 
 
 	<build>

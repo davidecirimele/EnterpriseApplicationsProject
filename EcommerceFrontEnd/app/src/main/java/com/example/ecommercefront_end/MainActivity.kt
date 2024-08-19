@@ -70,11 +70,58 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun NavigationView(navHostController: NavHostController) {
-    NavHost(navController = navHostController, startDestination = "account-manager") {
-        composable("home") {
-            //HomeProducts()
-        }
+fun NavigationView(navController: NavHostController) {
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    val selectedIndex = remember { mutableIntStateOf(0) }
+
+    // Usa remember per mantenere i ViewModel
+    val homeViewModel = remember { HomeViewModel(repository = HomeRepository(RetrofitClient.booksApiService)) }
+    val cartViewModel = remember { CartViewModel(repository = CartRepository(RetrofitClient.cartApiService)) }
+
+
+    Scaffold(
+        topBar = { TopBar(navController) },
+        bottomBar = { BottomBar(selectedIndex, navController) }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = "home",
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable("home") {
+                selectedIndex.value = 0
+                HomeScreen(homeViewModel = homeViewModel, navController)
+            }
+
+            composable("/books_details/{idBook}", arguments = listOf(navArgument("idBook") { type = NavType.LongType })) { backStackEntry ->
+                val idBook = backStackEntry.arguments?.getLong("idBook") ?: 0L
+
+                // Carica il libro corrispondente all'id
+                LaunchedEffect(idBook) {
+                    homeViewModel.loadBook(idBook)
+                }
+
+                // Osserva i cambiamenti del libro
+                val book by homeViewModel.bookFlow.collectAsState()
+
+                book?.let {
+                    BookDetailsScreen(book = it)
+                } ?: Text("Libro non trovato")
+            }
+
+            composable("cart") {
+                selectedIndex.value = 2
+                CartScreen(viewModel = cartViewModel, onCheckoutClick = { /* Add your action here */ })
+            }
+            composable("favorite") {
+                selectedIndex.value = 3
+                FavoriteScreen()
+            }
+            composable("userAuth") {
+                selectedIndex.value = 1
+                UserAuthScreen(navController)
+            }
+
         composable("account-manager") {
             val _userApiService = RetrofitClient.userApiService
             val repository = AccountRepository(_userApiService)
@@ -86,20 +133,12 @@ fun NavigationView(navHostController: NavHostController) {
             MyAccountScreen(viewModel = AccountViewModel(repository), onCheckoutClick = { /* Add your action here */ })
 
         }
-        composable("cart") {
-            val _cartApiService = RetrofitClient.cartApiService
 
-            val repository = CartRepository(_cartApiService)
-
-            CartScreen(viewModel = CartViewModel(repository), onCheckoutClick = { /* Add your action here */ })
-
-        }
     }
 
-        }
-        /*composable("favorite") {
-            CartScreen()
-        }*/
+    }
+
+
 
 @Composable
 fun HomeProducts() {
@@ -111,8 +150,18 @@ fun HomeProducts() {
 @Composable
 fun TopBar(navHostController: NavHostController) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
-    TopAppBar(title = { Text(stringResource(R.string.app_name))},
+    val isSearchVisible = currentRoute != "userAuth"
+
+    TopAppBar(
+        title = {
+            if (isSearchVisible) {
+                SearchBar()
+            } else {
+                Text(stringResource(R.string.app_name))
+            }
+        },
         navigationIcon = {
             if (showBackIcon) {
                 IconButton(onClick = { navHostController.popBackStack() }) {
@@ -124,42 +173,101 @@ fun TopBar(navHostController: NavHostController) {
             }
         },
         actions = {
-            IconButton(onClick = {}) {
-                Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings))
+            if (isSearchVisible) {
+                IconButton(onClick = { /* Handle settings click */ }) {
+                    Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings))
+                }
             }
         }
     )
 }
 
 @Composable
+fun SearchBar() {
+    // Placeholder per la SearchBar
+    Text(text = "🔍 Search...", modifier = Modifier.padding(8.dp))
+}
+
+
+@Composable
 fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostController) {
-    BottomAppBar {
-        NavigationBar {
-            NavigationBarItem(selected = selectedIndex.value == 0, onClick = {
+    NavigationBar {
+        NavigationBarItem(
+            selected = selectedIndex.value == 0,
+            onClick = {
                 selectedIndex.value = 0
-                navHostController.navigate("home")
-            }, icon = {
-                Icon(Icons.Filled.Home, contentDescription = stringResource(R.string.home))
-            })
-            NavigationBarItem(selected = selectedIndex.value == 1, onClick = {
+                navHostController.navigate("home") {
+                    popUpTo(navHostController.graph.startDestinationId) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            icon = {
+                Icon(
+                    Icons.Filled.Home,
+                    contentDescription = stringResource(R.string.home)
+                )
+            }
+        )
+        NavigationBarItem(
+            selected = selectedIndex.value == 1,
+            onClick = {
                 selectedIndex.value = 1
-                navHostController.navigate("account-manager")
-            }, icon = {
-                Icon(Icons.Filled.AccountCircle, contentDescription = stringResource(R.string.user))
-            })
-            NavigationBarItem(selected = selectedIndex.value == 2, onClick = {
+                navHostController.navigate("userAuth") {
+                    popUpTo(navHostController.graph.startDestinationId) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            icon = {
+                Icon(
+                    Icons.Filled.AccountCircle,
+                    contentDescription = stringResource(R.string.user)
+                )
+            }
+        )
+        NavigationBarItem(
+            selected = selectedIndex.value == 2,
+            onClick = {
                 selectedIndex.value = 2
-                navHostController.navigate("cart")
-            }, icon = {
-                Icon(Icons.Filled.ShoppingCart, contentDescription = stringResource(R.string.cart))
-            })
-            NavigationBarItem(selected = selectedIndex.value == 3, onClick = {
+                navHostController.navigate("cart") {
+                    popUpTo(navHostController.graph.startDestinationId) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            icon = {
+                Icon(
+                    Icons.Filled.ShoppingCart,
+                    contentDescription = stringResource(R.string.cart)
+                )
+            }
+        )
+        NavigationBarItem(
+            selected = selectedIndex.value == 3,
+            onClick = {
                 selectedIndex.value = 3
-                navHostController.navigate("favorite")
-            }, icon = {
-                Icon(Icons.Filled.Favorite, contentDescription = stringResource(R.string.favorite))
-            })
-        }
+                navHostController.navigate("favorite") {
+                    popUpTo(navHostController.graph.startDestinationId) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            icon = {
+                Icon(
+                    Icons.Filled.Favorite,
+                    contentDescription = stringResource(R.string.favorite)
+                )
+            }
+        )
     }
 }
 

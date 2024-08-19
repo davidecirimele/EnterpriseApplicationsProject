@@ -30,6 +30,6 @@ public class WishlistItem {
             name = "BOOK_ID",
             referencedColumnName = "ID"
     )
-    private Book bokk;
+    private Book book;
 
 }
