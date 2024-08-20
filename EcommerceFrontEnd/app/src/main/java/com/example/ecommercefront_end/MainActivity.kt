@@ -1,6 +1,5 @@
 package com.example.ecommercefront_end
 
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -31,6 +30,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -38,8 +38,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -49,36 +47,36 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.ecommercefront_end.network.CartApiService
 import com.example.ecommercefront_end.network.RetrofitClient
+import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.repository.HomeRepository
-import com.example.ecommercefront_end.ui.User.UserAuthScreen
 import com.example.ecommercefront_end.ui.cart.CartScreen
+import com.example.ecommercefront_end.ui.home.BookDetailsScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
+import com.example.ecommercefront_end.ui.user.AccountManagerScreen
+import com.example.ecommercefront_end.ui.user.MyAccountScreen
+import com.example.ecommercefront_end.ui.user.UserAuthScreen
+import com.example.ecommercefront_end.viewmodels.AccountViewModel
 import com.example.ecommercefront_end.viewmodels.CartViewModel
 import com.example.ecommercefront_end.viewmodels.HomeViewModel
-import com.example.ecommercefront_end.network.BooksApiService
-import com.example.ecommercefront_end.ui.home.BookDetailsScreen
-import com.example.ecommercefront_end.ui.home.HomeScreen
-import androidx.compose.runtime.collectAsState
 
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?){
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             EcommerceFrontEndTheme {
+                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val navController = rememberNavController()
-                    NavigationView(navController)
+                    HomePage()
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun NavigationView(navController: NavHostController) {
@@ -88,7 +86,7 @@ fun NavigationView(navController: NavHostController) {
     // Usa remember per mantenere i ViewModel
     val homeViewModel = remember { HomeViewModel(repository = HomeRepository(RetrofitClient.booksApiService)) }
     val cartViewModel = remember { CartViewModel(repository = CartRepository(RetrofitClient.cartApiService)) }
-
+    val accountViewModel = remember { AccountViewModel(repository = AccountRepository(RetrofitClient.userApiService)) }
 
     Scaffold(
         topBar = { TopBar(navController) },
@@ -101,10 +99,13 @@ fun NavigationView(navController: NavHostController) {
         ) {
             composable("home") {
                 selectedIndex.value = 0
-                HomeScreen(homeViewModel = homeViewModel, navController)
+                HomeScreen()
             }
 
-            composable("/books_details/{idBook}", arguments = listOf(navArgument("idBook") { type = NavType.LongType })) { backStackEntry ->
+            composable(
+                "/books_details/{idBook}",
+                arguments = listOf(navArgument("idBook") { type = NavType.LongType })
+            ) { backStackEntry ->
                 val idBook = backStackEntry.arguments?.getLong("idBook") ?: 0L
 
                 // Carica il libro corrispondente all'id
@@ -122,7 +123,9 @@ fun NavigationView(navController: NavHostController) {
 
             composable("cart") {
                 selectedIndex.value = 2
-                CartScreen(viewModel = cartViewModel, onCheckoutClick = { /* Add your action here */ })
+                CartScreen(
+                    viewModel = cartViewModel,
+                    onCheckoutClick = { /* Add your action here */ })
             }
             composable("favorite") {
                 selectedIndex.value = 3
@@ -133,26 +136,23 @@ fun NavigationView(navController: NavHostController) {
                 UserAuthScreen(navController)
             }
 
-        composable("account-manager") {
-            val _userApiService = RetrofitClient.userApiService
-            val repository = AccountRepository(_userApiService)
-            AccountManagerScreen(viewModel = AccountViewModel(repository), navHostController)
-        }
-        composable("my-account") {
-            val _userApiService = RetrofitClient.userApiService
-            val repository = AccountRepository(_userApiService)
-            MyAccountScreen(viewModel = AccountViewModel(repository), onCheckoutClick = { /* Add your action here */ })
+            composable("account-manager") {
+                val _userApiService = RetrofitClient.userApiService
+                val repository = AccountRepository(_userApiService)
+                AccountManagerScreen(viewModel = AccountViewModel(repository), navController)
+            }
+            composable("my-account") {
+                val _userApiService = RetrofitClient.userApiService
+                val repository = AccountRepository(_userApiService)
+                MyAccountScreen(
+                    viewModel = AccountViewModel(repository),
+                    onCheckoutClick = { /* Add your action here */ })
+
+            }
 
         }
 
     }
-}
-
-
-
-@Composable
-fun HomeProducts() {
-    TODO("Not yet implemented")
 }
 
 
@@ -281,8 +281,20 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
     }
 }
 
-
-
+@Composable
+fun HomePage() {
+    val navHostController = rememberNavController()
+    val selectedIndex = remember { mutableIntStateOf(0) }
+    Scaffold(topBar = { TopBar(navHostController) },
+        bottomBar = { BottomBar(selectedIndex, navHostController) },
+        floatingActionButton = { AddToCartFloatingButton { /* Add your action here */ } },
+        floatingActionButtonPosition = FabPosition.End
+    ) {
+        Box(modifier = Modifier.padding(it)) {
+            NavigationView(navController = navHostController)
+        }
+    }
+}
 @Composable
 fun AddToCartFloatingButton(onClick: () -> Unit) {
     FloatingActionButton(onClick = onClick) {
@@ -290,12 +302,19 @@ fun AddToCartFloatingButton(onClick: () -> Unit) {
     }
 }
 
-
 @Composable
-fun CartScreen() {
-    Text(text = "Cart Screen")
+fun HomeScreen() {
+    Text(text = "Home Screen")
+}
+@Composable
+fun UserScreen() {
+    Text(text = "User Screen")
 }
 
+/*@Composable
+fun CartScreen() {
+    Text(text = "Cart Screen")
+}*/
 @Composable
 fun FavoriteScreen() {
     Text(text = "Favorite Screen")

@@ -4,7 +4,7 @@
             "outputFile": "com.example.ecommercefront_end.app-mergeDebugResources-76:/values-hdpi-v4/values-hdpi-v4.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\samue\\.gradle\\caches\\transforms-4\\e075e34aad84be944e6d5526460e3689\\transformed\\appcompat-1.6.1\\res\\values-hdpi-v4\\values-hdpi-v4.xml",
+                    "source": "/Users/davidecirimele/.gradle/caches/transforms-4/e075e34aad84be944e6d5526460e3689/transformed/appcompat-1.6.1/res/values-hdpi-v4/values-hdpi-v4.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

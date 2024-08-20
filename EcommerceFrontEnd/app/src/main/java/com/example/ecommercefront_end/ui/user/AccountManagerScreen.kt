@@ -49,13 +49,13 @@ fun UserCard(){
                 Text(
                     text = "Welcome back, ",
                     style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 20.sp
                 )
                 Text(
                     text = "${user?.firstName}, ${user?.lastName}",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 30.sp
                 )
             }
@@ -100,7 +100,7 @@ fun PurchasedHistoryCard(history: List<Pair<String,String>>){
         Text(
             text = "Purchased History",
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.secondary,
+            color = MaterialTheme.colorScheme.primary,
             fontSize = 25.sp
         )
         Row(

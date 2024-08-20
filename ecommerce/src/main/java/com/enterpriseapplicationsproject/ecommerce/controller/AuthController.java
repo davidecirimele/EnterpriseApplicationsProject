@@ -17,6 +17,7 @@ import com.enterpriseapplicationsproject.ecommerce.dto.security.TokenRefreshRequ
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -48,12 +49,12 @@ public class AuthController {
 
 
     @PostMapping(consumes = "application/json", path = "/register")
-    public ResponseEntity<UserDetailsDto> registerUser(@RequestBody  SaveUserDto userDto) {
+    public ResponseEntity<UserDetailsDto> registerUser(@Valid @RequestBody  SaveUserDto userDto) {
         return ResponseEntity.ok(authService.registerUser(userDto));
     }
 
     @PostMapping(consumes = "application/json", path = "/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody UserLoginDto userDto) {
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody UserLoginDto userDto) {
         return ResponseEntity.ok(authService.loginUser(userDto));
     }
 
@@ -79,7 +80,7 @@ public class AuthController {
         }
     }*/
     @PostMapping("/refreshToken")
-    public ResponseEntity<?> refreshToken(@RequestBody TokenRefreshRequest request) {
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
         String refreshToken = request.getRefreshToken();
 
         // Verifica se il refresh token esiste nel database

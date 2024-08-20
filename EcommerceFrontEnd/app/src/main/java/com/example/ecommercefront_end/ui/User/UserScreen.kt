@@ -1,4 +1,4 @@
-package com.example.ecommercefront_end.ui.User
+package com.example.ecommercefront_end.ui.user
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement

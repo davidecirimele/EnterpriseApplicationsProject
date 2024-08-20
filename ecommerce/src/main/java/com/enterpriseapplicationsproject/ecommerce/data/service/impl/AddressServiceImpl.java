@@ -7,7 +7,6 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.AddressService;
 import com.enterpriseapplicationsproject.ecommerce.dto.AddressDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.AddressIdDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.EditAddressDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveAddressDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;

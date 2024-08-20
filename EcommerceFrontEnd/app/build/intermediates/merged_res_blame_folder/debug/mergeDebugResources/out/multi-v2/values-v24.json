@@ -4,7 +4,7 @@
             "outputFile": "com.example.ecommercefront_end.app-mergeDebugResources-76:/values-v24/values-v24.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\samue\\.gradle\\caches\\transforms-4\\e075e34aad84be944e6d5526460e3689\\transformed\\appcompat-1.6.1\\res\\values-v24\\values-v24.xml",
+                    "source": "/Users/davidecirimele/.gradle/caches/transforms-4/e075e34aad84be944e6d5526460e3689/transformed/appcompat-1.6.1/res/values-v24/values-v24.xml",
                     "from": {
                         "startLines": "2,3",
                         "startColumns": "4,4",
@@ -14,7 +14,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\samue\\.gradle\\caches\\transforms-4\\7339ce23e8b8cc0423b8a7591fa38088\\transformed\\material-1.12.0\\res\\values-v24\\values-v24.xml",
+                    "source": "/Users/davidecirimele/.gradle/caches/transforms-4/7339ce23e8b8cc0423b8a7591fa38088/transformed/material-1.12.0/res/values-v24/values-v24.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,9,12,15",
                         "startColumns": "4,4,4,4,4,4,4,4",
