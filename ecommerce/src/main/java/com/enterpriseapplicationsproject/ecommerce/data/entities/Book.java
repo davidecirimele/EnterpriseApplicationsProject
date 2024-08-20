@@ -54,10 +54,13 @@ public class Book{
     private String edition;
 
     @Column(name = "FORMAT")
+    @Enumerated(EnumType.STRING)
     private BookFormat format;
     @Column(name = "GENRE")
+    @Enumerated(EnumType.STRING)
     private BookGenre genre;
     @Column(name = "LANGUAGE")
+    @Enumerated(EnumType.STRING)
     private BookLanguage language;
 
     @Column(name = "PUBLISHER")
