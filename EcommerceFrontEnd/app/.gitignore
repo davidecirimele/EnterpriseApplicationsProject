@@ -19,6 +19,7 @@ EcommerceFrontEnd/local.properties
 # Kotlin specific
 *.class
 *.kt~
+*.kts
 *.log
 *.lock
 *.swp
