@@ -9,15 +9,20 @@ import java.time.format.DateTimeFormatter
 class LocalDateAdapter : JsonSerializer<LocalDate>, JsonDeserializer<LocalDate> {
     private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
-    override fun serialize(src: LocalDate, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
-        return JsonPrimitive(formatter.format(src))
+    override fun serialize(
+        src: LocalDate?,
+        typeOfSrc: Type?,
+        context: JsonSerializationContext?
+    ): JsonElement {
+        return JsonPrimitive(src?.format(DateTimeFormatter.ISO_LOCAL_DATE))
     }
 
-    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): LocalDate? {
-        return try {
-            LocalDate.parse(json.toString(), formatter)
-        } catch (e: Exception) {
-            null // Gestisci eventuali errori di parsing
-        }
+
+    override fun deserialize(
+        json: JsonElement?,
+        typeOfT: Type?,
+        context: JsonDeserializationContext?
+    ): LocalDate {
+        return LocalDate.parse(json?.asString, DateTimeFormatter.ISO_LOCAL_DATE)
     }
 }

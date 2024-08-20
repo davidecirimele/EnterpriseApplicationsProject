@@ -55,7 +55,7 @@ public class SecurityConfig {
                     auth.requestMatchers("api/v1/admin/register").permitAll();
                     auth.requestMatchers("/error").permitAll();
                     auth.requestMatchers("/api/v1/books/add").authenticated();
-                    auth.requestMatchers("/api/v1/books/getAll").permitAll(); //testing homew front end
+                    auth.requestMatchers("/api/v1/books/getAll").permitAll(); //testing home front end
                     }
                     )
                     .sessionManagement(session -> session
