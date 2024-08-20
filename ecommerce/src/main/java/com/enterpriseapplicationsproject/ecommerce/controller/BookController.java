@@ -58,4 +58,12 @@ public class BookController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(b, HttpStatus.OK);
     }
+
+
+    @PutMapping(path = "/{id}/updateCover")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> updateBookCover(@PathVariable Long id, @RequestParam String coverUrl) {
+        booksService.updateBookCover(id, coverUrl);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
