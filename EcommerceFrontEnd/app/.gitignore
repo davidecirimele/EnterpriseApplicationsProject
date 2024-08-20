@@ -13,6 +13,9 @@ out/
 .gradle/gradle.property
 gradle.properties
 
+local.properties
+EcommerceFrontEnd/local.properties
+
 # Kotlin specific
 *.class
 *.kt~

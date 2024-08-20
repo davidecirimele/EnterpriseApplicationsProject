@@ -82,6 +82,12 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()), req, ex.getMessage());
     }
 
+    @ExceptionHandler(InvalidJwtException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ServiceError onInvalidJwtException(WebRequest req, InvalidJwtException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.UNAUTHORIZED.value()), req, ex.getMessage());
+    }
+
 
 
 
