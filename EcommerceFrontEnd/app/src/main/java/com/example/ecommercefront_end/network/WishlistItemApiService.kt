@@ -9,7 +9,7 @@ import retrofit2.http.Path
 
 interface WishlistItemApiService {
 
-    @POST("/api/v1/wishlist-items/wishlistItem/add")
+    @POST("/api/v1/wishlist-items/add")
     suspend fun insertWishlistItem(w: WishlistItem)
 
     @GET("/api/v1/wishlist-items/getByWishlistId/{idWi}")
