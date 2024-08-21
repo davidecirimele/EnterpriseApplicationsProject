@@ -58,7 +58,6 @@ import java.time.format.DateTimeFormatter
 import com.google.android.material.datepicker.DateValidatorPointBackward
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserAuthScreen(navController: NavController) {
     var selectedTabIndex by remember { mutableStateOf(0) }

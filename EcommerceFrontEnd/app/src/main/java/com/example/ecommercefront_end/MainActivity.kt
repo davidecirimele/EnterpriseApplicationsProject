@@ -4,7 +4,6 @@ package com.example.ecommercefront_end
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,16 +14,12 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,7 +31,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -47,8 +41,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -56,7 +48,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.ecommercefront_end.network.CartApiService
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.repository.HomeRepository
@@ -65,10 +56,12 @@ import com.example.ecommercefront_end.ui.cart.CartScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.viewmodels.CartViewModel
 import com.example.ecommercefront_end.viewmodels.HomeViewModel
-import com.example.ecommercefront_end.network.BooksApiService
 import com.example.ecommercefront_end.ui.home.BookDetailsScreen
 import com.example.ecommercefront_end.ui.home.HomeScreen
 import androidx.compose.runtime.collectAsState
+import com.example.ecommercefront_end.repository.WishlistRepository
+import com.example.ecommercefront_end.ui.wishlist.WishlistsScreen
+import com.example.ecommercefront_end.viewmodels.WishlistViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -97,7 +90,7 @@ fun NavigationView(navController: NavHostController) {
     // Usa remember per mantenere i ViewModel
     val homeViewModel = remember { HomeViewModel(repository = HomeRepository(RetrofitClient.booksApiService)) }
     val cartViewModel = remember { CartViewModel(repository = CartRepository(RetrofitClient.cartApiService)) }
-
+    val wishlistViewModel = remember { WishlistViewModel(wRepository = WishlistRepository(RetrofitClient.wishlistApiService, RetrofitClient.wishlistItemApiService)) }
 
     Scaffold(
         topBar = { TopBar(navController) },
@@ -133,9 +126,10 @@ fun NavigationView(navController: NavHostController) {
                 selectedIndex.value = 2
                 CartScreen(viewModel = cartViewModel, onCheckoutClick = { /* Add your action here */ })
             }
-            composable("favorite") {
+            composable("wishlist") {
                 selectedIndex.value = 3
-                FavoriteScreen()
+                WishlistsScreen(viewModel = wishlistViewModel, navController = navController)
+
             }
             composable("userAuth") {
                 selectedIndex.value = 1
@@ -270,7 +264,7 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             selected = selectedIndex.value == 3,
             onClick = {
                 selectedIndex.value = 3
-                navHostController.navigate("favorite") {
+                navHostController.navigate("wishlist") {
                     popUpTo(navHostController.graph.startDestinationId) {
                         saveState = true
                     }
@@ -303,10 +297,7 @@ fun CartScreen() {
     Text(text = "Cart Screen")
 }
 
-@Composable
-fun FavoriteScreen() {
-    Text(text = "Favorite Screen")
-}
+
 
 /*
 sealed class Screen(val route: String, val icon: ImageVector) {

@@ -18,4 +18,6 @@ public interface WishlistItemsService {
     List<WishlistItemDto> getAllSorted();
 
     WishlistItemDto getById(Long id);
+
+    void save(WishlistItem wishlistItem);
 }

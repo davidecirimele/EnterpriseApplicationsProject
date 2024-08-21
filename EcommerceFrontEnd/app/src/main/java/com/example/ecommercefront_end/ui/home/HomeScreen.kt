@@ -32,6 +32,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -53,6 +54,14 @@ var testImgs : List<String> = listOf("https://mockuptree.com/wp-content/uploads/
     "https://images.thegreatestbooks.org/2msw2obu4l2xo14lgbkupce9f1y3", "https://images.thegreatestbooks.org/2msw2obu4l2xo14lgbkupce9f1y3",
     "https://images.thegreatestbooks.org/02k8grlgw3la54zif8ubgy9fiyrx")
 
+fun Modifier.productCardModifier(height: Dp, width: Dp, navController: NavController, bookId: Long) = composed {
+    this
+        .padding(8.dp)
+        .width(width)
+        .height(height)
+        .clickable { navController.navigate("/books_details/${bookId}") }
+}
+
 @Composable
 fun ProductCard(navController: NavController, book: Book, height: Dp, width: Dp) {
     val imageUrl = remember(book.id) {
@@ -65,11 +74,7 @@ fun ProductCard(navController: NavController, book: Book, height: Dp, width: Dp)
     val isLoading = imagePainter.state is AsyncImagePainter.State.Loading
 
     Card(
-        modifier = Modifier
-            .padding(8.dp)
-            .width(width)
-            .height(height)
-            .clickable { navController.navigate("/books_details/${book.id}") },
+        modifier = Modifier.productCardModifier(height, width, navController, book.id),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -131,6 +136,8 @@ fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
     val error by homeViewModel.error.collectAsState()
     val topProducts = remember(products) { products.take(5) }
     val gridProducts = remember(products) { products.drop(5) } // Libri per la griglia
+
+
 
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

@@ -26,7 +26,7 @@ class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
 
     init {
         loadBooksFromBD() // Avvia il caricamento dei libri non appena il ViewModel viene creato
-        println("ViewModel inizializzato")
+        println("HomeViewModel inizializzato")
     }
 
     private fun loadBooksFromBD() {
@@ -45,6 +45,7 @@ class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
         }
     }
 
+    /*
     private fun loadBooks() {
         viewModelScope.launch {
             _isLoading.value = true // Imposta isLoading a true prima del caricamento
@@ -61,7 +62,7 @@ class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
                 _isLoading.value = false // Imposta isLoading a false dopo il caricamento, indipendentemente dal risultato
             }
         }
-    }
+    }*/
 
     private val _bookFlow = MutableStateFlow<Book?>(null)
     val bookFlow: StateFlow<Book?> = _bookFlow.asStateFlow()
