@@ -30,8 +30,14 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
                 println("sto caricando il carrello")
 
                 val cart = repository.getCart(getUser().id)
-                _cartItems.value = cart.items
-                updateTotalAmount()
+                cart.onSuccess { cart_ ->
+                    if (cart_ != null) {
+                        _cartItems.value = cart_.cartItems
+                    }
+                    updateTotalAmount()
+                }.onFailure { e ->
+                    println("Errore: ${e.message}")
+                }
             } catch (e: Exception) {
                 // Gestire l'errore, ad esempio mostrando un messaggio all'utente
             }
