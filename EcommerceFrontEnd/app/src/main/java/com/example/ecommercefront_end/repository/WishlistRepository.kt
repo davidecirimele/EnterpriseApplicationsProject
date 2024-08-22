@@ -1,25 +1,57 @@
 package com.example.ecommercefront_end.repository
 
-import com.example.ecommercefront_end.model.UserId
 import com.example.ecommercefront_end.model.Wishlist
+import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.model.WishlistUpdate
 import com.example.ecommercefront_end.network.WishlistApiService
+import com.example.ecommercefront_end.network.WishlistItemApiService
 import java.util.UUID
 
-class WishlistRepository (
+class WishlistRepository (private val wApiService : WishlistApiService, private val WIApiService: WishlistItemApiService) {
 
-    private val apiService : WishlistApiService,
-)
-{
-    suspend fun getWishlists(userId : UUID) = apiService.getWishlists(userId)
+    suspend fun getWishlists(userId : UUID) = wApiService.getWishlistById(userId)
 
     suspend fun updateWishlist(w: Wishlist) {
         val newWishlist = WishlistUpdate(name = w.name, privacySettings = w.privacySetting)
-        apiService.updateWishlist(newWishlist)
+        wApiService.updateWishlist(newWishlist)
 
     }
 
     suspend fun removeWishlist(w: Wishlist){
-        apiService.deleteWishlist(w.id)
+        wApiService.deleteWishlist(w.id)
+    }
+
+    suspend fun getAllWishlists() : List<Wishlist> {
+        return try {
+            val wishlists = wApiService.getAllWishlist()
+
+            if (wishlists.isEmpty()) {
+                println("Nessuna lista dei desideri trovata")
+            } else {
+                println("Liste dei desideri prese")
+            }
+            wishlists
+
+        } catch (e: Exception) {
+            println("Errore durante il recupero di tutte le liste dei desideri: ${e.message}")
+            emptyList() // Restituisci una lista vuota in caso di errore
+        }
+    }
+
+    suspend fun getWishlistItems(wishlistId: Long): List<WishlistItem>{
+        return try {
+            val wishlistItems = WIApiService.getWishlistItems(wishlistId)
+
+            if (wishlistItems.isEmpty()) {
+                println("Nessun elemento della lista dei desideri trovato")
+            } else {
+                println("Elementi della lista dei desideri presi")
+            }
+            wishlistItems
+
+        } catch (e: Exception) {
+            println("Errore durante il recupero degli elementi della lista dei desideri: ${e.message}")
+            emptyList() // Restituisci una lista vuota in caso di errore
+        }
     }
 }

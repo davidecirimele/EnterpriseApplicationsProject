@@ -50,7 +50,9 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
 
     @Override
     public List<WishlistItemDto> getItemsByWishlistId(Long id) {
-        return wishlistItemsDao.findByWishlistId(id);
+        return wishlistItemsDao.findByWishlistId(id).stream()
+                .map(wi -> modelMapper.map(wi, WishlistItemDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -76,6 +78,11 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
         return wishlistItemsDao.findById(id)
                 .map(wishlistItem -> modelMapper.map(wishlistItem, WishlistItemDto.class))
                 .orElse(null);
+    }
+
+    @Override
+    public void save(WishlistItem wishlistItem) {
+        wishlistItemsDao.save(wishlistItem);
     }
 
 

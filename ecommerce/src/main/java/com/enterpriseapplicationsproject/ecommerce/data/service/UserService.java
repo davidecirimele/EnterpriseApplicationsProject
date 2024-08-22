@@ -16,7 +16,7 @@ public interface UserService {
 
     UserDto getByEmail(String email);
 
-    List<UserDto> getAll();
+    List<UserDto> getAllDto();
 
     @Transactional
     User getUserById(UUID id);
@@ -34,4 +34,6 @@ public interface UserService {
     boolean delete(UUID userId);
 
     String getUserRole(UUID userId);
+
+    List<User> getAll();
 }

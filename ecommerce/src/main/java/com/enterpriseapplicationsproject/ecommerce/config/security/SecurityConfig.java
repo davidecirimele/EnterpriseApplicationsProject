@@ -56,6 +56,9 @@ public class SecurityConfig {
                     auth.requestMatchers("/error").permitAll();
                     auth.requestMatchers("/api/v1/books/add").authenticated();
                     auth.requestMatchers("/api/v1/books/getAll").permitAll(); //testing home front end
+                    //testing fron end
+                    auth.requestMatchers("/api/v1/wishlists/**").permitAll();
+                    auth.requestMatchers("/api/v1/wishlist-items/**").permitAll();
                     }
                     )
                     .sessionManagement(session -> session

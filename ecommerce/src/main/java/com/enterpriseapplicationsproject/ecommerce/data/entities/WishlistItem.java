@@ -32,4 +32,6 @@ public class WishlistItem {
     )
     private Book book;
 
+    @Column(name = "QUANTITY")
+    private int quantity;
 }

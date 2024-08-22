@@ -67,7 +67,7 @@ dependencies {
     implementation(libs.androidx.browser)
     implementation(libs.material)
     implementation(libs.places)
-    implementation(libs.androidx.core.i18n)
+    implementation (libs.androidx.core.ktx)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose.android)
     testImplementation(libs.junit)

@@ -131,7 +131,7 @@ fun BookDetailsScreen(book: Book) {
                         expanded = qExpanded,
                         onDismissRequest = { qExpanded = false }
                     ) {
-                        for (i in 1..10) {
+                        for (i in 1..book.stock) {
                             DropdownMenuItem(
                                 onClick = {
                                     selectedQuantity = i
