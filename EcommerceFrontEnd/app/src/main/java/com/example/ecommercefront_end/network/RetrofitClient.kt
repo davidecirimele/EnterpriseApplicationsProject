@@ -55,6 +55,14 @@ object RetrofitClient {
         retrofit.create(AuthApiService::class.java)
     }
 
+    val wishlistApiService: WishlistApiService by lazy {
+        retrofit.create(WishlistApiService::class.java)
+    }
+
+    val wishlistItemApiService: WishlistItemApiService by lazy {
+        retrofit.create(WishlistItemApiService::class.java)
+    }
+
 
 
     val cartApiService: CartApiService by lazy {
