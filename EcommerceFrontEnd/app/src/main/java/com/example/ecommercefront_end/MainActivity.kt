@@ -19,7 +19,9 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,6 +43,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -48,6 +52,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.ecommercefront_end.network.CartApiService
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.repository.HomeRepository
@@ -56,6 +61,7 @@ import com.example.ecommercefront_end.ui.cart.CartScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.viewmodels.CartViewModel
 import com.example.ecommercefront_end.viewmodels.HomeViewModel
+import com.example.ecommercefront_end.network.BooksApiService
 import com.example.ecommercefront_end.ui.home.BookDetailsScreen
 import com.example.ecommercefront_end.ui.home.HomeScreen
 import androidx.compose.runtime.collectAsState
@@ -124,7 +130,12 @@ fun NavigationView(navController: NavHostController) {
 
             composable("cart") {
                 selectedIndex.value = 2
-                CartScreen(viewModel = cartViewModel, onCheckoutClick = { /* Add your action here */ })
+                val _cartApiService = RetrofitClient.cartApiService
+
+                val repository = CartRepository(_cartApiService)
+
+                CartScreen(viewModel = CartViewModel(repository), onCheckoutClick = { /* Add your action here */ })
+
             }
             composable("wishlist") {
                 selectedIndex.value = 3
@@ -281,9 +292,6 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
         )
     }
 }
-
-
-
 @Composable
 fun AddToCartFloatingButton(onClick: () -> Unit) {
     FloatingActionButton(onClick = onClick) {
