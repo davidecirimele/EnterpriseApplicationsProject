@@ -31,7 +31,7 @@ class AuthInterceptor(
 
         if (requiresAuth) {
 
-            val accessToken = "eyJhbGciOiJIUzI1NiJ9.eyJmaXJzdE5hbWUiOiJKb2huIiwibGFzdE5hbWUiOiJEb2UiLCJiaXJ0aGRhdGUiOiIxOTkwLTAxLTAxIiwidHlwZSI6ImFjY2Vzcy10b2tlbiIsInVzZXJJZCI6IjVlZWRkM2I0LTVjZDYtNGU4Ni04MGM3LTMyNThjMmZlNmYzMCIsInN1YiI6InV0ZW50ZUBwcm92YTEiLCJpYXQiOjE3MjQyNTE3ODIsImV4cCI6MTcyNDMzODE4Mn0.0Y5XGOl-WZf-F67fnOl9FjLa3ad1SmUjke6nkFeS3q8"
+            val accessToken = "eyJhbGciOiJIUzI1NiJ9.eyJmaXJzdE5hbWUiOiJKb2huIiwibGFzdE5hbWUiOiJEb2UiLCJiaXJ0aGRhdGUiOiIxOTkwLTAxLTAxIiwidHlwZSI6ImFjY2Vzcy10b2tlbiIsInVzZXJJZCI6IjVlZWRkM2I0LTVjZDYtNGU4Ni04MGM3LTMyNThjMmZlNmYzMCIsInN1YiI6InV0ZW50ZUBwcm92YTEiLCJpYXQiOjE3MjQzMzg5NjEsImV4cCI6MTcyNDQyNTM2MX0.Jd28NhK4B-Mo_tHs8l30Y0NWoNDWcRE7SCKu5r1Jg5M"
                 //sessionManager.authToken
 
             val requestBuilder = originalRequest.newBuilder()
