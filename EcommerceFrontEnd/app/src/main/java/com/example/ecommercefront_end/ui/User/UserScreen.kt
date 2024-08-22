@@ -55,9 +55,9 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import com.google.android.material.datepicker.DateValidatorPointBackward
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserAuthScreen(navController: NavController) {
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -103,6 +103,11 @@ fun LoginPage(onLoginSuccess: () -> Unit, onSwitchToRegister: () -> Unit) {
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    var isEmailValid by remember { mutableStateOf(false) }
+    val emailRegex = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+
+    var isPasswordValid by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -118,23 +123,32 @@ fun LoginPage(onLoginSuccess: () -> Unit, onSwitchToRegister: () -> Unit) {
 
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                isEmailValid = emailRegex.matches(it)
+            },
             label = { Text("Email") },
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .padding(bottom = 8.dp),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(16.dp),
+            singleLine = true
         )
         Spacer(modifier = Modifier.height(10.dp))
 
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                isPasswordValid =
+                    it.length in 8..20   // Controlla se la password ha almeno 8 caratteri
+            },
             label = { Text("Password") },
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .padding(bottom = 8.dp),
             shape = RoundedCornerShape(16.dp),
+            singleLine = true,
             visualTransformation = if (passwordVisible) VisualTransformation.None
             else PasswordVisualTransformation(),
             trailingIcon = {
@@ -152,7 +166,8 @@ fun LoginPage(onLoginSuccess: () -> Unit, onSwitchToRegister: () -> Unit) {
             onClick = { /* Logica di login */ },
             modifier = Modifier
                 .fillMaxWidth(0.5f)
-                .padding(bottom = 16.dp)
+                .padding(bottom = 16.dp),
+            enabled = isEmailValid && isPasswordValid
         ) {
             Text("Accedi", style = MaterialTheme.typography.bodyLarge)
         }
@@ -188,6 +203,16 @@ fun RegistrationStep1(onNext: () -> Unit) {
     var confirmPassword by remember { mutableStateOf("")}
     var passwordVisible by remember { mutableStateOf(false) }
 
+    var isEmailValid by remember { mutableStateOf(true) }
+    var isPasswordValid by remember { mutableStateOf(true) }
+    var isConfirmPasswordValid by remember { mutableStateOf(true) }
+
+    // Regex per la validazione dell'email
+    val emailRegex = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+
+    // Regex per la validazione della password
+    val passwordRegex = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!])[\\w@#$%^&+=!]{8,20}$")
+
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         Column(
             modifier = Modifier
@@ -204,37 +229,48 @@ fun RegistrationStep1(onNext: () -> Unit) {
                 onValueChange = { name = it },
                 label = { Text("Nome") },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
             OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
+                value = surname,
+                onValueChange = { surname = it },
                 label = { Text("Cognome") },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = {
+                    email = it
+                    isEmailValid = emailRegex.matches(it)
+                },
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true,
+                isError = !isEmailValid
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = {
+                    password = it
+                    isPasswordValid = passwordRegex.matches(it)
+                },
                 label = { Text("Password") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
+                singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -243,10 +279,13 @@ fun RegistrationStep1(onNext: () -> Unit) {
                             contentDescription = if (passwordVisible) "Nascondi password" else "Mostra password"
                         )
                     }
-                }
+                },
+
+                isError = !isPasswordValid // Mostra un errore se la password non è valida
             )
             Text(
-                text = "La password deve contenere almeno 8 caratteri, una lettera maiuscola, una lettera minuscola e un numero",
+                text = "La password deve contenere minimo 8 caratteri e massimo 20, di cui una lettera maiuscola, " +
+                        "una lettera minuscola, un numero e un carattere speciale",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .padding(top = 4.dp)
@@ -257,19 +296,26 @@ fun RegistrationStep1(onNext: () -> Unit) {
 
             OutlinedTextField(
                 value = confirmPassword,
-                onValueChange = { confirmPassword = it },
+                onValueChange = {
+                    confirmPassword = it
+                    isConfirmPasswordValid = (it == password) // Controlla se le password corrispondono
+                },
                 label = { Text("Conferma Password") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
+                singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
-                            imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                            contentDescription = if (passwordVisible) "Nascondi password" else "Mostra password"
+                            imageVector = if (passwordVisible) Icons.Filled.Visibility
+                                            else Icons.Filled.VisibilityOff,
+                            contentDescription = if (passwordVisible) "Nascondi password"
+                                                else "Mostra password"
                         )
                     }
-                }
+                },
+                isError = !isConfirmPasswordValid // Mostra un errore se le password non corrispondono
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -283,7 +329,9 @@ fun RegistrationStep1(onNext: () -> Unit) {
                         // Mostra un messaggio di errore: le password non corrispondono
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                 enabled = isEmailValid && isPasswordValid && isConfirmPasswordValid
+                         && name.isNotBlank() && surname.isNotBlank()
             ) {
                 Text("Verifica Email", style = MaterialTheme.typography.bodyLarge)
             }
@@ -298,6 +346,11 @@ fun RegistrationStep2(onNext: () -> Unit, onBack: () -> Unit) {
     var showDatePicker by remember { mutableStateOf(false) }
     var phoneNumber by remember { mutableStateOf("") }
     var admin by remember { mutableStateOf("") }
+
+    fun isValidDate(date: LocalDate): Boolean = date.isBefore(LocalDate.now())
+
+    var isPhoneNumberValid by remember { mutableStateOf(true) }
+    val italianPhoneNumberRegex = Regex("[0-9]{9,11}$")
 
     /*
     var street by remember { mutableStateOf("") }
@@ -333,8 +386,7 @@ fun RegistrationStep2(onNext: () -> Unit, onBack: () -> Unit) {
             )
             if (showDatePicker) {
                 DatePickerDialog(
-                    onDismissRequest = { showDatePicker = false },
-                    confirmButton = {
+                    onDismissRequest = { showDatePicker = false },confirmButton = {
                         Button(onClick = { showDatePicker = false }) {
                             Text("OK")
                         }
@@ -346,24 +398,46 @@ fun RegistrationStep2(onNext: () -> Unit, onBack: () -> Unit) {
                         }
                     }
                 ) {
+                    val datePickerState = rememberDatePickerState(
+                        initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.systemDefault())
+                            .toInstant().toEpochMilli(),
+                        yearRange = IntRange(1900, LocalDate.now().year),
+                        selectableDates = object : SelectableDates {
+                            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                                return Instant.ofEpochMilli(utcTimeMillis)
+                                    .atZone(ZoneId.systemDefault())
+                                    .toLocalDate()
+                                    .isBefore(LocalDate.now()) ||
+                                        Instant.ofEpochMilli(utcTimeMillis)
+                                            .atZone(ZoneId.systemDefault())
+                                            .toLocalDate()
+                                            .isEqual(LocalDate.now())
+                            }
+                        }
+                    )
+
+                    // Aggiorna selectedDate quando la data selezionata cambia
+                    LaunchedEffect(datePickerState.selectedDateMillis) {
+                        if (datePickerState.selectedDateMillis != null) {
+                            selectedDate = Instant.ofEpochMilli(datePickerState.selectedDateMillis!!)
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                        }
+                    }
+
                     DatePicker(
-                        state = rememberDatePickerState(
-                            initialSelectedDateMillis = selectedDate.atStartOfDay(
-                                ZoneId.systemDefault()
-                            ).toInstant().toEpochMilli()
-                        ),
-                        modifier = Modifier.fillMaxWidth()
+                        state = datePickerState,
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(10.dp))
 
             // Numero di telefono
             OutlinedTextField(
                 value = phoneNumber,
                 onValueChange = { newValue ->
                     phoneNumber = newValue.filter { it.isDigit() } // Accetta solo numeri
+                    isPhoneNumberValid =  phoneNumber.isNotBlank() && italianPhoneNumberRegex.matches(phoneNumber)
                 },
                 label = { Text("Numero di telefono") },
                 modifier = Modifier.fillMaxWidth(),
@@ -378,7 +452,8 @@ fun RegistrationStep2(onNext: () -> Unit, onBack: () -> Unit) {
                 onValueChange = { admin = it },
                 label = { Text("Codice ADMIN") },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
             )
             Text(
                 text = "Facoltativo",
@@ -437,7 +512,9 @@ fun RegistrationStep2(onNext: () -> Unit, onBack: () -> Unit) {
             Button(onClick = {
                 // Salva i dati nel ViewModel o esegui la logica di registrazione
                 onNext() // Passa al prossimo step
-            }) {
+            },
+                enabled = isPhoneNumberValid
+            ) {
                 Text("Completa Registrazione")
             }
         }

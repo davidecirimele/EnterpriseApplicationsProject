@@ -23,7 +23,7 @@ public class BookController {
 
     private final BooksService booksService;
 
-    @GetMapping(consumes = "application/json", path = "/getAll")
+    @GetMapping(path = "/getAll")
     //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<BookDto>> getAll() {
         List<BookDto> books = booksService.getAllSorted();
@@ -32,6 +32,7 @@ public class BookController {
         return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
+    // da testare se consumes va bene, dato che ha un corpo nella richiesta
     @GetMapping(consumes = "application/json", path = "/get/{idBook}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BookDto> getById(@PathVariable("idBook") Long id) {

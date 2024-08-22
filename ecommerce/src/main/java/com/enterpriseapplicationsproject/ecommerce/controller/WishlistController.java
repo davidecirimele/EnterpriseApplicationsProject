@@ -25,9 +25,9 @@ public class WishlistController {
 
     private final WishlistsService wishlistService;
 
-    @GetMapping(consumes = "application/json",path= "/getAll")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<WishlistDto>> all() {
+    @GetMapping(path= "/getAll")
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<WishlistDto>> getAll() {
         List<WishlistDto> wishlists = wishlistService.getAllSorted();
         if (wishlists.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

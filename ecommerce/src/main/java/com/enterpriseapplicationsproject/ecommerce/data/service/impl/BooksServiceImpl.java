@@ -49,7 +49,10 @@ public class BooksServiceImpl implements BooksService {
 
     @Override
     public List<BookDto> getBookDto() {
-        return List.of(); // toDo
+        List <Book> books = booksDao.findAll();
+        return books.stream()
+                .map(book -> modelMapper.map(book, BookDto.class))
+                .toList();
     }
 
     @Override

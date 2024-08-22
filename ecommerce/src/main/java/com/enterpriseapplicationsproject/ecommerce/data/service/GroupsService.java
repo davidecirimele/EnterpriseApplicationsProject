@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service;
 
+import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
 import com.enterpriseapplicationsproject.ecommerce.dto.GroupDto;
 
 import java.util.List;
@@ -19,4 +20,8 @@ public interface GroupsService {
     void addUserToGroup(Long groupId, UUID userId);
 
     void removeUserFromGroup(Long groupId, UUID userId);
+
+    Group getGroupById(Long id);
+
+    void save(Group group);
 }
