@@ -1,7 +1,9 @@
 package com.example.ecommercefront_end.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ecommercefront_end.model.Group
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.repository.WishlistRepository
@@ -64,6 +66,45 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
         viewModelScope.launch {
             val wishlist = _wishlists.value.find { it.id == id }
 
+        }
+    }
+
+
+    fun addWishlist(name: String, isPrivate: Boolean, otherParam: String) {
+        viewModelScope.launch {
+            try {
+                // Crea una lista vuota di elementi per la nuova wishlist
+                val wItemsList = mutableListOf<WishlistItem>()
+
+                // Crea un gruppo predefinito con un nome e ID fittizio, dato che non hai informazioni su gruppi esistenti
+                val defaultGroup = Group(
+                    id = 5L, // ID fittizio, da aggiornare se necessario
+                    groupName = "Famiglia_Test", // Nome del gruppo fittizio
+                    members = emptyList() // Nessun membro per ora
+                )
+
+                // Imposta la privacy della wishlist
+                val privacySetting = if (isPrivate) "Private" else "Public"
+
+                // Crea un nuovo oggetto Wishlist con i parametri forniti
+                val newWishlist = Wishlist(
+                    id = 50, // ID sarà generato dal database
+                    name = name,
+                    items = wItemsList, // Lista vuota di elementi
+                    user = null, // Nessun utente associato dato che non è loggato
+                    group = defaultGroup, // Gruppo predefinito
+                    privacySetting = privacySetting
+                )
+
+                // Salva la nuova wishlist nel database tramite il repository
+                wRepository.addWishlist(newWishlist)
+
+                // Potresti aggiornare la lista delle wishlist nel ViewModel qui, se necessario
+            } catch (e: Exception) {
+                // Gestisci l'errore
+                // Puoi aggiungere un log o mostrare un messaggio di errore all'utente
+                Log.e("addWishlist", "Errore durante la creazione della wishlist: ${e.message}")
+            }
         }
     }
 

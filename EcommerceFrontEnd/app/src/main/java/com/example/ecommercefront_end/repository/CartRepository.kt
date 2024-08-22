@@ -11,7 +11,7 @@ class CartRepository(
     private val apiService : CartApiService,
 
 
-){
+    ){
 
     suspend fun getCart(userId : UUID, token : String): Result<ShoppingCart?> {
         return try {
@@ -44,5 +44,7 @@ class CartRepository(
         apiService.removeItem(cartItemId)
 
     }
+
+
 
 }

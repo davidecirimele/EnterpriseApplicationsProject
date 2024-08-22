@@ -14,7 +14,7 @@ import java.util.UUID
 interface WishlistApiService {
 
     @POST("/api/v1/wishlists/add")
-    suspend fun addWishlist(w: Wishlist)
+    suspend fun addWishlist(@Body w: Wishlist)
 
     @GET("/api/v1/wishlists/get/{idW}")
     suspend fun getWishlistById(@Path("idW") idW: UUID)

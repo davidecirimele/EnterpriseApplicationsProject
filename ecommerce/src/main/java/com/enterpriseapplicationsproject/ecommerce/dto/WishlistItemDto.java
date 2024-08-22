@@ -22,7 +22,6 @@ public class WishlistItemDto {
     private String wishlistPrivacySetting;
     */
     private Book book;
-
-    private int quantity;
+    
 
 }

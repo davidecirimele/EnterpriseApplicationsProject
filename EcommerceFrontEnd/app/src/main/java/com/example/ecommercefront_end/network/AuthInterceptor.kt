@@ -33,7 +33,7 @@ class AuthInterceptor(
             val requestWithAuth = requestBuilder.build()
             val response = chain.proceed(requestWithAuth)
 
-            if (response.code() == 401) {
+            if (response.code == 401) {
 
 
                     val refreshToken = sessionManager.refreshToken

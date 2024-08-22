@@ -29,9 +29,15 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
             try {
                 println("sto caricando il carrello")
 
-                val cart = repository.getCart(getUser().id)
-                _cartItems.value = cart.items
-                updateTotalAmount()
+                val cart = repository.getCart(getUser().id, SessionManager.authToken!!)
+                cart.onSuccess { cart_ ->
+                    if (cart_ != null) {
+                        _cartItems.value = cart_.items
+                    }
+                    updateTotalAmount()
+                }.onFailure { e ->
+                    println("Errore: ${e.message}")
+                }
             } catch (e: Exception) {
                 // Gestire l'errore, ad esempio mostrando un messaggio all'utente
             }
@@ -76,7 +82,7 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
 
     private fun getUser(): UserId {
-       //val user = UserId(SessionManager.user?.id ?: throw IllegalStateException("User not logged in"))
+        //val user = UserId(SessionManager.user?.id ?: throw IllegalStateException("User not logged in"))
         val  uid = UUID.fromString("4267a28a-cab9-4c68-90b1-73874a0d08cf")
         val user = UserId(uid)
         return user
