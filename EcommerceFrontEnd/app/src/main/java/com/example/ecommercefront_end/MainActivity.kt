@@ -1,6 +1,7 @@
 package com.example.ecommercefront_end
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -76,6 +77,7 @@ import com.example.ecommercefront_end.viewmodels.AddressViewModel
 import com.example.ecommercefront_end.viewmodels.CartViewModel
 import com.example.ecommercefront_end.viewmodels.HomeViewModel
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
+import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
 
 
@@ -156,7 +158,7 @@ fun NavigationView(navController: NavHostController) {
                 selectedIndex.value = 1
                 val _authApiService = RetrofitClient.authApiService
                 val repository = AuthRepository(_authApiService)
-                UserAuthScreen(loginViewModel = LoginViewModel(repository), navController)
+                UserAuthScreen(loginViewModel = LoginViewModel(repository), registrationViewModel = RegistrationViewModel(repository), navController)
             }
 
             composable("account-manager") {
@@ -265,16 +267,15 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             selected = selectedIndex.value == 1,
             onClick = {
                 selectedIndex.value = 1
-                if(SessionManager.user == null) {
-                    navHostController.navigate("userAuth") {
-                        popUpTo(navHostController.graph.startDestinationId) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
+                if(SessionManager.user == null)
+                navHostController.navigate("userAuth") {
+                    popUpTo(navHostController.graph.startDestinationId) {
+                        saveState = true
                     }
+                    launchSingleTop = true
+                    restoreState = true
                 }
-                else{
+                else
                     navHostController.navigate("account-manager") {
                         popUpTo(navHostController.graph.startDestinationId) {
                             saveState = true
@@ -282,7 +283,7 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
                         launchSingleTop = true
                         restoreState = true
                     }
-                }
+
             },
             icon = {
                 Icon(
@@ -314,7 +315,7 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             selected = selectedIndex.value == 3,
             onClick = {
                 selectedIndex.value = 3
-                navHostController.navigate("favorite") {
+                navHostController.navigate("wishlist") {
                     popUpTo(navHostController.graph.startDestinationId) {
                         saveState = true
                     }

@@ -53,7 +53,7 @@ public class AuthController {
     }
 
     @PostMapping(consumes = "application/json", path = "/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody CredentialDto credentials) {
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody CredentialDto credentials) {
         log.info("Received request for auth/login");
         return ResponseEntity.ok(authService.loginUser(credentials));
     }
