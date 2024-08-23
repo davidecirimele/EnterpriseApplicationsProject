@@ -146,7 +146,7 @@ fun Buttons(navHostController: NavHostController){
     }
 }
 
-@Preview
+/*@Preview
 @Composable
 fun AccountScreenPreview(){
     val _userApiService = RetrofitClient.userApiService
@@ -154,4 +154,4 @@ fun AccountScreenPreview(){
     val viewModel = AccountViewModel(repository)
     val navController = rememberNavController()
     AccountManagerScreen(viewModel, navHostController = navController)
-}
+}*/

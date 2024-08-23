@@ -17,7 +17,7 @@ public class SaveUserDto {
     @NotBlank(message = "Last Name cannot be blank")
     private String lastName;
 
-    @NotNull(message = "Birth Data is required")
+    @NotNull(message = "Birth Date is required")
     private LocalDate birthDate;
 
     @NotNull(message = "Credentials are required")

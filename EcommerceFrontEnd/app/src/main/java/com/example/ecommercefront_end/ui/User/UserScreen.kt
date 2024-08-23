@@ -38,8 +38,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 import com.example.ecommercefront_end.model.Credential
+import com.example.ecommercefront_end.model.SaveUser
+import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -49,7 +52,7 @@ import java.time.format.DateTimeFormatter
 
 
 @Composable
-fun UserAuthScreen(loginViewModel: LoginViewModel, navController: NavController) {
+fun UserAuthScreen(loginViewModel: LoginViewModel, registrationViewModel: RegistrationViewModel, navController: NavController) {
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -76,8 +79,9 @@ fun UserAuthScreen(loginViewModel: LoginViewModel, navController: NavController)
                 }
             )
             1 -> RegistrationScreen(
+                registrationViewModel,
                 onRegistrationComplete = {
-                    navController.navigate("home") {
+                    navController.navigate("userAuth") {
                         popUpTo("userAuth") { inclusive = true }
                     }
                 },
@@ -154,9 +158,8 @@ fun LoginPage(loginViewModel: LoginViewModel, onLoginSuccess: () -> Unit) {
 
         Button(
             onClick = {
-                loginViewModel.viewModelScope.launch {
-                loginViewModel.login(Credential(email,password),onLoginSuccess)
-                } },
+                loginViewModel.login(Credential(email, password), onLoginSuccess)
+            },
             modifier = Modifier
                 .fillMaxWidth(0.5f)
                 .padding(bottom = 16.dp),
@@ -168,13 +171,13 @@ fun LoginPage(loginViewModel: LoginViewModel, onLoginSuccess: () -> Unit) {
 }
 
 @Composable
-fun RegistrationScreen(onRegistrationComplete: () -> Unit, onSwitchToLogin: () -> Unit) {
+fun RegistrationScreen(registrationViewModel : RegistrationViewModel ,onRegistrationComplete: () -> Unit, onSwitchToLogin: () -> Unit) {
     var currentStep by remember { mutableStateOf(1) }
 
     Column(modifier = Modifier.padding(16.dp)) {
         when (currentStep) {
-            1 -> RegistrationStep1(onNext = { currentStep = 2 })
-            2 -> RegistrationStep2(onNext = { currentStep = 3 }, onBack = { currentStep = 1 })
+            1 -> RegistrationStep1(registrationViewModel, onNext = { currentStep = 2 })
+            2 -> RegistrationStep2(registrationViewModel = registrationViewModel, onRegistrationComplete, onNext = { currentStep = 3 }, onBack = { currentStep = 1 })
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -188,7 +191,7 @@ fun RegistrationScreen(onRegistrationComplete: () -> Unit, onSwitchToLogin: () -
 }
 
 @Composable
-fun RegistrationStep1(onNext: () -> Unit) {
+fun RegistrationStep1(registrationViewModel: RegistrationViewModel, onNext: () -> Unit) {
     var name by remember { mutableStateOf("") }
     var surname by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -316,7 +319,7 @@ fun RegistrationStep1(onNext: () -> Unit) {
             Button(
                 onClick = {
                     if (password == confirmPassword) {
-                        // Salva i dati nel ViewModel o esegui la logica di registrazione
+                        registrationViewModel.updateUserDetails(name, surname, email, password)
                         onNext() // Passa al prossimo step
                     } else {
                         // Mostra un messaggio di errore: le password non corrispondono
@@ -334,7 +337,7 @@ fun RegistrationStep1(onNext: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegistrationStep2(onNext: () -> Unit, onBack: () -> Unit) {
+fun RegistrationStep2(registrationViewModel: RegistrationViewModel, onRegistrationComplete: () -> Unit, onNext: () -> Unit, onBack: () -> Unit) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var showDatePicker by remember { mutableStateOf(false) }
     var phoneNumber by remember { mutableStateOf("") }
@@ -503,8 +506,8 @@ fun RegistrationStep2(onNext: () -> Unit, onBack: () -> Unit) {
             }
 
             Button(onClick = {
-
-                // Salva i dati nel ViewModel o esegui la logica di registrazione
+                registrationViewModel.updateUserDetails(selectedDate, phoneNumber)
+                registrationViewModel.register(onRegistrationComplete)
                 onNext() // Passa al prossimo step
             },
                 enabled = isPhoneNumberValid

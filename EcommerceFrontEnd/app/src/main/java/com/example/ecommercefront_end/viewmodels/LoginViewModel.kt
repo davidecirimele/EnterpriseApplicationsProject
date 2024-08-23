@@ -5,9 +5,11 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Credential
 import com.example.ecommercefront_end.repository.AuthRepository
+import kotlinx.coroutines.launch
 
 class LoginViewModel(private val loginRepository: AuthRepository) : ViewModel() {
 
@@ -20,30 +22,36 @@ class LoginViewModel(private val loginRepository: AuthRepository) : ViewModel() 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> get() = _isLoading
 
-    suspend fun login(credentials: Credential, onLoginSuccess: () -> Unit) {
-        _isLoading.value = true
+    fun login(credentials: Credential, onLoginSuccess: () -> Unit) {
+        viewModelScope.launch {
+            // Imposta lo stato di caricamento
+            _isLoading.value = true
+
+            try {
+                Log.d(TAG, "login: tentativo $credentials")
+                val response = loginRepository.loginUser(credentials)
+                Log.d(TAG, "response: $response")
 
 
-        try {
-            Log.d(TAG, "login: tentativo $credentials")
-            val response = loginRepository.loginUser(credentials)
-            Log.d(TAG, "response: $response")
-            if (response.isSuccessful && response.body() != null) {
-                _loginResponse.value = response.body()
-                response.body()?.let {
-                    _loginResponse.value?.get("access_token")?.let { it1 -> SessionManager.saveAuthToken(it1) }
-                    _loginResponse.value?.get("refresh_token")?.let { it2 -> SessionManager.saveRefreshToken(it2) }
+                if (response.isSuccessful && response.body() != null) {
+                    _loginResponse.value = response.body()
+                    response.body()?.let {
+                        _loginResponse.value?.get("access_token")
+                            ?.let { it1 -> SessionManager.saveAuthToken(it1) }
+                        _loginResponse.value?.get("refresh_token")
+                            ?.let { it2 -> SessionManager.saveRefreshToken(it2) }
+                    }
+                    Log.d("SessionManagerDebug", "user: ${SessionManager.user}")
+                    onLoginSuccess()
+                } else {
+                    _loginError.value = "Login failed: ${response.message()}"
                 }
-                onLoginSuccess()
-            } else {
-                _loginError.value = "Login failed: ${response.message()}"
+            } catch (e: Exception) {
+                _loginError.value = "An error occurred: ${e.message}"
+                Log.e(TAG, "An error occurred during login: ${e.localizedMessage}", e)
+            } finally {
+                _isLoading.value = false
             }
-        } catch (e: Exception) {
-            _loginError.value = "An error occurred: ${e.message}"
-            Log.e(TAG, "An error occurred during login: ${e.localizedMessage}", e)
-            _loginError.value = "An error occurred: ${e.message}"
-        } finally {
-            _isLoading.value = false
         }
     }
 }
