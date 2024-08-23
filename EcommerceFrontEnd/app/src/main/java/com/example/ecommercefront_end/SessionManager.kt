@@ -1,13 +1,17 @@
 package com.example.ecommercefront_end
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.auth0.android.jwt.JWT
 import com.example.ecommercefront_end.model.User
 import com.google.gson.Gson
+import java.time.LocalDate
 import java.util.UUID
+import kotlin.math.log
 
 object SessionManager {
 
@@ -44,43 +48,55 @@ object SessionManager {
 
     }
 
+    private fun getPrefs(): SharedPreferences {
+        return prefs ?: throw IllegalStateException("SessionManager not initialized. Call init() first.")
+    }
+
     private fun loadSession(){
-        authToken = prefs.getString(KEY_AUTH_TOKEN, null)
-        refreshToken = prefs.getString(REFRESH_TOKEN_KEY, null)
+        authToken = getPrefs().getString(KEY_AUTH_TOKEN, null)
+        refreshToken = getPrefs().getString(REFRESH_TOKEN_KEY, null)
     }
 
     fun saveAuthToken(token: String){
         authToken = token
-        prefs.edit().putString(KEY_AUTH_TOKEN, token).apply()
+        getPrefs().edit().putString(KEY_AUTH_TOKEN, token).apply()
         user = decodeJwtToken(token)
+        Log.d(TAG, "user: ${user?.firstName}, ${user?.lastName}")
     }
 
     fun saveRefreshToken(token: String){
         refreshToken = token
-        prefs.edit().putString(REFRESH_TOKEN_KEY, token).apply()
+        getPrefs().edit().putString(REFRESH_TOKEN_KEY, token).apply()
     }
 
     fun clearSession(){
-        prefs.edit().clear().apply()
+        getPrefs().edit().clear().apply()
         authToken = null
         refreshToken = null
         user = null
     }
 
     private fun decodeJwtToken(token: String): User? {
+        Log.d(TAG, "decodeJwtToken: $token")
         val jwt = JWT(token)
         val userIdS = jwt.getClaim("userId").asString()
         val email = jwt.getClaim("sub").asString()
-        val firstName = jwt.getClaim("firstname").asString()
-        val lastName = jwt.getClaim("lastname").asString()
+        val firstName = jwt.getClaim("firstName").asString()
+        val lastName = jwt.getClaim("lastName").asString()
+        val birthdate = jwt.getClaim("birthdate").asString()
+        val phone_number = jwt.getClaim("phonenumber").asString()
 
-        return if (userIdS != null && email != null && firstName != null && lastName != null) {
+        return if (userIdS != null && email != null && firstName != null && lastName != null && birthdate != null && phone_number != null) {
             val userId = UUID.fromString(userIdS)
-            User(userId, firstName, lastName, email)
+            User(userId, firstName, lastName, LocalDate.parse(birthdate), phone_number)
         } else {
             null
         }
 
+    }
+
+    fun isLoggedIn(): Boolean {
+        return user != null
     }
 
 

@@ -11,10 +11,10 @@ class CartRepository(
     private val apiService : CartApiService
 ){
 
-    suspend fun getCart(userId : UUID, token : String): Result<ShoppingCart?> {
+    suspend fun getCart(userId : UUID): Result<ShoppingCart?> {
         return try {
             println("Sto cercando il carrello")
-            val response = apiService.getCart(userId, "Bearer $token")
+            val response = apiService.getCart(userId)
             println("Risposta ricevuta $response")
             if (response.isSuccessful) {
                 println("Carrello ricevuto")

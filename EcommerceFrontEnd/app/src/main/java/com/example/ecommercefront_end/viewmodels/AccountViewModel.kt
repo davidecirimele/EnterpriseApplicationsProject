@@ -15,17 +15,18 @@ class AccountViewModel(private val repository: AccountRepository): ViewModel() {
     val userDetails: StateFlow<User?> = _userDetails
 
     init {
-        loadUserDetails()
+        try{
+        viewModelScope.launch {
+            loadUserDetails()
+        }} catch (e: Exception) {
+            // TODO gestire eccezione
+        }
     }
 
-    private fun loadUserDetails(){
-        viewModelScope.launch {
-            try {
-                val loggedUser = SessionManager.user?.id?.let { repository.getLoggedInUser(it) }
-            } catch (e: Exception) {
-                // TODO gestire eccezione
-            }
-        }
+    private suspend fun loadUserDetails(){
+
+        _userDetails.value = SessionManager.user?.id?.let { repository.getLoggedInUser(it) }
+
     }
 
 }

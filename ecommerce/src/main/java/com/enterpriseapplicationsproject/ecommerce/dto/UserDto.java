@@ -22,8 +22,6 @@ public class UserDto {
 
     private LocalDate birthDate;
 
-    private CredentialDto credential;
-
     private String phoneNumber;
 
 }

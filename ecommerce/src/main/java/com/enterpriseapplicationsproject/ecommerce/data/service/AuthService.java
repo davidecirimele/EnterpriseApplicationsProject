@@ -9,7 +9,7 @@ public interface AuthService {
 
     SaveUserDto registerAdmin(SaveUserDto userDto);
 
-    Map<String, String> loginUser(UserLoginDto loginDto);
+    Map<String, String> loginUser(CredentialDto loginDto);
 
     Map<String, String> refreshToken(String authorizationHeader, String toString);
 }

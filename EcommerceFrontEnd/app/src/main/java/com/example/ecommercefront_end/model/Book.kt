@@ -2,6 +2,7 @@ package com.example.ecommercefront_end.model
 
 import com.google.gson.annotations.SerializedName
 import java.time.LocalDate
+import java.util.Date
 
 data class Book(
     val id: Long,
@@ -19,8 +20,8 @@ data class Book(
     val publisher: String,
     val age: Int,
     val publishDate: LocalDate, // Annotazione per mappare la proprietà "publish_date"
+    @SerializedName("insertDate")
     val insertDate: LocalDate, // Annotazione per mappare la proprietà "insert_date"
-    val category: String,
     val weight: Double,
     val price: Double,
     val stock: Int,

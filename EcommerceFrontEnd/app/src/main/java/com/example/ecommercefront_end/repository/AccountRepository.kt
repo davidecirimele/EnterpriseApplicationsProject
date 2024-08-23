@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end.repository
 
+import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.network.UserApiService
 import java.util.UUID
 

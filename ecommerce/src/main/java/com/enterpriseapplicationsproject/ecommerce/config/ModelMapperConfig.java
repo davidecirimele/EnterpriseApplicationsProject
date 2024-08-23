@@ -34,8 +34,6 @@ public class ModelMapperConfig {
         modelMapper.addMappings(new PropertyMap<User, UserDto>() {
             @Override
             protected void configure() {
-                map(source.getCredential().getEmail(), destination.getCredential().getEmail());
-                map(source.getCredential().getPassword(), destination.getCredential().getPassword());
                 map(source.getPhoneNumber(), destination.getPhoneNumber());
             }
         });
@@ -67,8 +65,6 @@ public class ModelMapperConfig {
             protected void configure() {
                 map(source.getFirstName(), destination.getFirstName());
                 map(source.getLastName(), destination.getLastName());
-                map(source.getCredential().getEmail(), destination.getCredential().getEmail());
-                map(source.getCredential().getPassword(), destination.getCredential().getPassword());
                 map(source.getBirthDate(), destination.getBirthDate());
                 map(source.getPhoneNumber(), destination.getPhoneNumber());
             }

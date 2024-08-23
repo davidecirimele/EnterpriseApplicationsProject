@@ -1,13 +1,11 @@
 package com.example.ecommercefront_end.ui.user
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -34,32 +32,24 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.*
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHost
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import com.example.ecommercefront_end.model.Credential
+import com.example.ecommercefront_end.viewmodels.LoginViewModel
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import com.google.android.material.datepicker.DateValidatorPointBackward
 
 
 @Composable
-fun UserAuthScreen(navController: NavController) {
+fun UserAuthScreen(loginViewModel: LoginViewModel, navController: NavController) {
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -78,12 +68,12 @@ fun UserAuthScreen(navController: NavController) {
         // Il resto del codice per visualizzare LoginPage o RegistrationScreen
         when (selectedTabIndex) {
             0 -> LoginPage(
+                loginViewModel = loginViewModel,
                 onLoginSuccess = {
                     navController.navigate("home") {
                         popUpTo("userAuth") { inclusive = true }
                     }
-                },
-                onSwitchToRegister = { selectedTabIndex = 1 }
+                }
             )
             1 -> RegistrationScreen(
                 onRegistrationComplete = {
@@ -98,7 +88,7 @@ fun UserAuthScreen(navController: NavController) {
 }
 
 @Composable
-fun LoginPage(onLoginSuccess: () -> Unit, onSwitchToRegister: () -> Unit) {
+fun LoginPage(loginViewModel: LoginViewModel, onLoginSuccess: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -163,7 +153,10 @@ fun LoginPage(onLoginSuccess: () -> Unit, onSwitchToRegister: () -> Unit) {
         Spacer(modifier = Modifier.height(10.dp))
 
         Button(
-            onClick = { /* Logica di login */ },
+            onClick = {
+                loginViewModel.viewModelScope.launch {
+                loginViewModel.login(Credential(email,password),onLoginSuccess)
+                } },
             modifier = Modifier
                 .fillMaxWidth(0.5f)
                 .padding(bottom = 16.dp),
@@ -510,6 +503,7 @@ fun RegistrationStep2(onNext: () -> Unit, onBack: () -> Unit) {
             }
 
             Button(onClick = {
+
                 // Salva i dati nel ViewModel o esegui la logica di registrazione
                 onNext() // Passa al prossimo step
             },

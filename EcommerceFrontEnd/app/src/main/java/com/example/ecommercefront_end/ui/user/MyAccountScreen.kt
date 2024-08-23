@@ -35,6 +35,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.ecommercefront_end.SessionManager.user
 import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.network.RetrofitClient
@@ -43,7 +45,7 @@ import com.example.ecommercefront_end.ui.books.BookCover
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
 
 @Composable
-fun MyAccountScreen(viewModel: AccountViewModel, onCheckoutClick: () -> Unit) {
+fun MyAccountScreen(viewModel: AccountViewModel, navHostController: NavHostController) {
 
     LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top){
         item {
@@ -51,7 +53,7 @@ fun MyAccountScreen(viewModel: AccountViewModel, onCheckoutClick: () -> Unit) {
                 Text(
                     text = "My Account",
                     style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 40.sp
                 )
             }
@@ -66,7 +68,7 @@ fun MyAccountScreen(viewModel: AccountViewModel, onCheckoutClick: () -> Unit) {
             Spacer(modifier = Modifier.height(20.dp))
         }
         item {
-            Options()
+            Options(navHostController)
         }
 
 
@@ -81,7 +83,7 @@ fun UserInfo(){
             Text(
                 text =  "${user?.firstName}, ${user?.lastName}",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.secondary,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 35.sp
                 )
         }
@@ -91,18 +93,18 @@ fun UserInfo(){
                 Text(
                     text = "Email",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 25.sp
                 )
                 Text(
                     text = "test@test.com",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 20.sp
                 )
             }
             IconButton(onClick = { /*TODO*/ }) {
-                Icon(imageVector = Icons.Filled.Edit, contentDescription = "edit email", tint = MaterialTheme.colorScheme.secondary)
+                Icon(imageVector = Icons.Filled.Edit, contentDescription = "edit email", tint = MaterialTheme.colorScheme.primary)
             }
         }
         Spacer(modifier = Modifier.height(30.dp))
@@ -111,18 +113,18 @@ fun UserInfo(){
                 Text(
                     text = "Phone Number",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 25.sp
                 )
                 Text(
                     text = "340000093",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 20.sp
                 )
             }
             IconButton(onClick = { /*TODO*/ }) {
-                Icon(imageVector = Icons.Filled.Edit, contentDescription = "edit phone number", tint = MaterialTheme.colorScheme.secondary)
+                Icon(imageVector = Icons.Filled.Edit, contentDescription = "edit phone number", tint = MaterialTheme.colorScheme.primary)
             }
         }
         Spacer(modifier = Modifier.height(30.dp))
@@ -131,7 +133,7 @@ fun UserInfo(){
                 Text(
                     text = "Default Address",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 25.sp
                 )
                 AddressView(address = address)
@@ -158,7 +160,7 @@ fun AddressView(address: Address){
             Text(
                 text = "Street: ${address.street}",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.secondary,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(8.dp)
             )
@@ -166,7 +168,7 @@ fun AddressView(address: Address){
             Text(
                 text = "City: ${address.city}, ZIP: ${address.postalCode}, Province: ${address.province}",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.secondary,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(8.dp)
             )
@@ -174,7 +176,7 @@ fun AddressView(address: Address){
             Text(
                 text = "State: ${address.state}",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.secondary,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(8.dp)
             )
@@ -193,10 +195,10 @@ fun AddressView(address: Address){
 }
 
 @Composable
-fun Options(){
+fun Options(navHostController: NavHostController){
     Column {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = { navHostController.navigate("addresses") }) {
                 Text(text = "Addresses")
             }
         }
@@ -231,7 +233,7 @@ fun AddressesList(){
         Text(
             text = "Saved addresses",
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.secondary,
+            color = MaterialTheme.colorScheme.primary,
             fontSize = 25.sp
         )
         Row(
@@ -254,5 +256,6 @@ fun MyAccountScreenPreview(){
     val _userApiService = RetrofitClient.userApiService
     val repository = AccountRepository(_userApiService)
     val viewModel = AccountViewModel(repository)
-    MyAccountScreen(viewModel, onCheckoutClick = { /* Add your action here */ })
+    val navController = rememberNavController()
+    MyAccountScreen(viewModel, navController)
 }

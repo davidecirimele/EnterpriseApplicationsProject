@@ -36,7 +36,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public AddressDto getAddressById(Long addressId) {
-        Optional<Address> optionalAddress = addressesDao.findById(addressId);
+        Optional<Address> optionalAddress = addressesDao.findAddressById(addressId);
 
         if(optionalAddress.isPresent()){
             Address address = optionalAddress.get();

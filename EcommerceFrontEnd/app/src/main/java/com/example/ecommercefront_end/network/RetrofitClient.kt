@@ -1,16 +1,18 @@
 package com.example.ecommercefront_end.network
 
 import com.example.ecommercefront_end.SessionManager
+import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.time.LocalDate
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
 object RetrofitClient {
-    private const val BASE_URL = "https://192.168.1.29:8443/api/v1/"
+    private const val BASE_URL = "https://10.0.2.2:8080/"
 
     private const val SAMUELES_URL = "https://192.168.1.54:8081/api/v1/" //URL di Samuele S
 
@@ -47,12 +49,20 @@ object RetrofitClient {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(
+                GsonBuilder()
+                    .registerTypeAdapter(LocalDate::class.java, LocalDateAdapter())
+                    .create()
+            ))
             .build()
     }
 
-   val authApiService: AuthApiService by lazy {
+    val authApiService: AuthApiService by lazy {
         retrofit.create(AuthApiService::class.java)
+    }
+
+    val userApiService: UserApiService by lazy {
+        retrofit.create(UserApiService::class.java)
     }
 
     val wishlistApiService: WishlistApiService by lazy {
@@ -63,14 +73,16 @@ object RetrofitClient {
         retrofit.create(WishlistItemApiService::class.java)
     }
 
-
-
     val cartApiService: CartApiService by lazy {
             retrofit.create(CartApiService::class.java)
     }
 
     val booksApiService: BooksApiService by lazy {
             retrofit.create(BooksApiService::class.java)
+    }
+
+    val addressApiService: AddressApiService by lazy {
+        retrofit.create(AddressApiService::class.java)
     }
 }
 

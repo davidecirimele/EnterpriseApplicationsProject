@@ -23,7 +23,6 @@ fun createTestBooks(): List<Book> {
             age = 18,
             publishDate = LocalDate.of(1925, 4, 10),
             insertDate = LocalDate.now(),
-            category = "Fiction",
             weight = 0.5,
             price = 10.99,
             stock = 15
@@ -42,7 +41,6 @@ fun createTestBooks(): List<Book> {
             age = 14,
             publishDate = LocalDate.of(1960, 7, 11),
             insertDate = LocalDate.now(),
-            category = "Fiction",
             weight = 0.45,
             price = 7.99,
             stock = 10
@@ -61,7 +59,6 @@ fun createTestBooks(): List<Book> {
             age = 16,
             publishDate = LocalDate.of(1949, 6, 8),
             insertDate = LocalDate.now(),
-            category = "Science Fiction",
             weight = 0.4,
             price = 9.99,
             stock = 8
@@ -80,7 +77,6 @@ fun createTestBooks(): List<Book> {
             age = 12,
             publishDate = LocalDate.of(1813, 1, 28),
             insertDate = LocalDate.now(),
-            category = "Fiction",
             weight = 0.52,
             price = 12.99,
             stock = 20
@@ -99,7 +95,6 @@ fun createTestBooks(): List<Book> {
             age = 10,
             publishDate = LocalDate.of(1937, 9, 21),
             insertDate = LocalDate.now(),
-            category = "Fantasy",
             weight = 0.55,
             price = 14.99,
             stock = 25
@@ -118,7 +113,6 @@ fun createTestBooks(): List<Book> {
         age = 9,
         publishDate = LocalDate.of(1997, 6, 26),
         insertDate = LocalDate.now(),
-        category = "Fantasy",
         weight = 0.4,
         price = 8.99,
         stock = 30
@@ -136,7 +130,6 @@ fun createTestBooks(): List<Book> {
             age = 14,
             publishDate = LocalDate.of(1954, 7, 29),
             insertDate = LocalDate.now(),
-            category = "Fantasy",
             weight = 1.5,
             price = 24.99,
             stock = 15
@@ -154,7 +147,6 @@ fun createTestBooks(): List<Book> {
             age = 16,
             publishDate = LocalDate.of(1951, 7, 16),
             insertDate = LocalDate.now(),
-            category = "Fiction",
             weight = 0.35,
             price = 6.99,
             stock = 12
@@ -173,7 +165,6 @@ fun createTestBooks(): List<Book> {
             age = 14,
             publishDate = LocalDate.of(1939, 11, 6),
             insertDate = LocalDate.now(),
-            category = "Mystery",
             weight = 0.3,
             price = 5.99,
             stock = 18
@@ -192,7 +183,6 @@ fun createTestBooks(): List<Book> {
             age = 16,
             publishDate = LocalDate.of(2003, 3, 18),
             insertDate = LocalDate.now(),
-            category = "Thriller",
             weight = 0.6,
             price = 11.99,
             stock = 22

@@ -2,6 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -16,5 +17,6 @@ public class InsertCartItemDto {
     private UserIdDto userId;
 
     @NotBlank
+    @Positive
     private Integer quantity;
 }

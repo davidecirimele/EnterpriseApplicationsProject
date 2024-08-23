@@ -7,10 +7,7 @@ import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDet
 import com.enterpriseapplicationsproject.ecommerce.data.service.AuthService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RefreshTokenService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
-import com.enterpriseapplicationsproject.ecommerce.dto.SaveUserDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserDetailsDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserLoginDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.AuthenticationResponse;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.RefreshTokenDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.TokenRefreshRequest;
@@ -19,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +33,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -54,8 +53,9 @@ public class AuthController {
     }
 
     @PostMapping(consumes = "application/json", path = "/login")
-    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody UserLoginDto userDto) {
-        return ResponseEntity.ok(authService.loginUser(userDto));
+    public ResponseEntity<Map<String, String>> login(@RequestBody CredentialDto credentials) {
+        log.info("Received request for auth/login");
+        return ResponseEntity.ok(authService.loginUser(credentials));
     }
 
     /*@GetMapping("/refreshToken")
