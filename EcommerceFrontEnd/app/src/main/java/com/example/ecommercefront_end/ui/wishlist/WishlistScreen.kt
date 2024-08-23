@@ -15,23 +15,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
-import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -43,6 +39,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -71,9 +68,8 @@ fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) 
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    var showAddWishlist by remember { mutableStateOf(false) }
-
-    val (selectedWishlist, setSelectedWishlist) = remember(wLists) {
+    // Gestione della selezione della wishlist
+    val selectedWishlist = remember(wLists) {
         mutableStateOf(wLists.firstOrNull())
     }
 
@@ -86,54 +82,40 @@ fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) 
             Text(text = error.toString())
         }
     } else {
-        LaunchedEffect(wLists) {
-            selectedWishlist?.let { viewModel.loadWishlistItemsFromDB(it.id) }
+        // Ricarica gli elementi della wishlist selezionata
+        LaunchedEffect(selectedWishlist.value) {
+            selectedWishlist.value?.let {
+                viewModel.loadWishlistItemsFromDB(it.id)
+            }
         }
 
-        Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Le tue liste desideri",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                IconButton(onClick = { showAddWishlist = true }) {
-                    Icon(imageVector = Icons.Filled.AddCircleOutline, contentDescription = "Aggiungi Lista")
-                }
-            }
-            if (showAddWishlist) {
-                AddWishlistDialog(
-                    onDismissRequest = { showAddWishlist = false },
-                    onAddWishlist = { wishlistName, isPrivate, otherParam ->
-                        viewModel.addWishlist(wishlistName, isPrivate, otherParam)// Crea la lista con più parametri
-                        showAddWishlist = false
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            item {
+                WishlistsList(
+                    wishlists = wLists,
+                    viewModel = viewModel,
+                    onWishlistSelected = { wishlist ->
+                        selectedWishlist.value = wishlist
+                        viewModel.loadWishlistItemsFromDB(wishlist.id)
                     }
                 )
             }
-            WishlistsList(
-                wishlists = wLists,
-                onWishlistSelected = { wishlist ->
-                    setSelectedWishlist(wishlist)
-                    viewModel.loadWishlistItemsFromDB(wishlist.id)
-                }
-            )
 
-            selectedWishlist?.let { wishlist ->
-                WishlistDetails(
-                    wishlist = wishlist,
-                    items = wListItems,
-                    navController = navController
-                )
+            // Mostra i dettagli solo se c'è una wishlist selezionata e ha degli elementi
+            selectedWishlist.value?.let { wishlist ->
+                item {
+                    WishlistDetails(
+                        wishlist = wishlist,
+                        items = wListItems,  // Usa wListItems osservato, non selectedWishlist.items
+                        navController = navController,
+                        viewModel = viewModel
+                    )
+                }
             }
         }
     }
 }
+
 
 @Composable
 fun AddWishlistDialog(onDismissRequest: () -> Unit, onAddWishlist: (String, Boolean, String) -> Unit) {
@@ -143,7 +125,7 @@ fun AddWishlistDialog(onDismissRequest: () -> Unit, onAddWishlist: (String, Bool
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text("Crea una nuova lista desideri") },
+        title = { Text("Crea una nuova lista") },
         text = {
             Column {
                 TextField(
@@ -156,30 +138,57 @@ fun AddWishlistDialog(onDismissRequest: () -> Unit, onAddWishlist: (String, Bool
                         checked = isPrivate,
                         onCheckedChange = { isPrivate = it }
                     )
-                    Text("Privata")
+                    Text(text = "Privata", modifier = Modifier.align(Alignment.CenterVertically))
                 }
-                TextField(
-                    value = otherParam,
-                    onValueChange = { otherParam = it },
-                    label = { Text("Altro parametro") }
-                )
-                // Aggiungi altri campi per i dettagli della wishlist se necessario
             }
         },
         confirmButton = {
-            Button(onClick = { onAddWishlist(wishlistName, isPrivate, otherParam) }) {
-                Text("Crea")}
-        },
-        dismissButton = {
-            Button(onClick = onDismissRequest) {
-                Text("Annulla")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround // Centra i bottoni
+            ) {
+                Button(onClick = { onAddWishlist(wishlistName, isPrivate, otherParam) }) {
+                    Text("Crea")
+                }
+                Button(onClick = onDismissRequest) {
+                    Text("Annulla")
+                }
             }
-        }
+        },
+        dismissButton = null // Non è più necessario
+        //... (altri parametri)
     )
 }
 
 @Composable
-fun WishlistsList(wishlists: List<Wishlist>, onWishlistSelected: (Wishlist) -> Unit) {
+fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWishlistSelected: (Wishlist) -> Unit) {
+    var showAddWishlist by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Le tue liste desideri",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
+        )
+        IconButton(onClick = { showAddWishlist = true }) {
+            Icon(imageVector = Icons.Filled.AddCircleOutline, contentDescription = "Aggiungi Lista", tint = Color.Green)
+        }
+    }
+    if (showAddWishlist) {
+        AddWishlistDialog(
+            onDismissRequest = { showAddWishlist = false },
+            onAddWishlist = { wishlistName, isPrivate, otherParam ->
+                viewModel.addWishlist(wishlistName, isPrivate, otherParam)// Crea la lista con più parametri
+                showAddWishlist = false
+            }
+        )
+    }
 
     LazyRow(
         modifier = Modifier
@@ -226,9 +235,21 @@ fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit) {
 }
 
 @Composable
-fun WishlistDetails(wishlist: Wishlist, items: List<WishlistItem>, navController: NavController) {
+fun WishlistDetails(
+    wishlist: Wishlist,
+    items: List<WishlistItem>,
+    navController: NavController,
+    viewModel: WishlistViewModel
+) {
     var isPrivate by remember { mutableStateOf(wishlist.privacySetting == "Private") }
     var showMenu by remember { mutableStateOf(false) } // Per gestire la visibilità del menu a comparsa
+
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+    var itemToRemove by remember { mutableStateOf<WishlistItem?>(null) }
+    var showRenameDialog by remember { mutableStateOf(false) }
+    var newWishlistName by remember { mutableStateOf(wishlist.name) }
+
+
 
     Column(modifier = Modifier.padding(16.dp)) {
         // Titolo della lista
@@ -248,14 +269,14 @@ fun WishlistDetails(wishlist: Wishlist, items: List<WishlistItem>, navController
             // Menu a comparsa
             Box{
                 IconButton(onClick = { showMenu = !showMenu }) {
-                    Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "Menu")
+                    Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "Menu", tint = Color.Blue)
                 }
                 DropdownMenu(
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Condividi Wishlist") },
+                        text = { Text("Condividi") },
                         onClick = {
                             showMenu = false
                             // Azione per condividere la wishlist
@@ -263,42 +284,93 @@ fun WishlistDetails(wishlist: Wishlist, items: List<WishlistItem>, navController
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Filled.Share,
-                                contentDescription = "Condividi Wishlist"
+                                contentDescription = "Condividi",
+                                tint = Color.Blue
                             )
                         }
                     )
-
                     DropdownMenuItem(
-                        text = { Text("Rinomina Wishlist") },
+                        text = { Text("Rinomina") },
                         onClick = {
                             showMenu = false
                             // Azione per rinominare la wishlist
+                            showRenameDialog = true
                         },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Filled.Edit,
-                                contentDescription = "Rinomina Wishlist"
+                                contentDescription = "Rinomina",
+                                tint = Color.Blue
                             )
                         }
                     )
 
                     DropdownMenuItem(
-                        text = { Text("Elimina Wishlist") },
+                        text = { Text("Elimina") },
                         onClick = {
                             showMenu = false
                             // Azione per eliminare la wishlist
+                            showDeleteConfirmation = true
                         },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Filled.Delete,
-                                contentDescription = "Elimina Wishlist"
+                                contentDescription = "Elimina",
+                                tint = Color.Red
                             )
                         }
                     )
                 }
             }
-        }
+            if (showDeleteConfirmation) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteConfirmation = false },
+                    title = { Text("Elimina Wishlist") },
+                    text = { Text("Vuoi davvero eliminare la wishlist '${wishlist.name}'?") },
+                    confirmButton = {
+                        Button(onClick = {
+                            //onDeleteWishlist(wishlist) // Chiama il callback per eliminare la wishlist
+                            showDeleteConfirmation = false
+                        }) {
+                            Text("Sì")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = { showDeleteConfirmation = false }) {
+                            Text("No")
+                        }
+                    }
+                )
+            }
 
+            // Dialogo di rinomina
+            if (showRenameDialog) {
+                AlertDialog(
+                    onDismissRequest = { showRenameDialog = false },
+                    title = { Text("Rinomina Wishlist") },
+                    text = {
+                        OutlinedTextField(
+                            value = newWishlistName,
+                            onValueChange = { newWishlistName = it },
+                            label = { Text("Nuovo nome") }
+                        )
+                    },
+                    confirmButton = {
+                        Button(onClick = {
+                            //onRenameWishlist(wishlist, newWishlistName) // Chiama il callback per rinominare la wishlist
+                            showRenameDialog = false
+                        }) {
+                            Text("Rinomina")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = { showRenameDialog = false }) {
+                            Text("Annulla")
+                        }
+                    }
+                )
+            }
+        }
         // Sezione Privacy
         Row(
             modifier = Modifier
@@ -330,10 +402,11 @@ fun WishlistDetails(wishlist: Wishlist, items: List<WishlistItem>, navController
 
         }
         Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn {
-            items(items) { item ->
-                WishlistItemCard(wishlistItem = item, navController = navController,onRemoveClick = {
-                    // Gestisci la rimozione dell'elemento qui, ad esempio chiamando una funzione nel tuo viewModel
+        Column {
+            items.forEach { item ->
+                WishlistItemCard(wishlistItem = item,
+                            navController = navController, onRemoveClick = {
+                    viewModel.removeWishlistItem(item.id)
                 })
             }
         }
@@ -350,7 +423,8 @@ fun WishlistItemCard(wishlistItem: WishlistItem, navController: NavController,on
     ) {
         Row(
             modifier = Modifier
-                .padding(8.dp).fillMaxWidth(),
+                .padding(8.dp)
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -381,7 +455,7 @@ fun WishlistItemCard(wishlistItem: WishlistItem, navController: NavController,on
             }
 
             IconButton(onClick = onRemoveClick) {
-                Icon(imageVector = Icons.Rounded.Delete, contentDescription = "Rimuovi elemento")
+                Icon(imageVector = Icons.Rounded.Delete, contentDescription = "Rimuovi elemento",tint = Color.Red)
             }
         }
     }
