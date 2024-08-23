@@ -17,7 +17,5 @@ public class CartItemDto {
 
     private Integer quantity;
 
-    private LocalDateTime addDate;
-
     private Double price;
 }

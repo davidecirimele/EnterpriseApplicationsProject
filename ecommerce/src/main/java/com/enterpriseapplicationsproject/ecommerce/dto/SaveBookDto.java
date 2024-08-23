@@ -1,9 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.sql.Date;
@@ -43,11 +40,8 @@ public class SaveBookDto {
     @Positive(message = "Age must be positive")
     private int age;
 
-    @NotBlank(message = "Publish date is mandatory")
-    private Date publishDate;
-
-    @NotBlank(message = "Category is mandatory")
-    private String category;
+    @NotNull(message = "Publish date is mandatory")
+    private LocalDate publishDate;
 
     @PositiveOrZero(message = "Weight must be positive or zero")
     private Double weight;

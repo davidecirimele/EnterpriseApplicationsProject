@@ -71,7 +71,6 @@ public class CartItemsServiceImpl implements CartItemsService {
             cartItem.setBookId(book);
             cartItem.setPrice(book.getPrice());
             cartItem.setQuantity(insertCartItemDto.getQuantity());
-            cartItem.setAddDate(LocalDateTime.now());
 
             CartItem insertedItem = cartItemsDao.save(cartItem);
             return modelMapper.map(insertedItem, CartItemDto.class);

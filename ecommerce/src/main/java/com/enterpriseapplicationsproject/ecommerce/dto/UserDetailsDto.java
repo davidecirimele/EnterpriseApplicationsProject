@@ -12,16 +12,12 @@ public class UserDetailsDto {
 
     private UUID id;
 
-    @NotBlank(message = "First Name cannot be blank")
     private String firstName;
 
-    @NotBlank(message = "Last Name cannot be blank")
     private String lastName;
 
-    @NotNull(message = "Credentials are required")
     private String email;
 
-    @NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
 }

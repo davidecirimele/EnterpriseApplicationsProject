@@ -12,16 +12,24 @@ import retrofit2.Invocation
 
 class AuthInterceptor(
     private val sessionManager: SessionManager,
-    private val authApiService: AuthApiService
 ) : Interceptor {
+    private var authApiService: AuthApiService? = null
 
-    override   fun intercept(chain: Interceptor.Chain): Response {
+    fun setAuthApiService(authApiService: AuthApiService) {
+        this.authApiService = authApiService
+    }
+
+    override fun intercept(chain: Interceptor.Chain): Response {
+        setAuthApiService(RetrofitClient.authApiService)
+        val authApiService = authApiService ?: throw IllegalStateException("AuthApiService is null")
         val originalRequest = chain.request()
+        println("Intercepting request: ${originalRequest.url}")
 
         val requiresAuth = originalRequest.tag(Invocation::class.java)?.method()?.getAnnotation(
             RequiresAuth::class.java) != null
+        println("Requires auth: $requiresAuth")
 
-        if (!requiresAuth) {
+        if (requiresAuth) {
 
             val accessToken = sessionManager.authToken
 
@@ -31,7 +39,9 @@ class AuthInterceptor(
             }
 
             val requestWithAuth = requestBuilder.build()
+            println("Request with auth: $requestWithAuth")
             val response = chain.proceed(requestWithAuth)
+            println("Response code: ${response.code}")
 
             if (response.code == 401) {
 

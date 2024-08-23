@@ -30,6 +30,8 @@ public class LoggedUserDetails implements UserDetails{
     private String firstName;
     private String lastName;
     private LocalDate birthDate;
+
+    private String phoneNumber;
     private List<GrantedAuthority> authorities;
 
     public LoggedUserDetails(User user) {
@@ -39,6 +41,7 @@ public class LoggedUserDetails implements UserDetails{
         this.authorities = Collections.singletonList( new SimpleGrantedAuthority("ROLE_" + user.getClass().getAnnotation(DiscriminatorValue.class).value()));
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
+        this.phoneNumber = user.getPhoneNumber();
         this.birthDate = user.getBirthDate();
     }
 

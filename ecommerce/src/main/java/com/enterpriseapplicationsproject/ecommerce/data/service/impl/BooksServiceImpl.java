@@ -41,7 +41,6 @@ public class BooksServiceImpl implements BooksService {
     @Override
     public BookDto save(SaveBookDto bookDto) {
         Book book = modelMapper.map(bookDto, Book.class);
-        book.setInsertDate(LocalDate.now());
         Book b = booksDao.save(book);
         return modelMapper.map(b, BookDto.class);
     }

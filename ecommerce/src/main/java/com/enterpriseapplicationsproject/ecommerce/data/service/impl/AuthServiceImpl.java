@@ -95,7 +95,7 @@ public class AuthServiceImpl implements  AuthService{
     }
 
     @Override
-    public Map<String, String> loginUser(UserLoginDto loginDto) {
+    public Map<String, String> loginUser(CredentialDto loginDto) {
         System.out.println("LoginDto: " + loginDto);
         try{
             System.out.println("Attempting to create UsernamePasswordAuthenticationToken");

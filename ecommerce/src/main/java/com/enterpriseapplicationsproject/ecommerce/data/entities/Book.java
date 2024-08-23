@@ -21,18 +21,10 @@ public class Book{
     @Column(name = "ID")
     private Long id;
 
-    @Basic(optional = false)
-    @Column(name = "CATEGORY")
-    private String category;
-
     //TODO immagine
 
     @Column(name = "WEIGHT")
     private Double weight;
-
-    @Basic(optional = false)
-    @Column(name = "INSERT_DATE")
-    private LocalDate insertDate;
 
     @Basic(optional = false)
     @Column(name = "PRICE")
@@ -68,7 +60,7 @@ public class Book{
     @Column(name = "AGE")
     private int age;
     @Column(name = "PUBLISH_DATE")
-    private Date publishDate;
+    private LocalDate publishDate;
 
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
     private List<Review> reviews = new ArrayList<>();

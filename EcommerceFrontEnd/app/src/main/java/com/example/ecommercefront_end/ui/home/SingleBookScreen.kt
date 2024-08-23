@@ -67,13 +67,6 @@ fun BookDetailsScreen(book: Book) {
                         .padding(bottom = 8.dp)
                 )
                 Text(
-                    text = book.category,
-                    fontSize = 20.sp,
-                    modifier = Modifier
-                        .align(Alignment.Start)
-                        .padding(bottom = 8.dp)
-                )
-                Text(
                     text = "di " + book.author,
                     fontSize = 20.sp,
                     modifier = Modifier

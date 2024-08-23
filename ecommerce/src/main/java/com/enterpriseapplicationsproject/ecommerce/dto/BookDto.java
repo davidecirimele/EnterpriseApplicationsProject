@@ -27,8 +27,6 @@ public class BookDto {
 
     private BookFormat format;
 
-    private LocalDate insertDate;
-
     private BookGenre genre;
 
     private BookLanguage language;
@@ -37,9 +35,7 @@ public class BookDto {
 
     private int age;
 
-    private Date publishDate;
-
-    private String category;
+    private LocalDate publishDate;
 
     private Double weight;
 

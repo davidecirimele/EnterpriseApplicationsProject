@@ -4,7 +4,6 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.Address;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.dto.AddressDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.AddressIdDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.EditAddressDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveAddressDto;
 
 import java.util.List;

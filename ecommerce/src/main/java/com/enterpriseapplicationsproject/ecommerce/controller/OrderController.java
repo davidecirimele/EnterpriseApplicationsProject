@@ -7,6 +7,7 @@ import com.enterpriseapplicationsproject.ecommerce.dto.OrderDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveOrderDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping(path = "/api/v1/orders", produces = "application/json")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
