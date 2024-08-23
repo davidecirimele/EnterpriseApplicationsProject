@@ -7,15 +7,13 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 
 @EqualsAndHashCode()
 @Entity
 @Data
 @NoArgsConstructor
-public class Book{
+public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
@@ -25,7 +23,8 @@ public class Book{
     @Column(name = "CATEGORY")
     private String category;
 
-    //TODO immagine
+    @Column(name = "COVER_URL")
+    private String coverUrl;
 
     @Column(name = "WEIGHT")
     private Double weight;
@@ -44,33 +43,37 @@ public class Book{
 
     @Column(name = "TITLE")
     private String title;
+
     @Column(name = "AUTHOR")
     private String author;
+
     @Column(name = "ISBN", unique = true)
     private String ISBN;
+
     @Column(name = "PAGES")
     private int pages;
+
     @Column(name = "EDITION")
     private String edition;
 
     @Column(name = "FORMAT")
     @Enumerated(EnumType.STRING)
     private BookFormat format;
+
     @Column(name = "GENRE")
     @Enumerated(EnumType.STRING)
     private BookGenre genre;
+
     @Column(name = "LANGUAGE")
     @Enumerated(EnumType.STRING)
     private BookLanguage language;
 
     @Column(name = "PUBLISHER")
     private String publisher;
+
     @Column(name = "AGE")
     private int age;
+
     @Column(name = "PUBLISH_DATE")
     private Date publishDate;
-
-    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
-    private List<Review> reviews = new ArrayList<>();
-
 }
