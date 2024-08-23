@@ -52,12 +52,17 @@ object SessionManager {
     private fun loadSession(){
         authToken = getPrefs().getString(KEY_AUTH_TOKEN, null)
         refreshToken = getPrefs().getString(REFRESH_TOKEN_KEY, null)
+
+        authToken?.let {
+            user = decodeJwtToken(it)
+        }
     }
 
     fun saveAuthToken(token: String){
         authToken = token
         getPrefs().edit().putString(KEY_AUTH_TOKEN, token).apply()
         user = decodeJwtToken(token)
+
     }
 
     fun saveRefreshToken(token: String){
@@ -82,13 +87,13 @@ object SessionManager {
         val phone_number = jwt.getClaim("phonenumber").asString()
 
         return if (userIdS != null && email != null && firstName != null && lastName != null && birthdate != null && phone_number != null) {
-            val userId = UUID.fromString(userIdS)
-            User(userId, firstName, lastName, LocalDate.parse(birthdate), phone_number)
-        } else {
-            null
-        }
-
+        val userId = UUID.fromString(userIdS)
+        User(userId, firstName, lastName, LocalDate.parse(birthdate), phone_number)
+    } else {
+        null
     }
+
+}
 
     fun isLoggedIn(): Boolean {
         return user != null

@@ -41,7 +41,6 @@ fun createTestBooks(): List<Book> {
             age = 14,
             publishDate = LocalDate.of(1960, 7, 11),
             insertDate = LocalDate.now(),
-            category = "Fiction",
             weight = 0.45,
             price = 7.99,
             stock = 10

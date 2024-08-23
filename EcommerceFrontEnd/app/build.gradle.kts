@@ -67,7 +67,9 @@ dependencies {
     implementation(libs.androidx.browser)
     implementation(libs.material)
     implementation(libs.places)
-    implementation(libs.androidx.core.i18n)
+    implementation(libs.coil)
+    implementation(libs.coil.compose)
+
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose.android)
     implementation(libs.volley)
@@ -89,6 +91,7 @@ dependencies {
     implementation(libs.converter.gson)
     implementation (libs.androidx.security.crypto)
     implementation (libs.jwtdecode)
+    implementation(libs.coil.compose)
 
     implementation("com.google.android.material:material:1.4.0")
 }

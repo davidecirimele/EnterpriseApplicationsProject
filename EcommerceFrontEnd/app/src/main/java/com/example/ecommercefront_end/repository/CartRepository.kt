@@ -20,6 +20,7 @@ class CartRepository(
             println("Risposta ricevuta $response")
             if (response.isSuccessful) {
                 println("Carrello ricevuto")
+                println("Carrello: ${response.body()}")
                 Result.success(response.body())
             } else {
                 println("Errore: ${response.message()}")
@@ -40,9 +41,11 @@ class CartRepository(
     }
 
     suspend fun removeItem( cartItemId: Long, userId: UserId){
-        val cartItemId = CartItemId(cartItemId, userId)
-        apiService.removeItem(cartItemId)
+        val cartItmId = CartItemId(cartItemId, userId)
+        apiService.removeItem(cartItmId)
 
     }
+
+
 
 }

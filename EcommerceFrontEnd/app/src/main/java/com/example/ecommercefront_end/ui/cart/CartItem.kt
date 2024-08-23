@@ -48,18 +48,18 @@ fun CartItem(
         // Dettagli del prodotto
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = item.book.title,
+                text = item.bookId.title,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold)
 
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Di: ${item.book.author}",
+                text = "Di: ${item.bookId.author}",
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Prezzo: ${item.book.price}€",
+                text = "Prezzo: ${item.bookId.price}€",
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(4.dp))
