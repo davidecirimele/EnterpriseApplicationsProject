@@ -18,7 +18,7 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
     }
 
     suspend fun removeWishlist(w: Wishlist){
-        wApiService.deleteWishlist(w.id)
+        wApiService.deleteWishlist(w.id!!)
     }
 
     suspend fun getAllWishlists() : List<Wishlist> {
@@ -53,5 +53,9 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
             println("Errore durante il recupero degli elementi della lista dei desideri: ${e.message}")
             emptyList() // Restituisci una lista vuota in caso di errore
         }
+    }
+
+    suspend fun addWishlist(wishlist: Wishlist) {
+        wApiService.addWishlist(wishlist)
     }
 }

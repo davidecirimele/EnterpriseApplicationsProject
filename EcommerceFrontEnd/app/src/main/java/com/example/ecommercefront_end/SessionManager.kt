@@ -74,22 +74,16 @@ object SessionManager {
         val firstName = jwt.getClaim("firstname").asString()
         val lastName = jwt.getClaim("lastname").asString()
 
+
         return if (userIdS != null && email != null && firstName != null && lastName != null) {
             val userId = UUID.fromString(userIdS)
-            User(userId, firstName, lastName, email)
+            //User(userId, firstName, lastName)
+            null
         } else {
             null
         }
 
     }
-
-
-
-
-
-
-
-
 
 
 

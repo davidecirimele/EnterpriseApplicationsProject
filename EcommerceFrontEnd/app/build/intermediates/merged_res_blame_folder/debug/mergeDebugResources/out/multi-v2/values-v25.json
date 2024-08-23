@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.ecommercefront_end.app-mergeDebugResources-76:/values-v25/values-v25.xml",
+            "outputFile": "com.example.ecommercefront_end.app-mergeDebugResources-73:/values-v25/values-v25.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\samue\\.gradle\\caches\\transforms-4\\e075e34aad84be944e6d5526460e3689\\transformed\\appcompat-1.6.1\\res\\values-v25\\values-v25.xml",
+                    "source": "C:\\Users\\samue\\.gradle\\caches\\transforms-4\\81735ad41fb1084171fc11e5d6fc30d4\\transformed\\appcompat-1.6.1\\res\\values-v25\\values-v25.xml",
                     "from": {
                         "startLines": "2,3,4,6",
                         "startColumns": "4,4,4,4",

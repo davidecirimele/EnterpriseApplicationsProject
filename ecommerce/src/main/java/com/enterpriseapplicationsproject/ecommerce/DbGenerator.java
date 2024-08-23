@@ -78,6 +78,7 @@ public class DbGenerator implements ApplicationRunner {
                 //System.out.println(record.get(0));
                 insertUser(record.get(0));
             }
+            System.out.println("USERS INSERTED");
 
             CSVParser booksCsv = CSVFormat.DEFAULT.withDelimiter(';')
                     .parse(new InputStreamReader(productsRes.getInputStream()));
@@ -85,6 +86,7 @@ public class DbGenerator implements ApplicationRunner {
                 //System.out.println(record.get(0));
                 insertBook(record.get(0));
             }
+            System.out.println("BOOKS INSERTED");
 
             CSVParser addressesCsv = CSVFormat.DEFAULT.withDelimiter(';')
                     .parse(new InputStreamReader(addressesRes.getInputStream()));
@@ -99,9 +101,10 @@ public class DbGenerator implements ApplicationRunner {
                     .parse(new InputStreamReader(groupsRes.getInputStream()));
 
             for (CSVRecord record : groupsCsv) {
-                System.out.println(record.get(0));
+                //System.out.println(record.get(0));
                 insertGroup(record.get(0));
             }
+            System.out.println("GROUPS INSERTED");
 
             //GROUP MEMBERSHIPS
 
@@ -109,29 +112,30 @@ public class DbGenerator implements ApplicationRunner {
                     .parse(new InputStreamReader(groupMembershipsRes.getInputStream()));
 
             for (CSVRecord record : groupMembershipsCsv) {
-                System.out.println(record.get(0));
+                //System.out.println(record.get(0));
                 insertGroupMembership(record.get(0));
             }
-
+            System.out.println("GROUP MEMBERSHIPS INSERTED");
             //WISH LIST
 
             CSVParser wishlistCsv = CSVFormat.DEFAULT.withDelimiter(';')
                     .parse(new InputStreamReader(wishlistRes.getInputStream()));
 
             for (CSVRecord record : wishlistCsv) {
-                System.out.println(record.get(0));
+                //System.out.println(record.get(0));
                 insertWishlist(record.get(0));
 
             }
-
+            System.out.println("WISHLISTS INSERTED");
             //WISH LIST ITEMS
             CSVParser wishlistItemsCsv = CSVFormat.DEFAULT.withDelimiter(';')
                     .parse(new InputStreamReader(wishlistItemsRes.getInputStream()));
 
             for (CSVRecord record : wishlistItemsCsv) {
-                System.out.println(record.get(0));
+                //System.out.println(record.get(0));
                 insertWishlistItem(record.get(0));
             }
+            System.out.println("WISHLIST ITEMS INSERTED");
 
 
 
@@ -292,7 +296,6 @@ public class DbGenerator implements ApplicationRunner {
 
         int wishlistIndex = Integer.parseInt(array[1]) - 1;
         int bookIndex = Integer.parseInt(array[2]) - 1;
-        int quantity = Integer.parseInt(array[3]);
 
         List<BookDto> allBooks = bookService.getBookDto();
         BookDto bookDto = allBooks.get(bookIndex);
@@ -304,7 +307,6 @@ public class DbGenerator implements ApplicationRunner {
         WishlistItem wishlistItem = new WishlistItem();
         wishlistItem.setBook(book);
         wishlistItem.setWishlist(wishlist);
-        wishlistItem.setQuantity(quantity);
 
         wishlistItemsService.save(wishlistItem);
     }

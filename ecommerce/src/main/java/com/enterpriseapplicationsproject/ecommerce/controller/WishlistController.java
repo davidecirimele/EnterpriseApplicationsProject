@@ -53,7 +53,7 @@ public class WishlistController {
     }
 
     @PostMapping(consumes =  "application/json", path = "/add")
-    @PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
+    //@PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> add(@RequestBody WishlistDto wDto) {
         WishlistDto w = wishlistService.save(wDto);
         if (w == null)

@@ -25,6 +25,7 @@ coreI18n = "1.0.0-alpha01"
 firebaseFirestoreKtx = "25.0.0"
 lifecycleRuntimeComposeAndroid = "2.8.4"
 securityCrypto = "1.1.0-alpha06"
+volley = "1.2.1"
 
 
 [libraries]
@@ -61,6 +62,7 @@ material = { module = "com.google.android.material:material", version.ref = "mat
 places = { module = "com.google.android.libraries.places:places", version.ref = "placesVersion" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "converterGson" }
 androidx-lifecycle-runtime-compose-android = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose-android", version.ref = "lifecycleRuntimeComposeAndroid" }
+volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
 
 
 
