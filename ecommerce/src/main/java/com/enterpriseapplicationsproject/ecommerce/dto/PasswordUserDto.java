@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
+import com.enterpriseapplicationsproject.ecommerce.validation.ValidPassword;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -10,10 +11,11 @@ import java.util.UUID;
 public class PasswordUserDto {
 
     @NotBlank(message = "Old password is required")
+    @ValidPassword
     private String oldPassword;
 
     @NotBlank(message = "New password is required")
-    @Size(min = 8, message = "New password must be at least 8 characters long")
+    @ValidPassword
     private String newPassword;
 
 }

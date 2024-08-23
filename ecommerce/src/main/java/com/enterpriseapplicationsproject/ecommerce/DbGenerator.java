@@ -183,42 +183,39 @@ public class DbGenerator implements ApplicationRunner {
 
         String[] array = record.split(",");
 
-        String category = array[0];
+        Double weight = Double.parseDouble(array[0]);
 
-        Double weight = Double.parseDouble(array[1]);
+        Double price = Double.parseDouble(array[1]);
 
-        Double price = Double.parseDouble(array[3]);
+        Integer stock = Integer.parseInt(array[2]);
 
-        Integer stock = Integer.parseInt(array[4]);
+        String title = array[3];
 
-        String title = array[5];
+        String author = array[4];
 
-        String author = array[6];
+        String ISBN = array[5];
 
-        String ISBN = array[7];
+        int pages = Integer.parseInt(array[6]);
 
-        int pages = Integer.parseInt(array[8]);
+        String edition = array[7];
 
-        String edition = array[9];
+        String format = array[8];
 
-        String format = array[10];
+        String genre = array[9];
 
-        String genre = array[11];
+        String language = array[10];
 
-        String language = array[12];
+        String publisher = array[11];
 
-        String publisher = array[13];
+        int age = Integer.parseInt(array[12]);
 
-        int age = Integer.parseInt(array[14]);
-
-        Date publishDate = Date.valueOf(array[15]);
+        LocalDate publishDate = LocalDate.parse(array[13]);
 
         System.out.println("RECORD : "+ record);
 
         SaveBookDto book = new SaveBookDto();
 
         book.setTitle(title);
-        book.setCategory(category);
         book.setAge(age);
         book.setFormat(format);
         book.setAuthor(author);

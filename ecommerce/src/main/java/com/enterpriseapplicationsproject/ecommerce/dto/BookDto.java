@@ -12,21 +12,33 @@ import java.time.LocalDate;
 public class BookDto {
 
     private Long id;
+
     private String title;
+
     private String author;
+
     private String ISBN;
+
     private int pages;
+
     private String edition;
+
     private BookFormat format;
-    private LocalDate insertDate;
+
     private BookGenre genre;
+
     private BookLanguage language;
+
     private String publisher;
+
     private int age;
-    private Date publishDate;
-    private String category;
+
+    private LocalDate publishDate;
+
     private Double weight;
+
     private Double price;
+
     private Integer stock;
     private String coverUrl;
 }

@@ -1,7 +1,9 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import org.springframework.format.annotation.NumberFormat;
 
 import java.util.UUID;
 

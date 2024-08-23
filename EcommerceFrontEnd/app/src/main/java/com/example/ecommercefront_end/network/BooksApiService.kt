@@ -22,10 +22,9 @@ interface BooksApiService {
     @GET("/books/get/{idBook}")
     suspend fun getBook(@Path("idBook") idBook: Long) : Book
 
-    @GET("/api/v1/books/getAll")
+    @GET("api/v1/books/getAll")
     suspend fun getAllBooks() : List<Book>
 
     @DELETE("/books/delete/{idBook}")
     suspend fun deleteBook(@Path("idBook") idBook: Long)
-
 }

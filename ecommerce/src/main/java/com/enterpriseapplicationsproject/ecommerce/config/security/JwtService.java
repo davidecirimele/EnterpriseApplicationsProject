@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.text.ParseException;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -29,6 +30,8 @@ public class JwtService {
     private String secretKey;
     @Value("${jwt.expiration}")
     private long jwtExpiration;
+
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
 
     public UsernamePasswordAuthenticationToken parseToken(String refreshToken) throws Exception {
         try{
@@ -81,7 +84,9 @@ public class JwtService {
         extraClaims.put("type", "access-token");
         extraClaims.put("firstName", ((LoggedUserDetails) userDetails).getFirstName());
         extraClaims.put("lastName", ((LoggedUserDetails) userDetails).getLastName());
-        extraClaims.put("birthdate", ((LoggedUserDetails) userDetails).getBirthDate());
+        String birthDateStr = ((LoggedUserDetails)userDetails).getBirthDate().format(DATE_FORMATTER);
+        extraClaims.put("birthdate", birthDateStr);
+        extraClaims.put("phonenumber", ((LoggedUserDetails) userDetails).getPhoneNumber());
 
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
@@ -113,7 +118,7 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

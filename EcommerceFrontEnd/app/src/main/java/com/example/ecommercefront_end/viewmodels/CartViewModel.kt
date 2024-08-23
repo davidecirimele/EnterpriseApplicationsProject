@@ -29,14 +29,16 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
             try {
                 println("sto caricando il carrello")
 
-                val cart = repository.getCart(getUser().id)
-                cart.onSuccess { cart_ ->
-                    if (cart_ != null) {
-                        _cartItems.value = cart_.cartItems
+                val cart = SessionManager.user?.let { repository.getCart(it.id) }
+                if (cart != null) {
+                    cart.onSuccess { cart_ ->
+                        if (cart_ != null) {
+                            _cartItems.value = cart_.items
+                        }
+                        updateTotalAmount()
+                    }.onFailure { e ->
+                        println("Errore: ${e.message}")
                     }
-                    updateTotalAmount()
-                }.onFailure { e ->
-                    println("Errore: ${e.message}")
                 }
             } catch (e: Exception) {
                 // Gestire l'errore, ad esempio mostrando un messaggio all'utente
@@ -47,9 +49,12 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     fun updateItemQuantity(item: CartItem, newQuantity: Int) {
         viewModelScope.launch {
             try {
-                val userId = getUser()
                 val updatedItem = item.copy(quantity = newQuantity)
-                repository.updateQuantity(updatedItem.quantity, userId )
+                SessionManager.user?.let { UserId(it.id) }?.let {
+                    repository.updateQuantity(updatedItem.quantity,
+                        it
+                    )
+                }
                 // Ricarica gli articoli dopo l'aggiornamento
                 _cartItems.value = _cartItems.value.map { currentItem ->
                     if (currentItem.id == updatedItem.id) updatedItem else currentItem
@@ -65,8 +70,9 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     fun removeItem(item: CartItem) {
         viewModelScope.launch {
             try {
-                val userId = getUser()
-                repository.removeItem(item.id, userId)
+                val userId = SessionManager.user?.id
+                if (userId != null)
+                    repository.removeItem(item.id, UserId(userId))
                 _cartItems.value = _cartItems.value.filterNot { it.id == item.id }
 
             } catch (e: Exception) {
@@ -78,13 +84,5 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
     private fun updateTotalAmount() {
         _totalAmount.value = _cartItems.value.sumOf { it.book.price * it.quantity }
-    }
-
-
-    private fun getUser(): UserId {
-       //val user = UserId(SessionManager.user?.id ?: throw IllegalStateException("User not logged in"))
-        val  uid = UUID.fromString("4267a28a-cab9-4c68-90b1-73874a0d08cf")
-        val user = UserId(uid)
-        return user
     }
 }

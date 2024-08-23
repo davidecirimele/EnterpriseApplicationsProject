@@ -3,11 +3,13 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 import com.enterpriseapplicationsproject.ecommerce.data.service.GroupsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.GroupDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("api/v1/groups")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
