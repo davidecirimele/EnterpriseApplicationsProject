@@ -5,6 +5,7 @@ import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.model.WishlistUpdate
 import com.example.ecommercefront_end.network.WishlistApiService
 import com.example.ecommercefront_end.network.WishlistItemApiService
+import retrofit2.Response
 import java.util.UUID
 
 class WishlistRepository (private val wApiService : WishlistApiService, private val WIApiService: WishlistItemApiService) {
@@ -17,8 +18,8 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
 
     }
 
-    suspend fun removeWishlist(w: Wishlist){
-        wApiService.deleteWishlist(w.id!!)
+    suspend fun removeWishlist(id: Long): Response<Unit>{
+        return wApiService.deleteWishlist(id)
     }
 
     suspend fun getAllWishlists() : List<Wishlist> {
@@ -58,4 +59,9 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
     suspend fun addWishlist(wishlist: Wishlist) {
         wApiService.addWishlist(wishlist)
     }
+
+    suspend fun removeWishlistItem(id: Long): Response<Unit> {
+        return WIApiService.deleteWishlistItem(id)
+    }
+
 }

@@ -69,10 +69,10 @@ public class WishlistItemsController {
         return new ResponseEntity<>(wi, HttpStatus.OK);
     }
 
-    @DeleteMapping(consumes = "application/json", path = "/delete/{idWishlistItem}")
-    @PreAuthorize("#wishlistItem.getWishlist().getUserId() == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<WishlistItemDto> deleteItemToWishlist(@RequestBody Long wishlistId, WishlistItem wishlistItem ) {
-        WishlistItemDto wi = wishlistItemsService.deleteItemById(wishlistItem);
+    @DeleteMapping( path = "/delete/{idWishlistItem}")
+    //@PreAuthorize("#wishlistItem.getWishlist().getUserId() == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<WishlistItemDto> deleteItemToWishlist(@PathVariable Long idWishlistItem ) {
+        WishlistItemDto wi = wishlistItemsService.deleteItemById(idWishlistItem);
         if (wi == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(wi, HttpStatus.OK);

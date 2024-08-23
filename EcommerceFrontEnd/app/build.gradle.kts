@@ -55,6 +55,7 @@ dependencies {
     implementation("io.ktor:ktor-client-serialization:2.3.4")
     implementation("io.ktor:ktor-client-logging:2.3.4")
     implementation("com.google.code.gson:gson:2.8.2")
+    implementation("io.coil-kt:coil-compose:2.4.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -65,11 +66,11 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.browser)
-    implementation(libs.material)
-    implementation(libs.places)
-    implementation(libs.coil)
-    implementation(libs.coil.compose)
 
+
+    implementation(libs.androidx.compose.material)
+    implementation(libs.places)
+    implementation (libs.androidx.core.ktx)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose.android)
     implementation(libs.volley)
@@ -91,7 +92,6 @@ dependencies {
     implementation(libs.converter.gson)
     implementation (libs.androidx.security.crypto)
     implementation (libs.jwtdecode)
-    implementation(libs.coil.compose)
 
     implementation("com.google.android.material:material:1.4.0")
 }

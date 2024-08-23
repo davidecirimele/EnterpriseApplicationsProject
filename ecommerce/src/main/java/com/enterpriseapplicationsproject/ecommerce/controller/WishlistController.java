@@ -72,9 +72,11 @@ public class WishlistController {
     }
 
     @DeleteMapping(path = "/delete/{idWishlist}")
-    @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
-    public ResponseEntity<WishlistDto> delete(@PathVariable("idWishlist") Long id) {
-        WishlistDto w = wishlistService.deleteWishlistByID(id);
+    //@PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
+    public ResponseEntity<WishlistDto> deleteById(@PathVariable Long idWishlist) {
+        WishlistDto w = wishlistService.deleteWishlistByID(idWishlist);
+        if(w == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
     /*

@@ -61,6 +61,60 @@ fun Modifier.productCardModifier(height: Dp, width: Dp, navController: NavContro
         .height(height)
         .clickable { navController.navigate("/books_details/${bookId}") }
 }
+@Composable
+fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
+    val products by homeViewModel.products.collectAsState()
+    val isLoading by homeViewModel.isLoading.collectAsState()
+    val error by homeViewModel.error.collectAsState()
+    val topProducts = remember(products) { products.take(5) }
+    val gridProducts = remember(products) { products.drop(5) } // Libri per la griglia
+
+
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+    } else if (error != null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Errore: $error")
+        }
+    } else {
+        if (products.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Nessun prodotto disponibile")
+            }
+        } else {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                item(key = "topSection") {
+                    ProductSection(
+                        navController,
+                        title = "Libri Popolari",
+                        books = topProducts,
+                    )
+                }
+                item {
+                    Text(
+                        text = "In base ai tuoi interessi",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+
+                items(gridProducts.chunked(2), key = { it[0].id }) { rowBooks ->
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    ) {
+                        for (book in rowBooks) {
+                            ProductCard(navController, book, height = 280.dp, width = 190.dp)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun ProductCard(navController: NavController, book: Book, height: Dp, width: Dp) {
@@ -129,59 +183,6 @@ fun ProductSection(navController: NavController, title: String, books: List<Book
     }
 }
 
-@Composable
-fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
-    val products by homeViewModel.products.collectAsState()
-    val isLoading by homeViewModel.isLoading.collectAsState()
-    val error by homeViewModel.error.collectAsState()
-    val topProducts = remember(products) { products.take(5) }
-    val gridProducts = remember(products) { products.drop(5) } // Libri per la griglia
 
-
-    if (isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-    } else if (error != null) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Errore: $error")
-        }
-    } else {
-        if (products.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Nessun prodotto disponibile")
-            }
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                item(key = "topSection") {
-                    ProductSection(
-                        navController,
-                        title = "Libri Popolari",
-                        books = topProducts,
-                    )
-                }
-                item {
-                    Text(
-                        text = "In base ai tuoi interessi",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-
-                items(gridProducts.chunked(2), key = { it[0].id }) { rowBooks ->
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    ) {
-                        for (book in rowBooks) {
-                            ProductCard(navController, book, height = 280.dp, width = 190.dp)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 

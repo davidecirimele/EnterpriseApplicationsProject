@@ -2,6 +2,57 @@ package com.example.ecommercefront_end.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+//  Tema Terracotta e Crema
+
+// Colori chiari
+val TCprimaryLight = Color(0xFF1DB954) // Verde Spotify
+val TConPrimaryLight = Color(0xFFFFFFFF) // Biancoval
+val TCprimaryContainerLight = Color(0xFFCCE6B4) // Verde chiaro
+val TConPrimaryContainerLight = Color(0xFF333333) // Grigio scuro
+val TCsecondaryLight = Color(0xFFE30613) // Rosso Feltrinelli
+val TConSecondaryLight = Color(0xFFFFFFFF) // Bianco
+val TCsecondaryContainerLight = Color(0xFFF2F2F2) // Grigio chiarissimo
+val TConSecondaryContainerLight = Color(0xFF333333) // Grigio scuro
+val TCtertiaryLight = Color(0xFF66B244) // Verde chiaro
+val TConTertiaryLight = Color(0xFFFFFFFF) // Bianco
+val TCtertiaryContainerLight = Color(0xFFF2F2F2) // Grigio chiarissimo
+val TConTertiaryContainerLight = Color(0xFF333333) // Grigio scuro
+val TCerrorLight = Color(0xFFCC0000) // Rosso scuro
+val TConErrorLight = Color(0xFFFFFFFF) // Bianco
+val TCerrorContainerLight = Color(0xFFF2F2F2) // Grigio chiarissimo
+val TConErrorContainerLight = Color(0xFFCC0000) // Rosso scuro
+val TCbackgroundLight = Color(0xFFFFFFFF) // Bianco
+val TConBackgroundLight = Color(0xFF333333) // Grigio scuro
+val TCsurfaceLight = Color(0xFFFFFFFF) // Bianco
+val TConSurfaceLight = Color(0xFF333333) // Grigio scuro
+val TCsurfaceVariantLight = Color(0xFFF2F2F2) // Grigio chiarissimo
+val TConSurfaceVariantLight = Color(0xFF666666) // Grigio medio
+val TCoutlineLight = Color(0xFF666666) //Grigio medio
+val TCoutlineVariantLight = Color(0xFFF2F2F2) // Grigio chiarissimo
+val TCscrimLight = Color(0xFF000000) // Nero
+val TCinverseSurfaceLight = Color(0xFF333333) // Grigio scuro
+val TCinverseOnSurfaceLight = Color(0xFFFFFFFF) // Bianco
+val TCinversePrimaryLight = Color(0xFF66B244) // Verde chiaro
+val TCsurfaceDimLight = Color(0xFFF2F2F2) // Grigio chiarissimo
+val TCsurfaceBrightLight = Color(0xFFFFFFFF) // Bianco
+val TCsurfaceContainerLowestLight = Color(0xFFFFFFFF) // Bianco
+val TCsurfaceContainerLowLight = Color(0xFFF2F2F2) // Grigio chiarissimo
+val TCsurfaceContainerLight = Color(0xFFF2F2F2) // Grigio chiarissimo
+val TCsurfaceContainerHighLight = Color(0xFFF2F2F2) // Grigio chiarissimo
+val TCsurfaceContainerHighestLight = Color(0xFFF2F2F2) // Grigio chiarissimo
+
+// Colori scuri (adatta questi in base alle tue preferenze per la modalità scura)
+val TCprimaryDark = Color(0xFF1DB954) // Verde Spotify (può rimanere lo stesso)
+val TConPrimaryDark = Color(0xFF000000) // Nero
+val TCprimaryContainerDark = Color(0xFF009639) // Verde Feltrinelli
+val TConPrimaryContainerDark = Color(0xFFFFFFFF) // Bianco
+val TCsecondaryDark = Color(0xFFCC0000) // Rosso scuro
+val TConSecondaryDark = Color(0xFF000000) // Nero
+val TCsecondaryContainerDark = Color(0xFF333333) // Grigio scuro
+val TConSecondaryContainerDark = Color(0xFFFFFFFF) // Bianco
+
+
+// FINE TEMA TERRACOTTA CREMA
 val primaryLight = Color(0xFF904A41)
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFFFFDAD5)

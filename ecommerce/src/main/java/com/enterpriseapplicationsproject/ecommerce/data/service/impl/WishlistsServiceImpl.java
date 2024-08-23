@@ -1,6 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 
 import com.enterpriseapplicationsproject.ecommerce.data.dao.GroupsDao;
+import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistItemsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
@@ -12,7 +13,9 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.Generated;
 import lombok.RequiredArgsConstructor;
+import org.antlr.v4.runtime.atn.SemanticContext;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +28,7 @@ import java.util.stream.Collectors;
 public class WishlistsServiceImpl implements WishlistsService {
 
     private final WishlistsDao wishlistsDao;
+    private final WishlistItemsDao WIDao;
     private final ModelMapper modelMapper; // serve per fare il mapping tra due oggetti
     private final GroupsDao groupsDao;
 
@@ -114,9 +118,25 @@ public class WishlistsServiceImpl implements WishlistsService {
 
     @Override
     public WishlistDto deleteWishlistByID(Long id) {
-        WishlistDto w  = wishlistsDao.deleteWishlistById(id);
-        return w;
+        // Trova la Wishlist usando il suo ID
+        Wishlist w = wishlistsDao.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));
+
+        // Elimina tutti gli elementi associati alla Wishlist
+        List<WishlistItem> items = WIDao.findByWishlistId(id);
+        for (WishlistItem item : items) {
+            WIDao.delete(item);
+        }
+
+        // Elimina la Wishlist
+        try {
+            wishlistsDao.delete(w);
+            return modelMapper.map(w, WishlistDto.class);
+        } catch (EmptyResultDataAccessException e) {
+            throw new IllegalArgumentException("Invalid wishlist ID");
+        }
     }
+
 
     @Transactional
     @Override

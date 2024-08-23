@@ -44,7 +44,6 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     fun updateItemQuantity(item: CartItem, newQuantity: Int) {
         viewModelScope.launch {
             try {
-
                 val updatedItem = item.copy(quantity = newQuantity)
                 SessionManager.user?.let { UserId(it.id) }?.let {
                     repository.updateQuantity(updatedItem.quantity,
@@ -66,7 +65,7 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     fun removeItem(item: CartItem) {
         viewModelScope.launch {
             try {
-                val userId = getUser().id
+                val userId = SessionManager.user?.id
                 if (userId != null)
                     repository.removeItem(item.id, UserId(userId))
                 _cartItems.value = _cartItems.value.filterNot { it.id == item.id }

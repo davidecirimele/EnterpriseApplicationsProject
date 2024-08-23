@@ -22,7 +22,7 @@ public class Wishlist {
     @Column(name = "ID")
     private Long id;
 
-    @OneToMany(mappedBy = "wishlist")//mappedBy indica il nome dell'attributo nella classe WishlistItem
+    @OneToMany(mappedBy = "wishlist", fetch = FetchType.EAGER)//mappedBy indica il nome dell'attributo nella classe WishlistItem
     @JsonManagedReference
     private List<WishlistItem> items = new ArrayList<>();
 

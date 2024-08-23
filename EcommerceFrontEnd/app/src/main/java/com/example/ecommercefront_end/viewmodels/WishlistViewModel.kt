@@ -7,6 +7,8 @@ import com.example.ecommercefront_end.model.Group
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.repository.WishlistRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -108,7 +110,41 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
         }
     }
 
+    fun removeWishlistItem(id: Long) {
+       viewModelScope.launch {
+           try {
+               val response = wRepository.removeWishlistItem(id)
+                if (response.isSuccessful) {
+                    Log.d("rimosso WI con id", id.toString())
+                    _wishlistItems.value = _wishlistItems.value.filter{ it.id != id }
+                     Log.d("removeWishlistItem", "Elemento della wishlist rimosso con successo")
+                } else {
+                    Log.e("removeWishlistItem", "Non rimosso WI con id: $id")
+                     Log.e("removeWishlistItem", "Errore durante la rimozione dell'elemento della wishlist: ${response.errorBody()}")
+                }
+           } catch (e: Exception) {
+               Log.e("removeWishlistItem", "Errore durante la rimozione dell'elemento della wishlist: ${e.message}")
+           }
+       }
 
+    }
+
+    fun removeWishlist(wishlistId: Long){
+        viewModelScope.launch {
+            try {
+                // Elimina la wishlist
+                val wResponse = wRepository.removeWishlist(wishlistId)
+                if (wResponse.isSuccessful) {
+                    _wishlists.value = _wishlists.value.filter { it.id != wishlistId }
+                    Log.d("removeWishlist", "Wishlist rimossa con successo")
+                } else {
+                    Log.e("removeWishlist", "Errore durante la rimozione della wishlist: ${wResponse.errorBody()}")
+                }
+            } catch (e: Exception) {
+                Log.e("removeWishlist", "Errore durante la rimozione della wishlist: ${e.message}")
+            }
+        }
+    }
 
 
 }

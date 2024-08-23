@@ -2,6 +2,7 @@ package com.example.ecommercefront_end.network
 
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistUpdate
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -28,7 +29,7 @@ interface WishlistApiService {
     @PUT("/api/v1/wishlists/update")
     suspend fun updateWishlist(@Body w: WishlistUpdate)
 
-    @DELETE("/api/v1/wishlists/delete/{idW}")
-    suspend fun deleteWishlist(@Path("idW") idW: Long)
+    @DELETE("/api/v1/wishlists/delete/{idWishlist}")
+    suspend fun deleteWishlist(@Path("idWishlist") idW: Long) : Response<Unit>
 
 }

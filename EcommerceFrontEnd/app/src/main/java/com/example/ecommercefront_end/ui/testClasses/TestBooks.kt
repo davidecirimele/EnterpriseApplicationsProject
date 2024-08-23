@@ -22,7 +22,6 @@ fun createTestBooks(): List<Book> {
             publisher = "Scribner",
             age = 18,
             publishDate = LocalDate.of(1925, 4, 10),
-            insertDate = LocalDate.now(),
             weight = 0.5,
             price = 10.99,
             stock = 15
@@ -40,7 +39,6 @@ fun createTestBooks(): List<Book> {
             publisher = "J.B. Lippincott & Co.",
             age = 14,
             publishDate = LocalDate.of(1960, 7, 11),
-            insertDate = LocalDate.now(),
             weight = 0.45,
             price = 7.99,
             stock = 10
@@ -58,7 +56,6 @@ fun createTestBooks(): List<Book> {
             publisher = "Secker & Warburg",
             age = 16,
             publishDate = LocalDate.of(1949, 6, 8),
-            insertDate = LocalDate.now(),
             weight = 0.4,
             price = 9.99,
             stock = 8
@@ -76,7 +73,6 @@ fun createTestBooks(): List<Book> {
             publisher = "T. Egerton, Whitehall",
             age = 12,
             publishDate = LocalDate.of(1813, 1, 28),
-            insertDate = LocalDate.now(),
             weight = 0.52,
             price = 12.99,
             stock = 20
@@ -94,28 +90,26 @@ fun createTestBooks(): List<Book> {
             publisher = "George Allen & Unwin",
             age = 10,
             publishDate = LocalDate.of(1937, 9, 21),
-            insertDate = LocalDate.now(),
             weight = 0.55,
             price = 14.99,
             stock = 25
         ),
         Book(
-        id = 6,
-        title = "Harry Potter and the Sorcerer's Stone",
-        author = "J.K. Rowling",
-        ISBN = "9780590353403",
-        pages = 309,
-        edition = "1st",
-        format = BookFormat.PAPERBACK,
-        genre = BookGenre.FANTASY,
-        language = BookLanguage.ENGLISH,
-        publisher = "Bloomsbury",
-        age = 9,
-        publishDate = LocalDate.of(1997, 6, 26),
-        insertDate = LocalDate.now(),
-        weight = 0.4,
-        price = 8.99,
-        stock = 30
+            id = 6,
+            title = "Harry Potter and the Sorcerer's Stone",
+            author = "J.K. Rowling",
+            ISBN = "9780590353403",
+            pages = 309,
+            edition = "1st",
+            format = BookFormat.PAPERBACK,
+            genre = BookGenre.FANTASY,
+            language = BookLanguage.ENGLISH,
+            publisher = "Bloomsbury",
+            age = 9,
+            publishDate = LocalDate.of(1997, 6, 26),
+            weight = 0.4,
+            price = 8.99,
+            stock = 30
         ),
         Book(
             id = 7,
@@ -129,7 +123,6 @@ fun createTestBooks(): List<Book> {
             publisher = "George Allen & Unwin",
             age = 14,
             publishDate = LocalDate.of(1954, 7, 29),
-            insertDate = LocalDate.now(),
             weight = 1.5,
             price = 24.99,
             stock = 15
@@ -146,7 +139,6 @@ fun createTestBooks(): List<Book> {
             publisher = "Little, Brown and Company",
             age = 16,
             publishDate = LocalDate.of(1951, 7, 16),
-            insertDate = LocalDate.now(),
             weight = 0.35,
             price = 6.99,
             stock = 12
@@ -164,7 +156,6 @@ fun createTestBooks(): List<Book> {
             publisher = "Collins Crime Club",
             age = 14,
             publishDate = LocalDate.of(1939, 11, 6),
-            insertDate = LocalDate.now(),
             weight = 0.3,
             price = 5.99,
             stock = 18
@@ -182,7 +173,6 @@ fun createTestBooks(): List<Book> {
             publisher = "Doubleday",
             age = 16,
             publishDate = LocalDate.of(2003, 3, 18),
-            insertDate = LocalDate.now(),
             weight = 0.6,
             price = 11.99,
             stock = 22

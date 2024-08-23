@@ -1,7 +1,9 @@
 package com.example.ecommercefront_end
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.auth0.android.jwt.JWT
@@ -9,6 +11,7 @@ import com.example.ecommercefront_end.model.User
 import com.google.gson.Gson
 import java.time.LocalDate
 import java.util.UUID
+import kotlin.math.log
 
 object SessionManager {
 
@@ -62,7 +65,7 @@ object SessionManager {
         authToken = token
         getPrefs().edit().putString(KEY_AUTH_TOKEN, token).apply()
         user = decodeJwtToken(token)
-
+        Log.d(TAG, "user: ${user?.firstName}, ${user?.lastName}")
     }
 
     fun saveRefreshToken(token: String){
@@ -78,6 +81,7 @@ object SessionManager {
     }
 
     private fun decodeJwtToken(token: String): User? {
+        Log.d(TAG, "decodeJwtToken: $token")
         val jwt = JWT(token)
         val userIdS = jwt.getClaim("userId").asString()
         val email = jwt.getClaim("sub").asString()

@@ -19,7 +19,6 @@ data class Book(
     val publisher: String,
     val age: Int,
     val publishDate: LocalDate, // Annotazione per mappare la proprietà "publish_date"
-    val insertDate: LocalDate, // Annotazione per mappare la proprietà "insert_date"
     val weight: Double,
     val price: Double,
     val stock: Int,
