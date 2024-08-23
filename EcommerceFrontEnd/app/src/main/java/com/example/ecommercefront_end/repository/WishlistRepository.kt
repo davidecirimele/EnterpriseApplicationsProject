@@ -18,8 +18,8 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
 
     }
 
-    suspend fun removeWishlist(w: Wishlist){
-        wApiService.deleteWishlist(w.id!!)
+    suspend fun removeWishlist(id: Long): Response<Unit>{
+        return wApiService.deleteWishlist(id)
     }
 
     suspend fun getAllWishlists() : List<Wishlist> {
@@ -63,4 +63,5 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
     suspend fun removeWishlistItem(id: Long): Response<Unit> {
         return WIApiService.deleteWishlistItem(id)
     }
+
 }

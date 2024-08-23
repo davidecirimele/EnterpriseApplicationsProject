@@ -330,6 +330,7 @@ fun WishlistDetails(
                     confirmButton = {
                         Button(onClick = {
                             //onDeleteWishlist(wishlist) // Chiama il callback per eliminare la wishlist
+                            viewModel.removeWishlist(wishlist.id)
                             showDeleteConfirmation = false
                         }) {
                             Text("Sì")

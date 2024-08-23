@@ -7,6 +7,8 @@ import com.example.ecommercefront_end.model.Group
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.repository.WishlistRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -125,6 +127,23 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
            }
        }
 
+    }
+
+    fun removeWishlist(wishlistId: Long){
+        viewModelScope.launch {
+            try {
+                // Elimina la wishlist
+                val wResponse = wRepository.removeWishlist(wishlistId)
+                if (wResponse.isSuccessful) {
+                    _wishlists.value = _wishlists.value.filter { it.id != wishlistId }
+                    Log.d("removeWishlist", "Wishlist rimossa con successo")
+                } else {
+                    Log.e("removeWishlist", "Errore durante la rimozione della wishlist: ${wResponse.errorBody()}")
+                }
+            } catch (e: Exception) {
+                Log.e("removeWishlist", "Errore durante la rimozione della wishlist: ${e.message}")
+            }
+        }
     }
 
 
