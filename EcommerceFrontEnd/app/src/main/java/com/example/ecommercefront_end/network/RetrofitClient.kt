@@ -14,7 +14,7 @@ import javax.net.ssl.X509TrustManager
 object RetrofitClient {
     private const val BASE_URL = "https://10.0.2.2:8080/"
 
-    private const val SAMUELES_URL = "https://192.168.1.54:8081/api/v1/" //URL di Samuele S
+    private const val SAMUELES_URL = "https://192.168.1.53:8081/api/v1/" //URL di Samuele S
 
 
     private val client: OkHttpClient by lazy {

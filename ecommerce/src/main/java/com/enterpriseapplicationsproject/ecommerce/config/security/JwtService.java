@@ -76,7 +76,7 @@ public class JwtService {
         return generateRefreshToken(new HashMap<>(), userDetails, expirationTimeInHours);
     }
 
-    public String generateToken(
+    public String generateToken( //serve per generare il token con i dati dell'utente
             Map<String, Object> extraClaims,
             UserDetails userDetails
     ) {

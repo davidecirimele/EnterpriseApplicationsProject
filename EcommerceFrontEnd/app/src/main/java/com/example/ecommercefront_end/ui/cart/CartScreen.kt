@@ -33,7 +33,7 @@ import com.example.ecommercefront_end.viewmodels.CartViewModel
 
 @Composable
 fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit) {
-    val cartItems by viewModel.cartItems.collectAsStateWithLifecycle()
+    val cartItems by viewModel.cartItems.collectAsStateWithLifecycle() //indica che il valore è osservato e che il composable deve essere ricreato ogni volta che cambia
     val totalAmount by viewModel.totalAmount.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize()) {
