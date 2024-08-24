@@ -1,6 +1,7 @@
 package com.example.ecommercefront_end.network
 
 import com.example.ecommercefront_end.SessionManager
+import com.example.ecommercefront_end.model.RefreshToken
 import com.example.ecommercefront_end.model.RequiresAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -48,7 +49,7 @@ class AuthInterceptor(
 
                     val refreshToken = sessionManager.refreshToken
                     if (refreshToken != null) {
-                        val newTokensResponse = runBlocking { withContext(Dispatchers.IO) {authApiService.refreshToken(refreshToken)  } }
+                        val newTokensResponse = runBlocking { withContext(Dispatchers.IO) {authApiService.refreshToken(RefreshToken(refreshToken)) } }
                         if (newTokensResponse.isSuccessful) {
                             val newAccessToken = newTokensResponse.body()?.accessToken
                             val newRefreshToken = newTokensResponse.body()?.refreshToken
@@ -78,6 +79,7 @@ class AuthInterceptor(
         return response
     }
         else {
+            println("Request without auth" + originalRequest.url)
             return chain.proceed(originalRequest)
         }
     }

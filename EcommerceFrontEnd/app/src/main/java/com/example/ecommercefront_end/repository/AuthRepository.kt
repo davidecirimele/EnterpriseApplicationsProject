@@ -1,10 +1,14 @@
 package com.example.ecommercefront_end.repository
 
+import com.example.ecommercefront_end.model.AccessToken
 import com.example.ecommercefront_end.model.Credential
+import com.example.ecommercefront_end.model.RefreshToken
+import com.example.ecommercefront_end.model.RefreshTokenResponse
 import com.example.ecommercefront_end.model.SaveUser
 import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.network.AuthApiService
 import com.example.ecommercefront_end.network.UserApiService
+import com.squareup.okhttp.Response
 import java.util.UUID
 
 class AuthRepository (private val apiService : AuthApiService) {
@@ -13,7 +17,7 @@ class AuthRepository (private val apiService : AuthApiService) {
 
     suspend fun registerUser(user: SaveUser) = apiService.register(user)
 
-    suspend fun validateToken(accessToken : String) = apiService.validateToken(accessToken)
+    suspend fun validateToken(accessToken : AccessToken) = apiService.validateToken(accessToken)
 
-    suspend fun refreshToken(refreshToken: String) = apiService.refreshToken(refreshToken)
+    suspend fun refreshToken(refreshToken: RefreshToken) = apiService.refreshToken(refreshToken)
 }
