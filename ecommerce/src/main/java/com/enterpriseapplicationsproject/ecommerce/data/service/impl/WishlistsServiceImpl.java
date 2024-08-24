@@ -4,6 +4,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.GroupsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistItemsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistItem;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistsService;
@@ -62,7 +63,30 @@ public class WishlistsServiceImpl implements WishlistsService {
 
     @Override
     public WishlistDto save(WishlistDto wishlistDto) {
+        Group group = new Group();
+
+        String gName = "Group " + wishlistDto.getName();
+        group.setGroupName(gName);
+
+        String wName = wishlistDto.getName();
+        String wPrivacy = wishlistDto.getPrivacySetting();
+
+        if (wishlistDto.getGroup() != null) {
+            List<User> members = wishlistDto.getGroup().getMembers().stream()
+                    .map(userDto -> modelMapper.map(userDto, User.class))
+                    .collect(Collectors.toList());
+            group.setMembers(members);
+        }
+
+        group = groupsDao.save(group); // Salva ilGroup nel database
+
+        // Crea e salva la Wishlist
         Wishlist wishlist = modelMapper.map(wishlistDto, Wishlist.class);
+        wishlist.setName(wName);
+        wishlist.setPrivacySetting(wPrivacy);
+        wishlist.setGroup(group); // Assegna il Group salvato
+
+        System.out.println("Dati nuova Wishlist: " + wishlist.toString());
         Wishlist w = wishlistsDao.save(wishlist);
         return modelMapper.map(w, WishlistDto.class);
     }

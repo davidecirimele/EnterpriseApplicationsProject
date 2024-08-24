@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class LoggedUserDetailsService implements UserDetailsService {
 
+    @Autowired //indica che il campo può essere iniettato
     private  UsersDao usersDao;
 
     @Override

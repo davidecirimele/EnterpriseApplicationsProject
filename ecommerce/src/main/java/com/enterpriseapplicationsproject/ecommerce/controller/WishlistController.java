@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -43,8 +42,9 @@ public class WishlistController {
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
-    @GetMapping(consumes = "application/json", path = "/getByUser/{idUser}")
-    @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
+
+    @GetMapping(path = "/getByUser/{idUser}")
+    //@PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<WishlistDto>> getByUser(@PathVariable UUID idUser) {
         List<WishlistDto> w = wishlistService.getWishlistsByUser(idUser);
         if(w == null)

@@ -11,5 +11,6 @@ public interface AuthService {
 
     Map<String, String> loginUser(CredentialDto loginDto);
 
+
     Map<String, String> refreshToken(String authorizationHeader, String toString);
 }

@@ -3,6 +3,7 @@ package com.example.ecommercefront_end.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Group
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel() {
 
@@ -33,17 +35,24 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
         loadWishlistsFromBD()
     }
 
-    private fun loadWishlistsFromBD(){
+
+    private fun loadWishlistsFromBD() {
         viewModelScope.launch {
-            try{
-                _wishlists.value = wRepository.getAllWishlists()
-                if(_wishlists.value.isEmpty()){
-                    _error.value = "Nessuna wishlist trovata"
+            _isLoading.value = true // Imposta il caricamento a vero all'inizio del processo
+            try {
+                val currentUser = SessionManager.user
+                currentUser?.let {
+                    _wishlists.value = wRepository.getWishlistsByUser(it.id)
+                    if (_wishlists.value.isEmpty()) {
+                        _error.value = "Nessuna wishlist trovata"
+                    }
+                } ?: run {
+                    _error.value = "Nessun utente loggato"
                 }
-            } catch (e: Exception){
+            } catch (e: Exception) {
                 _error.value = "Errore durante il caricamento delle wishlist: ${e.message}"
             } finally {
-                _isLoading.value = false
+                _isLoading.value = false // Imposta il caricamento a falso alla fine del processo
             }
         }
     }
@@ -72,7 +81,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
     }
 
 
-    fun addWishlist(name: String, isPrivate: Boolean, otherParam: String) {
+    fun addWishlist(name: String, isPrivate: Boolean) {
         viewModelScope.launch {
             try {
                 // Crea una lista vuota di elementi per la nuova wishlist
@@ -84,7 +93,6 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
                     groupName = "Famiglia_Test", // Nome del gruppo fittizio
                     members = emptyList() // Nessun membro per ora
                 )
-
                 // Imposta la privacy della wishlist
                 val privacySetting = if (isPrivate) "Private" else "Public"
 
@@ -93,14 +101,15 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
                     id = 50, // ID sarà generato dal database
                     name = name,
                     items = wItemsList, // Lista vuota di elementi
-                    user = null, // Nessun utente associato dato che non è loggato
+                    user = SessionManager.user, // Nessun utente associato dato che non è loggato
                     group = defaultGroup, // Gruppo predefinito
                     privacySetting = privacySetting
                 )
 
                 // Salva la nuova wishlist nel database tramite il repository
                 wRepository.addWishlist(newWishlist)
-
+                Log.e("addWishlist", "Nuova lista messa")
+                _wishlists.value += newWishlist
                 // Potresti aggiornare la lista delle wishlist nel ViewModel qui, se necessario
             } catch (e: Exception) {
                 // Gestisci l'errore

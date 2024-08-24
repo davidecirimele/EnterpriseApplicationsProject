@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end.ui.user
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +42,7 @@ fun AccountManagerScreen(viewModel: AccountViewModel, navHostController: NavHost
     }
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun UserCard(){
     Row(modifier = Modifier.fillMaxWidth()) {

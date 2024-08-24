@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end.ui.user
 
+import android.annotation.SuppressLint
 import android.text.style.BackgroundColorSpan
 import android.widget.Space
 import androidx.compose.foundation.ScrollState
@@ -75,6 +76,7 @@ fun MyAccountScreen(viewModel: AccountViewModel, navHostController: NavHostContr
     }
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun UserInfo(){
     val address = Address(1,"Test rue", "TS", "Test", "TestLand", "00000", "")

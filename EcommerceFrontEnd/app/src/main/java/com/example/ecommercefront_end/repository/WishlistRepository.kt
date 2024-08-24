@@ -10,7 +10,7 @@ import java.util.UUID
 
 class WishlistRepository (private val wApiService : WishlistApiService, private val WIApiService: WishlistItemApiService) {
 
-    suspend fun getWishlists(userId : UUID) = wApiService.getWishlistById(userId)
+
 
     suspend fun updateWishlist(w: Wishlist) {
         val newWishlist = WishlistUpdate(name = w.name, privacySettings = w.privacySetting)
@@ -20,6 +20,23 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
 
     suspend fun removeWishlist(id: Long): Response<Unit>{
         return wApiService.deleteWishlist(id)
+    }
+
+    suspend fun getWishlistsByUser(userId : UUID): List<Wishlist>{
+        return try {
+            val wishlists = wApiService.getWishlistsByUser(userId)
+            println("Cercando wishlist per utente "+ userId)
+            if (wishlists.isEmpty()) {
+                println("Nessuna lista dei desideri trovata per l utente")
+            } else {
+                println("Liste dei desideri utente prese")
+            }
+            wishlists
+
+        } catch (e: Exception) {
+            println("Errore durante il recupero di tutte le liste dei desideri: ${e.message}")
+            emptyList() // Restituisci una lista vuota in caso di errore
+        }
     }
 
     suspend fun getAllWishlists() : List<Wishlist> {

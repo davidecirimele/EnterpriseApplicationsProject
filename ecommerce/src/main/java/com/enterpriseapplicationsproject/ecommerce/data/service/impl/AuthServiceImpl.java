@@ -124,9 +124,11 @@ public class AuthServiceImpl implements  AuthService{
 
     } catch (Exception e) {
             e.printStackTrace();
-        throw new IllegalArgumentException("Invalid credentials");
+        throw new IllegalArgumentException(e.getMessage());
     }
     }
+
+
 
     @Override
     @Transactional(readOnly = true)

@@ -9,6 +9,9 @@ import androidx.security.crypto.MasterKey
 import com.auth0.android.jwt.JWT
 import com.example.ecommercefront_end.model.User
 import com.google.gson.Gson
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.math.log
@@ -22,8 +25,10 @@ object SessionManager {
     private lateinit var prefs: SharedPreferences
     private val gson = Gson()
 
-    var user: User? = null
-    private set
+    private val _user = MutableStateFlow<User?>(null)
+    val NotValueUser: StateFlow<User?> = _user.asStateFlow()
+    val user: User?
+    get() = _user.value
 
     var authToken: String? = null
     private set
@@ -56,15 +61,16 @@ object SessionManager {
         authToken = getPrefs().getString(KEY_AUTH_TOKEN, null)
         refreshToken = getPrefs().getString(REFRESH_TOKEN_KEY, null)
 
+        /*
         authToken?.let {
-            user = decodeJwtToken(it)
-        }
+            _user.value = decodeJwtToken(it)
+        }*/ //commentato per fare manualmente logout
     }
 
     fun saveAuthToken(token: String){
         authToken = token
         getPrefs().edit().putString(KEY_AUTH_TOKEN, token).apply()
-        user = decodeJwtToken(token)
+        _user.value = decodeJwtToken(token)
         Log.d(TAG, "user: ${user?.firstName}, ${user?.lastName}")
     }
 
@@ -77,7 +83,7 @@ object SessionManager {
         getPrefs().edit().clear().apply()
         authToken = null
         refreshToken = null
-        user = null
+        _user.value = null
     }
 
     private fun decodeJwtToken(token: String): User? {
