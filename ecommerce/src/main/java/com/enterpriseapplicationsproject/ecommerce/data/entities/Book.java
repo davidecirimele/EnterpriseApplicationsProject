@@ -21,6 +21,9 @@ public class Book{
     @Column(name = "ID")
     private Long id;
 
+
+    @Column(name = "COVER_URL")
+    private String coverUrl;
     //TODO immagine
 
     @Column(name = "WEIGHT")

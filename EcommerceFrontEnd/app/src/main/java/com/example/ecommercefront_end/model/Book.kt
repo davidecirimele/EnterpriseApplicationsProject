@@ -2,7 +2,6 @@ package com.example.ecommercefront_end.model
 
 import com.google.gson.annotations.SerializedName
 import java.time.LocalDate
-import java.util.Date
 
 data class Book(
     val id: Long,

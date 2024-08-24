@@ -3,9 +3,7 @@ package com.enterpriseapplicationsproject.ecommerce.dto;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.BookFormat;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.BookGenre;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.BookLanguage;
-import jakarta.persistence.Column;
 import lombok.Data;
-import lombok.ToString;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -27,6 +25,8 @@ public class BookDto {
 
     private BookFormat format;
 
+
+
     private BookGenre genre;
 
     private BookLanguage language;
@@ -42,5 +42,5 @@ public class BookDto {
     private Double price;
 
     private Integer stock;
-
+    private String coverUrl;
 }

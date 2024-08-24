@@ -20,25 +20,20 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     private val _totalAmount = MutableStateFlow(0.0)
     val totalAmount: StateFlow<Double> = _totalAmount
 
-    init {
-        loadCartItems()
-    }
 
-    private fun loadCartItems() {
+    fun loadCartItems() {
         viewModelScope.launch {
             try {
                 println("sto caricando il carrello")
 
-                val cart = SessionManager.user?.let { repository.getCart(it.id) }
-                if (cart != null) {
-                    cart.onSuccess { cart_ ->
-                        if (cart_ != null) {
-                            _cartItems.value = cart_.items
-                        }
-                        updateTotalAmount()
-                    }.onFailure { e ->
-                        println("Errore: ${e.message}")
+                val cart = repository.getCart(getUser().id)
+                cart.onSuccess { cart_ ->
+                    if (cart_ != null) {
+                        _cartItems.value = cart_.cartItems
                     }
+                    updateTotalAmount()
+                }.onFailure { e ->
+                    println("Errore: ${e.message}")
                 }
             } catch (e: Exception) {
                 // Gestire l'errore, ad esempio mostrando un messaggio all'utente
@@ -83,6 +78,13 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     }
 
     private fun updateTotalAmount() {
-        _totalAmount.value = _cartItems.value.sumOf { it.book.price * it.quantity }
+        _totalAmount.value = _cartItems.value.sumOf { it.bookId.price * it.quantity }
+    }
+
+
+    private fun getUser(): UserId {
+        val userId = SessionManager.user?.id
+        println("UserId recuperato: $userId")
+        return UserId(userId ?: throw IllegalStateException("User not logged in"))
     }
 }

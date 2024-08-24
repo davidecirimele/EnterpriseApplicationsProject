@@ -93,4 +93,13 @@ public class BooksServiceImpl implements BooksService {
         book.setStock(book.getStock() - quantity);
         booksDao.save(book);
     }
+
+    @Override
+    @Transactional
+    public void updateBookCover(Long id, String coverUrl) {
+        Book book = booksDao.findById(id)
+                .orElseThrow(() -> new BookNotFoundException("Book not found with id " + id));
+        book.setCoverUrl(coverUrl);
+        booksDao.save(book);
+    }
 }

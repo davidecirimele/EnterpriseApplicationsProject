@@ -19,6 +19,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -36,15 +37,35 @@ fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit) {
     val cartItems by viewModel.cartItems.collectAsStateWithLifecycle() //indica che il valore è osservato e che il composable deve essere ricreato ogni volta che cambia
     val totalAmount by viewModel.totalAmount.collectAsStateWithLifecycle()
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    LaunchedEffect(Unit) {
+        viewModel.loadCartItems()
 
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            items(cartItems) { item ->
-                CartItem(
-                    item = item,
-                    onRemoveClick = { viewModel.removeItem(item) },
-                    onQuantityChange = { newQuantity: Int -> viewModel.updateItemQuantity(item, newQuantity) }
-                )
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        if (cartItems.isEmpty()) {
+            Text(
+                text = "Il tuo carrello è vuoto.",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
+        } else {
+
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                items(cartItems) { item ->
+                    CartItem(
+                        item = item,
+                        onRemoveClick = { viewModel.removeItem(item) },
+                        onQuantityChange = { newQuantity: Int ->
+                            viewModel.updateItemQuantity(
+                                item,
+                                newQuantity
+                            )
+                        }
+                    )
+                }
             }
         }
 

@@ -2,6 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.config.security;
 
 import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
+import com.enterpriseapplicationsproject.ecommerce.exception.InvalidCredentialException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,7 +18,7 @@ public class LoggedUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = usersDao.findByCredentialEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = usersDao.findByCredentialEmail(email).orElseThrow(() -> new InvalidCredentialException("Invalid credentials"));
         return new LoggedUserDetails(user);
 
     }
