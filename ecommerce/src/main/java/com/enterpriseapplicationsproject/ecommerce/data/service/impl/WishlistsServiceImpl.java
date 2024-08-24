@@ -164,36 +164,37 @@ public class WishlistsServiceImpl implements WishlistsService {
 
     @Transactional
     @Override
-    public WishlistDto updateWishlist(Long id, WishlistDto wishlistDto) {
-        return wishlistsDao.findById(id)
+    public WishlistDto updateWishlist(WishlistDto wishlistDto) {
+        return wishlistsDao.findById(wishlistDto.getId())
                 .map(wishlist -> {
                     wishlist.setName(wishlistDto.getName());
                     wishlist.setPrivacySetting(wishlistDto.getPrivacySetting());
 
-                    // Mappa gli items
-                    List<WishlistItem> updatedItems = wishlistDto.getItems().stream()
-                            .map(itemDto -> {
-                                WishlistItem item = modelMapper.map(itemDto, WishlistItem.class);
-                                item.setWishlist(wishlist);
-                                return item;
-                            })
-                            .collect(Collectors.toList());
-
-                    // Sostituisci gli items esistenti con quelli aggiornati
-                    wishlist.getItems().clear();
-                    wishlist.getItems().addAll(updatedItems);
-
+                    System.out.println("PS in arrivo : " + wishlistDto.getPrivacySetting());
+                    System.out.println("PS attuale : " + wishlist.getPrivacySetting());
                     // Mappa il group
+
                     GroupDto groupDto = wishlistDto.getGroup();
+                    Group newGroup;
                     if (groupDto != null && groupDto.getId() != null) {
                         Group group = groupsDao.findById(groupDto.getId())
                                 .orElseThrow(() -> new EntityNotFoundException("Group not found"));
-                        wishlist.setGroup(group);
+
+                        if (!group.equals(wishlist.getGroup())) {
+                            newGroup = wishlist.getGroup();
+                        }
+                        else {
+                            newGroup = group;
+                        }
+
                     } else {
-                        wishlist.setGroup(null);
+                        newGroup = new Group();
                     }
+                    groupsDao.save(newGroup);
+                    wishlist.setGroup(newGroup);
 
                     Wishlist savedWishlist = wishlistsDao.save(wishlist);
+                    System.out.println("PS Nuovo : " + savedWishlist.getPrivacySetting());
                     return modelMapper.map(savedWishlist, WishlistDto.class);
                 })
                 .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));

@@ -62,10 +62,10 @@ public class WishlistController {
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
-    @PutMapping(consumes =  "application/json", path = "/update/{idWishlist}") // indica che il metodo risponde a una richiesta di tipo PUT
-    @PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<WishlistDto> update(@PathVariable("idWishlist") Long id, @RequestBody WishlistDto wDto) {
-        WishlistDto w = wishlistService.updateWishlist(id,wDto);
+    @PutMapping(consumes = "application/json", path = "/update")
+    //@PreAuthorize("#wDto.getUser().getId() == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<WishlistDto> update(@RequestBody WishlistDto wDto) {
+        WishlistDto w = wishlistService.updateWishlist(wDto);
         if (w == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(w, HttpStatus.OK);

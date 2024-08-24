@@ -13,8 +13,7 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
 
 
     suspend fun updateWishlist(w: Wishlist) {
-        val newWishlist = WishlistUpdate(name = w.name, privacySettings = w.privacySetting)
-        wApiService.updateWishlist(newWishlist)
+        wApiService.updateWishlist(w)
 
     }
 
@@ -75,6 +74,9 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
 
     suspend fun addWishlist(wishlist: Wishlist) {
         wApiService.addWishlist(wishlist)
+    }
+    suspend fun updatePrivacySettings(wishlist: Wishlist) {
+        wApiService.updateWishlist(wishlist)
     }
 
     suspend fun removeWishlistItem(id: Long): Response<Unit> {

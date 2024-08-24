@@ -94,6 +94,13 @@ dependencies {
     implementation (libs.jwtdecode)
 
     implementation("com.google.android.material:material:1.4.0")
+
+    val composeBom = platform("androidx.compose:compose-bom:2024.06.00")
+    implementation(composeBom)
+
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material:material:1.4.0")
 }
 
 kotlin {

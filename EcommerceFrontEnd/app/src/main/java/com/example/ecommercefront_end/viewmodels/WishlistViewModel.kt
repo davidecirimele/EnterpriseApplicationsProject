@@ -118,6 +118,43 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
             }
         }
     }
+    fun updateWishlist(id: Long, name: String, privacySettings: String, group: Group?){
+        viewModelScope.launch {
+            try {
+                val wishlist = _wishlists.value.find { it.id == id }
+                if (wishlist != null) {
+                    val updatedWishlist = wishlist.copy()
+
+                    if (!name.equals("")) {
+                        updatedWishlist.name = name
+                        Log.d("updateWishlistPrivacy", "Nuovo Nome della wishlist ${updatedWishlist.name} aggiornato con successo")
+                    }
+                    if (!privacySettings.equals("")) {
+                        updatedWishlist.privacySetting = privacySettings
+                        Log.d("updateWishlistPrivacy", "Nuove imp privacy ${updatedWishlist.privacySetting} aggiornato con successo")
+                    }
+                    if (group != null) {
+                        updatedWishlist.group = group
+                        Log.d("updateWishlistPrivacy", "Nuovo gruppo ${updatedWishlist.group.groupName} aggiornato con successo")
+                    }
+
+
+                    wRepository.updatePrivacySettings(updatedWishlist)
+                    _wishlists.value =
+                        _wishlists.value.map { if (it.id == id) updatedWishlist else it }
+                    Log.d("updateWishlistPrivacy", "Wishlist aggiornata con successo")
+                } else {
+                    Log.e("updateWishlistPrivacy", "Wishlist non trovata con id: $id")
+                }
+            } catch (e: Exception) {
+                Log.e(
+                    "updateWishlistPrivacy",
+                    "Errore durante l'aggiornamento della privacy della wishlist: ${e.message}"
+                )
+            }
+        }
+    }
+
 
     fun removeWishlistItem(id: Long) {
        viewModelScope.launch {

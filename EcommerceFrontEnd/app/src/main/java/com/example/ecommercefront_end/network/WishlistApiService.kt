@@ -27,7 +27,8 @@ interface WishlistApiService {
     suspend fun getAllWishlist() : List<Wishlist>
 
     @PUT("/api/v1/wishlists/update")
-    suspend fun updateWishlist(@Body w: WishlistUpdate)
+    suspend fun updateWishlist(@Body w: Wishlist): Response<Unit>
+
 
     @DELETE("/api/v1/wishlists/delete/{idWishlist}")
     suspend fun deleteWishlist(@Path("idWishlist") idW: Long) : Response<Unit>

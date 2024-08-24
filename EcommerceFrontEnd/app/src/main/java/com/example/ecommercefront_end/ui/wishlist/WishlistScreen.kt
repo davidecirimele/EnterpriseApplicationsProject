@@ -365,7 +365,7 @@ fun WishlistDetails(
                         },
                         confirmButton = {
                             Button(onClick = {
-                                //onRenameWishlist(wishlist, newWishlistName) // Chiama il callback per rinominare la wishlist
+                                viewModel.updateWishlist(wishlist.id, newWishlistName, "", null) // Chiama il callback per rinominare la wishlist
                                 showRenameDialog = false
                             }) {
                                 Text("Rinomina")
@@ -394,7 +394,13 @@ fun WishlistDetails(
                         fontSize = 18.sp
                     )
                     Button(
-                        onClick = { isPrivate = !isPrivate },
+                        onClick = {
+                            isPrivate = !isPrivate
+                            if (isPrivate)
+                                viewModel.updateWishlist(wishlist.id, "", "Private", null)
+                            else
+                                viewModel.updateWishlist(wishlist.id, "", "Public", null)
+                        },
                         modifier = Modifier.height(36.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp)
                     ) {

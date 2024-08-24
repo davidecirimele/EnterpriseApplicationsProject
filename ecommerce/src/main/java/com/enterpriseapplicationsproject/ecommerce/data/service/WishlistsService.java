@@ -22,7 +22,7 @@ public interface WishlistsService {
 
     Group getGroupByWishlistId(Long wishlistId);
 
-    WishlistDto updateWishlist(Long id, WishlistDto wishlistDto);
+    WishlistDto updateWishlist(WishlistDto wishlistDto);
 
     @Transactional
     Boolean shareWishlist(Long wishlistId, Group group);
