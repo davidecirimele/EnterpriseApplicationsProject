@@ -36,7 +36,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final JwtService jwtService;
@@ -108,8 +108,8 @@ public class AuthController {
         return ResponseEntity.ok(new AuthenticationResponse(newAccessToken, newRefreshToken));
     }
 
-    @PostMapping("validate-token")
-    public ResponseEntity<?> validateToken(@RequestBody AccessTokenValidationDto request) {
+    @PostMapping("/validate-token")
+    public ResponseEntity<Boolean> validateToken(@RequestBody AccessTokenValidationDto request) {
         String token = request.getToken();
         return ResponseEntity.ok(jwtService.isTokenValid(token));
     }
