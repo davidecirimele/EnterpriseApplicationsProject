@@ -8,6 +8,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.AuthService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RefreshTokenService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
+import com.enterpriseapplicationsproject.ecommerce.dto.security.AccessTokenValidationDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.AuthenticationResponse;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.RefreshTokenDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.TokenRefreshRequest;
@@ -48,7 +49,7 @@ public class AuthController {
 
 
     @PostMapping(consumes = "application/json", path = "/register")
-    public ResponseEntity<UserDetailsDto> registerUser(@Valid @RequestBody  SaveUserDto userDto) {
+    public ResponseEntity<UserDetailsDto> registerUser(@Valid @RequestBody SaveUserDto userDto) {
         return ResponseEntity.ok(authService.registerUser(userDto));
     }
 
@@ -105,5 +106,11 @@ public class AuthController {
         refreshTokenService.save(new RefreshTokenDto(newRefreshToken), userDetails);
 
         return ResponseEntity.ok(new AuthenticationResponse(newAccessToken, newRefreshToken));
+    }
+
+    @PostMapping("validate-token")
+    public ResponseEntity<?> validateToken(@RequestBody AccessTokenValidationDto request) {
+        String token = request.getToken();
+        return ResponseEntity.ok(jwtService.isTokenValid(token));
     }
 }
