@@ -61,10 +61,10 @@ object SessionManager {
         authToken = getPrefs().getString(KEY_AUTH_TOKEN, null)
         refreshToken = getPrefs().getString(REFRESH_TOKEN_KEY, null)
 
-        /*
+
         authToken?.let {
             _user.value = decodeJwtToken(it)
-        }*/ //commentato per fare manualmente logout
+        } //commentato per fare manualmente logout
     }
 
     fun saveAuthToken(token: String){

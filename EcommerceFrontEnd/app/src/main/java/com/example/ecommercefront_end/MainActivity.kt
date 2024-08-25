@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation
@@ -51,6 +53,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -59,6 +62,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -94,6 +98,7 @@ import com.example.ecommercefront_end.viewmodels.HomeViewModel
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
 import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
+import androidx.compose.ui.Alignment
 
 
 class MainActivity : ComponentActivity() {
@@ -249,6 +254,20 @@ fun SearchBar() {
     Text(text = "🔍 Search...", modifier = Modifier.padding(8.dp))
 }
 
+class PreviewParameterProvider : PreviewParameterProvider<Int> {
+    override val values = sequenceOf(0, 1, 2, 3)
+}
+
+@SuppressLint("RememberReturnType")
+@Preview(showBackground = true)
+@Composable
+fun BottomBarPreview() {
+    val selectedIndex = remember { mutableStateOf(0) } // Inizializza con un valore di esempio
+    // Crea un NavHostController fittizio per l'anteprima
+    val navController = rememberNavController()
+
+    BottomBar(selectedIndex, navController)
+}
 
 @PreviewParameter(PreviewParameterProvider::class)
 @Composable
@@ -256,7 +275,8 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
     BottomNavigation(
         backgroundColor = MaterialTheme.colorScheme.surface,
         modifier = Modifier
-            .height(67.dp).drawBehind {
+            .height(67.dp)
+            .drawBehind {
                 val borderSize = 1.dp.toPx()
                 val borderColor = Color.White.toArgb()
 
@@ -279,17 +299,22 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             },
             icon = {
                 Icon(
-                    imageVector = Icons.Filled.Home,contentDescription = stringResource(R.string.home),
-                    modifier = if (selectedIndex.value == 0) {
+                    modifier = if (selectedIndex.value == 0) { // Applica l'ombra solo se selezionato
                         Modifier.shadow(
-                            elevation = 4.dp, //Imposta l'elevazione dell'ombra
-                            shape = CutCornerShape(topStart = 8.dp, topEnd = 8.dp)
+                            elevation = 4.dp,
+                            shape = CutCornerShape(topStart = 8.dp, topEnd = 8.dp),
+                            spotColor = MaterialTheme.colorScheme.primary
                         )
-                    } else Modifier
+                    } else {
+                        Modifier
+                    },
+                    imageVector = Icons.Filled.Home,
+                    contentDescription = stringResource(R.string.home),
+
                 )
             },
             selectedContentColor = MaterialTheme.colorScheme.primary,
-            unselectedContentColor = MaterialTheme.colorScheme.onSurface
+            unselectedContentColor = MaterialTheme.colorScheme.onSurface // Centra verticalmente
         )
         // Ripeti per gli altri elementi della Navigation Bar
         // ...
@@ -316,14 +341,18 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
                 }
             },
             icon = {Icon(
+                modifier = if (selectedIndex.value == 1) { // Applica l'ombra solo se selezionato
+                    Modifier.shadow(
+                        elevation = 4.dp,
+                        shape = CutCornerShape(topStart = 8.dp, topEnd = 8.dp),
+                        spotColor = MaterialTheme.colorScheme.primary
+                    )
+                } else {
+                    Modifier
+                },
                 imageVector = Icons.Filled.AccountCircle,
                 contentDescription = stringResource(R.string.user),
-                modifier = if (selectedIndex.value == 1) {
-                    Modifier.shadow(
-                        elevation = 4.dp, //Imposta l'elevazione dell'ombra
-                        shape = CutCornerShape(topStart = 8.dp, topEnd = 8.dp)
-                    )
-                } else Modifier
+
             )
             },
             selectedContentColor = MaterialTheme.colorScheme.primary,
@@ -343,14 +372,19 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             },
             icon = {
                 Icon(
+                    modifier = if (selectedIndex.value == 2) { // Applica l'ombra solo se selezionato
+                        Modifier.shadow(
+                            elevation = 4.dp,
+                            shape = CutCornerShape(topStart = 8.dp, topEnd = 8.dp),
+                            spotColor = MaterialTheme.colorScheme.primary
+
+                        )
+                    } else {
+                        Modifier
+                    },
                     imageVector = Icons.Filled.ShoppingCart,
                     contentDescription = stringResource(R.string.cart),
-                    modifier = if (selectedIndex.value == 2) {
-                        Modifier.shadow(
-                            elevation = 4.dp, //Imposta l'elevazione dell'ombra
-                            shape = CutCornerShape(topStart = 8.dp, topEnd = 8.dp)
-                        )
-                    } else Modifier
+
                 )
             },
             selectedContentColor = MaterialTheme.colorScheme.primary,
@@ -370,14 +404,18 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             },
             icon = {
                 Icon(
-                    imageVector = Icons.Filled.Favorite,
-                    contentDescription = stringResource(R.string.favorite),
-                    modifier = if (selectedIndex.value == 3) {
+                    modifier = if (selectedIndex.value == 3) { // Applica l'ombra solo se selezionato
                         Modifier.shadow(
-                            elevation = 4.dp, //Imposta l'elevazione dell'ombra
-                            shape = CutCornerShape(topStart = 8.dp, topEnd = 8.dp)
+                            elevation = 4.dp,
+                            shape = CutCornerShape(topStart = 8.dp, topEnd = 8.dp),
+                            spotColor = MaterialTheme.colorScheme.primary
                         )
-                    } else Modifier
+                    } else {
+                        Modifier
+                    },
+                    imageVector = Icons.Filled.Favorite,
+                    contentDescription = stringResource(R.string.favorite)
+
                 )
             },
             selectedContentColor = MaterialTheme.colorScheme.primary,

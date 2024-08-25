@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(value = "/api/v1/wishlists", produces = "application/json")// indica che
+@RequestMapping(value = "/api/v1/wishlists")// produces indica che
 @CrossOrigin(origins = "*", allowedHeaders = "*") // indica
 @RequiredArgsConstructor
 @Slf4j // indica che il logger è di tipo log4j
@@ -33,7 +33,7 @@ public class WishlistController {
         return new ResponseEntity<>(wishlists, HttpStatus.OK);
     }
 
-    @GetMapping(consumes = "application/json", path = "/get/{idWishlist}")
+    @GetMapping(path = "/get/{idWishlist}")
     @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> getById(@PathVariable Long idWishlist) {
         WishlistDto w = wishlistService.getById(idWishlist);

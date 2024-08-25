@@ -61,6 +61,7 @@ import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
 
+
 @Composable
 fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) {
     val wLists by viewModel.wishlists.collectAsState()
