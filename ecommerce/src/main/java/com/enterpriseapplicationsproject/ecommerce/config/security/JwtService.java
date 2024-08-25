@@ -126,9 +126,6 @@ public class JwtService {
     public boolean isTokenValid(String token) {
         try {
             Jwts.parser().setSigningKey(getSignInKey()).build().parseClaimsJws(token);
-
-            isTokenExpired(token);
-
             return true;
 
 

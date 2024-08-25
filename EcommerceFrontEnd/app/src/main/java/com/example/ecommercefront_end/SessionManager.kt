@@ -4,14 +4,19 @@ import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.navigation.NavController
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.auth0.android.jwt.JWT
+import com.example.ecommercefront_end.model.AccessToken
+import com.example.ecommercefront_end.model.RefreshToken
 import com.example.ecommercefront_end.model.User
+import com.example.ecommercefront_end.network.AuthApiService
+import com.example.ecommercefront_end.network.RetrofitClient
+import com.example.ecommercefront_end.repository.AuthRepository
 import com.google.gson.Gson
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.math.log
@@ -25,10 +30,8 @@ object SessionManager {
     private lateinit var prefs: SharedPreferences
     private val gson = Gson()
 
-    private val _user = MutableStateFlow<User?>(null)
-    val NotValueUser: StateFlow<User?> = _user.asStateFlow()
-    val user: User?
-    get() = _user.value
+    var user: User? = null
+    private set
 
     var authToken: String? = null
     private set
@@ -36,7 +39,9 @@ object SessionManager {
     var refreshToken: String? = null
     private set
 
-    fun init(context: Context){
+    private var authRepository : AuthRepository? = null
+
+     fun init(context: Context) {
         val masterKeyAlias = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
@@ -48,6 +53,7 @@ object SessionManager {
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
+        setAuthRepository(AuthRepository(RetrofitClient.authApiService))
 
         loadSession()
 
@@ -57,20 +63,58 @@ object SessionManager {
         return prefs ?: throw IllegalStateException("SessionManager not initialized. Call init() first.")
     }
 
-    private fun loadSession(){
-        authToken = getPrefs().getString(KEY_AUTH_TOKEN, null)
-        refreshToken = getPrefs().getString(REFRESH_TOKEN_KEY, null)
+    private  fun loadSession() {
+        runBlocking {
+            launch {
+                authToken = getPrefs().getString(KEY_AUTH_TOKEN, null)
+                refreshToken = getPrefs().getString(REFRESH_TOKEN_KEY, null)
+                println("authToken: $authToken")
+                println("refreshToken: $refreshToken")
 
+                val tokenMustValidated = authToken
+                val _refreshToken = refreshToken
 
-        authToken?.let {
-            _user.value = decodeJwtToken(it)
-        } //commentato per fare manualmente logout
+                if (tokenMustValidated != null && _refreshToken != null) {
+                    val validatedToken = authRepository?.validateToken(AccessToken(tokenMustValidated))
+                    println("validatedToken: $validatedToken")
+                    println("validatedTokenBody ${validatedToken?.body()}")
+                    println("validatedTokenCode ${validatedToken?.code()}")
+                    if (validatedToken != null && validatedToken.isSuccessful) {
+                        authToken = tokenMustValidated
+                        user = decodeJwtToken(tokenMustValidated)
+                        println("user: ${user?.firstName}, ${user?.lastName}")
+                        return@launch
+                    } else {
+                        val tokenResponse = authRepository?.refreshToken(RefreshToken(_refreshToken))
+                        if (tokenResponse != null) {
+                            println( "tokenResponseBody: ${tokenResponse.body()}")
+                            println("tokenResponseCode: ${tokenResponse.code()}")
+                        }
+
+                        if (tokenResponse != null) {
+
+                            authToken = tokenResponse.body()?.accessToken
+                            refreshToken = tokenResponse.body()?.refreshToken
+                            authToken?.let {
+
+                                user = decodeJwtToken(it)
+                            }
+                            getPrefs().edit().putString(KEY_AUTH_TOKEN, authToken).apply()
+                            getPrefs().edit().putString(REFRESH_TOKEN_KEY, refreshToken).apply()
+                            return@launch
+                        }
+                    }
+                }
+                clearSession()
+
+            }
+        }
     }
 
     fun saveAuthToken(token: String){
         authToken = token
         getPrefs().edit().putString(KEY_AUTH_TOKEN, token).apply()
-        _user.value = decodeJwtToken(token)
+        user = decodeJwtToken(token)
         Log.d(TAG, "user: ${user?.firstName}, ${user?.lastName}")
     }
 
@@ -83,7 +127,7 @@ object SessionManager {
         getPrefs().edit().clear().apply()
         authToken = null
         refreshToken = null
-        _user.value = null
+        user = null
     }
 
     private fun decodeJwtToken(token: String): User? {
@@ -107,6 +151,10 @@ object SessionManager {
 
     fun isLoggedIn(): Boolean {
         return user != null
+    }
+
+    fun setAuthRepository(authRepository: AuthRepository){
+        this.authRepository = authRepository
     }
 
 
