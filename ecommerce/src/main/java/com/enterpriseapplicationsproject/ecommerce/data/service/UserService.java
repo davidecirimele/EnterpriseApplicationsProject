@@ -18,7 +18,8 @@ public interface UserService {
 
     List<UserDto> getAllDto();
 
-    @Transactional
+    UserDetailsDto getUserDetailsById(UUID id);
+
     User getUserById(UUID id);
 
     User getUserByEmail(String email);

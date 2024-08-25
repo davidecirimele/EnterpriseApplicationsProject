@@ -56,9 +56,9 @@ object SessionManager {
         authToken = getPrefs().getString(KEY_AUTH_TOKEN, null)
         refreshToken = getPrefs().getString(REFRESH_TOKEN_KEY, null)
 
-        authToken?.let {
-            user = decodeJwtToken(it)
-        }
+        //authToken?.let {
+        //    user = decodeJwtToken(it)
+        //}
     }
 
     fun saveAuthToken(token: String){
@@ -98,19 +98,5 @@ object SessionManager {
     }
 
 }
-
-    fun isLoggedIn(): Boolean {
-        return user != null
-    }
-
-
-
-
-
-
-
-
-
-
 
 }

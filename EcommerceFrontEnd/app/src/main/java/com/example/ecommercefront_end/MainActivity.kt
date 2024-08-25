@@ -69,6 +69,8 @@ import com.example.ecommercefront_end.ui.home.HomeScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.ui.user.AccountManagerScreen
 import com.example.ecommercefront_end.ui.user.AddressesScreen
+import com.example.ecommercefront_end.ui.user.EditAddressScreen
+import com.example.ecommercefront_end.ui.user.InsertAddressScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
 import com.example.ecommercefront_end.ui.user.UserAuthScreen
 import com.example.ecommercefront_end.ui.wishlist.WishlistsScreen
@@ -79,6 +81,7 @@ import com.example.ecommercefront_end.viewmodels.HomeViewModel
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
 import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
+import kotlinx.coroutines.async
 
 
 class MainActivity : ComponentActivity() {
@@ -110,6 +113,7 @@ fun NavigationView(navController: NavHostController) {
     val homeViewModel = remember { HomeViewModel(repository = HomeRepository(RetrofitClient.booksApiService)) }
     val cartViewModel = remember { CartViewModel(repository = CartRepository(RetrofitClient.cartApiService)) }
     val accountViewModel = remember { AccountViewModel(repository = AccountRepository(RetrofitClient.userApiService)) }
+    val addressViewModel = remember { AddressViewModel(repository = AddressRepository(RetrofitClient.addressApiService)) }
 
     Scaffold(
         topBar = { TopBar(navController) },
@@ -163,23 +167,50 @@ fun NavigationView(navController: NavHostController) {
 
             composable("account-manager") {
                 selectedIndex.value = 1
+
+                LaunchedEffect(Unit) {
+                    accountViewModel.loadUserDetails(forceReload = true)
+                }
+
                 val _userApiService = RetrofitClient.userApiService
                 val repository = AccountRepository(_userApiService)
-                AccountManagerScreen(viewModel = AccountViewModel(repository), navController)
+                AccountManagerScreen(viewModel = accountViewModel, navController)
             }
             composable("my-account") {
-                val _userApiService = RetrofitClient.userApiService
-                val repository = AccountRepository(_userApiService)
+                LaunchedEffect(Unit) {
+                    Log.d("MyAccountScreen", "SessionManager.user: ${SessionManager.user}")
+                    val userDetailsJob = async {accountViewModel.loadUserDetails(forceReload = true)}
+                    val defaultAddress = async {addressViewModel.fetchDefaultAddress(forceReload = true)}
+
+                    userDetailsJob.await()
+                    defaultAddress.await()
+                }
                 MyAccountScreen(
-                    viewModel = AccountViewModel(repository),
+                    accountViewModel = accountViewModel, addressViewModel = addressViewModel,
                     navHostController = navController)
             }
 
             composable("addresses") {
+
+                LaunchedEffect(Unit) {
+                    addressViewModel.fetchUserAddresses(forceReload = true)
+                }
                 val _addressApiService = RetrofitClient.addressApiService
                 val repository = AddressRepository(_addressApiService)
                 AddressesScreen(
-                    viewModel = AddressViewModel(repository), navController)
+                    viewModel = addressViewModel, navController)
+            }
+
+            composable("insert-address") {
+                val _addressApiService = RetrofitClient.addressApiService
+                val repository = AddressRepository(_addressApiService)
+                InsertAddressScreen(viewModel = addressViewModel, navController)
+            }
+
+            composable("edit-address") {
+                val _addressApiService = RetrofitClient.addressApiService
+                val repository = AddressRepository(_addressApiService)
+                EditAddressScreen(viewModel = addressViewModel, navController)
             }
 
         }
