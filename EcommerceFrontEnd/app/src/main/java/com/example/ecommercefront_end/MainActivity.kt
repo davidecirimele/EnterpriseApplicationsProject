@@ -69,7 +69,6 @@ import com.example.ecommercefront_end.ui.home.HomeScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.ui.user.AccountManagerScreen
 import com.example.ecommercefront_end.ui.user.AddressesScreen
-import com.example.ecommercefront_end.ui.user.EditAddressScreen
 import com.example.ecommercefront_end.ui.user.InsertAddressScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
 import com.example.ecommercefront_end.ui.user.UserAuthScreen
@@ -205,12 +204,6 @@ fun NavigationView(navController: NavHostController) {
                 val _addressApiService = RetrofitClient.addressApiService
                 val repository = AddressRepository(_addressApiService)
                 InsertAddressScreen(viewModel = addressViewModel, navController)
-            }
-
-            composable("edit-address") {
-                val _addressApiService = RetrofitClient.addressApiService
-                val repository = AddressRepository(_addressApiService)
-                EditAddressScreen(viewModel = addressViewModel, navController)
             }
 
         }
