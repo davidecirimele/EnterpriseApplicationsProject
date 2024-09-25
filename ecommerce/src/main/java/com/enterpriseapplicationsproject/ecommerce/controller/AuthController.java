@@ -7,16 +7,17 @@ import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDet
 import com.enterpriseapplicationsproject.ecommerce.data.service.AuthService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RefreshTokenService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
-import com.enterpriseapplicationsproject.ecommerce.dto.SaveUserDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserLoginDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.*;
+import com.enterpriseapplicationsproject.ecommerce.dto.security.AccessTokenValidationDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.AuthenticationResponse;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.RefreshTokenDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.TokenRefreshRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,8 +34,9 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+@Slf4j
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final JwtService jwtService;
@@ -47,13 +49,14 @@ public class AuthController {
 
 
     @PostMapping(consumes = "application/json", path = "/register")
-    public ResponseEntity<SaveUserDto> registerUser(@RequestBody  SaveUserDto userDto) {
+    public ResponseEntity<UserDetailsDto> registerUser(@Valid @RequestBody SaveUserDto userDto) {
         return ResponseEntity.ok(authService.registerUser(userDto));
     }
 
     @PostMapping(consumes = "application/json", path = "/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody UserLoginDto userDto) {
-        return ResponseEntity.ok(authService.loginUser(userDto));
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody CredentialDto credentials) {
+        log.info("Received request for auth/login");
+        return ResponseEntity.ok(authService.loginUser(credentials));
     }
 
     /*@GetMapping("/refreshToken")
@@ -78,7 +81,7 @@ public class AuthController {
         }
     }*/
     @PostMapping("/refreshToken")
-    public ResponseEntity<?> refreshToken(@RequestBody TokenRefreshRequest request) {
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
         String refreshToken = request.getRefreshToken();
 
         // Verifica se il refresh token esiste nel database
@@ -103,5 +106,11 @@ public class AuthController {
         refreshTokenService.save(new RefreshTokenDto(newRefreshToken), userDetails);
 
         return ResponseEntity.ok(new AuthenticationResponse(newAccessToken, newRefreshToken));
+    }
+
+    @PostMapping("/validate-token")
+    public ResponseEntity<Boolean> validateToken(@RequestBody AccessTokenValidationDto request) {
+        String token = request.getToken();
+        return ResponseEntity.ok(jwtService.isTokenValid(token));
     }
 }

@@ -25,9 +25,9 @@ public class WishlistController {
 
     private final WishlistsService wishlistService;
 
-    @GetMapping(consumes = "application/json",path= "/getAll")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<WishlistDto>> all() {
+    @GetMapping(path= "/getAll")
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<WishlistDto>> getAll() {
         List<WishlistDto> wishlists = wishlistService.getAllSorted();
         if (wishlists.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -53,7 +53,7 @@ public class WishlistController {
     }
 
     @PostMapping(consumes =  "application/json", path = "/add")
-    @PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
+    //@PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> add(@RequestBody WishlistDto wDto) {
         WishlistDto w = wishlistService.save(wDto);
         if (w == null)
@@ -72,9 +72,11 @@ public class WishlistController {
     }
 
     @DeleteMapping(path = "/delete/{idWishlist}")
-    @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
-    public ResponseEntity<WishlistDto> delete(@PathVariable("idWishlist") Long id) {
-        WishlistDto w = wishlistService.deleteWishlistByID(id);
+    //@PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
+    public ResponseEntity<WishlistDto> deleteById(@PathVariable Long idWishlist) {
+        WishlistDto w = wishlistService.deleteWishlistByID(idWishlist);
+        if(w == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
     /*

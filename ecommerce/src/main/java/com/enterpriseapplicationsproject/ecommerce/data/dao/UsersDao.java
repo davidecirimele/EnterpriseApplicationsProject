@@ -25,4 +25,6 @@ public interface UsersDao extends JpaRepository<User, UUID> {
 
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.addresses WHERE u.id = :id")
     Optional<User> findByIdWithAddresses(@Param("id") UUID id);
+
+    Optional<User> findByPhoneNumber(String phoneNumber);
 }

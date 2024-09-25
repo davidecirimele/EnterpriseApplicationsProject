@@ -2,6 +2,8 @@ package com.enterpriseapplicationsproject.ecommerce.data.service;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
@@ -12,7 +14,7 @@ public interface BooksService {
 
     BookDto getBookDtoById(Long id);
 
-    BookDto save(BookDto bookDto);
+    BookDto save(SaveBookDto bookDto);
 
     List<BookDto> getBookDto();
 
@@ -23,4 +25,7 @@ public interface BooksService {
     List<BookDto> getAllSorted();
 
     void downBookStock(Long id, int quantity);
+
+    @Transactional
+    void updateBookCover(Long id, String coverUrl);
 }

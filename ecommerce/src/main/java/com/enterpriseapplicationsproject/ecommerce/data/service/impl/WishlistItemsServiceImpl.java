@@ -8,7 +8,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistItemsSer
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistItemDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Sort;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,22 +35,33 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
 
 
     @Override
-    public WishlistItemDto deleteItemById(WishlistItem wishlistItem) {
+    public WishlistItemDto deleteItemById(Long idWishlistItem) {
+        WishlistItem wishlistItem = wishlistItemsDao.findById(idWishlistItem)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist item ID"));
+
         Wishlist wishlist = wishlistsDao.findById(wishlistItem.getWishlist().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID"));
 
+        /*
         if (!wishlist.getItems().contains(wishlistItem))
-            throw new IllegalArgumentException("Item not in wishlist");
+            throw new IllegalArgumentException("Item not in wishlist");*/
 
-        wishlistItem.setWishlist(null);
         wishlist.getItems().remove(wishlistItem);
-        WishlistItem wi = wishlistItemsDao.save(wishlistItem);
-        return modelMapper.map(wi, WishlistItemDto.class);
+        try {
+            wishlistItemsDao.deleteById(idWishlistItem);
+            return modelMapper.map(wishlistItem, WishlistItemDto.class);
+
+            // Restituisci un codice di stato HTTP 204 (No Content) per indicare successo senza contenuto
+        } catch (EmptyResultDataAccessException e) {
+            throw new IllegalArgumentException("Invalid wishlist item ID");
+        }
     }
 
     @Override
     public List<WishlistItemDto> getItemsByWishlistId(Long id) {
-        return wishlistItemsDao.findByWishlistId(id);
+        return wishlistItemsDao.findByWishlistId(id).stream()
+                .map(wi -> modelMapper.map(wi, WishlistItemDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -76,6 +87,11 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
         return wishlistItemsDao.findById(id)
                 .map(wishlistItem -> modelMapper.map(wishlistItem, WishlistItemDto.class))
                 .orElse(null);
+    }
+
+    @Override
+    public void save(WishlistItem wishlistItem) {
+        wishlistItemsDao.save(wishlistItem);
     }
 
 

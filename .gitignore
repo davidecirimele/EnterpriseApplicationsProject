@@ -8,3 +8,59 @@
 
 /EcommerceFrontEnd/app/src/main/AndroidManifest.xml
 /.idea/
+
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+/ecommerce/.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# application.properties
+application.properties
+
+# Gradle specific
+out/
+!gradle/wrapper/gradle-wrapper.jar
+.gradle/caches/
+.gradle/gradle-app.setting
+.gradle/gradle.property
+gradle.properties
+
+# Kotlin specific
+*.class
+*.kt~
+*.log
+*.lock
+*.swp
+
+*.dex
+*.json
+
+
+# MacOS specific
+.DS_Store

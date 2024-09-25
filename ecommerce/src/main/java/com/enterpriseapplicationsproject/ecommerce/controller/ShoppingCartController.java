@@ -4,6 +4,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.ShoppingCartServ
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,8 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
-@RequestMapping("api/v1/shopping_cart")
+@RequestMapping("api/v1/shopping-cart")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 public class ShoppingCartController {
@@ -35,9 +37,9 @@ public class ShoppingCartController {
         return new ResponseEntity<>(shoppingCart, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete")
-    @PreAuthorize("#userId.userId == authentication.principal.getId()")
-    public ResponseEntity<Void> deleteShoppingCart(@RequestBody UserIdDto userId) {
+    @DeleteMapping("/{userId}/clear")
+    @PreAuthorize("#userId == authentication.principal.getId()")
+    public ResponseEntity<Void> deleteShoppingCart(@PathVariable UUID userId) {
 
         boolean isRemoved = shoppingCartService.delete(userId);
         if (!isRemoved) {
@@ -46,20 +48,12 @@ public class ShoppingCartController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/create")
-    @PreAuthorize("#createShoppingCartDto.userId.userId == authentication.principal.getId()")
-    public ResponseEntity<ShoppingCartDto> createCart(@RequestBody CreateShoppingCartDto createShoppingCartDto) {
-        System.out.println("CREATED SC: "+createShoppingCartDto);
-        ShoppingCartDto createdCart = shoppingCartService.createCart(createShoppingCartDto);
-        return new ResponseEntity<>(createdCart, HttpStatus.CREATED);
-    }
-
-    @PutMapping("/save")
-    @PreAuthorize("#saveShoppingCartDto.userId == authentication.principal.getId()")
-    public ResponseEntity<ShoppingCartDto> saveCart(@RequestBody SaveShoppingCartDto saveShoppingCartDto) {
-        ShoppingCartDto savedCart = shoppingCartService.saveCart(saveShoppingCartDto);
+    /*@PutMapping("/save")
+    @PreAuthorize("#ShoppingCartDto.userId == authentication.principal.getId()")
+    public ResponseEntity<ShoppingCartDto> saveCart(@RequestBody ShoppingCartDto ShoppingCartDto) {
+        ShoppingCartDto savedCart = shoppingCartService.saveCart(ShoppingCartDto);
         return new ResponseEntity<>(savedCart, HttpStatus.OK);
-    }
+    }*/
 }
 
 

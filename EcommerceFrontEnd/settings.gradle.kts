@@ -12,6 +12,7 @@ pluginManagement {
     }
     plugins {
         kotlin("jvm") version "2.0.0"
+
     }
 }
 dependencyResolutionManagement {
@@ -22,6 +23,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "EcommerceFront-End"
+rootProject.name = "EcommerceFrontEnd"
 include(":app")
- 

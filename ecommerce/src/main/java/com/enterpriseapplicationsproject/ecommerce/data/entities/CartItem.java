@@ -27,9 +27,6 @@ public class CartItem {
     @Column(name = "QUANTITY")
     private Integer quantity;
 
-    @Column(name = "ADD_DATE")
-    private LocalDateTime addDate;
-
     @Column(name = "PRICE")
     private Double price;
 

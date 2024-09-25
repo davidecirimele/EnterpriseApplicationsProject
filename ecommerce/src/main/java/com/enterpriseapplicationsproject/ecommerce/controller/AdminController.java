@@ -8,6 +8,7 @@ import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.RefreshTokenDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserRegistrationException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("api/v1/admin")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -35,7 +37,7 @@ public class AdminController {
     @GetMapping("/all-users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserDto>> allUsers() {
-        List<UserDto> users = userService.getAll();
+        List<UserDto> users = userService.getAllDto();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 

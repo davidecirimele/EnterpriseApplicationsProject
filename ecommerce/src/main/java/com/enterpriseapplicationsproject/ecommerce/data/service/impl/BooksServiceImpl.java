@@ -4,6 +4,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.BooksDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
 import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.BookNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -37,7 +39,7 @@ public class BooksServiceImpl implements BooksService {
     }
 
     @Override
-    public BookDto save(BookDto bookDto) {
+    public BookDto save(SaveBookDto bookDto) {
         Book book = modelMapper.map(bookDto, Book.class);
         Book b = booksDao.save(book);
         return modelMapper.map(b, BookDto.class);
@@ -46,7 +48,10 @@ public class BooksServiceImpl implements BooksService {
 
     @Override
     public List<BookDto> getBookDto() {
-        return List.of(); // toDo
+        List <Book> books = booksDao.findAll();
+        return books.stream()
+                .map(book -> modelMapper.map(book, BookDto.class))
+                .toList();
     }
 
     @Override
@@ -86,6 +91,15 @@ public class BooksServiceImpl implements BooksService {
         Book book = booksDao.findById(id)
                 .orElseThrow(() -> new BookNotFoundException("Book not found"));
         book.setStock(book.getStock() - quantity);
+        booksDao.save(book);
+    }
+
+    @Override
+    @Transactional
+    public void updateBookCover(Long id, String coverUrl) {
+        Book book = booksDao.findById(id)
+                .orElseThrow(() -> new BookNotFoundException("Book not found with id " + id));
+        book.setCoverUrl(coverUrl);
         booksDao.save(book);
     }
 }

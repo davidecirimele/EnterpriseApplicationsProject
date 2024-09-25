@@ -8,4 +8,5 @@ import java.util.UUID;
 public class UserIdDto {
 
     private UUID userId;
+
 }

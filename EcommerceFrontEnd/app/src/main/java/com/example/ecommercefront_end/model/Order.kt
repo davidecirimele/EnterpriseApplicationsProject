@@ -1,7 +1,7 @@
 package com.example.ecommercefront_end.model
 
+import android.location.Address
 import java.time.LocalDate
-
 
 data class Order(
 
@@ -9,8 +9,8 @@ data class Order(
     val user: User,
     val items: List<OrderItem>,
     val totalPrice: Double,
-    val shippingAddress: Address,
-    val status: OrderStatus,
+    //val shippingAddress: Address,
+    //val status: OrderStatus,
     val paymentMethod: PaymentMethod,
     val orderDate : LocalDate? = null
 )

@@ -22,18 +22,19 @@ public class WishlistItemsController {
 
     private final WishlistItemsService wishlistItemsService;
 
-    @GetMapping(consumes = "application/json", path = "/getAll")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<WishlistItemDto>> allSorted() {
+    @GetMapping(path = "/getAll")
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<WishlistItemDto>> getAllSorted() {
         List<WishlistItemDto> wishlistItems = wishlistItemsService.getAllSorted();
         if (wishlistItems.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(wishlistItems, HttpStatus.OK);
     }
 
-    @GetMapping(consumes = "application/json", path = "/getByWishlistId/{idWishlist}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping( path = "/getByWishlistId/{idWishlist}")
+    //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<WishlistItemDto>> getByWishlistId(@PathVariable Long idWishlist) {
+        log.info("Fetching wishlist items for wishlist id: {}", idWishlist);
         List<WishlistItemDto> wishlistItems = wishlistItemsService.getItemsByWishlistId(idWishlist);
         if (wishlistItems == null || wishlistItems.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -41,7 +42,7 @@ public class WishlistItemsController {
     }
 
     @GetMapping(consumes = "application/json", path = "/get/{idWishlistItem}")
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<WishlistItemDto> getById(@PathVariable Long idWishlistItem) {
         System.out.println("idWishlistItem: " + idWishlistItem);
         WishlistItemDto wi = null;
@@ -68,10 +69,10 @@ public class WishlistItemsController {
         return new ResponseEntity<>(wi, HttpStatus.OK);
     }
 
-    @DeleteMapping(consumes = "application/json", path = "/delete/{idWishlistItem}")
-    @PreAuthorize("#wishlistItem.getWishlist().getUserId() == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<WishlistItemDto> deleteItemToWishlist(@RequestBody Long wishlistId, WishlistItem wishlistItem ) {
-        WishlistItemDto wi = wishlistItemsService.deleteItemById(wishlistItem);
+    @DeleteMapping( path = "/delete/{idWishlistItem}")
+    //@PreAuthorize("#wishlistItem.getWishlist().getUserId() == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<WishlistItemDto> deleteItemToWishlist(@PathVariable Long idWishlistItem ) {
+        WishlistItemDto wi = wishlistItemsService.deleteItemById(idWishlistItem);
         if (wi == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(wi, HttpStatus.OK);

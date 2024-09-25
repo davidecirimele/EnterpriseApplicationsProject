@@ -17,6 +17,91 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
+val EmeraldGreen = Color(0xFF50C878)
+val Gold = Color(0xFFFFD700)
+val Black = Color(0xFF000000)
+
+
+//  Tema Terracotta e Crema
+
+private val FeltrinellilightScheme = lightColorScheme(
+    primary = TCprimaryLight,
+    onPrimary = TConPrimaryLight,
+    primaryContainer = TCprimaryContainerLight,
+    onPrimaryContainer = TConPrimaryContainerLight,
+    secondary = TCsecondaryLight,
+    onSecondary = TConSecondaryLight,
+    secondaryContainer = TCsecondaryContainerLight,
+    onSecondaryContainer = TConSecondaryContainerLight,
+    tertiary = TCtertiaryLight,
+    onTertiary = TConTertiaryLight,
+    tertiaryContainer = TCtertiaryContainerLight,
+    onTertiaryContainer = TConTertiaryContainerLight,
+    error = TCerrorLight,
+    onError = TConErrorLight,
+    errorContainer = TCerrorContainerLight,
+    onErrorContainer = TConErrorContainerLight,
+    background = TCbackgroundLight,
+    onBackground = TConBackgroundLight,surface = TCsurfaceLight,
+    onSurface = TConSurfaceLight,
+    surfaceVariant = TCsurfaceVariantLight,
+    onSurfaceVariant = TConSurfaceVariantLight,
+    outline = TCoutlineLight,
+    outlineVariant = TCoutlineVariantLight,
+    scrim = TCscrimLight,
+    inverseSurface = TCinverseSurfaceLight,
+    inverseOnSurface = TCinverseOnSurfaceLight,
+    inversePrimary = TCinversePrimaryLight,
+    surfaceDim = TCsurfaceDimLight,
+    surfaceBright = TCsurfaceBrightLight,
+    surfaceContainerLowest = TCsurfaceContainerLowestLight,
+    surfaceContainerLow = TCsurfaceContainerLowLight,
+    surfaceContainer = TCsurfaceContainerLight,
+    surfaceContainerHigh = TCsurfaceContainerHighLight,
+    surfaceContainerHighest = TCsurfaceContainerHighestLight
+)
+
+private val FeltrinellidarkScheme = darkColorScheme(
+    primary = TCprimaryDark,
+    onPrimary = TConPrimaryDark,
+    primaryContainer = TCprimaryContainerDark,
+    onPrimaryContainer = TConPrimaryContainerDark,
+    secondary = TCsecondaryDark,
+    onSecondary = TConSecondaryDark,
+    secondaryContainer = TCsecondaryContainerDark,
+    onSecondaryContainer = TConSecondaryContainerDark,
+
+)
+
+//FINE TEMA TERRACOTTA E CREMA
+
+private val EGBDarkColorScheme = darkColorScheme(
+    primary = EmeraldGreen,
+    secondary = Gold,
+    tertiary = Black,
+    background = Black,
+    surface = Color(0xFF121212), // Un grigio scuro per la superficie
+    onPrimary = Black,
+    onSecondary = Black,
+    onTertiary = Gold,
+    onBackground = Color.White,
+    onSurface = Color.White
+)
+
+private val EGBLightColorScheme = lightColorScheme(
+    primary = EmeraldGreen,
+    secondary = Gold,
+    tertiary = Black,
+    background = Color.White, // Sfondo bianco
+    surface = Color(0xFFF5F5F5), // Un grigio chiaro per la superficie
+    onPrimary = Black,
+    onSecondary = Black,
+    onTertiary = Gold,
+    onBackground = Black,
+    onSurface = Black
+)
+
+
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
     onPrimary = onPrimaryLight,
@@ -262,7 +347,7 @@ val unspecified_scheme = ColorFamily(
 fun EcommerceFrontEndTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable() () -> Unit
 ) {
     val colorScheme = when {
@@ -271,8 +356,8 @@ fun EcommerceFrontEndTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> darkScheme
-        else -> lightScheme
+        darkTheme -> FeltrinellidarkScheme
+        else -> FeltrinellilightScheme
     }
     val view = LocalView.current
     if (!view.isInEditMode) {

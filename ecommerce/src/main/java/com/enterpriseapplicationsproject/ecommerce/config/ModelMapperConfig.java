@@ -34,11 +34,7 @@ public class ModelMapperConfig {
         modelMapper.addMappings(new PropertyMap<User, UserDto>() {
             @Override
             protected void configure() {
-                map(source.getCredential().getEmail(), destination.getCredentials().getEmail());
-                map(source.getCredential().getPassword(), destination.getCredentials().getPassword());
                 map(source.getPhoneNumber(), destination.getPhoneNumber());
-                map(source.getAddresses(), destination.getAddresses());
-                map(source.getGroups(), destination.getGroups());
             }
         });
 
@@ -47,8 +43,19 @@ public class ModelMapperConfig {
             protected void configure() {
                 map(source.getFirstName(), destination.getFirstName());
                 map(source.getLastName(), destination.getLastName());
-                map(source.getCredentials().getEmail(), destination.getCredential().getEmail());
-                map(source.getCredentials().getPassword(), destination.getCredential().getPassword());
+                map(source.getCredential().getEmail(), destination.getCredential().getEmail());
+                map(source.getCredential().getPassword(), destination.getCredential().getPassword());
+                map(source.getPhoneNumber(), destination.getPhoneNumber());
+            }
+        });
+
+        modelMapper.addMappings(new PropertyMap<User, UserDetailsDto>() {
+            @Override
+            protected void configure() {
+                map(source.getId(), destination.getId());
+                map(source.getFirstName(), destination.getFirstName());
+                map(source.getLastName(), destination.getLastName());
+                map(source.getCredential().getEmail(), destination.getEmail());
                 map(source.getPhoneNumber(), destination.getPhoneNumber());
             }
         });
@@ -58,12 +65,8 @@ public class ModelMapperConfig {
             protected void configure() {
                 map(source.getFirstName(), destination.getFirstName());
                 map(source.getLastName(), destination.getLastName());
-                map(source.getCredentials().getEmail(), destination.getCredential().getEmail());
-                map(source.getCredentials().getPassword(), destination.getCredential().getPassword());
                 map(source.getBirthDate(), destination.getBirthDate());
                 map(source.getPhoneNumber(), destination.getPhoneNumber());
-                map(source.getAddresses(), destination.getAddresses());
-                map(source.getGroups(), destination.getGroups());
             }
         });
 
@@ -96,8 +99,6 @@ public class ModelMapperConfig {
                 map(source.getToken(), destination.getToken());
             }
         });
-
-
 
         return modelMapper;
     }
