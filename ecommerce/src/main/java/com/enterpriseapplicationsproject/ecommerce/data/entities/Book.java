@@ -23,8 +23,8 @@ public class Book {
     @Column(name = "CATEGORY")
     private String category;
 
-    @Column(name = "COVER_URL")
-    private String coverUrl;
+    @Column(name = "image_path")
+    private String imagePath;
 
     @Column(name = "WEIGHT")
     private Double weight;

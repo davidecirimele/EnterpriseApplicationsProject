@@ -8,15 +8,22 @@ import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.BookNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +32,10 @@ public class BooksServiceImpl implements BooksService {
     private final BooksDao booksDao;
 
     private final ModelMapper modelMapper;
+
+    @Value("${app.upload.dir}")
+    private String uploadDir;
+
 
     @Override
     public Book getBookById(Long id) {
@@ -92,12 +103,46 @@ public class BooksServiceImpl implements BooksService {
         booksDao.save(book);
     }
 
+
     @Override
-    @Transactional
-    public void updateBookCover(Long id, String coverUrl) {
-        Book book = booksDao.findById(id)
-                .orElseThrow(() -> new BookNotFoundException("Book not found with id " + id));
-        book.setCoverUrl(coverUrl);
+    public void saveBook(BookDto bookDto) throws IOException {
+        Book book = new Book();
+
+        MultipartFile imageFile = bookDto.getImage();
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String fileName = imageFile.getOriginalFilename();
+            Path filePath = Paths.get(uploadDir, fileName);
+            Files.write(filePath, imageFile.getBytes());
+
+            book.setImagePath(filePath.toString());
+        }
+
+        booksDao.save(book);
+    }
+
+    @Override
+    public void updateBookCover(Long bookId, MultipartFile coverImage) throws IOException, BookNotFoundException {
+        // Cerca il libro nel database
+        Optional<Book> optionalBook = booksDao.findById(bookId);
+        if (optionalBook.isEmpty()) {
+            throw new BookNotFoundException("Libro non trovato");
+        }
+
+        Book book = optionalBook.get();
+
+        // Salva la nuova immagine
+        String fileName = coverImage.getOriginalFilename();
+        Path filePath = Paths.get(uploadDir, fileName);
+        Files.write(filePath, coverImage.getBytes());
+
+        // Rimuovi l'immagine precedente dal filesystem
+        if (book.getImagePath() != null) {
+            Path oldImagePath = Paths.get(book.getImagePath());
+            Files.deleteIfExists(oldImagePath);
+        }
+
+        // Aggiorna il percorso dell'immagine nel database
+        book.setImagePath(filePath.toString());
         booksDao.save(book);
     }
 }
