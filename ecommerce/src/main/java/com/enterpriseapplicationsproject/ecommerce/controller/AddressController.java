@@ -119,7 +119,7 @@ public class AddressController {
 
     @PutMapping("/{userId}/{addressId}/edit-address")
     @PreAuthorize("#userId == authentication.principal.getId()")
-    public ResponseEntity<AddressDto> updateDefaultAddress(@PathVariable UUID userId, @PathVariable Long addressId, @RequestBody SaveAddressDto addressDto) {
+    public ResponseEntity<AddressDto> updateAddress(@PathVariable UUID userId, @PathVariable Long addressId, @RequestBody SaveAddressDto addressDto) {
         log.info("Received request for addresses/{userId}/{addressId}/edit-address");
 
         AddressDto updatedAddress = addressService.updateAddress(addressId, addressDto);

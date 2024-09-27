@@ -58,11 +58,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: AddressViewModel, navHostController: NavHostController) {
 
+    LaunchedEffect(Unit) {
+        addressViewModel.fetchDefaultAddress()
+    }
+
     val userDetails by accountViewModel.userDetails.collectAsState()
 
     val defaultAddress by addressViewModel.defaultAddress.collectAsState()
-
-
 
     LazyColumn(modifier = Modifier
         .fillMaxSize()
@@ -186,7 +188,7 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
                         fontSize = 20.sp
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    AddressView(address = defaultAddress, addressViewModel, navController)
+                    AddressView(address = defaultAddress, addressViewModel, navController, false)
                 }
                 else
                     Text(

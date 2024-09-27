@@ -34,7 +34,7 @@ import com.example.ecommercefront_end.repository.AddressRepository
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
 
 @Composable
-fun AddressView(address: Address, addressViewModel: AddressViewModel, navController: NavHostController){
+fun AddressView(address: Address, addressViewModel: AddressViewModel, navController: NavHostController, showButtons: Boolean){
 
     var checked by remember { mutableStateOf(address.defaultAddress) }
 
@@ -42,9 +42,8 @@ fun AddressView(address: Address, addressViewModel: AddressViewModel, navControl
 
     Card(modifier = Modifier
         .fillMaxWidth()
-        .height(200.dp)
         .padding(4.dp)){
-        Column (modifier = Modifier.padding(8.dp)){
+        Column (modifier = Modifier.padding(8.dp)) {
             Row() {
                 Column() {
                     Row {
@@ -105,26 +104,32 @@ fun AddressView(address: Address, addressViewModel: AddressViewModel, navControl
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-                Button(onClick = {
-                    val addressId = address.id
-                    navController.navigate("edit-address/$addressId"){
-                        popUpTo("addresses") {
-                            saveState = true
+            if (showButtons) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Button(onClick = {
+                        val addressId = address.id
+                        navController.navigate("edit-address/$addressId") {
+                            popUpTo("addresses") {
+                                saveState = true
+                            }
                         }
-                    } }) {
-                    Text(text = "Edit")
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = { showDialog = true }) {
-                    Text(text = "Remove")
-                }
-                if(!address.defaultAddress){
+                    }) {
+                        Text(text = "Edit")
+                    }
                     Spacer(modifier = Modifier.width(8.dp))
-                    defaultCheckBox(checked, addressViewModel, address, navController)
-                    {
-                        checked = it
+                    Button(onClick = { showDialog = true }) {
+                        Text(text = "Remove")
+                    }
+                    if (!address.defaultAddress) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        defaultCheckBox(checked, addressViewModel, address, navController)
+                        {
+                            checked = it
+                        }
                     }
                 }
             }
@@ -173,7 +178,9 @@ fun defaultCheckBox(checked : Boolean, addressViewModel: AddressViewModel, addre
             onCheckedChange = {
                 onCheckedChange(it)
                 addressViewModel.setDefaultAddress(address)
-                navController.navigate("my-account")
+                navController.navigate("my-account") {
+                    popUpTo("account-manager") { saveState = true }
+                }
             },
             modifier = Modifier.padding(2.dp)
         )

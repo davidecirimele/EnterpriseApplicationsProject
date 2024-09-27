@@ -106,7 +106,6 @@ object SessionManager {
                     }
                 }
                 clearSession()
-
             }
         }
     }

@@ -130,7 +130,11 @@ fun InsertAddressScreen(viewModel: AddressViewModel, navController: NavHostContr
             Button(
                 onClick = {
                     viewModel.insertAddress(SaveAddress(street, province, city, state, postalCode, additionalInfo))
-                    navController.navigate("addresses")
+                    navController.navigate("addresses") {
+                        popUpTo("my-account") {
+                            saveState = true
+                        }
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = street.isNotBlank() && province.isNotBlank() && city.isNotBlank() && state.isNotBlank() && postalCode.isNotBlank()

@@ -92,6 +92,7 @@ class AddressViewModel(private val repository: AddressRepository): ViewModel() {
                 if (SessionManager.user != null) {
                     repository.deleteAddress(UserId(SessionManager.user!!.id), address.id)
                     fetchUserAddresses()
+                    fetchDefaultAddress(true)
                     Log.d("AddressViewModel", "Address deleted: ${_addresses.value}")
                 }
                 else

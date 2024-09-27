@@ -60,7 +60,7 @@ fun AddressesScreen(viewModel: AddressViewModel, navHostController: NavHostContr
             if(addresses != null && !addresses!!.isEmpty())
                 for (address in addresses!!)
                     item {
-                        AddressView(address = address, viewModel, navHostController)
+                        AddressView(address = address, viewModel, navHostController, true)
                     }
         }
         Icon(Icons.Filled.AddBox, contentDescription = "Insert address", modifier = Modifier.clickable(onClick = { navHostController.navigate("insert-address"){

@@ -43,6 +43,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ecommercefront_end.model.Credential
 import com.example.ecommercefront_end.model.SaveUser
 import com.example.ecommercefront_end.model.User
+import com.example.ecommercefront_end.viewmodels.AddressViewModel
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -209,6 +210,10 @@ fun RegistrationStep1(registrationViewModel: RegistrationViewModel, onNext: () -
     // Regex per la validazione della password
     val passwordRegex = Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!])[\\w@#$%^&+=!]{8,20}$")
 
+    val isFormValid = isEmailValid && isPasswordValid && isConfirmPasswordValid
+            && name.isNotBlank() && surname.isNotBlank() && email.isNotBlank()
+            && password.isNotBlank() && confirmPassword.isNotBlank()
+
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         Column(
             modifier = Modifier
@@ -326,8 +331,7 @@ fun RegistrationStep1(registrationViewModel: RegistrationViewModel, onNext: () -
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                 enabled = isEmailValid && isPasswordValid && isConfirmPasswordValid
-                         && name.isNotBlank() && surname.isNotBlank()
+                 enabled = isFormValid
             ) {
                 Text("Verifica Email", style = MaterialTheme.typography.bodyLarge)
             }
@@ -345,7 +349,7 @@ fun RegistrationStep2(registrationViewModel: RegistrationViewModel, onRegistrati
 
     fun isValidDate(date: LocalDate): Boolean = date.isBefore(LocalDate.now())
 
-    var isPhoneNumberValid by remember { mutableStateOf(true) }
+    var isPhoneNumberValid by remember { mutableStateOf(false) }
     val italianPhoneNumberRegex = Regex("[0-9]{9,11}$")
 
     /*
