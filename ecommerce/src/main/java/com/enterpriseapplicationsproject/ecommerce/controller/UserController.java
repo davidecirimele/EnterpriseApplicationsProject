@@ -79,9 +79,10 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String token) {
-        token.replace("Bearer ", "");
-        revokedTokenService.revokeToken(token);
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String accessToken, @RequestBody String refreshToken) {
+        accessToken = accessToken.replace("Bearer ", "");
+        revokedTokenService.revokeToken(accessToken);
+        revokedTokenService.revokeToken(refreshToken);
         return ResponseEntity.ok().build();
     }
 
