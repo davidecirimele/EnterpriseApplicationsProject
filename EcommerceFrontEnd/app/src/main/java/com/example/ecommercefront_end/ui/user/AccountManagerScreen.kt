@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.SessionManager.user
 import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.model.UserDetails
@@ -72,7 +73,9 @@ fun OptionsSection(navHostController: NavHostController){
     {
         Column {
             Row {
-                Button(onClick = {navHostController.navigate("my-account")}) {
+                Button(onClick = {navHostController.navigate("my-account"){
+                    popUpTo("account-manager") { saveState = true }
+                }}) {
                     Text(text = "My Account")
                 }
                 Spacer(modifier = Modifier.width(20.dp))
@@ -139,7 +142,7 @@ fun Buttons(navHostController: NavHostController){
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = { SessionManager.clearSession()}) {
                 Text(text = "Logout")
             }
         }
