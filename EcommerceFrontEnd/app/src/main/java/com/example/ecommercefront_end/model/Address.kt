@@ -15,4 +15,6 @@ data class Address(
     val postalCode: String,
 
     val additionalInfo: String,
+
+    val defaultAddress: Boolean
 )

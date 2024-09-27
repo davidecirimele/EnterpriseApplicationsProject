@@ -26,7 +26,7 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
             try {
                 println("sto caricando il carrello")
 
-                val cart = repository.getCart(getUser().id)
+                val cart = repository.getCart(getUser().userId)
                 cart.onSuccess { cart_ ->
                     if (cart_ != null) {
                         _cartItems.value = cart_.cartItems

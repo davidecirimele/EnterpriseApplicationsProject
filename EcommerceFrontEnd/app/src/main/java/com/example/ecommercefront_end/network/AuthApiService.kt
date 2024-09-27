@@ -6,6 +6,7 @@ import com.example.ecommercefront_end.model.RefreshToken
 import com.example.ecommercefront_end.model.RefreshTokenResponse
 import com.example.ecommercefront_end.model.SaveUser
 import com.example.ecommercefront_end.model.User
+import com.example.ecommercefront_end.model.UserDetails
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -23,7 +24,7 @@ interface AuthApiService {
     suspend fun login(@Body credentials: Credential): Response<Map<String, String>>
 
     @POST("auth/register")
-    suspend fun register(@Body user: SaveUser): Response<User>
+    suspend fun register(@Body user: SaveUser): Response<UserDetails>
 
     @POST("auth/validate-token")
     suspend fun validateToken(@Body accessToken : AccessToken) : Response<Boolean>

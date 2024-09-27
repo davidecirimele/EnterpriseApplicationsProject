@@ -14,19 +14,19 @@ import java.util.UUID
 
 interface WishlistApiService {
 
-    @POST("/api/v1/wishlists/add")
+    @POST("wishlists/add")
     suspend fun addWishlist(@Body w: Wishlist)
 
-    @GET("/api/v1/wishlists/get/{idW}")
+    @GET("wishlists/get/{idW}")
     suspend fun getWishlistById(@Path("idW") idW: UUID)
 
-    @GET("/api/v1/wishlists/getByUser/{idUser}")
+    @GET("wishlists/getByUser/{idUser}")
     suspend fun getWishlistsByUser(@Path("idUser") idUser: Long)
 
-    @GET("/api/v1/wishlists/getAll")
+    @GET("wishlists/getAll")
     suspend fun getAllWishlist() : List<Wishlist>
 
-    @PUT("/api/v1/wishlists/update")
+    @PUT("wishlists/update")
     suspend fun updateWishlist(@Body w: WishlistUpdate)
 
     @DELETE("/api/v1/wishlists/delete/{idWishlist}")

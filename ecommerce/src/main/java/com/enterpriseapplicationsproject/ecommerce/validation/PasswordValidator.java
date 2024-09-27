@@ -2,9 +2,13 @@ package com.enterpriseapplicationsproject.ecommerce.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.regex.Pattern;
 
+@Slf4j
 public class PasswordValidator implements ConstraintValidator<ValidPassword,String>{
 
     private int minLength;
@@ -24,11 +28,13 @@ public class PasswordValidator implements ConstraintValidator<ValidPassword,Stri
             return false;
         }
         String specialCharacterPattern = "[" + Pattern.quote(allowedSpecialCharacters) + "]";
+
         if (!value.matches(".*" + specialCharacterPattern + ".*")) {
             return false;
         }
 
         String nonAllowedSpecialCharacterPattern = "[^0-9a-zA-Z" + Pattern.quote(allowedSpecialCharacters) + "]";
+        log.info("Pattern caratteri non consentiti: " + nonAllowedSpecialCharacterPattern);
         if (value.matches(".*" + nonAllowedSpecialCharacterPattern + ".*")) {
             return false;
         }

@@ -10,19 +10,19 @@ import retrofit2.http.Path
 
 interface WishlistItemApiService {
 
-    @POST("/api/v1/wishlist-items/add")
+    @POST("wishlist-items/add")
     suspend fun insertWishlistItem(w: WishlistItem)
 
-    @GET("/api/v1/wishlist-items/getByWishlistId/{idWi}")
+    @GET("wishlist-items/getByWishlistId/{idWi}")
     suspend fun getWishlistItems(@Path("idWi") idW: Long) : List<WishlistItem>
 
-    @GET("/api/v1/wishlist-items/getAll")
+    @GET("wishlist-items/getAll")
     suspend fun getAllWishlistItem()
 
-    @GET("/api/v1/wishlist-items/getByWishlist/{idWishlist}")
+    @GET("wishlist-items/getByWishlist/{idWishlist}")
     suspend fun getWishlistItemByWishlist(@Path("idUser") idUser: Long)
 
 
-    @DELETE("/api/v1/wishlist-items/delete/{idWishlistItem}")
+    @DELETE("wishlist-items/delete/{idWishlistItem}")
     suspend fun deleteWishlistItem(@Path("idWishlistItem") idWi: Long): Response<Unit>
 }

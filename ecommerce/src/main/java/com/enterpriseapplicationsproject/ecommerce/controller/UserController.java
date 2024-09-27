@@ -29,9 +29,9 @@ public class UserController {
 
     @GetMapping("/{id}")
     @PreAuthorize("#id == authentication.principal.getId()")
-    public ResponseEntity<UserDto> getUserById(@PathVariable UUID id) {
+    public ResponseEntity<UserDetailsDto> getUserById(@PathVariable UUID id) {
         System.out.println("ROLE: "+userService.getUserRole(id));
-        UserDto user = userService.getById(id);
+        UserDetailsDto user = userService.getUserDetailsById(id);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
@@ -50,6 +50,7 @@ public class UserController {
     @PutMapping(value = "{userId}/change-email", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<UserDto> updateEmail(@PathVariable UUID userId,@RequestBody EmailUserDto userDto){
+        log.info("Received request for user/change-email");
         try{
             UserDto updatedUser= userService.updateEmail(userId, userDto);
             return new ResponseEntity<>(updatedUser, HttpStatus.OK);}
@@ -61,6 +62,7 @@ public class UserController {
     @PutMapping(value = "{userId}/change-phone-number", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<UserDto> updatePhoneNumber(@PathVariable UUID userId,@RequestBody PhoneNumberUserDto userDto){
+        log.info("Received request for user/change-phone-number");
         try{
             UserDto updatedUser= userService.updatePhoneNumber(userId, userDto);
             return new ResponseEntity<>(updatedUser, HttpStatus.OK);}

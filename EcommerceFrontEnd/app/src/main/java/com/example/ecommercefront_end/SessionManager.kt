@@ -106,7 +106,6 @@ object SessionManager {
                     }
                 }
                 clearSession()
-
             }
         }
     }
@@ -148,10 +147,6 @@ object SessionManager {
     }
 
 }
-
-    fun isLoggedIn(): Boolean {
-        return user != null
-    }
 
     fun setAuthRepository(authRepository: AuthRepository){
         this.authRepository = authRepository
