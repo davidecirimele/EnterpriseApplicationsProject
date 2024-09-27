@@ -162,6 +162,9 @@ public class AddressServiceImpl implements AddressService {
     private void assignNewDefault(Long id){
         List<Address> valid_addresses = addressesDao.findAllByValidity(addressesDao.findUserByAddressId(id).getId());
 
+        if(valid_addresses.isEmpty())
+            return;
+
         for(Address a:valid_addresses){
             if(!a.getId().equals(id)) {
                 updateDefaultAddress(a.getId());
