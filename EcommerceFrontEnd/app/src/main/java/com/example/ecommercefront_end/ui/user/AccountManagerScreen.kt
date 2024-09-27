@@ -1,6 +1,7 @@
 package com.example.ecommercefront_end.ui.user
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +21,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,8 +56,7 @@ fun UserCard(userDetails: UserDetails){
             Row(horizontalArrangement = Arrangement.Start) {
                 Text(
                     text = "Welcome back, ${userDetails.firstName}",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
             }
@@ -98,9 +100,8 @@ fun PurchasedHistoryCard(history: List<Pair<String,String>>){
     Column {
         Text(
             text = "Purchased History",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-            fontSize = 25.sp
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp
         )
         Row(
             Modifier
@@ -145,7 +146,8 @@ fun Buttons(navHostController: NavHostController){
     }
 }
 
-/*@Preview
+/*
+@Preview
 @Composable
 fun AccountScreenPreview(){
     val _userApiService = RetrofitClient.userApiService

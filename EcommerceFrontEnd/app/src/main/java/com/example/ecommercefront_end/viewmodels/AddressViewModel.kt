@@ -13,6 +13,7 @@ import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.repository.AddressRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class AddressViewModel(private val repository: AddressRepository): ViewModel() {
@@ -22,6 +23,15 @@ class AddressViewModel(private val repository: AddressRepository): ViewModel() {
     private val _defaultAddress = MutableStateFlow<Address?>(null)
     val defaultAddress: StateFlow<Address?> = _defaultAddress
 
+    private val _addressToEdit = MutableStateFlow<Address?>(null)
+    val addressToEdit: StateFlow<Address?> = _addressToEdit
+
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+
 
     suspend fun fetchUserAddresses(forceReload: Boolean = false){
         try {
@@ -29,8 +39,23 @@ class AddressViewModel(private val repository: AddressRepository): ViewModel() {
         }catch (e: Exception){
             Log.e("AddressError", "Error loading default address", e)
         }
+    }
 
-
+    suspend fun fetchAddressById(addressId: Long){
+        try {
+            Log.d("AddressViewModel", "IM IN FABID")
+            if (SessionManager.user != null) {
+                Log.d("AddressViewModel", "STO PER PRENDERE INDIRIZZO BY ID")
+                _addressToEdit.value = repository.getAddress(SessionManager.user!!.id, addressId)
+                Log.d("AddressViewModel", "Address fetched: ${_addressToEdit.value}")
+            } else {
+                Log.e("AddressViewModel", "SessionManager.user is null")
+            }
+        }catch(e : Exception){
+            Log.d("UserDebug", "loadDefaultAddress: ${_addressToEdit.value}")
+        }finally {
+            _isLoading.value = false // Imposta isLoading a false dopo il caricamento, indipendentemente dal risultato
+        }
     }
 
     suspend fun fetchDefaultAddress(forceReload: Boolean = false){

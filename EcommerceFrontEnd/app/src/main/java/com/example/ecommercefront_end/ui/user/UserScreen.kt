@@ -443,6 +443,7 @@ fun RegistrationStep2(registrationViewModel: RegistrationViewModel, onRegistrati
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            /*
             OutlinedTextField(
                 value = admin,
                 onValueChange = { admin = it },
@@ -458,7 +459,7 @@ fun RegistrationStep2(registrationViewModel: RegistrationViewModel, onRegistrati
                     .padding(top = 4.dp)
                     .offset(x = 8.dp),
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(10.dp))*/
 
 
         /* Indirizzo

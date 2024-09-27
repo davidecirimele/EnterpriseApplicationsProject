@@ -63,7 +63,7 @@ public class AddressController {
     }
 
     @GetMapping("/{userId}/{id}")
-    @PreAuthorize("#id == authentication.principal.getId()")
+    @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<AddressDto> getValidAddressByUserId(@PathVariable UUID userId, @PathVariable Long id) {
         log.info("Received request for addresses/{userId}/{id}");
         User user = userService.getUserById(userId);

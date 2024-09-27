@@ -19,7 +19,7 @@ interface AddressApiService {
     @RequiresAuth
     suspend fun getAddresses(@Path("userid") userid: UUID) : List<Address>?
 
-    @GET("addresses/{userid}/{id}")
+    @GET("addresses/{userId}/{addressId}")
     @RequiresAuth
     suspend fun getAddress(@Path("userId") userId: UUID, @Path("addressId") addressId: Long) : Address?
 

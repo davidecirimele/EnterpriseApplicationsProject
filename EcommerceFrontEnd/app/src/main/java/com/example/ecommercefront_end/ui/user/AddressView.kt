@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,42 +47,73 @@ fun AddressView(address: Address, addressViewModel: AddressViewModel, navControl
         Column (modifier = Modifier.padding(8.dp)){
             Row() {
                 Column() {
-                    Text(
-                        text = "Address: ${address.street}, ${address.city}",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 15.sp,
-                        modifier = Modifier.padding(4.dp)
-                    )
+                    Row {
+                        Text(
+                            text = "Address: ",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(4.dp)
+                        )
+                        Text(
+                            text = "${address.street}, ${address.city}",
+                            fontSize = 15.sp,
+                            modifier = Modifier.padding(4.dp)
+                        )
+                    }
                     Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "ZIP: ${address.postalCode}",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 15.sp,
-                        modifier = Modifier.padding(4.dp)
-                    )
+                    Row {
+                        Text(
+                            text = "ZIP: ",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(4.dp)
+                        )
+                        Text(
+                            text = "${address.postalCode}",
+                            fontSize = 15.sp,
+                            modifier = Modifier.padding(4.dp)
+                        )
+                    }
                     Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "Province: ${address.province}",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 15.sp,
-                        modifier = Modifier.padding(4.dp)
-                    )
+                    Row {
+                        Text(
+                            text = "Province: ",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(4.dp)
+                        )
+                        Text(
+                            text = "${address.province}",
+                            fontSize = 15.sp,
+                            modifier = Modifier.padding(4.dp)
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "State: ${address.state}",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 15.sp,
-                        modifier = Modifier.padding(4.dp)
-                    )
+                    Row {
+                        Text(
+                            text = "State: ",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(4.dp)
+                        )
+                        Text(
+                            text = "${address.state}",
+                            fontSize = 15.sp,
+                            modifier = Modifier.padding(4.dp)
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-                Button(onClick = { navController.navigate("edit-address") }) {
+                Button(onClick = {
+                    val addressId = address.id
+                    navController.navigate("edit-address/$addressId"){
+                        popUpTo("addresses") {
+                            saveState = true
+                        }
+                    } }) {
                     Text(text = "Edit")
                 }
                 Spacer(modifier = Modifier.width(8.dp))
@@ -132,8 +164,7 @@ fun defaultCheckBox(checked : Boolean, addressViewModel: AddressViewModel, addre
     ) {
         Text(
             text = "Set as default",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
             fontSize = 15.sp,
             modifier = Modifier.padding(2.dp)
         )

@@ -63,6 +63,7 @@ import com.example.ecommercefront_end.repository.AuthRepository
 import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.repository.HomeRepository
 import com.example.ecommercefront_end.repository.WishlistRepository
+import com.example.ecommercefront_end.ui.user.EditAddressScreen
 import com.example.ecommercefront_end.ui.cart.CartScreen
 import com.example.ecommercefront_end.ui.home.BookDetailsScreen
 import com.example.ecommercefront_end.ui.home.HomeScreen
@@ -206,6 +207,16 @@ fun NavigationView(navController: NavHostController) {
                 InsertAddressScreen(viewModel = addressViewModel, navController)
             }
 
+            composable(
+                route = "edit-address/{addressId}",
+                arguments = listOf(navArgument("addressId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val addressId = backStackEntry.arguments?.getLong("addressId")
+                if (addressId != null) {
+                    EditAddressScreen(viewModel = addressViewModel, navController = navController, addressId)
+                }
+            }
+
         }
 
     }
@@ -218,7 +229,7 @@ fun TopBar(navHostController: NavHostController) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
-    val isSearchVisible = currentRoute != "userAuth"
+    val isSearchVisible = currentRoute == "home"
     val colorScheme = MaterialTheme.colorScheme
 
     TopAppBar(
@@ -292,13 +303,13 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             onClick = {
                 selectedIndex.value = 1
                 if(SessionManager.user == null)
-                navHostController.navigate("userAuth") {
-                    popUpTo(navHostController.graph.startDestinationId) {
-                        saveState = true
+                    navHostController.navigate("userAuth") {
+                        popUpTo(navHostController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
                     }
-                    launchSingleTop = true
-                    restoreState = true
-                }
                 else
                     navHostController.navigate("account-manager") {
                         popUpTo(navHostController.graph.startDestinationId) {

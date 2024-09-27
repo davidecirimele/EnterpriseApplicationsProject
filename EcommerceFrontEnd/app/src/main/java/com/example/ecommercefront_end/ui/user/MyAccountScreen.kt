@@ -1,6 +1,8 @@
 package com.example.ecommercefront_end.ui.user
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -33,6 +36,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -57,14 +63,16 @@ fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: Addres
     val defaultAddress by addressViewModel.defaultAddress.collectAsState()
 
 
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.Top){
+
+    LazyColumn(modifier = Modifier
+        .fillMaxSize()
+        .padding(8.dp), verticalArrangement = Arrangement.Top){
         item {
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = "My Account",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 40.sp
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 25.sp
                 )
             }
         }
@@ -80,26 +88,28 @@ fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: Addres
         item {
             Options(navHostController)
         }
-
-
     }
 }
 
 @Composable
 fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewModel : AccountViewModel, addressViewModel: AddressViewModel, navController: NavHostController){
-
     var isEditingEmail by remember { mutableStateOf(false) }
 
     var isEditingPhoneNumber by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth().pointerInput(Unit) {
+        detectTapGestures(onTap = {
+            // Quando viene toccato qualsiasi punto al di fuori del campo di testo
+            isEditingPhoneNumber = false
+            isEditingEmail = false
+        })
+    }) {
         Row(modifier = Modifier.fillMaxWidth()){
             if (userDetails != null) {
                 Text(
                     text =  "${userDetails.firstName} ${userDetails.lastName}",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 35.sp
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 25.sp
                 )
             }
         }
@@ -108,22 +118,21 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
             Column {
                 Text(
                     text = "Email",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 25.sp
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
                 )
-                if (userDetails != null) {
-                    Text(
-                        text = "${userDetails.email}",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 25.sp
-                    )
+                Row() {
+                    if (userDetails != null) {
+                        Text(
+                            text = "${userDetails.email}",
+                            fontSize = 20.sp
+                        )
+                    }
+                    Spacer(modifier = Modifier.padding(horizontal = 15.dp))
+                    Icon(modifier = Modifier.clickable{ isEditingEmail = true }, imageVector = Icons.Filled.Edit, contentDescription = "edit email")
                 }
             }
-            IconButton(onClick = {  isEditingEmail = true }) {
-                Icon(imageVector = Icons.Filled.Edit, contentDescription = "edit email", tint = MaterialTheme.colorScheme.primary)
-            }
+
         }
         Spacer(modifier = Modifier.height(15.dp))
         Row(modifier = Modifier.fillMaxWidth()){
@@ -141,25 +150,20 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
                 Column {
                     Text(
                         text = "Phone Number",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 25.sp
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
                     )
-                    if (userDetails != null) {
-                        Text(
-                            text = "${userDetails.phoneNumber}",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontSize = 20.sp
-                        )
+                    Row {
+                        if (userDetails != null) {
+                            Text(
+                                text = "${userDetails.phoneNumber}",
+                                fontSize = 20.sp
+                            )
+                        }
+                        Spacer(modifier = Modifier.padding(horizontal = 15.dp))
+                        Icon(modifier = Modifier.clickable{ isEditingPhoneNumber = true }, imageVector = Icons.Filled.Edit, contentDescription = "edit phone number")
                     }
-                }
-                IconButton(onClick = { isEditingPhoneNumber = true }) {
-                    Icon(
-                        imageVector = Icons.Filled.Edit,
-                        contentDescription = "edit phone number",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+
                 }
             }
             Spacer(modifier = Modifier.height(15.dp))
@@ -178,9 +182,8 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
                 if(defaultAddress != null) {
                     Text(
                         text = "Default Address:",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 25.sp
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     AddressView(address = defaultAddress, addressViewModel, navController)
@@ -188,9 +191,8 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
                 else
                     Text(
                         text = "No Default Address",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 25.sp
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
                     )
             }
         }
@@ -203,6 +205,7 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
                 )
             }*/
     }
+
 }
 
 @Composable
@@ -230,7 +233,10 @@ fun Options(navHostController: NavHostController){
 @Composable
 fun EditEmailScreen(isEditing: Boolean, accountViewModel: AccountViewModel, onSuccess: () -> Unit) {
     var inputText by remember { mutableStateOf("") }
-    Column {
+
+    var showDialog by remember { mutableStateOf(false)}
+
+    Column{
 
         // Se `isEditing` è true, mostra il campo di testo e il bottone "Submit"
         if (isEditing) {
@@ -251,9 +257,7 @@ fun EditEmailScreen(isEditing: Boolean, accountViewModel: AccountViewModel, onSu
             // Bottone "Submit"
             Button(
                 onClick = {
-                    accountViewModel.viewModelScope.launch {
-                        accountViewModel.editEmail(inputText, onSuccess)
-                    }
+                    showDialog = true
                 },
                 modifier = Modifier
                     .padding(8.dp)
@@ -263,11 +267,40 @@ fun EditEmailScreen(isEditing: Boolean, accountViewModel: AccountViewModel, onSu
             }
         }
     }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(text = "Confirm Email") },
+            text = { Text(text = "Are you sure you want to change this email? You will be asked to log in again", fontWeight = FontWeight.Bold) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        accountViewModel.viewModelScope.launch {
+                            accountViewModel.editEmail(inputText, onSuccess)
+                        }
+                        showDialog = false
+                    }
+                ) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDialog = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
 @Composable
 fun EditPhoneNumberScreen(isEditing: Boolean, accountViewModel: AccountViewModel, onSuccess: () -> Unit) {
     var inputText by remember { mutableStateOf("") }
+
+    var showDialog by remember { mutableStateOf(false)}
     Column {
 
         // Se `isEditing` è true, mostra il campo di testo e il bottone "Submit"
@@ -289,9 +322,7 @@ fun EditPhoneNumberScreen(isEditing: Boolean, accountViewModel: AccountViewModel
             // Bottone "Submit"
             Button(
                 onClick = {
-                    accountViewModel.viewModelScope.launch {
-                        accountViewModel.editPhoneNumber(inputText, onSuccess)
-                    }
+                    showDialog = true
                 },
                 modifier = Modifier
                     .padding(8.dp)
@@ -301,4 +332,36 @@ fun EditPhoneNumberScreen(isEditing: Boolean, accountViewModel: AccountViewModel
             }
         }
     }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(text = "Confirm Phone Number") },
+            text = { Text(text = "Are you sure you want to change this phone number?", fontWeight = FontWeight.Bold) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        accountViewModel.viewModelScope.launch {
+                            accountViewModel.editPhoneNumber(inputText, onSuccess)
+                        }
+                        showDialog = false
+                    }
+                ) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDialog = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
+
+
+
+
+
