@@ -15,16 +15,15 @@ import java.util.List;
 @Entity
 @Data
 @NoArgsConstructor
-public class Book{
+public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
 
 
-    @Column(name = "COVER_URL")
-    private String coverUrl;
-    //TODO immagine
+    @Column(name = "image_path")
+    private String imagePath;
 
     @Column(name = "WEIGHT")
     private Double weight;

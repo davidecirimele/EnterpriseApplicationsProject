@@ -1,7 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
-import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RefreshTokenService;
+import com.enterpriseapplicationsproject.ecommerce.data.service.RevokedTokenService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserRegistrationException;
@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -24,7 +23,7 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
-
+    private final RevokedTokenService revokedTokenService;
     private final RefreshTokenService refreshTokenService;
 
     @GetMapping("/{id}")
@@ -40,7 +39,8 @@ public class UserController {
     public ResponseEntity<UserDto> updatePassword(@PathVariable UUID userId,@RequestBody PasswordUserDto userDto){
         try{
             UserDto updatedUser= userService.updatePassword(userId, userDto);
-            //refreshTokenService.revokeRefreshTokenByUserId(userId);
+            String toRevoke = refreshTokenService.getTokenByUserId(userId).getToken();
+            revokedTokenService.revokeToken(toRevoke);
             return new ResponseEntity<>(updatedUser, HttpStatus.OK);}
         catch(UserRegistrationException e){
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -80,6 +80,14 @@ public class UserController {
         catch(UserRegistrationException e){
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String accessToken, @RequestBody String refreshToken) {
+        accessToken = accessToken.replace("Bearer ", "");
+        revokedTokenService.revokeToken(accessToken);
+        revokedTokenService.revokeToken(refreshToken);
+        return ResponseEntity.ok().build();
     }
 
 }
