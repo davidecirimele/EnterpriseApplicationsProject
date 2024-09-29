@@ -46,6 +46,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -66,7 +67,8 @@ import com.example.ecommercefront_end.viewmodels.WishlistViewModel
 fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) {
     val wLists by viewModel.wishlists.collectAsState()
     val wListItems by viewModel.wishlistItems.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
+    val isLoading by viewModel.IsLoading.collectAsState()
+
 
     // Gestione della selezione della wishlist
     val selectedWishlist = remember(wLists) {
@@ -79,13 +81,7 @@ fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) 
         }
     } else {
         // Ricarica gli elementi della wishlist selezionata
-        LaunchedEffect(selectedWishlist.value) {
-            selectedWishlist.value?.let {
-                viewModel.loadWishlistItemsFromDB(it.id)
-            }
-        }
-
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
+             LazyColumn(modifier = Modifier.fillMaxSize()) {
             item {
                 WishlistsList(
                     wishlists = wLists,
@@ -117,7 +113,6 @@ fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) 
 fun AddWishlistDialog(onDismissRequest: () -> Unit, onAddWishlist: (String, Boolean) -> Unit) {
     var wishlistName by remember { mutableStateOf("") }
     var isPrivate by remember { mutableStateOf(false) }
-    var otherParam by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
@@ -191,8 +186,11 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
     ) {
-        items(wishlists) { wishlist ->
-            WishlistThumbnail(
+        items(
+            items = wishlists,
+            key = { item -> item.id } // Chiave a livello di items
+        ) { wishlist ->
+            WishlistThumbnail( // Rimuovi il secondo key qui
                 wishlist = wishlist,
                 onClick = { onWishlistSelected(wishlist) }
             )
@@ -245,11 +243,11 @@ fun WishlistDetails(
     var showRenameDialog by remember { mutableStateOf(false) }
     var newWishlistName by remember { mutableStateOf(wishlist.name) }
 
-    val isLoading by viewModel.isLoading.collectAsState()
+    val isLoading by viewModel.IsLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
     // Ricarica gli elementi della wishlist selezionata
-    LaunchedEffect(wishlist) {
+    LaunchedEffect(key1 = wishlist.id) {
         viewModel.loadWishlistItemsFromDB(wishlist.id)
     }
 
@@ -420,6 +418,7 @@ fun WishlistDetails(
             if (!items.isNullOrEmpty()) {
                 Column {
                     items.forEach { item ->
+
                         WishlistItemCard(wishlistItem = item,
                             navController = navController, onRemoveClick = {
                                 viewModel.removeWishlistItem(item.id)

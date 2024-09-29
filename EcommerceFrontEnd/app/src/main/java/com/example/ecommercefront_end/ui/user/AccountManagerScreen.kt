@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.SessionManager.user
 import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.network.RetrofitClient
@@ -141,7 +142,7 @@ fun Buttons(navHostController: NavHostController){
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = { SessionManager.clearSession() }) {
                 Text(text = "Logout")
             }
         }

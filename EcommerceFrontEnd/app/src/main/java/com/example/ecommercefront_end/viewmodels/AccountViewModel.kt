@@ -19,7 +19,7 @@ class AccountViewModel(private val repository: AccountRepository): ViewModel() {
     init {
         try{
         viewModelScope.launch {
-            loadUserDetails()
+            //loadUserDetails()
         }} catch (e: Exception) {
             // TODO gestire eccezione
         }

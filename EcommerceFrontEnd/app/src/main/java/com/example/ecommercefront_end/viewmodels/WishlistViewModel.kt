@@ -25,24 +25,44 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
     private val _wishlistItems = MutableStateFlow<List<WishlistItem>>(emptyList())
     val wishlistItems: StateFlow<List<WishlistItem>> = _wishlistItems.asStateFlow()
 
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    private val _FriendWwishlist = MutableStateFlow<List<Wishlist>>(emptyList())
+    val FriendWishlist: StateFlow<List<Wishlist>> = _FriendWwishlist.asStateFlow()
+
+    private val _IsLoading = MutableStateFlow(false)
+    val IsLoading: StateFlow<Boolean> = _IsLoading.asStateFlow()
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    private val _selectedWishlist = MutableStateFlow<Wishlist?>(null)
+    val selectedWishlist: StateFlow<Wishlist?> = _selectedWishlist.asStateFlow()
+
+    fun selectWishlist(wishlist: Wishlist) {
+        _selectedWishlist.value = wishlist
+        loadWishlistItemsFromDB(wishlist.id)
+    }
+
     init{
         loadWishlistsFromBD()
+        Log.e("Init", "Init chiamata")
     }
 
 
-    private fun loadWishlistsFromBD() {
+    fun loadWishlistsFromBD() {
         viewModelScope.launch {
-            _isLoading.value = true // Imposta il caricamento a vero all'inizio del processo
+            _IsLoading.value = true // Imposta il caricamento a vero all'inizio del processo
             try {
                 val currentUser = SessionManager.user
                 currentUser?.let {
-                    _wishlists.value = wRepository.getWishlistsByUser(it.id)
+
+                    val myWishlistsDeferred = async { wRepository.getWishlistsByUser(it.id) }
+                    val friendWishlistsDeferred = async { wRepository.getFriendWishlist(it.id) }
+
+                    _wishlists.value = myWishlistsDeferred.await()
+                    _FriendWwishlist.value = friendWishlistsDeferred.await()
+
+                    _wishlists.value += _FriendWwishlist.value
+
                     if (_wishlists.value.isEmpty()) {
                         _error.value = "Nessuna wishlist trovata"
                     }
@@ -52,7 +72,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
             } catch (e: Exception) {
                 _error.value = "Errore durante il caricamento delle wishlist: ${e.message}"
             } finally {
-                _isLoading.value = false // Imposta il caricamento a falso alla fine del processo
+                _IsLoading.value = false // Imposta il caricamento a falso alla fine del processo
             }
         }
     }
@@ -62,6 +82,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
 
     fun loadWishlistItemsFromDB(wishlistId: Long){
         viewModelScope.launch {
+            _IsLoading.value = true
             try{
                 _wishlistItems.value = wRepository.getWishlistItems(wishlistId)
                 if(_wishlistItems.value.isEmpty()){
@@ -69,6 +90,8 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
                 }
             } catch (e: Exception){
                 _error.value = "Errore durante il caricamento degli elementi della wishlist: ${e.message}"
+            }finally {
+                _IsLoading.value = false
             }
         }
     }
@@ -157,21 +180,21 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
 
 
     fun removeWishlistItem(id: Long) {
-       viewModelScope.launch {
-           try {
-               val response = wRepository.removeWishlistItem(id)
+        viewModelScope.launch {
+            try {
+                val response = wRepository.removeWishlistItem(id)
                 if (response.isSuccessful) {
                     Log.d("rimosso WI con id", id.toString())
                     _wishlistItems.value = _wishlistItems.value.filter{ it.id != id }
-                     Log.d("removeWishlistItem", "Elemento della wishlist rimosso con successo")
+                    Log.d("removeWishlistItem", "Elemento della wishlist rimosso con successo")
                 } else {
                     Log.e("removeWishlistItem", "Non rimosso WI con id: $id")
-                     Log.e("removeWishlistItem", "Errore durante la rimozione dell'elemento della wishlist: ${response.errorBody()}")
+                    Log.e("removeWishlistItem", "Errore durante la rimozione dell'elemento della wishlist: ${response.errorBody()}")
                 }
-           } catch (e: Exception) {
-               Log.e("removeWishlistItem", "Errore durante la rimozione dell'elemento della wishlist: ${e.message}")
-           }
-       }
+            } catch (e: Exception) {
+                Log.e("removeWishlistItem", "Errore durante la rimozione dell'elemento della wishlist: ${e.message}")
+            }
+        }
 
     }
 

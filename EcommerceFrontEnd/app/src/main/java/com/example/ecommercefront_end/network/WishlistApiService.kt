@@ -23,6 +23,10 @@ interface WishlistApiService {
     @GET("/api/v1/wishlists/getByUser/{idUser}")
     suspend fun getWishlistsByUser(@Path("idUser") idUser: UUID) : List<Wishlist>
 
+    @GET("/api/v1/wishlists/getOfFriend/{idUser}")
+    suspend fun getFriendWishlists(@Path("idUser") idUser: UUID) : List<Wishlist>
+
+
     @GET("/api/v1/wishlists/getAll")
     suspend fun getAllWishlist() : List<Wishlist>
 
