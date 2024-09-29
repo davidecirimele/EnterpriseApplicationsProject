@@ -58,10 +58,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: AddressViewModel, navHostController: NavHostController) {
 
-    LaunchedEffect(Unit) {
-        addressViewModel.fetchDefaultAddress()
-    }
-
     val userDetails by accountViewModel.userDetails.collectAsState()
 
     val defaultAddress by addressViewModel.defaultAddress.collectAsState()

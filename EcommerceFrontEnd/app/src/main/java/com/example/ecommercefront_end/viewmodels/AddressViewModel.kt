@@ -65,9 +65,11 @@ class AddressViewModel(private val repository: AddressRepository): ViewModel() {
                 _defaultAddress.value = repository.getDefaultAddress(SessionManager.user!!.id)
                 Log.d("AddressViewModel", "Default address fetched: ${_defaultAddress.value}")
             } else {
+                _defaultAddress.value = null
                 Log.e("AddressViewModel", "SessionManager.user is null")
             }
         }catch(e : Exception){
+            _defaultAddress.value = null
             Log.d("UserDebug", "loadDefaultAddress: ${_defaultAddress.value}")
         }
     }
