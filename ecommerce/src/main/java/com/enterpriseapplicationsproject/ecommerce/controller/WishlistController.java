@@ -52,6 +52,16 @@ public class WishlistController {
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
+
+    @GetMapping(path = "/getOfFriend/{idUser}")
+    //@PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
+    public  ResponseEntity<List<WishlistDto>> getOfFriend(@PathVariable UUID idUser) {
+        List<WishlistDto> w = wishlistService.getWishlistsOfFriend(idUser);
+        if(w == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // meglio farlo nel service e gestire l'eccezione con l'handler
+        return new ResponseEntity<>(w, HttpStatus.OK);
+    }
+
     @PostMapping(consumes =  "application/json", path = "/add")
     //@PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> add(@RequestBody WishlistDto wDto) {

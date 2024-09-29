@@ -52,6 +52,16 @@ public class WishlistsServiceImpl implements WishlistsService {
     }
 
     @Override
+    public List<WishlistDto> getWishlistsOfFriend(UUID idUser) {
+        return wishlistsDao.findOfFriends(idUser)
+                .stream()
+                .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
+                .collect(Collectors.toList());
+    }
+
+
+
+    @Override
     public List<Wishlist> getAll() {
         return wishlistsDao.findAll();
     }

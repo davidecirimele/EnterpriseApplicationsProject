@@ -32,6 +32,8 @@ public interface WishlistsService {
 
     WishlistDto getById(Long id);
 
+    List<WishlistDto> getWishlistsOfFriend(UUID idUser);
+
     List<WishlistDto> getByLastname(String name);
 
     void deleteWishlist(Long id);
