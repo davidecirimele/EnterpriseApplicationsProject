@@ -15,6 +15,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Credential
 import com.example.ecommercefront_end.model.SaveUser
+import com.example.ecommercefront_end.model.UserDetails
 import com.example.ecommercefront_end.repository.AuthRepository
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -39,8 +40,8 @@ data class ShippingAddress(
 class RegistrationViewModel(private val registrationRepository: AuthRepository) : ViewModel() {
     var registrationData = mutableStateOf(RegistrationData())
 
-    private val _registrationResponse = MutableLiveData<User>()
-    val loginResponse: LiveData<User> get() = _registrationResponse
+    private val _registrationResponse = MutableLiveData<UserDetails>()
+    val loginResponse: LiveData<UserDetails> get() = _registrationResponse
 
     private val _registrationError = MutableLiveData<String>()
     val loginError: LiveData<String> get() = _registrationError

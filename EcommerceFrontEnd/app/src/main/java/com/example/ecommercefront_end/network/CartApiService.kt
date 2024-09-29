@@ -18,10 +18,10 @@ interface CartApiService {
     @RequiresAuth
     suspend fun getCart(@Path("userId") userId: UUID): Response<ShoppingCart?>
 
-    @PUT("/cart/edit-quantity")
+    @PUT("cart/edit-quantity")
     suspend fun updateQuantity(@Body quantityCartItem : QuantityCartItem)
 
-    @DELETE("/cart/remove")
+    @DELETE("cart/remove")
     suspend fun removeItem(@Body cartItemId: CartItemId)
 
 }

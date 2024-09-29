@@ -40,6 +40,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDetailsDto getUserDetailsById(UUID id) {
+        Optional<User> optionalUser = userDao.findById(id);
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return modelMapper.map(user, UserDetailsDto.class);
+        } else {
+            throw new RuntimeException("User with id " + id + " not found");
+        }
+    }
+
+    @Override
     public UserDto save(User user) {
         User savedUser = userDao.save(user);
         return modelMapper.map(savedUser, UserDto.class);

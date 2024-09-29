@@ -52,8 +52,16 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public AddressDto getAddressByUserIdAndDefaultTrue(UUID userid){
-        Address address = addressesDao.findByDefaultAddress(userid);
-        return modelMapper.map(address , AddressDto.class);
+        Optional<Address> optionalAddress = addressesDao.findByDefaultAddress(userid);
+
+        if(optionalAddress.isPresent()){
+            Address address = optionalAddress.get();
+
+            return modelMapper.map(address, AddressDto.class);
+        }
+        else{
+            throw new RuntimeException("Default address not found");
+        }
     }
 
     @Override
@@ -121,17 +129,23 @@ public class AddressServiceImpl implements AddressService {
 
             List<Address> addresses = new ArrayList<>();
 
-            Address defaultAddress = addressesDao.findByDefaultAddress(addressesDao.findUserByAddressId(id).getId());
+            Optional<Address> optionalDefaultAddress = addressesDao.findByDefaultAddress(addressesDao.findUserByAddressId(id).getId());
 
-            defaultAddress.setDefaultAddress(false);
-            address.setDefaultAddress(true);
+            if(optionalDefaultAddress.isPresent()) {
+                Address defaultAddress = optionalDefaultAddress.get();
+                defaultAddress.setDefaultAddress(false);
+                address.setDefaultAddress(true);
 
-            addresses.add(defaultAddress);
-            addresses.add(address);
+                addresses.add(defaultAddress);
+                addresses.add(address);
 
-            addressesDao.saveAll(addresses);
+                addressesDao.saveAll(addresses);
 
-            return modelMapper.map(address, AddressDto.class);
+                return modelMapper.map(address, AddressDto.class);
+            }
+            else{
+                throw new RuntimeException("Default Address not found");
+            }
         }
         else{
             throw new RuntimeException("Address with id " + id + " not found");
@@ -161,6 +175,9 @@ public class AddressServiceImpl implements AddressService {
 
     private void assignNewDefault(Long id){
         List<Address> valid_addresses = addressesDao.findAllByValidity(addressesDao.findUserByAddressId(id).getId());
+
+        if(valid_addresses.isEmpty())
+            return;
 
         for(Address a:valid_addresses){
             if(!a.getId().equals(id)) {
