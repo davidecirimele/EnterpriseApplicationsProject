@@ -5,6 +5,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.RevokedTokenServ
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserRegistrationException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -36,7 +37,7 @@ public class UserController {
 
     @PutMapping(value = "{userId}/change-password", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("#userId == authentication.principal.getId()")
-    public ResponseEntity<UserDto> updatePassword(@PathVariable UUID userId,@RequestBody PasswordUserDto userDto){
+    public ResponseEntity<UserDto> updatePassword(@PathVariable UUID userId,@Valid @RequestBody PasswordUserDto userDto){
         try{
             UserDto updatedUser= userService.updatePassword(userId, userDto);
             String toRevoke = refreshTokenService.getTokenByUserId(userId).getToken();
@@ -49,9 +50,10 @@ public class UserController {
 
     @PutMapping(value = "{userId}/change-email", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("#userId == authentication.principal.getId()")
-    public ResponseEntity<UserDto> updateEmail(@PathVariable UUID userId,@RequestBody EmailUserDto userDto){
+    public ResponseEntity<UserDto> updateEmail(@PathVariable UUID userId, @Valid @RequestBody EmailUserDto userDto){
         log.info("Received request for user/change-email");
         try{
+            log.info("Email is valid: "+userDto.getNewEmail());
             UserDto updatedUser= userService.updateEmail(userId, userDto);
             return new ResponseEntity<>(updatedUser, HttpStatus.OK);}
         catch(UserRegistrationException e){
@@ -61,7 +63,7 @@ public class UserController {
 
     @PutMapping(value = "{userId}/change-phone-number", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("#userId == authentication.principal.getId()")
-    public ResponseEntity<UserDto> updatePhoneNumber(@PathVariable UUID userId,@RequestBody PhoneNumberUserDto userDto){
+    public ResponseEntity<UserDto> updatePhoneNumber(@PathVariable UUID userId,@Valid @RequestBody PhoneNumberUserDto userDto){
         log.info("Received request for user/change-phone-number");
         try{
             UserDto updatedUser= userService.updatePhoneNumber(userId, userDto);

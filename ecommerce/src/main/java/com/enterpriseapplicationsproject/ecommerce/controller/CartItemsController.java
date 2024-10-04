@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("api/v1/cart")
+@RequestMapping("api/v1/shopping-cart/cart")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 public class CartItemsController {
@@ -27,33 +28,25 @@ public class CartItemsController {
 
     private final ShoppingCartsDao shoppingCartsDao;
 
-    //@GetMapping("/{id}")
-//    @PreAuthorize("hasAuthority('ROLE_USER')")
-    //public ResponseEntity<CartItemDto> getUserById(@PathVariable long id) {
-        //List<ProductDto> cartitems = cartItemsService.getProductByCartId(id);
-        //return new ResponseEntity<>(cartitems, HttpStatus.OK);
-    //}
-
-    @GetMapping("/shopping_cart/{cartId}")
-    @PreAuthorize("#userId.userId == authentication.principal.getId()")
-    public ResponseEntity<List<CartItemDto>> getItems(@PathVariable Long cartId, @RequestBody UserIdDto userId) {
+    @GetMapping("/{userId}/{cartId}")
+    @PreAuthorize("#userId == authentication.principal.getId()")
+    public ResponseEntity<List<CartItemDto>> getItems(@PathVariable UUID userId, @PathVariable Long cartId) {
         List<CartItemDto> items = cartItemsService.getCartItemsByCartId(cartId);
         return new ResponseEntity<>(items, HttpStatus.OK);
     }
 
 
-    @PostMapping("/{bookId}/insert")
-    @PreAuthorize("#insertCartItemDto.userId.userId == authentication.principal.getId()")
-    public ResponseEntity<CartItemDto> insertItem(@RequestBody InsertCartItemDto insertCartItemDto,@PathVariable Long bookId) {
-        System.out.println("INSERTED CI: "+insertCartItemDto);
-        CartItemDto insertedItem = cartItemsService.insert(insertCartItemDto, bookId);
+    @PostMapping("/{userId}/{cartId}/{bookId}/insert")
+    @PreAuthorize("#userId == authentication.principal.getId()")
+    public ResponseEntity<CartItemDto> insertItem(@RequestBody QuantityCartItemDto quantityCartItemDto,@PathVariable Long cartId, @PathVariable Long bookId,  @PathVariable UUID userId) {
+        System.out.println("INSERTED CI: "+quantityCartItemDto);
+        CartItemDto insertedItem = cartItemsService.insert(quantityCartItemDto, cartId, bookId);
         return new ResponseEntity<>(insertedItem, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{itemId}/remove")
-    @PreAuthorize("#id.userId == authentication.principal.getId()")
-    public ResponseEntity<CartItemDto> removeItem(@PathVariable Long itemId,@RequestBody UserIdDto id) {
-        System.out.println("REMOVE CI: "+id);
+    @DeleteMapping("/{userId}/{cartId}/{itemId}/remove")
+    @PreAuthorize("#userId == authentication.principal.getId()")
+    public ResponseEntity<CartItemDto> removeItem(@PathVariable Long cartId, @PathVariable Long itemId,@PathVariable UUID userId) {
 
         boolean isRemoved = cartItemsService.delete(itemId);
 
@@ -63,9 +56,9 @@ public class CartItemsController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping("/{itemId}/edit-quantity")
-    @PreAuthorize("#quantityCartItemDto.userId.userId == authentication.principal.getId()")
-    public ResponseEntity<CartItemDto> updateQuantity(@PathVariable Long itemId, @RequestBody QuantityCartItemDto quantityCartItemDto) {
+    @PutMapping("{userId}/{cartId}/{itemId}/edit-quantity")
+    @PreAuthorize("#userId == authentication.principal.getId()")
+    public ResponseEntity<CartItemDto> updateQuantity(@PathVariable UUID userId, @PathVariable Long cartId, @PathVariable Long itemId, @RequestBody QuantityCartItemDto quantityCartItemDto) {
         CartItemDto updatedItem = cartItemsService.updateQuantity(itemId, quantityCartItemDto);
         return new ResponseEntity<>(updatedItem, HttpStatus.OK);
     }

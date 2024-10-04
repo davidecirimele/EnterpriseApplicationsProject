@@ -19,10 +19,6 @@ public class Book {
     @Column(name = "ID")
     private Long id;
 
-    @Basic(optional = false)
-    @Column(name = "CATEGORY")
-    private String category;
-
     @Column(name = "image_path")
     private String imagePath;
 
@@ -73,4 +69,9 @@ public class Book {
 
     @Column(name = "PUBLISH_DATE")
     private Date publishDate;
+
+    @PrePersist
+    protected void onCreate() {
+        this.insertDate = LocalDate.now();
+    }
 }

@@ -12,8 +12,6 @@ public class ShoppingCartDto {
 
     private Long id;
 
-    private UserIdDto userId;
-
     private List<CartItemDto> cartItems;
 
 }
