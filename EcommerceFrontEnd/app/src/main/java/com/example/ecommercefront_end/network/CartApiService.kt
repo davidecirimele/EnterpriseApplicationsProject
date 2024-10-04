@@ -10,7 +10,7 @@ import java.util.UUID
 
 interface CartApiService {
 
-    @POST("shopping_cart/cart/{userId}/{cartId}/{bookId}/insert")
+    @POST("shopping-cart/cart/{userId}/{cartId}/{bookId}/insert")
     @RequiresAuth
     suspend fun insertItem(@Path("userId") userId: UUID, @Path("cartId") cartId: Long, @Path("bookId") bookId: Long, @Body quantityCartItem: QuantityCartItem)
 
@@ -18,11 +18,11 @@ interface CartApiService {
     @RequiresAuth
     suspend fun getCart(@Path("userId") userId: UUID): Response<ShoppingCart?>
 
-    @PUT("shopping_cart/cart/{userId}/{cartId}/{itemId}/edit-quantity")
+    @PUT("shopping-cart/cart/{userId}/{cartId}/{itemId}/edit-quantity")
     @RequiresAuth
     suspend fun updateQuantity(@Path("userId") userId: UUID, @Path("cartId") cartId: Long, @Path("itemId") itemId: Long, @Body quantityCartItem : QuantityCartItem)
 
-    @DELETE("shopping_cart/cart/{userId}/{cartId}/{itemId}/remove")
+    @DELETE("shopping-cart/cart/{userId}/{cartId}/{itemId}/remove")
     @RequiresAuth
     suspend fun removeItem(@Path("userId") userId: UUID, @Path("cartId") cartId: Long, @Path("itemId") itemId: Long)
 
