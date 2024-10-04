@@ -49,8 +49,21 @@ public class AddressController {
         }
     }
 
-    @GetMapping("/{userId}/{id}")
+    @GetMapping("/{id}/default")
     @PreAuthorize("#id == authentication.principal.getId()")
+    public ResponseEntity<AddressDto> getDefaultAddressByUserId(@PathVariable UUID id) {
+        log.info("Received request for addresses/{id}/default");
+        User user = userService.getUserById(id);
+        if (user != null) {
+            AddressDto address = addressService.getAddressByUserIdAndDefaultTrue(user.getId());
+            return new ResponseEntity<>(address, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/{userId}/{id}")
+    @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<AddressDto> getValidAddressByUserId(@PathVariable UUID userId, @PathVariable Long id) {
         log.info("Received request for addresses/{userId}/{id}");
         User user = userService.getUserById(userId);
@@ -87,13 +100,13 @@ public class AddressController {
 
     @DeleteMapping("/{addressId}/delete")
     @PreAuthorize("#userId.userId == authentication.principal.getId()")
-    public ResponseEntity<Void> deleteAddress(@PathVariable Long addressId, @RequestBody UserIdDto userId) {
+    public ResponseEntity<Boolean> deleteAddress(@PathVariable Long addressId, @RequestBody UserIdDto userId) {
         log.info("Received request for addresses/{addressId}/delete");
         boolean isRemoved = addressService.deleteAddress(addressId);
         if (!isRemoved) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping("/{addressId}/update-default")
@@ -106,7 +119,7 @@ public class AddressController {
 
     @PutMapping("/{userId}/{addressId}/edit-address")
     @PreAuthorize("#userId == authentication.principal.getId()")
-    public ResponseEntity<AddressDto> updateDefaultAddress(@PathVariable UUID userId, @PathVariable Long addressId, @RequestBody SaveAddressDto addressDto) {
+    public ResponseEntity<AddressDto> updateAddress(@PathVariable UUID userId, @PathVariable Long addressId, @RequestBody SaveAddressDto addressDto) {
         log.info("Received request for addresses/{userId}/{addressId}/edit-address");
 
         AddressDto updatedAddress = addressService.updateAddress(addressId, addressDto);

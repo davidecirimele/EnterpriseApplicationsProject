@@ -3,6 +3,7 @@ package com.example.ecommercefront_end.network
 import com.example.ecommercefront_end.SessionManager
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.time.LocalDate
@@ -16,6 +17,7 @@ object RetrofitClient {
 
     private const val SAMUELES_URL = "https://192.168.1.53:8081/api/v1/" //URL di Samuele S
 
+    private const val DAVIDES_URL = "https://192.168.1.4:8080/api/v1/"
 
     private val client: OkHttpClient by lazy {
         val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
@@ -37,11 +39,17 @@ object RetrofitClient {
         val sslContext = SSLContext.getInstance("SSL")
         sslContext.init(null, trustAllCerts, java.security.SecureRandom())
 
+        // Configura il logging interceptor
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY // Logga il corpo della richiesta e della risposta
+        }
+
         val allHostsValid = HostnameVerifier { _, _ -> true }
         OkHttpClient.Builder()
             .sslSocketFactory(sslContext.socketFactory, trustAllCerts[0] as X509TrustManager)
             .hostnameVerifier(allHostsValid)
             .addInterceptor(AuthInterceptor(SessionManager))
+            .addInterceptor(loggingInterceptor)
             .build()
     }
 

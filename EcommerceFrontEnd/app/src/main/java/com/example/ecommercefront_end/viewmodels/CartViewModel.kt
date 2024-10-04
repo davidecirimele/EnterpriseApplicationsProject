@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 import com.example.ecommercefront_end.model.CartItem
+import com.example.ecommercefront_end.model.ShoppingCart
 import com.example.ecommercefront_end.model.UserId
 import com.example.ecommercefront_end.repository.CartRepository
 import java.util.UUID
@@ -16,6 +17,9 @@ import java.util.UUID
 class CartViewModel(private val repository: CartRepository) : ViewModel() {
     private val _cartItems = MutableStateFlow<List<CartItem>>(emptyList())
     val cartItems: StateFlow<List<CartItem>> = _cartItems
+
+    private val _shoppingCart = MutableStateFlow<ShoppingCart?>(null)
+    val shoppingCart: StateFlow<ShoppingCart?> = _shoppingCart
 
     private val _totalAmount = MutableStateFlow(0.0)
     val totalAmount: StateFlow<Double> = _totalAmount
@@ -26,9 +30,11 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
             try {
                 println("sto caricando il carrello")
 
-                val cart = repository.getCart(getUser().id)
+                val cart = repository.getCart(getUser().userId)
+
                 cart.onSuccess { cart_ ->
                     if (cart_ != null) {
+                        _shoppingCart.value = cart_
                         _cartItems.value = cart_.cartItems
                     }
                     updateTotalAmount()
@@ -46,9 +52,11 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
             try {
                 val updatedItem = item.copy(quantity = newQuantity)
                 SessionManager.user?.let { UserId(it.id) }?.let {
-                    repository.updateQuantity(updatedItem.quantity,
-                        it
-                    )
+                    shoppingCart.value?.let { it1 ->
+                        repository.updateQuantity(updatedItem.quantity,
+                            it.userId, it1.id, item.id
+                        )
+                    }
                 }
                 // Ricarica gli articoli dopo l'aggiornamento
                 _cartItems.value = _cartItems.value.map { currentItem ->
@@ -67,7 +75,7 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
             try {
                 val userId = SessionManager.user?.id
                 if (userId != null)
-                    repository.removeItem(item.id, UserId(userId))
+                    shoppingCart.value?.let { repository.removeItem(item.id, it.id, userId) }
                 _cartItems.value = _cartItems.value.filterNot { it.id == item.id }
 
             } catch (e: Exception) {

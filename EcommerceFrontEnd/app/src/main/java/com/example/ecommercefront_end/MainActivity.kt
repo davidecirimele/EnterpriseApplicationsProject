@@ -87,12 +87,14 @@ import com.example.ecommercefront_end.repository.AuthRepository
 import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.repository.HomeRepository
 import com.example.ecommercefront_end.repository.WishlistRepository
+import com.example.ecommercefront_end.ui.user.EditAddressScreen
 import com.example.ecommercefront_end.ui.cart.CartScreen
 import com.example.ecommercefront_end.ui.home.BookDetailsScreen
 import com.example.ecommercefront_end.ui.home.HomeScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.ui.user.AccountManagerScreen
 import com.example.ecommercefront_end.ui.user.AddressesScreen
+import com.example.ecommercefront_end.ui.user.InsertAddressScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
 import com.example.ecommercefront_end.ui.user.UserAuthScreen
 import com.example.ecommercefront_end.ui.wishlist.WishlistsScreen
@@ -104,6 +106,7 @@ import com.example.ecommercefront_end.viewmodels.LoginViewModel
 import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.async
 
 
 class MainActivity : ComponentActivity() {
@@ -136,6 +139,7 @@ fun NavigationView(navController: NavHostController) {
     val homeViewModel = remember { HomeViewModel(repository = HomeRepository(RetrofitClient.booksApiService)) }
     val cartViewModel = remember { CartViewModel(repository = CartRepository(RetrofitClient.cartApiService)) }
     val accountViewModel = remember { AccountViewModel(repository = AccountRepository(RetrofitClient.userApiService)) }
+    val addressViewModel = remember { AddressViewModel(repository = AddressRepository(RetrofitClient.addressApiService)) }
 
     Scaffold(
         topBar = { TopBar(navController) },
@@ -189,23 +193,54 @@ fun NavigationView(navController: NavHostController) {
 
             composable("account-manager") {
                 selectedIndex.value = 1
+
+                LaunchedEffect(Unit) {
+                    accountViewModel.loadUserDetails(forceReload = true)
+                }
+
                 val _userApiService = RetrofitClient.userApiService
                 val repository = AccountRepository(_userApiService)
-                AccountManagerScreen(viewModel = AccountViewModel(repository), navController)
+                AccountManagerScreen(viewModel = accountViewModel, navController)
             }
             composable("my-account") {
-                val _userApiService = RetrofitClient.userApiService
-                val repository = AccountRepository(_userApiService)
+                LaunchedEffect(Unit) {
+                    Log.d("MyAccountScreen", "SessionManager.user: ${SessionManager.user}")
+                    val userDetailsJob = async {accountViewModel.loadUserDetails(forceReload = true)}
+                    val defaultAddress = async {addressViewModel.fetchDefaultAddress(forceReload = true)}
+
+                    userDetailsJob.await()
+                    defaultAddress.await()
+                }
                 MyAccountScreen(
-                    viewModel = AccountViewModel(repository),
+                    accountViewModel = accountViewModel, addressViewModel = addressViewModel,
                     navHostController = navController)
             }
 
             composable("addresses") {
+
+                LaunchedEffect(Unit) {
+                    addressViewModel.fetchUserAddresses(forceReload = true)
+                }
                 val _addressApiService = RetrofitClient.addressApiService
                 val repository = AddressRepository(_addressApiService)
                 AddressesScreen(
-                    viewModel = AddressViewModel(repository), navController)
+                    viewModel = addressViewModel, navController)
+            }
+
+            composable("insert-address") {
+                val _addressApiService = RetrofitClient.addressApiService
+                val repository = AddressRepository(_addressApiService)
+                InsertAddressScreen(viewModel = addressViewModel, navController)
+            }
+
+            composable(
+                route = "edit-address/{addressId}",
+                arguments = listOf(navArgument("addressId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val addressId = backStackEntry.arguments?.getLong("addressId")
+                if (addressId != null) {
+                    EditAddressScreen(viewModel = addressViewModel, navController = navController, addressId)
+                }
             }
 
         }
@@ -220,7 +255,7 @@ fun TopBar(navHostController: NavHostController) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
-    val isSearchVisible = currentRoute != "userAuth" && currentRoute != "account-manager" && currentRoute != "my-account" && currentRoute != "addresses"
+    val isSearchVisible = currentRoute == "home"
     val colorScheme = MaterialTheme.colorScheme
 
     TopAppBar(
@@ -238,6 +273,13 @@ fun TopBar(navHostController: NavHostController) {
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.back)
                     )
+                }
+            }
+        },
+        actions = {
+            if (isSearchVisible) {
+                IconButton(onClick = { /* Handle settings click */ }) {
+                    Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings))
                 }
             }
         },
@@ -259,22 +301,7 @@ fun SearchBar() {
     Text(text = "🔍 Search...", modifier = Modifier.padding(8.dp))
 }
 
-class PreviewParameterProvider : PreviewParameterProvider<Int> {
-    override val values = sequenceOf(0, 1, 2, 3)
-}
 
-@SuppressLint("RememberReturnType")
-@Preview(showBackground = true)
-@Composable
-fun BottomBarPreview() {
-    val selectedIndex = remember { mutableStateOf(0) } // Inizializza con un valore di esempio
-    // Crea un NavHostController fittizio per l'anteprima
-    val navController = rememberNavController()
-
-    BottomBar(selectedIndex, navController)
-}
-
-@PreviewParameter(PreviewParameterProvider::class)
 @Composable
 fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostController) {
     BottomNavigation(
@@ -299,7 +326,11 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             onClick = {
                 selectedIndex.value = 0
                 navHostController.navigate("home") {
-                    // ...
+                    popUpTo(navHostController.graph.startDestinationId) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
                 }
             },
             icon = {
@@ -327,7 +358,7 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             selected = selectedIndex.value == 1,
             onClick = {
                 selectedIndex.value = 1
-                if (SessionManager.user == null) {
+                if(SessionManager.user == null)
                     navHostController.navigate("userAuth") {
                         popUpTo(navHostController.graph.startDestinationId) {
                             saveState = true
@@ -335,7 +366,7 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
                         launchSingleTop = true
                         restoreState = true
                     }
-                } else {
+                else{
                     navHostController.navigate("account-manager") {
                         popUpTo(navHostController.graph.startDestinationId) {
                             saveState = true

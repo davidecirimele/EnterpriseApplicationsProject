@@ -49,7 +49,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/v1/users/**").authenticated();
                     auth.requestMatchers("/api/v1/addresses/**").authenticated();
                     auth.requestMatchers("/api/v1/shopping-cart/**").authenticated();
-                    auth.requestMatchers("/api/v1/cart/**").authenticated();;
+                    auth.requestMatchers("/api/v1/shopping-cart/cart/**").authenticated();;
                     auth.requestMatchers("api/v1/admin/all-tokens").authenticated();
                     auth.requestMatchers("api/v1/admin/all-users").authenticated();
                     auth.requestMatchers("api/v1/admin/register").permitAll();
@@ -91,7 +91,7 @@ public class SecurityConfig {
         @Bean
         public CorsConfigurationSource corsConfigurationSource() { //serve per abilitare le chiamate da localhost
             CorsConfiguration configuration = new CorsConfiguration();
-            configuration.setAllowedOrigins(Arrays.asList("https://localhost:*")); // Modifica secondo le tue esigenze
+            configuration.setAllowedOrigins(Arrays.asList("https://localhost:*","https://192.168.1.23:*")); // Modifica secondo le tue esigenze
             //configuration.setAllowedOrigins(Arrays.asList("https://localhost:8081","https://192.168.1.54:8081", "https://93.44.97.32")); // Modifica secondo le tue esigenze
 
             configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));

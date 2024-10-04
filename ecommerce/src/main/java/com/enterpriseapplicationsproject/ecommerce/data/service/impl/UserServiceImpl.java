@@ -5,8 +5,10 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import com.enterpriseapplicationsproject.ecommerce.exception.ResourceNotFoundException;
+import com.enterpriseapplicationsproject.ecommerce.exception.UserAlreadyExistsException;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserNotFoundException;
 import jakarta.persistence.DiscriminatorValue;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,6 +36,18 @@ public class UserServiceImpl implements UserService {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             return modelMapper.map(user, UserDto.class);
+        } else {
+            throw new RuntimeException("User with id " + id + " not found");
+        }
+    }
+
+    @Override
+    public UserDetailsDto getUserDetailsById(UUID id) {
+        Optional<User> optionalUser = userDao.findById(id);
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return modelMapper.map(user, UserDetailsDto.class);
         } else {
             throw new RuntimeException("User with id " + id + " not found");
         }
@@ -92,7 +106,6 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Old password is incorrect");
         }
 
-
         user.getCredential().setPassword(passwordEncoder.encode(userDto.getNewPassword()));
         userDao.save(user);
         return modelMapper.map(user, UserDto.class);
@@ -106,6 +119,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateEmail(UUID userId, EmailUserDto userDto) {
+
+        userDao.findByCredentialEmail(userDto.getNewEmail()).ifPresent(u -> {
+            throw new UserAlreadyExistsException("User with this email already exists");
+        });
+
         User user = userDao.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
@@ -116,6 +134,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updatePhoneNumber(UUID userId, PhoneNumberUserDto userDto) {
+
+        userDao.findByPhoneNumber(userDto.getNewPhoneNumber()).ifPresent(u -> {
+            throw new UserAlreadyExistsException("User with this phone number already exists");
+        });
+
         User user = userDao.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
