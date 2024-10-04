@@ -101,6 +101,5 @@ fun addNewAddressCard(navHostController: NavHostController){
                 modifier = Modifier
                     .size(50.dp).align(Alignment.CenterHorizontally)
         )
-
     }
 }

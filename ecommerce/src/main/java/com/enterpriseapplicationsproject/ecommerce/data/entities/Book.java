@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 
 @EqualsAndHashCode()
@@ -21,12 +19,15 @@ public class Book {
     @Column(name = "ID")
     private Long id;
 
-
     @Column(name = "image_path")
     private String imagePath;
 
     @Column(name = "WEIGHT")
     private Double weight;
+
+    @Basic(optional = false)
+    @Column(name = "INSERT_DATE")
+    private LocalDate insertDate;
 
     @Basic(optional = false)
     @Column(name = "PRICE")
@@ -38,12 +39,16 @@ public class Book {
 
     @Column(name = "TITLE")
     private String title;
+
     @Column(name = "AUTHOR")
     private String author;
+
     @Column(name = "ISBN", unique = true)
     private String ISBN;
+
     @Column(name = "PAGES")
     private int pages;
+
     @Column(name = "EDITION")
     private String edition;
 
@@ -62,9 +67,12 @@ public class Book {
     @Column(name = "AGE")
     private int age;
     @Column(name = "PUBLISH_DATE")
-    private LocalDate publishDate;
+    private Date publishDate;
 
-    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
-    private List<Review> reviews = new ArrayList<>();
+    @PrePersist
+    protected void onCreate() {
+        this.insertDate = LocalDate.now();
+    }
+}
 
 }

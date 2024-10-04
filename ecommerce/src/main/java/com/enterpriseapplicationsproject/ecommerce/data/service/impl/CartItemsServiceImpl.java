@@ -49,8 +49,8 @@ public class CartItemsServiceImpl implements CartItemsService {
     }
 
     @Override
-    public CartItemDto insert(InsertCartItemDto insertCartItemDto, Long bookId) {
-        Optional<ShoppingCart> optionalCart = shoppingCartsDao.findByUserId(insertCartItemDto.getUserId().getUserId());
+    public CartItemDto insert(QuantityCartItemDto insertCartItemDto, Long cartId, Long bookId) {
+        Optional<ShoppingCart> optionalCart = shoppingCartsDao.findById(cartId);
         Optional<Book> optionalBook = booksDao.findById(bookId);
         if(optionalCart.isPresent() && optionalBook.isPresent())
         {

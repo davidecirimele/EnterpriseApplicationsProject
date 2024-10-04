@@ -6,6 +6,7 @@ import com.example.ecommercefront_end.model.PhoneNumber
 import com.example.ecommercefront_end.model.RequiresAuth
 import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.model.UserDetails
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -22,10 +23,10 @@ interface UserApiService {
 
     @PUT("users/{id}/change-email")
     @RequiresAuth
-    suspend fun changeEmail(@Path("id") id: UUID, @Body email: Email)
+    suspend fun changeEmail(@Path("id") id: UUID, @Body email: Email) : Response<User>
 
     @PUT("users/{id}/change-phone-number")
     @RequiresAuth
-    suspend fun changePhoneNumber(@Path("id") id: UUID, @Body phoneNumber: PhoneNumber)
+    suspend fun changePhoneNumber(@Path("id") id: UUID, @Body phoneNumber: PhoneNumber) : Response<User>
 
 }

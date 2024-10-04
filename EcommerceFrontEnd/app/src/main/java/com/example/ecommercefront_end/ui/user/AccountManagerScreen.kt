@@ -102,7 +102,7 @@ fun OptionsSection(navHostController: NavHostController){
 fun PurchasedHistoryCard(history: List<Pair<String,String>>){
     Column {
         Text(
-            text = "Purchased History",
+            text = "Purchased Books",
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp
         )

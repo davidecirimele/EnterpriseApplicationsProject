@@ -1,7 +1,6 @@
 package com.example.ecommercefront_end.network
 
 import com.example.ecommercefront_end.model.CartItemId
-import com.example.ecommercefront_end.model.InsertCartItem
 import com.example.ecommercefront_end.model.QuantityCartItem
 import com.example.ecommercefront_end.model.RequiresAuth
 import com.example.ecommercefront_end.model.ShoppingCart
@@ -11,17 +10,20 @@ import java.util.UUID
 
 interface CartApiService {
 
-    @POST("cart/insert")
-    suspend fun insertItem(insertCartItem: InsertCartItem)
+    @POST("shopping-cart/cart/{userId}/{cartId}/{bookId}/insert")
+    @RequiresAuth
+    suspend fun insertItem(@Path("userId") userId: UUID, @Path("cartId") cartId: Long, @Path("bookId") bookId: Long, @Body quantityCartItem: QuantityCartItem)
 
-    @GET("shopping-cart/user/{userId}")
+    @GET("shopping-cart/get/{userId}")
     @RequiresAuth
     suspend fun getCart(@Path("userId") userId: UUID): Response<ShoppingCart?>
 
-    @PUT("cart/edit-quantity")
-    suspend fun updateQuantity(@Body quantityCartItem : QuantityCartItem)
+    @PUT("shopping-cart/cart/{userId}/{cartId}/{itemId}/edit-quantity")
+    @RequiresAuth
+    suspend fun updateQuantity(@Path("userId") userId: UUID, @Path("cartId") cartId: Long, @Path("itemId") itemId: Long, @Body quantityCartItem : QuantityCartItem)
 
-    @DELETE("cart/remove")
-    suspend fun removeItem(@Body cartItemId: CartItemId)
+    @DELETE("shopping-cart/cart/{userId}/{cartId}/{itemId}/remove")
+    @RequiresAuth
+    suspend fun removeItem(@Path("userId") userId: UUID, @Path("cartId") cartId: Long, @Path("itemId") itemId: Long)
 
 }

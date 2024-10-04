@@ -95,13 +95,21 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
 
     var isEditingPhoneNumber by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxWidth().pointerInput(Unit) {
-        detectTapGestures(onTap = {
-            // Quando viene toccato qualsiasi punto al di fuori del campo di testo
-            isEditingPhoneNumber = false
-            isEditingEmail = false
-        })
-    }) {
+    var isErrorEmailTriggered by remember { mutableStateOf(false) }
+
+    var isErrorPhoneNumberTriggered by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .pointerInput(Unit) {
+            detectTapGestures(onTap = {
+                // Quando viene toccato qualsiasi punto al di fuori del campo di testo
+                isEditingPhoneNumber = false
+                isEditingEmail = false
+                isErrorPhoneNumberTriggered = false
+                isErrorEmailTriggered = false
+            })
+        }) {
         Row(modifier = Modifier.fillMaxWidth()){
             if (userDetails != null) {
                 Text(
@@ -134,12 +142,12 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
         }
         Spacer(modifier = Modifier.height(15.dp))
         Row(modifier = Modifier.fillMaxWidth()){
-            EditEmailScreen(isEditingEmail, accountViewModel = accountViewModel, onSuccess = {
+            EditScreen("Email", isEditingEmail, isErrorEmailTriggered, accountViewModel = accountViewModel, onSuccess = {
                     isEditingEmail = false
                     navController.navigate("userAuth") {
                         popUpTo("userAuth") { inclusive = true }
                     }
-            })
+            }, onError = {isErrorEmailTriggered = true})
         }
         Spacer(modifier = Modifier.height(30.dp))
 
@@ -166,12 +174,12 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
             }
             Spacer(modifier = Modifier.height(15.dp))
             Row(modifier = Modifier.fillMaxWidth()){
-                EditPhoneNumberScreen(isEditingPhoneNumber, accountViewModel = accountViewModel, onSuccess = {
+                EditScreen("Phone Number", isEditingPhoneNumber, isErrorPhoneNumberTriggered, accountViewModel = accountViewModel, onSuccess = {
                     isEditingPhoneNumber = false
                     navController.navigate("my-account") {
                     popUpTo("my-account") { inclusive = true }
                 }
-            })
+            }, onError = {isErrorPhoneNumberTriggered = true})
             }
         }
         Spacer(modifier = Modifier.height(30.dp))
@@ -229,7 +237,7 @@ fun Options(navHostController: NavHostController){
 }
 
 @Composable
-fun EditEmailScreen(isEditing: Boolean, accountViewModel: AccountViewModel, onSuccess: () -> Unit) {
+fun EditScreen(key: String, isEditing: Boolean, isErrorTriggered: Boolean, accountViewModel: AccountViewModel, onSuccess: () -> Unit, onError: () -> Unit) {
     var inputText by remember { mutableStateOf("") }
 
     var showDialog by remember { mutableStateOf(false)}
@@ -244,13 +252,17 @@ fun EditEmailScreen(isEditing: Boolean, accountViewModel: AccountViewModel, onSu
             TextField(
                 value = inputText,
                 onValueChange = { inputText = it },
-                label = { Text(text = "Enter your new email") },
+                label = { Text(text = "Enter your new $key") },
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth()
             )
+            Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp)) // Spazio tra i componenti
+            if(isErrorTriggered) {
+                Text(text = "Error changing the $key", fontWeight = FontWeight.Bold, color = Color.Red)
+                Spacer(modifier = Modifier.height(16.dp)) // Spazio tra i componenti
+            }
 
             // Bottone "Submit"
             Button(
@@ -269,78 +281,24 @@ fun EditEmailScreen(isEditing: Boolean, accountViewModel: AccountViewModel, onSu
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text(text = "Confirm Email") },
-            text = { Text(text = "Are you sure you want to change this email? You will be asked to log in again", fontWeight = FontWeight.Bold) },
+            title = { Text(text = "Confirm $key") },
+            text = { Column {
+                Text(
+                    text = "Are you sure you want to change this $key?",
+                    fontWeight = FontWeight.Bold
+                )
+                if (key == "Email") {
+                    Text(
+                        text = "You will be asked to log in again",
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }},
             confirmButton = {
                 Button(
                     onClick = {
                         accountViewModel.viewModelScope.launch {
-                            accountViewModel.editEmail(inputText, onSuccess)
-                        }
-                        showDialog = false
-                    }
-                ) {
-                    Text("Confirm")
-                }
-            },
-            dismissButton = {
-                Button(
-                    onClick = { showDialog = false }
-                ) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-}
-
-@Composable
-fun EditPhoneNumberScreen(isEditing: Boolean, accountViewModel: AccountViewModel, onSuccess: () -> Unit) {
-    var inputText by remember { mutableStateOf("") }
-
-    var showDialog by remember { mutableStateOf(false)}
-    Column {
-
-        // Se `isEditing` è true, mostra il campo di testo e il bottone "Submit"
-        if (isEditing) {
-            Spacer(modifier = Modifier.height(16.dp)) // Spazio tra i componenti
-
-            // Campo di testo per inserire le modifiche
-            TextField(
-                value = inputText,
-                onValueChange = { inputText = it },
-                label = { Text(text = "Enter your new Phone Number") },
-                modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp)) // Spazio tra i componenti
-
-            // Bottone "Submit"
-            Button(
-                onClick = {
-                    showDialog = true
-                },
-                modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxWidth()
-            ) {
-                Text(text = "Submit")
-            }
-        }
-    }
-
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text(text = "Confirm Phone Number") },
-            text = { Text(text = "Are you sure you want to change this phone number?", fontWeight = FontWeight.Bold) },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        accountViewModel.viewModelScope.launch {
-                            accountViewModel.editPhoneNumber(inputText, onSuccess)
+                            accountViewModel.editFunction(key,inputText, onSuccess, onError)
                         }
                         showDialog = false
                     }

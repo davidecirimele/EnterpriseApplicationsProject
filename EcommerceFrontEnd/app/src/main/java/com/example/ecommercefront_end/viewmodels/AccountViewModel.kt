@@ -1,6 +1,9 @@
 package com.example.ecommercefront_end.viewmodels
 
+import android.content.ContentValues.TAG
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.compose.AsyncImagePainter
@@ -13,11 +16,15 @@ import com.example.ecommercefront_end.repository.AccountRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import retrofit2.Response
 import java.util.UUID
 
 class AccountViewModel(private val repository: AccountRepository): ViewModel() {
     private val _userDetails = MutableStateFlow<UserDetails?>(null)
     val userDetails: StateFlow<UserDetails?> = _userDetails
+
+    private val _onError = MutableLiveData<String>()
+    val onError: LiveData<String> get() = _onError
 
     fun loadUserDetails(forceReload : Boolean = false) {
 
@@ -38,23 +45,32 @@ class AccountViewModel(private val repository: AccountRepository): ViewModel() {
         }
     }
 
+    suspend fun editFunction(key:String, value : String, onSuccess : ()-> Unit, onError : ()-> Unit){
+        viewModelScope.launch {
+            try {
+                val response: Response<User>?;
 
+                if(key == "Email") {
+                    response = userDetails.value?.let { repository.editEmail(it.id, value) }
+                }
+                else if(key == "Phone Number"){
+                    response = userDetails.value?.let { repository.editPhoneNumber(it.id, value) }
+                }
+                else{
+                    response = null
+                }
 
-    suspend fun editEmail(email : String, onSuccess : ()-> Unit){
-        try {
-            userDetails.value?.let { repository.editEmail(it.id, email) }
-            onSuccess()
-        }catch (e: Exception) {
-            // TODO gestire eccezione
-        }
-    }
-
-    suspend fun editPhoneNumber(phoneNumber : String, onSuccess : ()-> Unit){
-        try {
-            userDetails.value?.let { repository.editPhoneNumber(it.id, phoneNumber) }
-            onSuccess()
-        }catch (e: Exception) {
-            // TODO gestire eccezione
+                if (response != null) {
+                    if (response.isSuccessful && response.body() != null) {
+                        onSuccess()
+                    }
+                    else {
+                        onError()
+                    }
+                }
+            } catch (e: Exception) {
+                onError()
+            }
         }
     }
 

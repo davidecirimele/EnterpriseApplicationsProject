@@ -13,7 +13,7 @@ public interface CartItemsService {
 
     CartItemDto save(CartItem cartitem);
 
-    CartItemDto insert(InsertCartItemDto insertCartItemDto, Long bookId);
+    CartItemDto insert(QuantityCartItemDto quantityCartItemDto, Long bookId, Long cartId);
 
     boolean delete(Long id);
 
