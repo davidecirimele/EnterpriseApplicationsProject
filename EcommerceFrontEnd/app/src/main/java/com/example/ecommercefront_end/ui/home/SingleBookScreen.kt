@@ -376,7 +376,11 @@ fun BookDetailsScreen(book: Book) {
 
                         )
                         Text(
-                            text = "${book.age}",
+                            text = if (book.age != null) {
+                                "${book.age}"
+                            }else {
+                                "--" // O un altro messaggio di default
+                            },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -393,7 +397,11 @@ fun BookDetailsScreen(book: Book) {
 
                         )
                         Text(
-                            text = book.publishDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                            text = if (book.publishDate != null) {
+                                book.publishDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                            } else {
+                                "--" // O un altro messaggio di default
+                            },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -410,7 +418,11 @@ fun BookDetailsScreen(book: Book) {
 
                         )
                         Text(
-                            text = "${book.weight} kg",
+                            if (book.weight != null) {
+                                "${book.weight} kg"
+                            } else {
+                                " --" // O un altro messaggio di default
+                            },
                             modifier = Modifier.weight(1f)
                         )
                     }

@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end.network
 
+import com.example.ecommercefront_end.model.RequiresAuth
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistUpdate
 import retrofit2.Response
@@ -14,23 +15,28 @@ import java.util.UUID
 
 interface WishlistApiService {
 
-    @POST("/api/v1/wishlists/add")
+    @POST("wishlists/add")
+    @RequiresAuth
     suspend fun addWishlist(@Body w: Wishlist)
 
-    @GET("/api/v1/wishlists/get/{idW}")
+    @GET("wishlists/get/{idW}")
+    @RequiresAuth
     suspend fun getWishlistById(@Path("idW") idW: UUID)
 
-    @GET("/api/v1/wishlists/getByUser/{idUser}")
+    @GET("wishlists/getByUser/{idUser}")
+    @RequiresAuth
     suspend fun getWishlistsByUser(@Path("idUser") idUser: UUID) : List<Wishlist>
 
-    @GET("/api/v1/wishlists/getAll")
+    @GET("wishlists/getAll")
+    @RequiresAuth
     suspend fun getAllWishlist() : List<Wishlist>
 
-    @PUT("/api/v1/wishlists/update")
+    @PUT("wishlists/update")
+    @RequiresAuth
     suspend fun updateWishlist(@Body w: Wishlist): Response<Unit>
 
-
-    @DELETE("/api/v1/wishlists/delete/{idWishlist}")
+    @DELETE("wishlists/delete/{idWishlist}")
+    @RequiresAuth
     suspend fun deleteWishlist(@Path("idWishlist") idW: Long) : Response<Unit>
 
 }

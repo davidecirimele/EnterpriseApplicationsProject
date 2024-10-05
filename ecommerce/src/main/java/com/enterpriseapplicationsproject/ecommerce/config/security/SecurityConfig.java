@@ -57,8 +57,8 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/v1/books/add").authenticated();
                     auth.requestMatchers("/api/v1/books/getAll").permitAll(); //testing home front end
                     //testing fron end
-                    auth.requestMatchers("/api/v1/wishlists/**").permitAll();
-                    auth.requestMatchers("/api/v1/wishlist-items/**").permitAll();
+                    auth.requestMatchers("/api/v1/wishlists/**").authenticated();
+                    auth.requestMatchers("/api/v1/wishlist-items/**").authenticated();
                     }
                     )
                     .sessionManagement(session -> session
@@ -91,7 +91,7 @@ public class SecurityConfig {
         @Bean
         public CorsConfigurationSource corsConfigurationSource() { //serve per abilitare le chiamate da localhost
             CorsConfiguration configuration = new CorsConfiguration();
-            configuration.setAllowedOrigins(Arrays.asList("https://localhost:*","https://192.168.1.23:*")); // Modifica secondo le tue esigenze
+            configuration.setAllowedOrigins(Arrays.asList("https://localhost:*","https://192.168.1.23:*", "https://10.0.2.2:*")); // Modifica secondo le tue esigenze
             //configuration.setAllowedOrigins(Arrays.asList("https://localhost:8081","https://192.168.1.54:8081", "https://93.44.97.32")); // Modifica secondo le tue esigenze
 
             configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));

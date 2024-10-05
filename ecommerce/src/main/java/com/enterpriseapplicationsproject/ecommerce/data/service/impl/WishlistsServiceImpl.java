@@ -42,7 +42,6 @@ public class WishlistsServiceImpl implements WishlistsService {
     }
 
 
-
     @Override
     public List<WishlistDto> getWishlistsByUser(UUID userId) {
         return wishlistsDao.findByUserId(userId)

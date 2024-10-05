@@ -11,12 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(value = "/api/v1/wishlists")// produces indica che
+@RequestMapping(value = "api/v1/wishlists")// produces indica che
 @CrossOrigin(origins = "*", allowedHeaders = "*") // indica
 @RequiredArgsConstructor
 @Slf4j // indica che il logger è di tipo log4j
@@ -44,8 +43,9 @@ public class WishlistController {
 
 
     @GetMapping(path = "/getByUser/{idUser}")
-    //@PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
+    @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<WishlistDto>> getByUser(@PathVariable UUID idUser) {
+        log.info("Received request for addresses/{idUser}");
         List<WishlistDto> w = wishlistService.getWishlistsByUser(idUser);
         if(w == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // meglio farlo nel service e gestire l'eccezione con l'handler
