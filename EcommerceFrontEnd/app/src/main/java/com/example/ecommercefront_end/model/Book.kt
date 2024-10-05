@@ -1,6 +1,8 @@
 package com.example.ecommercefront_end.model
 
 import com.google.gson.annotations.SerializedName
+import retrofit2.http.Multipart
+import java.io.File
 import java.time.LocalDate
 
 data class Book(
@@ -22,4 +24,6 @@ data class Book(
     val weight: Double,
     val price: Double,
     val stock: Int,
+    //val image: ByteArray,
+
 )

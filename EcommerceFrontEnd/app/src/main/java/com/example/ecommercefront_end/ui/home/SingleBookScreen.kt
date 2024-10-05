@@ -34,15 +34,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import com.example.ecommercefront_end.SessionManager
 import java.time.format.DateTimeFormatter
 import com.example.ecommercefront_end.model.Book
+import com.example.ecommercefront_end.repository.CartRepository
+import kotlinx.coroutines.launch
 
 @Composable
-fun BookDetailsScreen(book: Book) {
+fun BookDetailsScreen(book: Book, cartRepository: CartRepository ) {
     var selectedQuantity by remember { mutableStateOf(1) }
     var shippingAddress by remember { mutableStateOf("Via Roma 1") }
 
@@ -157,8 +161,18 @@ fun BookDetailsScreen(book: Book) {
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
+                val coroutineScope = rememberCoroutineScope()
                 Button(
-                    onClick = { /* TODO: Aggiungi al carrello */ },
+                    onClick = {
+                        coroutineScope.launch {
+                            cartRepository.addCartItem(
+                                SessionManager.getUser(),
+                                selectedQuantity,
+                                book.id
+                            )
+                        }
+                    },
+
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(60.dp)

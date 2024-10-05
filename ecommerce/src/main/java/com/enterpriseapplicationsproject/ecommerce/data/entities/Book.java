@@ -74,5 +74,3 @@ public class Book {
         this.insertDate = LocalDate.now();
     }
 }
-
-}

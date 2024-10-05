@@ -141,13 +141,13 @@ fun NavigationView(navController: NavHostController) {
                 val book by homeViewModel.bookFlow.collectAsState()
 
                 book?.let {
-                    BookDetailsScreen(book = it)
+                    BookDetailsScreen(book = it, cartRepository = CartRepository(RetrofitClient.cartApiService))
                 } ?: Text("Libro non trovato")
             }
 
             composable("cart") {
                 selectedIndex.value = 2
-                CartScreen(viewModel = cartViewModel, onCheckoutClick = { /* Add your action here */ })
+                CartScreen(viewModel = cartViewModel, navController = navController, onCheckoutClick = { /* Add your action here */ })
 
             }
             composable("wishlist") {

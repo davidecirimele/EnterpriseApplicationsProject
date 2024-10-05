@@ -1,6 +1,6 @@
 package com.example.ecommercefront_end.network
 
-import com.example.ecommercefront_end.model.CartItemId
+
 import com.example.ecommercefront_end.model.QuantityCartItem
 import com.example.ecommercefront_end.model.RequiresAuth
 import com.example.ecommercefront_end.model.ShoppingCart

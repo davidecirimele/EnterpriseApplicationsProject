@@ -2,7 +2,6 @@ package com.example.ecommercefront_end.repository
 
 import com.example.ecommercefront_end.network.CartApiService
 import com.example.ecommercefront_end.model.QuantityCartItem
-import com.example.ecommercefront_end.model.CartItemId
 import com.example.ecommercefront_end.model.ShoppingCart
 import com.example.ecommercefront_end.model.UserId
 import java.util.UUID
@@ -44,4 +43,16 @@ class CartRepository(
         apiService.removeItem(userId,cartId,itemId)
     }
 
+    suspend fun addCartItem (userId: UserId, quantity: Int, bookId: Long){
+        val cartRes = getCart(userId.userId)
+        cartRes.onSuccess { cart ->
+            if (cart != null) {
+                val cartId = cart.id
+                val quantityCartItem = QuantityCartItem(quantity)
+                apiService.insertItem(userId.userId, cartId, bookId, quantityCartItem)
+
+            }
+        }
+
+    }
 }
