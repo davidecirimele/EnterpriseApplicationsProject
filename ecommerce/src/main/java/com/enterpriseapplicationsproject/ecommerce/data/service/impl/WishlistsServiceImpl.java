@@ -98,11 +98,13 @@ public class WishlistsServiceImpl implements WishlistsService {
 
     @Override
     @Transactional
-    public Boolean shareWishlist(Long wishlistId, Group group) {
+    public Boolean shareWishlist(Long wishlistId, UUID userId) {
+
         Wishlist wishlist = wishlistsDao.findById(wishlistId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID"));
 
-        wishlist.setGroup(group);
+
+        wishlist.setGroup(null);
         wishlistsDao.save(wishlist);
         return true;
     }

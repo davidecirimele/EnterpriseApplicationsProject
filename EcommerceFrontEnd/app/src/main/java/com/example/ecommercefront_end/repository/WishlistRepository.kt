@@ -82,5 +82,12 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
     suspend fun removeWishlistItem(id: Long): Response<Unit> {
         return WIApiService.deleteWishlistItem(id)
     }
+    suspend fun shareWishlist(wishlist: Wishlist): Response<String> {
+        return wApiService.shareWishlist(wishlist)
+    }
+
+    suspend fun joinWishlist(token: Any, wishlist: Wishlist): Any {
+        return  wApiService.joinWishlist(token, wishlist)
+    }
 
 }

@@ -1,5 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.config.security;
 
+import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
+import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.InvalidJwtException;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -89,6 +91,19 @@ public class JwtService {
         extraClaims.put("phonenumber", ((LoggedUserDetails) userDetails).getPhoneNumber());
 
         return buildToken(extraClaims, userDetails, jwtExpiration);
+    }
+
+    public String generateSharedWishlistToken(UserDetails userDetails, WishlistDto wDto, Integer expirationTimeInHours) {
+
+        Map<String, Object> extraClaims = new HashMap<>();
+
+        extraClaims.put("userId", ((LoggedUserDetails) userDetails).getId());
+        extraClaims.put("type", "shared-wishlist");
+        extraClaims.put("wishlistId", wDto.getId());
+        extraClaims.put("wishlistName", wDto.getName());
+        extraClaims.put("expirationTime", expirationTimeInHours);
+
+        return buildToken(extraClaims, userDetails, expirationTimeInHours);
     }
 
     public String generateRefreshToken(Map<String, Object> extraClaims, UserDetails userDetails, Integer expirationTimeInHours) {

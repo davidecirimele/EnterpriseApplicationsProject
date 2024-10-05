@@ -39,4 +39,10 @@ interface WishlistApiService {
     @RequiresAuth
     suspend fun deleteWishlist(@Path("idWishlist") idW: Long) : Response<Unit>
 
+    @POST("wishlists/share")
+    suspend fun shareWishlist(wishlist: Wishlist) : Response<String>
+
+    @POST("wishlists/join/{idWishlist}")
+    suspend fun joinWishlist(token: Any, wishlist: Wishlist): Any
+
 }

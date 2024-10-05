@@ -80,6 +80,36 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
         }
     }
 
+    fun shareWishlist(wishlist: Wishlist){
+        viewModelScope.launch {
+            try {
+                val response = wRepository.shareWishlist(wishlist)
+                if (response.isSuccessful) {
+                    Log.d("shareWishlist", "Wishlist condivisa con successo")
+                } else {
+                    Log.e("shareWishlist", "Errore durante la condivisione della wishlist: ${response.errorBody()}")
+                }
+            } catch (e: Exception) {
+                Log.e("shareWishlist", "Errore durante la condivisione della wishlist: ${e.message}")
+            }
+        }
+    }
+
+    fun joinWishlist(token : String, wishlistId : Long){
+        viewModelScope.launch {
+            try {
+                //val response = wRepository.joinWishlist(token, wishlistId)
+                if (true) {
+                    Log.d("joinWishlist", "Utente aggiunto con successo alla wishlist")
+                } else {
+                    //Log.e("joinWishlist", "Errore durante l'aggiunta dell'utente alla wishlist: ${response.errorBody()}")
+                }
+            } catch (e: Exception) {
+                Log.e("joinWishlist", "Errore durante l'aggiunta dell'utente alla wishlist: ${e.message}")
+            }
+        }
+    }
+
 
     fun addWishlist(name: String, isPrivate: Boolean) {
         viewModelScope.launch {

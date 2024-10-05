@@ -114,46 +114,80 @@ fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) 
 
 
 @Composable
-fun AddWishlistDialog(onDismissRequest: () -> Unit, onAddWishlist: (String, Boolean) -> Unit) {
+fun AddWishlistDialog(
+    onDismissRequest: () -> Unit,
+    onAddWishlist: (String, Boolean) -> Unit,
+    onJoinWishlist: () -> Unit
+) {
+    var showCreateWishlist by remember { mutableStateOf(false) }
     var wishlistName by remember { mutableStateOf("") }
     var isPrivate by remember { mutableStateOf(false) }
-    var otherParam by remember { mutableStateOf("") }
 
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text("Crea una nuova lista") },
-        text = {
-            Column {
-                TextField(
-                    value = wishlistName,
-                    onValueChange = { wishlistName = it },
-                    label = { Text("Nome della lista") }
-                )
-                Row {
-                    Checkbox(
-                        checked = isPrivate,
-                        onCheckedChange = { isPrivate = it }
+    if (showCreateWishlist) {
+        // Dialogo per creare una nuova wishlist
+        AlertDialog(
+            onDismissRequest = { showCreateWishlist = false },
+            title = { Text("Crea una nuova lista") },
+            text = {
+                Column {
+                    TextField(
+                        value = wishlistName,
+                        onValueChange = { wishlistName = it },
+                        label = { Text("Nome della lista") }
                     )
-                    Text(text = "Privata", modifier = Modifier.align(Alignment.CenterVertically))
+                    Row {
+                        Checkbox(
+                            checked = isPrivate,
+                            onCheckedChange = { isPrivate = it }
+                        )
+                        Text("Privata", modifier = Modifier.align(Alignment.CenterVertically))
+                    }
                 }
-            }
-        },
-        confirmButton = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround // Centra i bottoni
-            ) {
-                Button(onClick = { onAddWishlist(wishlistName, isPrivate) }) {
-                    Text("Crea")
+            },
+            confirmButton = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    Button(onClick = {
+                        onAddWishlist(wishlistName, isPrivate)
+                        showCreateWishlist = false
+                    }) {
+                        Text("Crea")
+                    }
+                    Button(onClick = { showCreateWishlist = false }) {
+                        Text("Annulla")
+                    }
                 }
+            },
+            dismissButton = null
+        )
+    } else {
+        // Dialogo con le opzioni
+        AlertDialog(
+            onDismissRequest = onDismissRequest,
+            title = { Text("Scegli un'opzione") },
+            text = {
+                Column {
+                    Button(onClick = { showCreateWishlist = true }) {
+                        Text("Crea Wishlist")
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(onClick = {
+                        onJoinWishlist()
+                    }) {
+                        Text("Unisciti alla Wishlist di un amico")
+                    }
+                }
+            },
+            confirmButton = {
                 Button(onClick = onDismissRequest) {
                     Text("Annulla")
                 }
-            }
-        },
-        dismissButton = null // Non è più necessario
-        //... (altri parametri)
-    )
+            },
+            dismissButton = null
+        )
+    }
 }
 
 @Composable
@@ -180,7 +214,11 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
         AddWishlistDialog(
             onDismissRequest = { showAddWishlist = false },
             onAddWishlist = { wishlistName, isPrivate ->
-                viewModel.addWishlist(wishlistName, isPrivate)// Crea la lista con più parametri
+                viewModel.addWishlist(wishlistName, isPrivate)
+                showAddWishlist = false
+            },
+            onJoinWishlist = {
+                // TODO: Implementa la logica per unirsi a una wishlist
                 showAddWishlist = false
             }
         )
