@@ -25,6 +25,9 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
     private val _wishlistItems = MutableStateFlow<List<WishlistItem>>(emptyList())
     val wishlistItems: StateFlow<List<WishlistItem>> = _wishlistItems.asStateFlow()
 
+    private val _tokenToShare = MutableStateFlow<String>("")
+    val tokenToShare: StateFlow<String> = _tokenToShare.asStateFlow()
+
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
@@ -84,16 +87,19 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
         viewModelScope.launch {
             try {
                 val response = wRepository.shareWishlist(wishlist)
-                if (response.isSuccessful) {
+                if (response.contains("token")) {
+                    _tokenToShare.value =
+                        response.get("token").toString() // Estrai il token dalla risposta JSON
                     Log.d("shareWishlist", "Wishlist condivisa con successo")
                 } else {
-                    Log.e("shareWishlist", "Errore durante la condivisione della wishlist: ${response.errorBody()}")
+                    Log.e("shareWishlist", "Errore durante la condivisione della wishlist: ${response.get("error")}")
                 }
             } catch (e: Exception) {
                 Log.e("shareWishlist", "Errore durante la condivisione della wishlist: ${e.message}")
             }
         }
     }
+
 
     fun joinWishlist(token : String, wishlistId : Long){
         viewModelScope.launch {

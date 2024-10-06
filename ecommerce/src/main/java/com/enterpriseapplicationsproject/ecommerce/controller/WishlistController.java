@@ -19,7 +19,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -73,21 +75,27 @@ public class WishlistController {
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
-    @PostMapping(consumes = "application/json", path = "/share")
-    //@PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<String> shareWishlist(@RequestBody SharedWishlistRequest request) {
+    @PostMapping(path = "/share")
+    @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
+    public ResponseEntity<Map <String,String> > shareWishlist(@RequestBody SharedWishlistRequest request) {
         // Estrarre i dettagli dell'utente loggato
         LoggedUserDetails userDetails = (LoggedUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         // Generare il token JWT che include le informazioni della wishlist
         String wishlistSharedToken = jwtService.generateSharedWishlistToken(userDetails, request.getWishlistId(), 1);
-        return ResponseEntity.ok(wishlistSharedToken);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("token", wishlistSharedToken); // Incapsula il token in una mappa
+
+        System.out.println("Generated wToken: " + wishlistSharedToken);
+        return ResponseEntity.ok(response);
+
     }
 
     //TO DOs
 
-    @PostMapping(consumes = "application/json", path = "/joinShared/{idUserToJoin}/{token}")
-    //@PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
+    @PostMapping(path = "/join/{idUserToJoin}/{token}")
+    @PreAuthorize("#idUserToJoin == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<String> acceptSharedWishlist(@PathVariable UUID idUserToJoin, String token) {
         try {
             // Analizzare il token della wishlist

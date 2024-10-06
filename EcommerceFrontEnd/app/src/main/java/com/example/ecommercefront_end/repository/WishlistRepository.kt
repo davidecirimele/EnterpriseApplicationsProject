@@ -82,7 +82,7 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
     suspend fun removeWishlistItem(id: Long): Response<Unit> {
         return WIApiService.deleteWishlistItem(id)
     }
-    suspend fun shareWishlist(wishlist: Wishlist): Response<String> {
+    suspend fun shareWishlist(wishlist: Wishlist): Map<String, String> {
         return wApiService.shareWishlist(wishlist)
     }
 

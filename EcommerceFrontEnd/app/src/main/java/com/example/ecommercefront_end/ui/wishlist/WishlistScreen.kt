@@ -1,5 +1,7 @@
 package com.example.ecommercefront_end.ui.wishlist
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -53,6 +55,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -286,6 +292,10 @@ fun WishlistDetails(
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
+    val tokenToShare by viewModel.tokenToShare.collectAsState()
+    val clipboardManager: ClipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
+
     // Ricarica gli elementi della wishlist selezionata
     LaunchedEffect(wishlist) {
         viewModel.loadWishlistItemsFromDB(wishlist.id)
@@ -326,6 +336,15 @@ fun WishlistDetails(
                             onClick = {
                                 showMenu = false
                                 // Azione per condividere la wishlist
+                                if (tokenToShare.isNotEmpty()) {
+                                    Log.d("WishlistDetails", "Token da copiare: $tokenToShare")
+                                    clipboardManager.setText(AnnotatedString(tokenToShare))
+                                    Toast.makeText(context, "Token copiato negli appunti!", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    // Altrimenti, fai la chiamata all'API e copia il token quando disponibile
+                                    viewModel.shareWishlist(wishlist)
+                                    Log.d("WishlistDetails", "Chiamata all'API per condivisione in corso...")
+                                }
                             },
                             leadingIcon = {
                                 Icon(
@@ -473,6 +492,13 @@ fun WishlistDetails(
         }
 
     }
+    if (tokenToShare.isNotEmpty()) { // TO DO : Aggiungere un controllo per verificare se il token è già stato copiato
+        clipboardManager.setText(AnnotatedString(tokenToShare))
+        Toast.makeText(context, "Token copiato negli appunti!", Toast.LENGTH_SHORT).show()
+        // Pulisci il tokenToShare dopo che è stato copiato
+        //viewModel.clearToken()
+    }
+
 
 }
 
