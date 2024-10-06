@@ -1,6 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 
 import com.enterpriseapplicationsproject.ecommerce.data.dao.GroupsDao;
+import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistItemsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
@@ -32,6 +33,7 @@ public class WishlistsServiceImpl implements WishlistsService {
     private final WishlistItemsDao WIDao;
     private final ModelMapper modelMapper; // serve per fare il mapping tra due oggetti
     private final GroupsDao groupsDao;
+    private final UsersDao usersDao;
 
     @Override
     public List<WishlistDto> getAllSorted() { // restituisce la lista di tutti i wishlists ordinata per privacySetting
@@ -40,7 +42,6 @@ public class WishlistsServiceImpl implements WishlistsService {
                 .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
                 .collect(Collectors.toList());
     }
-
 
 
     @Override
@@ -109,12 +110,29 @@ public class WishlistsServiceImpl implements WishlistsService {
 
     @Override
     @Transactional
-    public Boolean shareWishlist(Long wishlistId, Group group) {
-        Wishlist wishlist = wishlistsDao.findById(wishlistId)
+    public Boolean JoinShareWishlist(Long wishlistIdToJoin, UUID idUserToJoin) {
+        User user = usersDao.findById(idUserToJoin)
+                .orElseThrow( () -> new IllegalArgumentException("Invalid Owner email user"));
+
+        Wishlist wishlistToJoin = wishlistsDao.findById(wishlistIdToJoin)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID"));
 
-        wishlist.setGroup(group);
-        wishlistsDao.save(wishlist);
+        if(wishlistToJoin.getUserId().equals(idUserToJoin)){
+            throw new IllegalArgumentException("User is the owner of the wishlist");
+        }
+
+        Group group = wishlistToJoin.getGroup();
+        if (group == null || !group.getMembers().contains(user)) {
+            if (group == null) {
+                group = new Group();
+                group.setGroupName("Group " + wishlistToJoin.getName());
+            }
+            group.getMembers().add(user);
+            groupsDao.save(group);
+        }
+
+        wishlistToJoin.setGroup(group);
+        wishlistsDao.save(wishlistToJoin);
         return true;
     }
 

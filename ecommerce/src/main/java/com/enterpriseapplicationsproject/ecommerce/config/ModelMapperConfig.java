@@ -89,7 +89,6 @@ public class ModelMapperConfig {
             @Override
             protected void configure(){
                 map(source.getId(), destination.getId());
-                map(source.getUserId(), destination.getUserId());
             }
         });
 

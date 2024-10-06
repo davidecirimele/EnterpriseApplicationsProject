@@ -29,19 +29,18 @@ public class ShoppingCartController {
         return new ResponseEntity<>(shoppingCarts, HttpStatus.OK);
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/get/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<ShoppingCartDto> get(@PathVariable UUID userId) {
-        System.out.println("USER ID: "+userId);
         ShoppingCartDto shoppingCart = shoppingCartService.getByUserId(userId);
         return new ResponseEntity<>(shoppingCart, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{userId}/clear")
+    @DeleteMapping("/{userId}/{cartId}/clear")
     @PreAuthorize("#userId == authentication.principal.getId()")
-    public ResponseEntity<Void> deleteShoppingCart(@PathVariable UUID userId) {
+    public ResponseEntity<Void> deleteShoppingCart(@PathVariable UUID userId, @PathVariable Long cartId) {
 
-        boolean isRemoved = shoppingCartService.delete(userId);
+        boolean isRemoved = shoppingCartService.delete(cartId);
         if (!isRemoved) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

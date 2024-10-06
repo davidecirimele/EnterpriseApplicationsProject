@@ -1,11 +1,9 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 
 import com.enterpriseapplicationsproject.ecommerce.data.dao.ShoppingCartsDao;
-import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.ShoppingCart;
 import com.enterpriseapplicationsproject.ecommerce.data.service.ShoppingCartService;
 import com.enterpriseapplicationsproject.ecommerce.dto.ShoppingCartDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserIdDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -26,7 +24,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Override
     public ShoppingCartDto getByUserId(UUID userId) {
         Optional<ShoppingCart> optionalShoppingCart = shoppingCartDao.findByUserId(userId);
-        System.out.println("OPTIONAL SHOPPING: "+optionalShoppingCart);
 
         if(optionalShoppingCart.isPresent())
         {
@@ -35,6 +32,20 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         }
         else{
             throw new RuntimeException("Cart of user with id " + userId + " not found");
+        }
+    }
+
+    @Override
+    public ShoppingCartDto getByCartId(Long cartId) {
+        Optional<ShoppingCart> optionalShoppingCart = shoppingCartDao.findById(cartId);
+
+        if(optionalShoppingCart.isPresent())
+        {
+            ShoppingCart cart = optionalShoppingCart.get();
+            return modelMapper.map(cart, ShoppingCartDto.class);
+        }
+        else{
+            throw new RuntimeException("Cart with id " + cartId + " not found");
         }
     }
 
@@ -51,8 +62,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    public boolean delete(UUID id){
-        Optional<ShoppingCart> optionalSC = shoppingCartDao.findByUserId(id);
+    public boolean delete(Long cartId){
+        Optional<ShoppingCart> optionalSC = shoppingCartDao.findById(cartId);
 
         if(optionalSC.isPresent())
         {
@@ -63,7 +74,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             return true;
         }
         else{
-            throw new RuntimeException("Cart for User with id " + id + " not found");
+            throw new RuntimeException("Cart with id " + cartId + " not found");
         }
     }
 

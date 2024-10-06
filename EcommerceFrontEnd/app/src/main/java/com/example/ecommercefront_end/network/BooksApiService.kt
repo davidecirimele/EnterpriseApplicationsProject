@@ -2,7 +2,6 @@ package com.example.ecommercefront_end.network
 
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.CartItemId
-import com.example.ecommercefront_end.model.InsertCartItem
 import com.example.ecommercefront_end.model.QuantityCartItem
 import com.example.ecommercefront_end.model.ShoppingCart
 

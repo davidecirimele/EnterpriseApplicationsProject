@@ -25,7 +25,7 @@ public interface WishlistsService {
     WishlistDto updateWishlist(WishlistDto wishlistDto);
 
     @Transactional
-    Boolean shareWishlist(Long wishlistId, Group group);
+    Boolean JoinShareWishlist(Long wishlistId, UUID idUser);
 
     @Transactional
     Boolean unshareWishlist(Long wishlistId);

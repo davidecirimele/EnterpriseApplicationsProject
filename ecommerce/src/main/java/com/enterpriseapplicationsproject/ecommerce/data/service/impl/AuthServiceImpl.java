@@ -110,25 +110,23 @@ public class AuthServiceImpl implements  AuthService{
             System.out.println("Authentication successful");
 
 
-           LoggedUserDetails userDetails = (LoggedUserDetails) auth.getPrincipal();
+            LoggedUserDetails userDetails = (LoggedUserDetails) auth.getPrincipal();
 
 
 
-        String accessToken = jwtService.generateToken(userDetails);
-        String refreshToken = jwtService.generateRefreshToken(userDetails, expirationTimeInHours);
+            String accessToken = jwtService.generateToken(userDetails);
+            String refreshToken = jwtService.generateRefreshToken(userDetails, expirationTimeInHours);
 
-        RefreshTokenDto r = new RefreshTokenDto(refreshToken);
-        refreshTokenService.save(r, userDetails);
+            RefreshTokenDto r = new RefreshTokenDto(refreshToken);
+            refreshTokenService.save(r, userDetails);
 
-        return Map.of("access_token", accessToken, "refresh_token", refreshToken);
+            return Map.of("access_token", accessToken, "refresh_token", refreshToken);
 
-    } catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException("Invalid credentials");
+        }
     }
-    }
-
-
 
     @Override
     @Transactional(readOnly = true)

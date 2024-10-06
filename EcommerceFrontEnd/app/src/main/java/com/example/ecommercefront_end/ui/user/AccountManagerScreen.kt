@@ -51,6 +51,7 @@ fun AccountManagerScreen(viewModel: AccountViewModel, navHostController: NavHost
     }
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun UserCard(userDetails: UserDetails){
     Row(modifier = Modifier.fillMaxWidth()) {
@@ -60,12 +61,6 @@ fun UserCard(userDetails: UserDetails){
                     text = "Welcome back, ${userDetails.firstName}",
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
-                )
-                Text(
-                    text = "${user?.firstName}, ${user?.lastName}",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 30.sp
                 )
             }
 
@@ -109,10 +104,9 @@ fun OptionsSection(navHostController: NavHostController){
 fun PurchasedHistoryCard(history: List<Pair<String,String>>){
     Column {
         Text(
-            text = "Purchased History",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-            fontSize = 25.sp
+            text = "Purchased Books",
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp
         )
         Row(
             Modifier
@@ -157,7 +151,8 @@ fun Buttons(navHostController: NavHostController){
     }
 }
 
-/*@Preview
+/*
+@Preview
 @Composable
 fun AccountScreenPreview(){
     val _userApiService = RetrofitClient.userApiService

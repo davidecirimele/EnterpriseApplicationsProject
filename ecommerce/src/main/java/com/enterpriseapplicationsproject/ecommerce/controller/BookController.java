@@ -3,13 +3,16 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
+import com.enterpriseapplicationsproject.ecommerce.exception.BookNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -60,10 +63,15 @@ public class BookController {
     }
 
 
-    @PutMapping(path = "/{id}/updateCover")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> updateBookCover(@PathVariable Long id, @RequestParam String coverUrl) {
-        booksService.updateBookCover(id, coverUrl);
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PostMapping("/{id}/update-cover")
+    public ResponseEntity<?> updateBookCover(@PathVariable Long id, @RequestParam("cover") MultipartFile coverImage) {
+        try {
+            booksService.updateBookCover(id, coverImage);
+            return ResponseEntity.ok("Cover aggiornata con successo!");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Errore nel salvataggio della cover.");
+        } catch (BookNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Libro non trovato.");
+        }
     }
 }
