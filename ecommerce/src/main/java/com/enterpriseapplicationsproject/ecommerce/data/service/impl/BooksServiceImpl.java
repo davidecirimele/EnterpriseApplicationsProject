@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 
+import com.enterpriseapplicationsproject.ecommerce.data.dao.BookSpecification;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.BooksDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
 import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,7 +22,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -105,6 +106,13 @@ public class BooksServiceImpl implements BooksService {
         booksDao.save(book);
     }
 
+    @Override
+    public List<Book> getFilteredBooks(BookSpecification.Filter filter) {
+        Specification<Book> spec = BookSpecification.bookFilter(filter);
+
+        return booksDao.findAll(spec);
+    }
+
 
     @Override
     public void saveBook(BookDto bookDto) throws IOException {
@@ -146,5 +154,35 @@ public class BooksServiceImpl implements BooksService {
         // Aggiorna il percorso dell'immagine nel database
         book.setImagePath(filePath.toString());
         booksDao.save(book);
+    }
+
+    @Override
+    public Double getMaxBookPrice() {
+        return booksDao.findMaxPrice();
+    }
+
+    @Override
+    public Double getMinBookPrice() {
+        return booksDao.findMinPrice();
+    }
+
+    @Override
+    public Integer getMaxBookAge() {
+        return booksDao.findMaxAge();
+    }
+
+    @Override
+    public Integer getMinBookAge() {
+        return booksDao.findMinAge();
+    }
+
+    @Override
+    public Integer getMaxBookPages() {
+        return booksDao.findMaxPages();
+    }
+
+    @Override
+    public Integer getMinBookPages() {
+        return booksDao.findMinPages();
     }
 }

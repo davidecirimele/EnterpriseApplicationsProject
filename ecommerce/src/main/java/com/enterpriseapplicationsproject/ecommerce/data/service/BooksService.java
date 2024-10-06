@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service;
 
+import com.enterpriseapplicationsproject.ecommerce.data.dao.BookSpecification;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
@@ -29,7 +30,21 @@ public interface BooksService {
 
     void downBookStock(Long id, int quantity);
 
+    List<Book> getFilteredBooks(BookSpecification.Filter filter);
+
     void saveBook(BookDto bookDto) throws IOException, IOException;
 
     void updateBookCover(Long bookId, MultipartFile coverImage) throws IOException, BookNotFoundException;
+
+    Double getMaxBookPrice();
+
+    Double getMinBookPrice();
+
+    Integer getMaxBookAge();
+
+    Integer getMinBookAge();
+
+    Integer getMaxBookPages();
+
+    Integer getMinBookPages();
 }

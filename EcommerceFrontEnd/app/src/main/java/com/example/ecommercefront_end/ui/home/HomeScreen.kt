@@ -46,6 +46,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.CachePolicy
 import com.android.volley.toolbox.ImageRequest
 import com.example.ecommercefront_end.model.Book
+import com.example.ecommercefront_end.viewmodels.BookViewModel
 import com.example.ecommercefront_end.viewmodels.HomeViewModel
 
 var testImgs : List<String> = listOf("https://mockuptree.com/wp-content/uploads/edd/2019/10/free-Book-mockup-150x150.jpg",
@@ -62,10 +63,11 @@ fun Modifier.productCardModifier(height: Dp, width: Dp, navController: NavContro
         .clickable { navController.navigate("/books_details/${bookId}") }
 }
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
+fun HomeScreen(homeViewModel: HomeViewModel, bookViewModel: BookViewModel, navController: NavController) {
     val products by homeViewModel.products.collectAsState()
     val isLoading by homeViewModel.isLoading.collectAsState()
     val error by homeViewModel.error.collectAsState()
+    val showFilterOptions by homeViewModel.showFilterOptions.collectAsState()
     val topProducts = remember(products) { products.take(5) }
     val gridProducts = remember(products) { products.drop(5) } // Libri per la griglia
 
@@ -111,6 +113,12 @@ fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
                         }
                     }
                 }
+            }
+            
+            if(showFilterOptions){
+                BooksFilterScreen(viewModel = bookViewModel, onDismiss = {
+                    homeViewModel.triggerShowFilterOptions()
+                })
             }
         }
     }

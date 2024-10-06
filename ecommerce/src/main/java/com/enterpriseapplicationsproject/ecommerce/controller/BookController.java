@@ -1,5 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
+import com.enterpriseapplicationsproject.ecommerce.data.dao.BookSpecification;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
 import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
@@ -32,6 +34,48 @@ public class BookController {
         if (books.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(books, HttpStatus.OK);
+    }
+
+    @GetMapping("/get/filter")
+    public ResponseEntity<List<Book>> filterBooks(@RequestBody BookSpecification.Filter filter) {
+        List<Book> filteredBooks = booksService.getFilteredBooks(filter);
+        return ResponseEntity.ok(filteredBooks);
+    }
+
+    @GetMapping("/get/max-price")
+    public ResponseEntity<Double> getMaxPrice() {
+        Double maxPrice = booksService.getMaxBookPrice();
+        return ResponseEntity.ok(maxPrice);
+    }
+
+    @GetMapping("/get/min-price")
+    public ResponseEntity<Double> getMinPrice() {
+        Double minPrice = booksService.getMinBookPrice();
+        return ResponseEntity.ok(minPrice);
+    }
+
+    @GetMapping("/get/max-age")
+    public ResponseEntity<Integer> getMaxAge() {
+        Integer maxAge = booksService.getMaxBookAge();
+        return ResponseEntity.ok(maxAge);
+    }
+
+    @GetMapping("/get/min-age")
+    public ResponseEntity<Integer> getMinAge() {
+        Integer minAge = booksService.getMinBookAge();
+        return ResponseEntity.ok(minAge);
+    }
+
+    @GetMapping("/get/max-pages")
+    public ResponseEntity<Integer> getMaxPages() {
+        Integer maxPages = booksService.getMaxBookPages();
+        return ResponseEntity.ok(maxPages);
+    }
+
+    @GetMapping("/get/min-pages")
+    public ResponseEntity<Integer> getMinPages() {
+        Integer minPages = booksService.getMinBookPages();
+        return ResponseEntity.ok(minPages);
     }
 
     // da testare se consumes va bene, dato che ha un corpo nella richiesta

@@ -18,6 +18,9 @@ class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
     private val _products = MutableStateFlow<List<Book>>(emptyList())
     val products: StateFlow<List<Book>> = _products.asStateFlow()
 
+    private val _showFilterOptions = MutableStateFlow(false)
+    val showFilterOptions: StateFlow<Boolean> = _showFilterOptions.asStateFlow()
+
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
@@ -74,7 +77,14 @@ class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
         }
     }
 
+    fun searchBook(value: String){
+        viewModelScope.launch {
+        }
+    }
 
+    fun triggerShowFilterOptions(){
+        _showFilterOptions.value = !showFilterOptions.value;
+    }
 
 }
 

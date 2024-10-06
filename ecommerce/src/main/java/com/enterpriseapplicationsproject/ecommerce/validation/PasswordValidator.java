@@ -27,6 +27,12 @@ public class PasswordValidator implements ConstraintValidator<ValidPassword,Stri
         if (value == null || value.length() < minLength || value.length() > maxLength) {
             return false;
         }
+
+        String uppercasePattern = ".*[A-Z].*";
+        if (!value.matches(uppercasePattern)) {
+            return false;
+        }
+
         String specialCharacterPattern = "[" + Pattern.quote(allowedSpecialCharacters) + "]";
 
         if (!value.matches(".*" + specialCharacterPattern + ".*")) {
