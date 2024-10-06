@@ -2,16 +2,20 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 
 
 import com.enterpriseapplicationsproject.ecommerce.config.security.JwtService;
+import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetails;
 import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetailsService;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistsService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.impl.WishlistsServiceImpl;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.security.SharedWishlistRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -71,24 +75,38 @@ public class WishlistController {
 
     @PostMapping(consumes = "application/json", path = "/share")
     //@PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<String> share(@RequestBody WishlistDto wDto) {
+    public ResponseEntity<String> shareWishlist(@RequestBody SharedWishlistRequest request) {
+        // Estrarre i dettagli dell'utente loggato
+        LoggedUserDetails userDetails = (LoggedUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        String username = jwtService.extractUsername(wDto.getUser().getFirstName());
-
-        final UserDetails userDetails = loggedUserDetailsService.loadUserByUsername(username);
-
-        String wishlistSharedToken = jwtService.generateSharedWishlistToken( userDetails,wDto,1);
-
-        return new ResponseEntity<>(wishlistSharedToken, HttpStatus.OK);
+        // Generare il token JWT che include le informazioni della wishlist
+        String wishlistSharedToken = jwtService.generateSharedWishlistToken(userDetails, request.getWishlistId(), 1);
+        return ResponseEntity.ok(wishlistSharedToken);
     }
+
     //TO DOs
 
-    @PostMapping(consumes = "application/json", path = "/joinShared/{idUser}/{token}")
+    @PostMapping(consumes = "application/json", path = "/joinShared/{idUserToJoin}/{token}")
     //@PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<Boolean> joinShared(@PathVariable UUID idUser, @PathVariable String token) {
-        String toDo = "TOdo";
-        return new ResponseEntity<>(true, HttpStatus.OK);
+    public ResponseEntity<String> acceptSharedWishlist(@PathVariable UUID idUserToJoin, String token) {
+        try {
+            // Analizzare il token della wishlist
+            SharedWishlistRequest tokenDetails = jwtService.parseWishlistToken(token);
+
+            // Ottenere l'ID della wishlist e l'ID dell'utente dal token
+            Long wishlistId = tokenDetails.getWishlistId();
+            String ownerUserEmail = tokenDetails.getEmail();
+
+            // Logica per aggiungere l'utente alla wishlist condivisa
+            Boolean success = wishlistService.JoinShareWishlist(wishlistId,idUserToJoin);
+
+            return success ? ResponseEntity.ok("Successfully joined the wishlist") :
+                    ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to join wishlist");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+        }
     }
+
 
     @PostMapping(consumes = "application/json", path = "/unshare")
     //@PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")

@@ -1,10 +1,10 @@
 package com.enterpriseapplicationsproject.ecommerce.config.security;
 
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
-import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.security.SharedWishlistRequest;
 import com.enterpriseapplicationsproject.ecommerce.exception.InvalidJwtException;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import io.jsonwebtoken.Claims;
@@ -12,6 +12,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,6 +27,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class JwtService {
 
     @Value("${jwt.secret-key}")
@@ -37,9 +39,9 @@ public class JwtService {
 
     public UsernamePasswordAuthenticationToken parseToken(String refreshToken) throws Exception {
         try{
-            SignedJWT signedJWT = SignedJWT.parse(refreshToken);
+            SignedJWT signedJWT = SignedJWT.parse(refreshToken); //al fine di estrarre informazioni
 
-            if (!signedJWT.verify(new MACVerifier(secretKey))) {
+            if (!signedJWT.verify(new MACVerifier(secretKey))) { //verifica della firma
                 throw new SecurityException("Token signature is invalid");
             }
 
@@ -55,6 +57,29 @@ public class JwtService {
         }catch(ParseException e){
             throw new Exception("Error parsing JWT token", e);
         }
+    }
+
+    public SharedWishlistRequest parseWishlistToken(String wishlistToken) throws Exception {
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(wishlistToken);
+
+            if (!signedJWT.verify(new MACVerifier(secretKey))){
+                throw new SecurityException("Wislist-Token signature is invalid");
+            }
+            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+            String userEmail = claims.getSubject();
+            Long wishlistId = Long.valueOf(claims.getStringClaim("wishlistId"));
+
+            SharedWishlistRequest swr = new SharedWishlistRequest(userEmail,wishlistId);
+
+            log.info("userEmail: {userEmail} wId {wishlistId}");
+            return swr;
+
+
+        }catch (ParseException e){
+            throw new Exception("Error parsing Wishlist JWT token", e);
+        }
+
     }
 
     public String extractUsername(String token) {
@@ -93,14 +118,13 @@ public class JwtService {
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
-    public String generateSharedWishlistToken(UserDetails userDetails, WishlistDto wDto, Integer expirationTimeInHours) {
+    public String generateSharedWishlistToken(UserDetails userDetails, Long wishlistId, Integer expirationTimeInHours) {
 
         Map<String, Object> extraClaims = new HashMap<>();
 
         extraClaims.put("userId", ((LoggedUserDetails) userDetails).getId());
         extraClaims.put("type", "shared-wishlist");
-        extraClaims.put("wishlistId", wDto.getId());
-        extraClaims.put("wishlistName", wDto.getName());
+        extraClaims.put("wishlistId", wishlistId);
         extraClaims.put("expirationTime", expirationTimeInHours);
 
         return buildToken(extraClaims, userDetails, expirationTimeInHours);
