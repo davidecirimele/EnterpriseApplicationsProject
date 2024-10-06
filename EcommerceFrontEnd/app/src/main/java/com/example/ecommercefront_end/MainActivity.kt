@@ -5,24 +5,33 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -31,9 +40,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.darkColorScheme
@@ -44,9 +55,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -60,12 +75,14 @@ import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.repository.AddressRepository
 import com.example.ecommercefront_end.repository.AuthRepository
+import com.example.ecommercefront_end.repository.BookRepository
 import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.repository.HomeRepository
 import com.example.ecommercefront_end.repository.WishlistRepository
 import com.example.ecommercefront_end.ui.user.EditAddressScreen
 import com.example.ecommercefront_end.ui.cart.CartScreen
 import com.example.ecommercefront_end.ui.home.BookDetailsScreen
+import com.example.ecommercefront_end.ui.home.BooksFilterScreen
 import com.example.ecommercefront_end.ui.home.HomeScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.ui.user.AccountManagerScreen
@@ -76,6 +93,7 @@ import com.example.ecommercefront_end.ui.user.UserAuthScreen
 import com.example.ecommercefront_end.ui.wishlist.WishlistsScreen
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
+import com.example.ecommercefront_end.viewmodels.BookViewModel
 import com.example.ecommercefront_end.viewmodels.CartViewModel
 import com.example.ecommercefront_end.viewmodels.HomeViewModel
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
@@ -114,9 +132,10 @@ fun NavigationView(navController: NavHostController) {
     val cartViewModel = remember { CartViewModel(repository = CartRepository(RetrofitClient.cartApiService)) }
     val accountViewModel = remember { AccountViewModel(repository = AccountRepository(RetrofitClient.userApiService)) }
     val addressViewModel = remember { AddressViewModel(repository = AddressRepository(RetrofitClient.addressApiService)) }
+    val bookViewModel = remember { BookViewModel(repository = BookRepository(RetrofitClient.booksApiService)) }
 
     Scaffold(
-        topBar = { TopBar(navController) },
+        topBar = { TopBar(navController, homeViewModel) },
         bottomBar = { BottomBar(selectedIndex, navController) }
     ) { innerPadding ->
         NavHost(
@@ -126,7 +145,7 @@ fun NavigationView(navController: NavHostController) {
         ) {
             composable("home") {
                 selectedIndex.value = 0
-                HomeScreen(homeViewModel = homeViewModel, navController)
+                HomeScreen(homeViewModel = homeViewModel, bookViewModel = bookViewModel,navController)
             }
 
             composable("/books_details/{idBook}", arguments = listOf(navArgument("idBook") { type = NavType.LongType })) { backStackEntry ->
@@ -222,10 +241,9 @@ fun NavigationView(navController: NavHostController) {
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navHostController: NavHostController) {
+fun TopBar(navHostController: NavHostController, homeViewModel: HomeViewModel) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
@@ -235,7 +253,7 @@ fun TopBar(navHostController: NavHostController) {
     TopAppBar(
         title = {
             if (isSearchVisible) {
-                SearchBar()
+                SearchBar(homeViewModel)
             } else {
                 Text(stringResource(R.string.app_name))
             }
@@ -247,13 +265,6 @@ fun TopBar(navHostController: NavHostController) {
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.back)
                     )
-                }
-            }
-        },
-        actions = {
-            if (isSearchVisible) {
-                IconButton(onClick = { /* Handle settings click */ }) {
-                    Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings))
                 }
             }
         },
@@ -270,11 +281,27 @@ fun TopBar(navHostController: NavHostController) {
 }
 
 @Composable
-fun SearchBar() {
-    // Placeholder per la SearchBar
-    Text(text = "🔍 Search...", modifier = Modifier.padding(8.dp))
-}
+fun SearchBar(homeViewModel: HomeViewModel) {
+    var searchValue by remember { mutableStateOf("") }
 
+    Row(modifier = Modifier.fillMaxWidth()) {
+        IconButton(modifier = Modifier.align(Alignment.CenterVertically),onClick = { homeViewModel.triggerShowFilterOptions()}) {
+            Icon(
+                Icons.Filled.FilterAlt,
+                contentDescription = "Filter Books",
+                modifier = Modifier.size(35.dp)
+            )
+        }
+
+        TextField(
+            value = searchValue,
+            onValueChange = { searchValue = it },
+            label = { Text("Search Book") },
+            shape = RoundedCornerShape(16.dp),
+            singleLine = true
+        )
+    }
+}
 
 @Composable
 fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostController) {
@@ -368,8 +395,9 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
     }
 }
 
+
 @Composable
-fun HomePage() {
+fun HomePage() {/*
     val navHostController = rememberNavController()
     val selectedIndex = remember { mutableIntStateOf(0) }
     Scaffold(topBar = { TopBar(navHostController) },
@@ -380,7 +408,7 @@ fun HomePage() {
         Box(modifier = Modifier.padding(it)) {
             NavigationView(navController = navHostController)
         }
-    }
+    }*/
 }
 @Composable
 fun AddToCartFloatingButton(onClick: () -> Unit) {
