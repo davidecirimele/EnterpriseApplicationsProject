@@ -40,7 +40,7 @@ public class ShoppingCartController {
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<Void> deleteShoppingCart(@PathVariable UUID userId, @PathVariable Long cartId) {
 
-        boolean isRemoved = shoppingCartService.delete(cartId);
+        boolean isRemoved = shoppingCartService.delete(userId, cartId);
         if (!isRemoved) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

@@ -6,16 +6,17 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.ShoppingCart;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface CartItemsService {
 
-    List<CartItemDto> getCartItemsByCartId(Long cartId);
+    List<CartItemDto> getCartItems(UUID userId, Long cartId);
 
     CartItemDto save(CartItem cartitem);
 
-    CartItemDto insert(QuantityCartItemDto quantityCartItemDto, Long bookId, Long cartId);
+    CartItemDto insert(QuantityCartItemDto quantityCartItemDto, UUID userId, Long bookId, Long cartId);
 
-    boolean delete(Long id);
+    boolean delete(UUID userId, Long cartId, Long id);
 
-    CartItemDto updateQuantity(Long itemId, QuantityCartItemDto quantityCartItem);
+    CartItemDto updateQuantity(UUID userId, Long cartId, Long id, QuantityCartItemDto quantityCartItem);
 }
