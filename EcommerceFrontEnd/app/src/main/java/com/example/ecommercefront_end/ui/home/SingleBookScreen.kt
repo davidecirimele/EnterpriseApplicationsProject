@@ -165,12 +165,20 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository ) {
                 Button(
                     onClick = {
                         coroutineScope.launch {
-                            cartRepository.addCartItem(
-                                SessionManager.getUser(),
-                                selectedQuantity,
-                                book.id
-                            )
+
+                            SessionManager.user?.let { user ->
+                                cartRepository.addCartItem(user.id, selectedQuantity, book.id)
+                            } ?: run {
+                                navController.navigate(route = "login") {
+                                    popUpTo(route = "cart") {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+
+
                         }
+
                     },
 
                     modifier = Modifier

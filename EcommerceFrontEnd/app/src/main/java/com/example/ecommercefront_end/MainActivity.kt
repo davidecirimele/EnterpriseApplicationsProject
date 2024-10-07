@@ -160,7 +160,7 @@ fun NavigationView(navController: NavHostController) {
                 val book by homeViewModel.bookFlow.collectAsState()
 
                 book?.let {
-                    BookDetailsScreen(book = it, cartRepository = CartRepository(RetrofitClient.cartApiService))
+                    BookDetailsScreen(book = it, cartRepository = CartRepository(RetrofitClient.cartApiService), navController = navController)
                 } ?: Text("Libro non trovato")
             }
 
@@ -397,7 +397,7 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
 
 
 @Composable
-fun HomePage() {/*
+fun HomePage() {
     val navHostController = rememberNavController()
     val selectedIndex = remember { mutableIntStateOf(0) }
     Scaffold(topBar = { TopBar(navHostController) },
@@ -408,7 +408,7 @@ fun HomePage() {/*
         Box(modifier = Modifier.padding(it)) {
             NavigationView(navController = navHostController)
         }
-    }*/
+    }
 }
 @Composable
 fun AddToCartFloatingButton(onClick: () -> Unit) {
