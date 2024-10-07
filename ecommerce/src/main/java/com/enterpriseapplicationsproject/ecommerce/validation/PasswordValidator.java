@@ -40,10 +40,10 @@ public class PasswordValidator implements ConstraintValidator<ValidPassword,Stri
         }
 
         String nonAllowedSpecialCharacterPattern = "[^0-9a-zA-Z" + Pattern.quote(allowedSpecialCharacters) + "]";
-        log.info("Pattern caratteri non consentiti: " + nonAllowedSpecialCharacterPattern);
         if (value.matches(".*" + nonAllowedSpecialCharacterPattern + ".*")) {
             return false;
         }
+        log.info("La seguente password va bene: " + value);
         return true;
     }
 }
