@@ -26,12 +26,10 @@ public class CartItemsController {
 
     private final CartItemsService cartItemsService;
 
-    private final ShoppingCartsDao shoppingCartsDao;
-
-    @GetMapping("/{userId}/{cartId}")
+    @GetMapping("/get/items/{userId}/{cartId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<List<CartItemDto>> getItems(@PathVariable UUID userId, @PathVariable Long cartId) {
-        List<CartItemDto> items = cartItemsService.getCartItemsByCartId(cartId);
+        List<CartItemDto> items = cartItemsService.getCartItems(userId, cartId);
         return new ResponseEntity<>(items, HttpStatus.OK);
     }
 
@@ -40,7 +38,7 @@ public class CartItemsController {
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<CartItemDto> insertItem(@RequestBody QuantityCartItemDto quantityCartItemDto,@PathVariable Long cartId, @PathVariable Long bookId,  @PathVariable UUID userId) {
         System.out.println("INSERTED CI: "+quantityCartItemDto);
-        CartItemDto insertedItem = cartItemsService.insert(quantityCartItemDto, cartId, bookId);
+        CartItemDto insertedItem = cartItemsService.insert(quantityCartItemDto, userId, cartId, bookId);
         return new ResponseEntity<>(insertedItem, HttpStatus.CREATED);
     }
 
@@ -48,7 +46,7 @@ public class CartItemsController {
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<CartItemDto> removeItem(@PathVariable Long cartId, @PathVariable Long itemId,@PathVariable UUID userId) {
 
-        boolean isRemoved = cartItemsService.delete(itemId);
+        boolean isRemoved = cartItemsService.delete(userId,cartId,itemId);
 
         if (!isRemoved) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -59,7 +57,7 @@ public class CartItemsController {
     @PutMapping("{userId}/{cartId}/{itemId}/edit-quantity")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<CartItemDto> updateQuantity(@PathVariable UUID userId, @PathVariable Long cartId, @PathVariable Long itemId, @RequestBody QuantityCartItemDto quantityCartItemDto) {
-        CartItemDto updatedItem = cartItemsService.updateQuantity(itemId, quantityCartItemDto);
+        CartItemDto updatedItem = cartItemsService.updateQuantity(userId, cartId, itemId, quantityCartItemDto);
         return new ResponseEntity<>(updatedItem, HttpStatus.OK);
     }
 }

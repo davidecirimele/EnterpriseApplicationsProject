@@ -17,7 +17,7 @@ public interface ShoppingCartService {
 
     List<ShoppingCartDto> getAll();
 
-    boolean delete(Long cartId);
+    boolean delete(UUID userId, Long cartId);
 
     ShoppingCartDto saveCart(ShoppingCartDto shoppingCartDto);
 }
