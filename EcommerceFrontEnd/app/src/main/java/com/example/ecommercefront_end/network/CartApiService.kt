@@ -24,6 +24,6 @@ interface CartApiService {
 
     @DELETE("shopping-cart/cart/{userId}/{cartId}/{itemId}/remove")
     @RequiresAuth
-    suspend fun removeItem(@Path("userId") userId: UUID, @Path("cartId") cartId: Long, @Path("itemId") itemId: Long)
+    suspend fun removeItem(@Path("userId") userId: UUID, @Path("cartId") cartId: Long, @Path("itemId") itemId: Long) : Response<Void>
 
 }

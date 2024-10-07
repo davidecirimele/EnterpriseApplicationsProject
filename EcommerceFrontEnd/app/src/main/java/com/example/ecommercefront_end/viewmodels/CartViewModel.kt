@@ -79,15 +79,24 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
         viewModelScope.launch {
             try {
                 val userId = SessionManager.user?.id
-                if (userId != null)
-                    shoppingCart.value?.let { repository.removeItem(item.id, it.id, userId) }
-                _cartItems.value = _cartItems.value.filterNot { it.id == item.id }
+                if (userId != null) {
+                    println("shpping cart items pre delete: ${_cartItems.value}")
+                    shoppingCart.value?.let {
+                        repository.removeItem(item.id, it.id, userId)
+                        println("shpping cart items post delete: ${_cartItems.value}")
+                        _cartItems.value = _cartItems.value.filterNot { it.id == item.id }.toList()
+                        println("Lista aggiornata dopo rimozione: ${_cartItems.value}")
+                        updateTotalAmount()
+
+                    }
+
+
+                }
 
             } catch (e: Exception) {
-                // Gestire l'errore
+                println()
             }
         }
-        updateTotalAmount()
     }
 
     private fun updateTotalAmount() {

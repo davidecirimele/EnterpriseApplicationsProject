@@ -85,7 +85,7 @@ object SessionManager {
                         user = decodeJwtToken(tokenMustValidated)
                         println("user: ${user?.firstName}, ${user?.lastName}")
                         return@launch
-                    } else {
+                    } else if (validatedToken != null && validatedToken.code() == 401) {
                         val tokenResponse = authRepository?.refreshToken(RefreshToken(_refreshToken))
                         if (tokenResponse != null) {
                             println( "tokenResponseBody: ${tokenResponse.body()}")
