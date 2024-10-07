@@ -2,7 +2,6 @@ package com.example.ecommercefront_end.repository
 
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
-import com.example.ecommercefront_end.model.WishlistUpdate
 import com.example.ecommercefront_end.network.WishlistApiService
 import com.example.ecommercefront_end.network.WishlistItemApiService
 import retrofit2.Response
@@ -86,8 +85,12 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
         return wApiService.shareWishlist(wishlist)
     }
 
-    suspend fun joinWishlist(token: Any, wishlist: Wishlist): Any {
-        return  wApiService.joinWishlist(token, wishlist)
+    suspend fun joinWishlist(userId: UUID , token: String ): Response<Boolean> {
+        return  wApiService.joinWishlist(userId, token)
+    }
+
+    suspend fun getWishlistsByFriends(id: UUID): List<Wishlist> {
+        return wApiService.getFriendWishlists(id)
     }
 
 }
