@@ -9,9 +9,13 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.RefreshToken;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.ShoppingCart;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RefreshTokenService;
+import com.enterpriseapplicationsproject.ecommerce.data.service.RevokedTokenService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
+import com.enterpriseapplicationsproject.ecommerce.dto.security.AccessTokenValidationDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.RefreshTokenDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserAlreadyExistsException;
+import com.enterpriseapplicationsproject.ecommerce.exception.UserNotFoundException;
+import io.jsonwebtoken.JwtException;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 
@@ -40,6 +44,8 @@ public class AuthServiceImpl implements  AuthService{
     private final RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+
+    private final RevokedTokenService revokedTokenService;
 
     private final Integer expirationTimeInHours = 96;
 
@@ -145,4 +151,26 @@ public class AuthServiceImpl implements  AuthService{
         String accessToken = jwtService.generateToken(loggedUserDetails);
         return Map.of("access_token", accessToken, "refresh_token", refreshToken);
     }
-}
+
+    @Override
+    public AccessTokenValidationDto validateToken(AccessTokenValidationDto accessTokenValidationDto) {
+            try {
+
+                jwtService.isTokenValid(accessTokenValidationDto.getToken());
+
+                if (revokedTokenService.isTokenRevoked(accessTokenValidationDto.getToken())) {
+                    throw new JwtException("Token is revoked");
+                }
+
+                String username = jwtService.extractUsername(accessTokenValidationDto.getToken());
+
+                userDao.findByCredentialEmail(username).orElseThrow(() -> new UserNotFoundException("User not found"));
+
+                return accessTokenValidationDto;
+            } catch (JwtException e) {
+                throw new JwtException("Token is invalid");
+            }
+        }
+
+    }
+

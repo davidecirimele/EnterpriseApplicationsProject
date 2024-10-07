@@ -76,8 +76,12 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     @Transactional
-    public OrderDto setOrderStatusToCancelled(Long orderId) {
+    public OrderDto setOrderStatusToCancelled(Long orderId, UUID userId) {
+
         Order order = ordersDao.findById(orderId).orElseThrow(() -> new OrderNotFoundException("Order not found"));
+        if (!order.getUser().getId().equals(userId)) {
+            throw new UnauthorizedAccessException("Unauthorized access to this order");
+        }
         order.setOrderStatus(OrderStatus.CANCELLED);
         Order o = ordersDao.save(order);
         return modelMapper.map(o, OrderDto.class);

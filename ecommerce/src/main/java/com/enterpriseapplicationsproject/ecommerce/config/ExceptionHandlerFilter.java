@@ -31,7 +31,7 @@ public class ExceptionHandlerFilter  extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             filterChain.doFilter(request, response);
-        } catch (ExpiredJwtException e) {
+        } catch (JwtException e) {
             int status = HttpStatus.UNAUTHORIZED.value();
             String message = "Token not valid";
 

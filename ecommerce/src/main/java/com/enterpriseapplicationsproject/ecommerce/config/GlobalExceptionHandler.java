@@ -5,6 +5,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.ShoppingCart;
 import com.enterpriseapplicationsproject.ecommerce.dto.ServiceError;
 import com.enterpriseapplicationsproject.ecommerce.exception.*;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -104,10 +105,23 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.valueOf(HttpStatus.BAD_REQUEST.value()), req, ex.getMessage());
     }
 
+
     @ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ServiceError onAuthenticationException(WebRequest req, AuthenticationException ex){
         return errorResponse(HttpStatus.valueOf(HttpStatus.UNAUTHORIZED.value()), req, ex.getMessage());
+    }
+
+    @ExceptionHandler(JwtException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ServiceError onJwtException(WebRequest req, JwtException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.UNAUTHORIZED.value()), req, ex.getMessage());
+    }
+
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ServiceError onUnauthorizedAccessException(WebRequest req, UnauthorizedAccessException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.FORBIDDEN.value()), req, ex.getMessage());
     }
 
 
