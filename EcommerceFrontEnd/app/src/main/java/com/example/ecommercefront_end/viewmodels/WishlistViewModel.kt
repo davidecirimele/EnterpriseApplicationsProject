@@ -8,6 +8,7 @@ import com.example.ecommercefront_end.model.Group
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.repository.WishlistRepository
+import io.ktor.util.reflect.instanceOf
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
@@ -21,6 +22,9 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
 
     private val _wishlists = MutableStateFlow<List<Wishlist>>(emptyList())
     val wishlists: StateFlow<List<Wishlist>> = _wishlists.asStateFlow()
+
+    private val _friendWishlists = MutableStateFlow<List<Wishlist>>(emptyList())
+    val friendWishlists: StateFlow<List<Wishlist>> = _friendWishlists.asStateFlow()
 
     private val _wishlistItems = MutableStateFlow<List<WishlistItem>>(emptyList())
     val wishlistItems: StateFlow<List<WishlistItem>> = _wishlistItems.asStateFlow()
@@ -46,6 +50,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
                 val currentUser = SessionManager.user
                 currentUser?.let {
                     _wishlists.value = wRepository.getWishlistsByUser(it.id)
+                    _friendWishlists.value = wRepository.getWishlistsByFriends(it.id)
                     if (_wishlists.value.isEmpty()) {
                         _error.value = "Nessuna wishlist trovata"
                     }
@@ -101,11 +106,12 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
     }
 
 
-    fun joinWishlist(token : String, wishlistId : Long){
+    fun joinWishlist(token : String){
         viewModelScope.launch {
             try {
-                //val response = wRepository.joinWishlist(token, wishlistId)
-                if (true) {
+                val currentUser = SessionManager.user
+                val response = currentUser?.let { wRepository.joinWishlist(it.id, token) }
+                if (response != null && response.isSuccessful) {
                     Log.d("joinWishlist", "Utente aggiunto con successo alla wishlist")
                 } else {
                     //Log.e("joinWishlist", "Errore durante l'aggiunta dell'utente alla wishlist: ${response.errorBody()}")

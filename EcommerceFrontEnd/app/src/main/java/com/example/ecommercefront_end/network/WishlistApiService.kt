@@ -2,7 +2,6 @@ package com.example.ecommercefront_end.network
 
 import com.example.ecommercefront_end.model.RequiresAuth
 import com.example.ecommercefront_end.model.Wishlist
-import com.example.ecommercefront_end.model.WishlistUpdate
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -27,6 +26,11 @@ interface WishlistApiService {
     @RequiresAuth
     suspend fun getWishlistsByUser(@Path("idUser") idUser: UUID) : List<Wishlist>
 
+
+    @GET("wishlists/getFriendWishlists/{idUser}")
+    @RequiresAuth
+    suspend fun getFriendWishlists(@Path("idUser") idUser: UUID): List<Wishlist>
+
     @GET("wishlists/getAll")
     @RequiresAuth
     suspend fun getAllWishlist() : List<Wishlist>
@@ -43,8 +47,10 @@ interface WishlistApiService {
     @RequiresAuth
     suspend fun shareWishlist(@Body wishlist: Wishlist) : Map<String, String>
 
-    @POST("wishlists/join/{idWishlist}")
+    @POST("wishlists/join/{idUserToJoin}/{token}")
     @RequiresAuth
-    suspend fun joinWishlist(token: Any, wishlist: Wishlist): Any
+    suspend fun joinWishlist(@Path("idUserToJoin") idUser: UUID, @Path("token") token: String): Response<Boolean>
+
+
 
 }

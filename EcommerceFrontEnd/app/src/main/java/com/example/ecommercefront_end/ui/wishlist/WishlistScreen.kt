@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -119,17 +120,22 @@ fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) 
 fun AddWishlistDialog(
     onDismissRequest: () -> Unit,
     onAddWishlist: (String, Boolean) -> Unit,
-    onJoinWishlist: () -> Unit
+    onJoinWishlist: (String) -> Unit
 ) {
     var showCreateWishlist by remember { mutableStateOf(false) }
     var wishlistName by remember { mutableStateOf("") }
     var isPrivate by remember { mutableStateOf(false) }
 
+    var tokenShared by remember { mutableStateOf("") }
+    var showJoinWishlist by remember { mutableStateOf(false) }
+
     if (showCreateWishlist) {
         // Dialogo per creare una nuova wishlist
         AlertDialog(
             onDismissRequest = { showCreateWishlist = false },
-            title = { Text("Crea una nuova lista") },
+            title = { Text("Crea una nuova lista" ,
+                modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally))
+            },
             text = {
                 Column {
                     TextField(
@@ -164,7 +170,41 @@ fun AddWishlistDialog(
             },
             dismissButton = null
         )
-    } else {
+    }else if(showJoinWishlist){
+        // Dialogo per unirsi alla wishlist di un amico
+        AlertDialog(
+            onDismissRequest = { showJoinWishlist = false },
+            title = { Text("Unisciti alla lista di un amico",
+                modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)
+            ) },
+            text = {
+                Column {
+                    TextField(
+                        value = tokenShared,
+                        onValueChange = { tokenShared = it },
+                        label = { Text("Inserisci il token ricevuto") }
+                    )
+                }
+            },
+            confirmButton = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    Button(onClick = {
+                        onJoinWishlist(tokenShared)
+                        showJoinWishlist = false
+                    }) {
+                        Text("Partecipa")
+                    }
+                    Button(onClick = { showJoinWishlist = false }) {
+                        Text("Annulla")
+                    }
+                }
+            },
+            dismissButton = null
+        )
+    }else {
         // Dialogo con le opzioni
         AlertDialog(
             onDismissRequest = onDismissRequest,
@@ -172,18 +212,21 @@ fun AddWishlistDialog(
             text = {
                 Column {
                     Button(onClick = { showCreateWishlist = true }) {
-                        Text("Crea Wishlist")
+                        Text("Crea una nuova lista")
                     }
+
                     Spacer(modifier = Modifier.height(8.dp))
-                    Button(onClick = {
-                        onJoinWishlist()
-                    }) {
-                        Text("Unisciti alla Wishlist di un amico")
+
+                    Button(onClick = { showJoinWishlist = true }) {
+                        Text("Unisciti alla lista di un amico")
                     }
                 }
             },
             confirmButton = {
-                Button(onClick = onDismissRequest) {
+                Button(
+                    onClick = onDismissRequest,
+                    modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)
+                ) {
                     Text("Annulla")
                 }
             },
@@ -194,7 +237,7 @@ fun AddWishlistDialog(
 
 @Composable
 fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWishlistSelected: (Wishlist) -> Unit) {
-    var showAddWishlist by remember { mutableStateOf(false) }
+    var showAddWishlistMain by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
@@ -208,24 +251,23 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
-        IconButton(onClick = { showAddWishlist = true }) {
+        IconButton(onClick = { showAddWishlistMain = true }) {
             Icon(imageVector = Icons.Filled.AddCircleOutline, contentDescription = "Aggiungi Lista", tint = Color.Green)
         }
     }
-    if (showAddWishlist) {
+    if (showAddWishlistMain) {
         AddWishlistDialog(
-            onDismissRequest = { showAddWishlist = false },
-            onAddWishlist = { wishlistName, isPrivate ->
+            onDismissRequest = { showAddWishlistMain = false },
+            onAddWishlist = { wishlistName, isPrivate -> // wishlistName e isPrivate sono i parametri passati dal dialogo
                 viewModel.addWishlist(wishlistName, isPrivate)
-                showAddWishlist = false
+                showAddWishlistMain = false
             },
-            onJoinWishlist = {
-                // TODO: Implementa la logica per unirsi a una wishlist
-                showAddWishlist = false
+            onJoinWishlist = { token -> // token è il parametro passato dal dialogo
+                viewModel.joinWishlist(token)
+                showAddWishlistMain = false
             }
         )
     }
-
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()

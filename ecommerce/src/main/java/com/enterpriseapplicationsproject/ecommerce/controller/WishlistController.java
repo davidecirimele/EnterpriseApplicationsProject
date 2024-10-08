@@ -85,6 +85,17 @@ public class WishlistController {
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
+    //TO DOO
+    @GetMapping(path = "/getFriendWishlists/{idUser}")
+    //@PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<List<WishlistDto>> getFriendWishlists(@PathVariable UUID idUser) {
+        log.info("Received request for friend Wishlists");
+        List<WishlistDto> w = wishlistService.getFriendWishlists(idUser);
+        if(w == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // meglio farlo nel service e gestire l'eccezione con l'handler
+        return new ResponseEntity<>(w, HttpStatus.OK);
+    }
+
     @PostMapping(path = "/share")
     @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
     public ResponseEntity<Map <String,String> > shareWishlist(@RequestBody SharedWishlistRequest request) {
@@ -106,7 +117,7 @@ public class WishlistController {
 
     @PostMapping(path = "/join/{idUserToJoin}/{token}")
     @PreAuthorize("#idUserToJoin == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<String> acceptSharedWishlist(@PathVariable UUID idUserToJoin, String token) {
+    public ResponseEntity<String> joinWishlist(@PathVariable UUID idUserToJoin, String token) {
         try {
             // Analizzare il token della wishlist
             SharedWishlistRequest tokenDetails = jwtService.parseWishlistToken(token);

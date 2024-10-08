@@ -14,6 +14,8 @@ public interface WishlistsService {
     List<WishlistDto> getAllSorted();
     List<WishlistDto> getWishlistsByUser(UUID userId);
 
+    List<WishlistDto> getFriendWishlists(UUID userId);
+
     List<Wishlist> getAll();
 
     void save(Wishlist wishlist);

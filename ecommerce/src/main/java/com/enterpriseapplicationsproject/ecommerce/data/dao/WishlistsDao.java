@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,11 +26,8 @@ public interface WishlistsDao extends JpaRepository<Wishlist, Long>,
     @Query("SELECT w.group FROM Wishlist w WHERE w.id = :wishlistId")
     Group getGroupByWishlistId(@Param("wishlistId") Long wishlistId);
 
-    @Query("SELECT w FROM Wishlist w " +
-            "JOIN w.group g " +
-            "JOIN g.members gm " +
-            "WHERE gm.id = :userId AND w.userId.id != :userId")
-    List<Wishlist> findOfFriends(@Param("userId") UUID userId);
+    @Query("SELECT distinct w FROM Wishlist w JOIN w.group.members m WHERE m.id = :userId")
+    List<Wishlist> findFriendWishlists(@Param("userId")UUID userId);
 
 
 }
