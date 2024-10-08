@@ -103,7 +103,7 @@ public class WishlistController {
         LoggedUserDetails userDetails = (LoggedUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         // Generare il token JWT che include le informazioni della wishlist
-        String wishlistSharedToken = jwtService.generateSharedWishlistToken(userDetails, request.getWishlistId(), 1);
+        String wishlistSharedToken = jwtService.generateSharedWishlistToken(userDetails, request.getWishlistId(), 10);
 
         Map<String, String> response = new HashMap<>();
         response.put("token", wishlistSharedToken); // Incapsula il token in una mappa

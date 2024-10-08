@@ -67,7 +67,7 @@ public class WishlistsServiceImpl implements WishlistsService {
 
     @Override
     public void save(Wishlist wishlist) {
-       wishlistsDao.save(wishlist);
+        wishlistsDao.save(wishlist);
     }
 
     @Override
@@ -154,6 +154,14 @@ public class WishlistsServiceImpl implements WishlistsService {
         return wishlistsDao.findById(id)
                 .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
                 .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));*/
+    }
+
+    @Override
+    public List<WishlistDto> getWishlistsOfFriend(UUID idUser) {
+        return wishlistsDao.findFriendWishlists(idUser)
+                .stream()
+                .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override

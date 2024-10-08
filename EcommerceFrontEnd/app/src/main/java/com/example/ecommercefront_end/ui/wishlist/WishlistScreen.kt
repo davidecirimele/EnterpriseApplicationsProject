@@ -74,7 +74,7 @@ import com.example.ecommercefront_end.viewmodels.WishlistViewModel
 fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) {
     val wLists by viewModel.wishlists.collectAsState()
     val wListItems by viewModel.wishlistItems.collectAsState()
-    val isLoading by viewModel.IsLoading.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
 
     // Gestione della selezione della wishlist
@@ -330,7 +330,7 @@ fun WishlistDetails(
     var showRenameDialog by remember { mutableStateOf(false) }
     var newWishlistName by remember { mutableStateOf(wishlist.name) }
 
-    val isLoading by viewModel.IsLoading.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
     val tokenToShare by viewModel.tokenToShare.collectAsState()

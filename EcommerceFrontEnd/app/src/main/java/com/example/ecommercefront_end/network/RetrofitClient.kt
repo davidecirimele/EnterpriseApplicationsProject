@@ -15,7 +15,7 @@ import javax.net.ssl.X509TrustManager
 object RetrofitClient {
     private const val BASE_URL = "https://10.0.2.2:8081/api/v1/"
 
-    private const val SAMUELES_URL = "https://10.0.2.2:8081/api/v1/" //URL di Samuele S
+    private const val SAMUELES_URL = "https://192.168.50.2:8081/api/v1/" //URL di Samuele S
 
     private const val DAVIDES_URL = "https://192.168.1.4:8080/api/v1/"
 
