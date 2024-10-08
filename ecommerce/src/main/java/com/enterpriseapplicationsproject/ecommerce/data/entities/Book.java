@@ -1,6 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -24,10 +25,6 @@ public class Book {
 
     @Column(name = "WEIGHT")
     private Double weight;
-
-    @Basic(optional = false)
-    @Column(name = "INSERT_DATE")
-    private LocalDate insertDate;
 
     @Basic(optional = false)
     @Column(name = "PRICE")
@@ -67,11 +64,8 @@ public class Book {
     @Column(name = "AGE")
     private int age;
 
+    @NotNull
     @Column(name = "PUBLISH_DATE")
-    private Date publishDate;
+    private LocalDate publishDate;
 
-    @PrePersist
-    protected void onCreate() {
-        this.insertDate = LocalDate.now();
-    }
 }

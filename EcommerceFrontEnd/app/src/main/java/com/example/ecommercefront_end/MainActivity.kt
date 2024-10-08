@@ -83,6 +83,7 @@ import com.example.ecommercefront_end.ui.user.EditAddressScreen
 import com.example.ecommercefront_end.ui.cart.CartScreen
 import com.example.ecommercefront_end.ui.home.BookDetailsScreen
 import com.example.ecommercefront_end.ui.home.BooksFilterScreen
+import com.example.ecommercefront_end.ui.home.FilteredBooksScreen
 import com.example.ecommercefront_end.ui.home.HomeScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.ui.user.AccountManagerScreen
@@ -207,6 +208,11 @@ fun NavigationView(navController: NavHostController) {
                 MyAccountScreen(
                     accountViewModel = accountViewModel, addressViewModel = addressViewModel,
                     navHostController = navController)
+            }
+
+            composable("filtered-books") {
+                FilteredBooksScreen(
+                    viewModel = bookViewModel, navController = navController)
             }
 
             composable("addresses") {

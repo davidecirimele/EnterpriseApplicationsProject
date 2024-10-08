@@ -5,6 +5,7 @@ coilComposeVersion = "2.7.0"
 converterGson = "2.9.0"
 gson = "2.10.1"
 gsonVersion = "2.8.2"
+jacksonAnnotations = "2.18.0"
 jwtdecode = "2.0.1"
 kotlin = "1.9.23"
 coreKtx = "1.13.1"
@@ -40,6 +41,8 @@ coil = { module = "io.coil-kt:coil", version.ref = "coilComposeVersion" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilComposeVersion" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 gson-v282 = { module = "com.google.code.gson:gson", version.ref = "gsonVersion" }
+jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jacksonAnnotations" }
+jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jacksonAnnotations" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

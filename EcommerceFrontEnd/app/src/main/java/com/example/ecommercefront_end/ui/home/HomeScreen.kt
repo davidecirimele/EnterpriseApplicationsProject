@@ -86,6 +86,7 @@ fun HomeScreen(homeViewModel: HomeViewModel, bookViewModel: BookViewModel, navCo
                 Text("Nessun prodotto disponibile")
             }
         } else {
+
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 item(key = "topSection") {
                     ProductSection(
@@ -116,8 +117,9 @@ fun HomeScreen(homeViewModel: HomeViewModel, bookViewModel: BookViewModel, navCo
             }
             
             if(showFilterOptions){
-                BooksFilterScreen(viewModel = bookViewModel, onDismiss = {
+                BooksFilterScreen(viewModel = bookViewModel, navController = navController, onDismiss = {
                     homeViewModel.triggerShowFilterOptions()
+                    bookViewModel.resetFilter()
                 })
             }
         }

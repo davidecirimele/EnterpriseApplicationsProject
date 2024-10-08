@@ -8,6 +8,7 @@ import com.enterpriseapplicationsproject.ecommerce.dto.GroupDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -26,6 +27,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Component
 public class DbGenerator implements ApplicationRunner {
 
@@ -96,6 +98,7 @@ public class DbGenerator implements ApplicationRunner {
                 insertAddress(record.get(0));
 
             }
+
             //GROUPS
             CSVParser groupsCsv = CSVFormat.DEFAULT.withDelimiter(';')
                     .parse(new InputStreamReader(groupsRes.getInputStream()));
@@ -199,19 +202,22 @@ public class DbGenerator implements ApplicationRunner {
 
         String edition = array[7];
 
-        String format = array[8];
+        BookFormat format = BookFormat.valueOf(array[8].toUpperCase());
 
-        String genre = array[9];
+        BookGenre genre = BookGenre.valueOf(array[9].toUpperCase());
 
-        String language = array[10];
+        BookLanguage language = BookLanguage.valueOf(array[10].toUpperCase());
 
         String publisher = array[11];
 
         int age = Integer.parseInt(array[12]);
 
+        log.info("LocalDate = "+LocalDate.parse(array[13]));
         LocalDate publishDate = LocalDate.parse(array[13]);
+        log.info("PublishDate = "+publishDate);
 
-        System.out.println("RECORD : "+ record);
+        System.out.println("RECORD : "+ publishDate);
+
 
         SaveBookDto book = new SaveBookDto();
 

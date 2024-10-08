@@ -26,8 +26,6 @@ public class BookDto {
 
     private BookFormat format;
 
-
-
     private BookGenre genre;
 
     private BookLanguage language;
@@ -43,5 +41,6 @@ public class BookDto {
     private Double price;
 
     private Integer stock;
+
     private MultipartFile image;
 }

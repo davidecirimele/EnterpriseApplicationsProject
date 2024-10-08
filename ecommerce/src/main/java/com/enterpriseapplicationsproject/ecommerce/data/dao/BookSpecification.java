@@ -18,9 +18,6 @@ public class BookSpecification {
     @Data
     public static class Filter {
         private Double weight;
-        private LocalDate insertDate;
-        private LocalDate minInsertDate;
-        private LocalDate maxInsertDate;
         private Double price;
         private Double minPrice;
         private Double maxPrice;
@@ -39,9 +36,9 @@ public class BookSpecification {
         private Integer age;
         private Integer minAge;
         private Integer maxAge;
-        private Date publishDate;
-        private Date minPublishDate;
-        private Date maxPublishDate;
+        private LocalDate publishDate;
+        private LocalDate minPublishDate;
+        private LocalDate maxPublishDate;
     }
 
     public static Specification<Book> bookFilter(BookSpecification.Filter filter) {
@@ -126,15 +123,6 @@ public class BookSpecification {
                 }
                 if (filter.getMaxPages() != null) {
                     predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("pages"), filter.getMaxPages()));
-                }
-                if (filter.getInsertDate() != null) {
-                    predicates.add(criteriaBuilder.equal(root.get("insertDate"), filter.getInsertDate()));
-                }
-                if (filter.getMinInsertDate() != null) {
-                    predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("insertDate"), filter.getMinInsertDate()));
-                }
-                if (filter.getMaxInsertDate() != null) {
-                    predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("insertDate"), filter.getMaxInsertDate()));
                 }
 
                 return query.where(predicates.toArray(new Predicate[0])).getRestriction();

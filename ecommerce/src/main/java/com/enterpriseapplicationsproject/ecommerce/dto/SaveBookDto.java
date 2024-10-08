@@ -1,5 +1,8 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
+import com.enterpriseapplicationsproject.ecommerce.data.entities.BookFormat;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.BookGenre;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.BookLanguage;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -26,13 +29,13 @@ public class SaveBookDto {
     private String edition;
 
     @NotBlank(message = "Format is mandatory")
-    private String format;
+    private BookFormat format;
 
     @NotBlank(message = "Genre is mandatory")
-    private String genre;
+    private BookGenre genre;
 
     @NotBlank(message = "Language is mandatory")
-    private String language;
+    private BookLanguage language;
 
     @NotBlank(message = "Publisher is mandatory")
     private String publisher;
