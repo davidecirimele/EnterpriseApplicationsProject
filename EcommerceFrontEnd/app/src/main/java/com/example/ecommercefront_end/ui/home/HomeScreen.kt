@@ -117,7 +117,7 @@ fun HomeScreen(homeViewModel: HomeViewModel, bookViewModel: BookViewModel, navCo
             }
             
             if(showFilterOptions){
-                BooksFilterScreen(viewModel = bookViewModel, navController = navController, onDismiss = {
+                BooksFilterScreen(viewModel = bookViewModel, navController = navController, "home", onDismiss = {
                     homeViewModel.triggerShowFilterOptions()
                     bookViewModel.resetFilter()
                 })

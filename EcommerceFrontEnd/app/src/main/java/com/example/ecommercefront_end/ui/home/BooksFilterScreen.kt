@@ -65,7 +65,7 @@ import java.util.Locale
 
 @Preview
 @Composable
-fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, onDismiss: () -> Unit){
+fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, currentRoute: String?, onDismiss: () -> Unit){
 
     LaunchedEffect(Unit) {
         viewModel.fetchBooksData();
@@ -255,7 +255,7 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, on
 
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-                        Button(onClick = { navController.navigate("filtered-books") }) {
+                        Button(onClick = { viewModel.searchBooks(navController, currentRoute) }) {
                             Text(text = "Filter Books")
                         }
                     }

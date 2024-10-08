@@ -136,7 +136,7 @@ fun NavigationView(navController: NavHostController) {
     val bookViewModel = remember { BookViewModel(repository = BookRepository(RetrofitClient.booksApiService)) }
 
     Scaffold(
-        topBar = { TopBar(navController, homeViewModel) },
+        topBar = { TopBar(navController, homeViewModel, bookViewModel) },
         bottomBar = { BottomBar(selectedIndex, navController) }
     ) { innerPadding ->
         NavHost(
@@ -249,17 +249,17 @@ fun NavigationView(navController: NavHostController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navHostController: NavHostController, homeViewModel: HomeViewModel) {
+fun TopBar(navHostController: NavHostController, homeViewModel: HomeViewModel, bookViewModel: BookViewModel) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
-    val isSearchVisible = currentRoute == "home"
+    val isSearchVisible = currentRoute == "home" || currentRoute == "filtered-books"
     val colorScheme = MaterialTheme.colorScheme
 
     TopAppBar(
         title = {
             if (isSearchVisible) {
-                SearchBar(homeViewModel)
+                SearchBar(navHostController,homeViewModel, bookViewModel, currentRoute)
             } else {
                 Text(stringResource(R.string.app_name))
             }
@@ -287,7 +287,7 @@ fun TopBar(navHostController: NavHostController, homeViewModel: HomeViewModel) {
 }
 
 @Composable
-fun SearchBar(homeViewModel: HomeViewModel) {
+fun SearchBar(navHostController: NavHostController, homeViewModel: HomeViewModel, bookViewModel: BookViewModel, currentRoute: String?) {
     var searchValue by remember { mutableStateOf("") }
 
     Row(modifier = Modifier.fillMaxWidth()) {
@@ -301,7 +301,9 @@ fun SearchBar(homeViewModel: HomeViewModel) {
 
         TextField(
             value = searchValue,
-            onValueChange = { searchValue = it },
+            onValueChange = { searchValue = it;
+                bookViewModel.updateFilter(title = it, author = it, publisher = it);
+                bookViewModel.searchBooks(navHostController, currentRoute)},
             label = { Text("Search Book") },
             shape = RoundedCornerShape(16.dp),
             singleLine = true

@@ -70,9 +70,6 @@ public class BookSpecification {
                 if (filter.getMaxPrice() != null) {
                     predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("price"), filter.getMaxPrice()));
                 }
-                if (filter.getTitle() != null) {
-                    predicates.add(criteriaBuilder.like(root.get("title"), "%" + filter.getTitle() + "%"));
-                }
                 if (filter.getISBN() != null) {
                     predicates.add(criteriaBuilder.equal(root.get("ISBN"), filter.getISBN()));
                 }
@@ -85,12 +82,23 @@ public class BookSpecification {
                 if (filter.getLanguage() != null) {
                     predicates.add(criteriaBuilder.equal(root.get("language"), filter.getLanguage()));
                 }
+
+                List<Predicate> orPredicates = new ArrayList<>();
+                if (filter.getTitle() != null) {
+                    orPredicates.add(criteriaBuilder.like(root.get("title"), "%" + filter.getTitle() + "%"));
+                }
                 if (filter.getAuthor() != null) {
-                    predicates.add(criteriaBuilder.like(root.get("author"), "%" + filter.getAuthor() + "%"));
+                    orPredicates.add(criteriaBuilder.like(root.get("author"), "%" + filter.getAuthor() + "%"));
                 }
                 if (filter.getPublisher() != null) {
-                    predicates.add(criteriaBuilder.like(root.get("publisher"), "%" + filter.getPublisher() + "%"));
+                    orPredicates.add(criteriaBuilder.like(root.get("publisher"), "%" + filter.getPublisher() + "%"));
                 }
+
+                if (!orPredicates.isEmpty()) {
+                    Predicate orPredicate = criteriaBuilder.or(orPredicates.toArray(new Predicate[0]));
+                    predicates.add(orPredicate);
+                }
+
                 if (filter.getGenre() != null) {
                     predicates.add(criteriaBuilder.equal(root.get("genre"), filter.getGenre()));
                 }

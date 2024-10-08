@@ -4,6 +4,8 @@ import android.se.omapi.Session
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.model.Book
@@ -248,5 +250,17 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
     fun resetFilter(){
         _filter.value = BookFilter()
+    }
+
+    fun searchBooks(navController: NavController, currentRoute: String?){
+        if(currentRoute != null && currentRoute != "filtered-books") {
+            navController.navigate("filtered-books") {
+                popUpTo("home") {
+                    saveState = true
+                }
+            }
+        } else{
+            fetchFilteredBooks()
+        }
     }
 }
