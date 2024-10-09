@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -60,8 +61,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -99,6 +109,7 @@ import com.example.ecommercefront_end.viewmodels.HomeViewModel
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
 import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
+import androidx.compose.ui.Alignment
 import kotlinx.coroutines.async
 
 
@@ -135,7 +146,7 @@ fun NavigationView(navController: NavHostController) {
     val bookViewModel = remember { BookViewModel(repository = BookRepository(RetrofitClient.booksApiService)) }
 
     Scaffold(
-        topBar = { TopBar(navController, homeViewModel) },
+        topBar = { TopBar(navController) },
         bottomBar = { BottomBar(selectedIndex, navController) }
     ) { innerPadding ->
         NavHost(
@@ -145,7 +156,7 @@ fun NavigationView(navController: NavHostController) {
         ) {
             composable("home") {
                 selectedIndex.value = 0
-                HomeScreen(homeViewModel = homeViewModel, bookViewModel = bookViewModel,navController)
+                HomeScreen(homeViewModel = homeViewModel, navController)
             }
 
             composable("/books_details/{idBook}", arguments = listOf(navArgument("idBook") { type = NavType.LongType })) { backStackEntry ->
@@ -241,9 +252,10 @@ fun NavigationView(navController: NavHostController) {
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navHostController: NavHostController, homeViewModel: HomeViewModel) {
+fun TopBar(navHostController: NavHostController) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
@@ -253,7 +265,7 @@ fun TopBar(navHostController: NavHostController, homeViewModel: HomeViewModel) {
     TopAppBar(
         title = {
             if (isSearchVisible) {
-                SearchBar(homeViewModel)
+                SearchBar()
             } else {
                 Text(stringResource(R.string.app_name))
             }
@@ -265,6 +277,13 @@ fun TopBar(navHostController: NavHostController, homeViewModel: HomeViewModel) {
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.back)
                     )
+                }
+            }
+        },
+        actions = {
+            if (isSearchVisible) {
+                IconButton(onClick = { /* Handle settings click */ }) {
+                    Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings))
                 }
             }
         },
@@ -305,8 +324,24 @@ fun SearchBar(homeViewModel: HomeViewModel) {
 
 @Composable
 fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostController) {
-    NavigationBar {
-        NavigationBarItem(
+    BottomNavigation(
+        backgroundColor = MaterialTheme.colorScheme.surface,
+        modifier = Modifier
+            .height(67.dp)
+            .drawBehind {
+                val borderSize = 1.dp.toPx()
+                val borderColor = Color.White.toArgb()
+
+                drawLine(
+                    color = Color(borderColor),
+                    start = Offset(0f, 0f),
+                    end = Offset(size.width, 0f),
+                    strokeWidth = borderSize
+                )
+            }
+            )
+    {
+        BottomNavigationItem(
             selected = selectedIndex.value == 0,
             onClick = {
                 selectedIndex.value = 0
@@ -320,16 +355,30 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             },
             icon = {
                 Icon(
-                    Icons.Filled.Home,
-                    contentDescription = stringResource(R.string.home)
+                    modifier = if (selectedIndex.value == 0) { // Applica l'ombra solo se selezionato
+                        Modifier.shadow(
+                            elevation = 4.dp,
+                            shape = CutCornerShape(topStart = 8.dp, topEnd = 8.dp),
+                            spotColor = MaterialTheme.colorScheme.primary
+                        )
+                    } else {
+                        Modifier
+                    },
+                    imageVector = Icons.Filled.Home,
+                    contentDescription = stringResource(R.string.home),
+
                 )
-            }
+            },
+            selectedContentColor = MaterialTheme.colorScheme.primary,
+            unselectedContentColor = MaterialTheme.colorScheme.onSurface // Centra verticalmente
         )
-        NavigationBarItem(
+        // Ripeti per gli altri elementi della Navigation Bar
+        // ...
+        BottomNavigationItem(
             selected = selectedIndex.value == 1,
             onClick = {
                 selectedIndex.value = 1
-                if(SessionManager.user == null)
+                if (SessionManager.user == null)
                     navHostController.navigate("userAuth") {
                         popUpTo(navHostController.graph.startDestinationId) {
                             saveState = true
@@ -337,7 +386,7 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
                         launchSingleTop = true
                         restoreState = true
                     }
-                else
+                else {
                     navHostController.navigate("account-manager") {
                         popUpTo(navHostController.graph.startDestinationId) {
                             saveState = true
@@ -345,16 +394,27 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
                         launchSingleTop = true
                         restoreState = true
                     }
-
+                }
             },
-            icon = {
-                Icon(
-                    Icons.Filled.AccountCircle,
-                    contentDescription = stringResource(R.string.user)
-                )
-            }
+            icon = {Icon(
+                modifier = if (selectedIndex.value == 1) { // Applica l'ombra solo se selezionato
+                    Modifier.shadow(
+                        elevation = 4.dp,
+                        shape = CutCornerShape(topStart = 8.dp, topEnd = 8.dp),
+                        spotColor = MaterialTheme.colorScheme.primary
+                    )
+                } else {
+                    Modifier
+                },
+                imageVector = Icons.Filled.AccountCircle,
+                contentDescription = stringResource(R.string.user),
+
+            )
+            },
+            selectedContentColor = MaterialTheme.colorScheme.primary,
+            unselectedContentColor = MaterialTheme.colorScheme.onSurface
         )
-        NavigationBarItem(
+        BottomNavigationItem(
             selected = selectedIndex.value == 2,
             onClick = {
                 selectedIndex.value = 2
@@ -368,12 +428,25 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             },
             icon = {
                 Icon(
-                    Icons.Filled.ShoppingCart,
-                    contentDescription = stringResource(R.string.cart)
+                    modifier = if (selectedIndex.value == 2) { // Applica l'ombra solo se selezionato
+                        Modifier.shadow(
+                            elevation = 4.dp,
+                            shape = CutCornerShape(topStart = 8.dp, topEnd = 8.dp),
+                            spotColor = MaterialTheme.colorScheme.primary
+
+                        )
+                    } else {
+                        Modifier
+                    },
+                    imageVector = Icons.Filled.ShoppingCart,
+                    contentDescription = stringResource(R.string.cart),
+
                 )
-            }
+            },
+            selectedContentColor = MaterialTheme.colorScheme.primary,
+            unselectedContentColor = MaterialTheme.colorScheme.onSurface
         )
-        NavigationBarItem(
+        BottomNavigationItem(
             selected = selectedIndex.value == 3,
             onClick = {
                 selectedIndex.value = 3
@@ -387,14 +460,25 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             },
             icon = {
                 Icon(
-                    Icons.Filled.Favorite,
+                    modifier = if (selectedIndex.value == 3) { // Applica l'ombra solo se selezionato
+                        Modifier.shadow(
+                            elevation = 4.dp,
+                            shape = CutCornerShape(topStart = 8.dp, topEnd = 8.dp),
+                            spotColor = MaterialTheme.colorScheme.primary
+                        )
+                    } else {
+                        Modifier
+                    },
+                    imageVector = Icons.Filled.Favorite,
                     contentDescription = stringResource(R.string.favorite)
+
                 )
-            }
+            },
+            selectedContentColor = MaterialTheme.colorScheme.primary,
+            unselectedContentColor = MaterialTheme.colorScheme.onSurface
         )
     }
 }
-
 
 @Composable
 fun HomePage() {

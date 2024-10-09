@@ -1,7 +1,7 @@
 package com.example.ecommercefront_end.network
 
+import com.example.ecommercefront_end.model.RequiresAuth
 import com.example.ecommercefront_end.model.Wishlist
-import com.example.ecommercefront_end.model.WishlistUpdate
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -15,21 +15,42 @@ import java.util.UUID
 interface WishlistApiService {
 
     @POST("wishlists/add")
+    @RequiresAuth
     suspend fun addWishlist(@Body w: Wishlist)
 
     @GET("wishlists/get/{idW}")
+    @RequiresAuth
     suspend fun getWishlistById(@Path("idW") idW: UUID)
 
     @GET("wishlists/getByUser/{idUser}")
-    suspend fun getWishlistsByUser(@Path("idUser") idUser: Long)
+    @RequiresAuth
+    suspend fun getWishlistsByUser(@Path("idUser") idUser: UUID) : List<Wishlist>
+
+
+    @GET("wishlists/getFriendWishlists/{idUser}")
+    @RequiresAuth
+    suspend fun getFriendWishlists(@Path("idUser") idUser: UUID): List<Wishlist>
 
     @GET("wishlists/getAll")
+    @RequiresAuth
     suspend fun getAllWishlist() : List<Wishlist>
 
     @PUT("wishlists/update")
-    suspend fun updateWishlist(@Body w: WishlistUpdate)
+    @RequiresAuth
+    suspend fun updateWishlist(@Body w: Wishlist): Response<Unit>
 
-    @DELETE("/api/v1/wishlists/delete/{idWishlist}")
+    @DELETE("wishlists/delete/{idWishlist}")
+    @RequiresAuth
     suspend fun deleteWishlist(@Path("idWishlist") idW: Long) : Response<Unit>
+
+    @POST("wishlists/share")
+    @RequiresAuth
+    suspend fun shareWishlist(@Body wishlist: Wishlist) : Map<String, String>
+
+    @POST("wishlists/join/{idUserToJoin}/{token}")
+    @RequiresAuth
+    suspend fun joinWishlist(@Path("idUserToJoin") idUser: UUID, @Path("token") token: String): Response<Boolean>
+
+
 
 }

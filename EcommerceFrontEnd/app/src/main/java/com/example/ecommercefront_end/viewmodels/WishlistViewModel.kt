@@ -3,10 +3,12 @@ package com.example.ecommercefront_end.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Group
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.repository.WishlistRepository
+import io.ktor.util.reflect.instanceOf
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
@@ -14,14 +16,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel() {
 
     private val _wishlists = MutableStateFlow<List<Wishlist>>(emptyList())
     val wishlists: StateFlow<List<Wishlist>> = _wishlists.asStateFlow()
 
+    private val _friendWishlists = MutableStateFlow<List<Wishlist>>(emptyList())
+    val friendWishlists: StateFlow<List<Wishlist>> = _friendWishlists.asStateFlow()
+
     private val _wishlistItems = MutableStateFlow<List<WishlistItem>>(emptyList())
     val wishlistItems: StateFlow<List<WishlistItem>> = _wishlistItems.asStateFlow()
+
+    private val _tokenToShare = MutableStateFlow<String>("")
+    val tokenToShare: StateFlow<String> = _tokenToShare.asStateFlow()
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -33,17 +42,25 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
         loadWishlistsFromBD()
     }
 
-    private fun loadWishlistsFromBD(){
+
+    private fun loadWishlistsFromBD() {
         viewModelScope.launch {
-            try{
-                _wishlists.value = wRepository.getAllWishlists()
-                if(_wishlists.value.isEmpty()){
-                    _error.value = "Nessuna wishlist trovata"
+            _isLoading.value = true // Imposta il caricamento a vero all'inizio del processo
+            try {
+                val currentUser = SessionManager.user
+                currentUser?.let {
+                    _wishlists.value = wRepository.getWishlistsByUser(it.id)
+                    _friendWishlists.value = wRepository.getWishlistsByFriends(it.id)
+                    if (_wishlists.value.isEmpty()) {
+                        _error.value = "Nessuna wishlist trovata"
+                    }
+                } ?: run {
+                    _error.value = "Nessun utente loggato"
                 }
-            } catch (e: Exception){
+            } catch (e: Exception) {
                 _error.value = "Errore durante il caricamento delle wishlist: ${e.message}"
             } finally {
-                _isLoading.value = false
+                _isLoading.value = false // Imposta il caricamento a falso alla fine del processo
             }
         }
     }
@@ -71,8 +88,42 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
         }
     }
 
+    fun shareWishlist(wishlist: Wishlist){
+        viewModelScope.launch {
+            try {
+                val response = wRepository.shareWishlist(wishlist)
+                if (response.contains("token")) {
+                    _tokenToShare.value =
+                        response.get("token").toString() // Estrai il token dalla risposta JSON
+                    Log.d("shareWishlist", "Wishlist condivisa con successo")
+                } else {
+                    Log.e("shareWishlist", "Errore durante la condivisione della wishlist: ${response.get("error")}")
+                }
+            } catch (e: Exception) {
+                Log.e("shareWishlist", "Errore durante la condivisione della wishlist: ${e.message}")
+            }
+        }
+    }
 
-    fun addWishlist(name: String, isPrivate: Boolean, otherParam: String) {
+
+    fun joinWishlist(token : String){
+        viewModelScope.launch {
+            try {
+                val currentUser = SessionManager.user
+                val response = currentUser?.let { wRepository.joinWishlist(it.id, token) }
+                if (response != null && response.isSuccessful) {
+                    Log.d("joinWishlist", "Utente aggiunto con successo alla wishlist")
+                } else {
+                    //Log.e("joinWishlist", "Errore durante l'aggiunta dell'utente alla wishlist: ${response.errorBody()}")
+                }
+            } catch (e: Exception) {
+                Log.e("joinWishlist", "Errore durante l'aggiunta dell'utente alla wishlist: ${e.message}")
+            }
+        }
+    }
+
+
+    fun addWishlist(name: String, isPrivate: Boolean) {
         viewModelScope.launch {
             try {
                 // Crea una lista vuota di elementi per la nuova wishlist
@@ -84,7 +135,6 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
                     groupName = "Famiglia_Test", // Nome del gruppo fittizio
                     members = emptyList() // Nessun membro per ora
                 )
-
                 // Imposta la privacy della wishlist
                 val privacySetting = if (isPrivate) "Private" else "Public"
 
@@ -93,14 +143,15 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
                     id = 50, // ID sarà generato dal database
                     name = name,
                     items = wItemsList, // Lista vuota di elementi
-                    user = null, // Nessun utente associato dato che non è loggato
+                    user = SessionManager.user, // Nessun utente associato dato che non è loggato
                     group = defaultGroup, // Gruppo predefinito
                     privacySetting = privacySetting
                 )
 
                 // Salva la nuova wishlist nel database tramite il repository
                 wRepository.addWishlist(newWishlist)
-
+                Log.e("addWishlist", "Nuova lista messa")
+                _wishlists.value += newWishlist
                 // Potresti aggiornare la lista delle wishlist nel ViewModel qui, se necessario
             } catch (e: Exception) {
                 // Gestisci l'errore
@@ -109,6 +160,43 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
             }
         }
     }
+    fun updateWishlist(id: Long, name: String, privacySettings: String, group: Group?){
+        viewModelScope.launch {
+            try {
+                val wishlist = _wishlists.value.find { it.id == id }
+                if (wishlist != null) {
+                    val updatedWishlist = wishlist.copy()
+
+                    if (!name.equals("")) {
+                        updatedWishlist.name = name
+                        Log.d("updateWishlistPrivacy", "Nuovo Nome della wishlist ${updatedWishlist.name} aggiornato con successo")
+                    }
+                    if (!privacySettings.equals("")) {
+                        updatedWishlist.privacySetting = privacySettings
+                        Log.d("updateWishlistPrivacy", "Nuove imp privacy ${updatedWishlist.privacySetting} aggiornato con successo")
+                    }
+                    if (group != null) {
+                        updatedWishlist.group = group
+                        Log.d("updateWishlistPrivacy", "Nuovo gruppo ${updatedWishlist.group.groupName} aggiornato con successo")
+                    }
+
+
+                    wRepository.updatePrivacySettings(updatedWishlist)
+                    _wishlists.value =
+                        _wishlists.value.map { if (it.id == id) updatedWishlist else it }
+                    Log.d("updateWishlistPrivacy", "Wishlist aggiornata con successo")
+                } else {
+                    Log.e("updateWishlistPrivacy", "Wishlist non trovata con id: $id")
+                }
+            } catch (e: Exception) {
+                Log.e(
+                    "updateWishlistPrivacy",
+                    "Errore durante l'aggiornamento della privacy della wishlist: ${e.message}"
+                )
+            }
+        }
+    }
+
 
     fun removeWishlistItem(id: Long) {
        viewModelScope.launch {

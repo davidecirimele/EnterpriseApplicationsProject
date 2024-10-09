@@ -1,9 +1,11 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 
 import com.enterpriseapplicationsproject.ecommerce.data.dao.GroupsDao;
+import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistItemsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistItem;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistsService;
@@ -31,6 +33,7 @@ public class WishlistsServiceImpl implements WishlistsService {
     private final WishlistItemsDao WIDao;
     private final ModelMapper modelMapper; // serve per fare il mapping tra due oggetti
     private final GroupsDao groupsDao;
+    private final UsersDao usersDao;
 
     @Override
     public List<WishlistDto> getAllSorted() { // restituisce la lista di tutti i wishlists ordinata per privacySetting
@@ -41,10 +44,17 @@ public class WishlistsServiceImpl implements WishlistsService {
     }
 
 
-
     @Override
     public List<WishlistDto> getWishlistsByUser(UUID userId) {
         return wishlistsDao.findByUserId(userId)
+                .stream()
+                .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<WishlistDto> getFriendWishlists(UUID userId) {
+        return wishlistsDao.findFriendWishlists(userId)
                 .stream()
                 .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
                 .collect(Collectors.toList());
@@ -62,7 +72,30 @@ public class WishlistsServiceImpl implements WishlistsService {
 
     @Override
     public WishlistDto save(WishlistDto wishlistDto) {
+        Group group = new Group();
+
+        String gName = "Group " + wishlistDto.getName();
+        group.setGroupName(gName);
+
+        String wName = wishlistDto.getName();
+        String wPrivacy = wishlistDto.getPrivacySetting();
+
+        if (wishlistDto.getGroup() != null) {
+            List<User> members = wishlistDto.getGroup().getMembers().stream()
+                    .map(userDto -> modelMapper.map(userDto, User.class))
+                    .collect(Collectors.toList());
+            group.setMembers(members);
+        }
+
+        group = groupsDao.save(group); // Salva ilGroup nel database
+
+        // Crea e salva la Wishlist
         Wishlist wishlist = modelMapper.map(wishlistDto, Wishlist.class);
+        wishlist.setName(wName);
+        wishlist.setPrivacySetting(wPrivacy);
+        wishlist.setGroup(group); // Assegna il Group salvato
+
+        System.out.println("Dati nuova Wishlist: " + wishlist.toString());
         Wishlist w = wishlistsDao.save(wishlist);
         return modelMapper.map(w, WishlistDto.class);
     }
@@ -75,12 +108,29 @@ public class WishlistsServiceImpl implements WishlistsService {
 
     @Override
     @Transactional
-    public Boolean shareWishlist(Long wishlistId, Group group) {
-        Wishlist wishlist = wishlistsDao.findById(wishlistId)
+    public Boolean JoinShareWishlist(Long wishlistIdToJoin, UUID idUserToJoin) {
+        User user = usersDao.findById(idUserToJoin)
+                .orElseThrow( () -> new IllegalArgumentException("Invalid Owner email user"));
+
+        Wishlist wishlistToJoin = wishlistsDao.findById(wishlistIdToJoin)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID"));
 
-        wishlist.setGroup(group);
-        wishlistsDao.save(wishlist);
+        if(wishlistToJoin.getUserId().equals(idUserToJoin)){
+            throw new IllegalArgumentException("User is the owner of the wishlist");
+        }
+
+        Group group = wishlistToJoin.getGroup();
+        if (group == null || !group.getMembers().contains(user)) {
+            if (group == null) {
+                group = new Group();
+                group.setGroupName("Group " + wishlistToJoin.getName());
+            }
+            group.getMembers().add(user);
+            groupsDao.save(group);
+        }
+
+        wishlistToJoin.setGroup(group);
+        wishlistsDao.save(wishlistToJoin);
         return true;
     }
 
@@ -140,36 +190,37 @@ public class WishlistsServiceImpl implements WishlistsService {
 
     @Transactional
     @Override
-    public WishlistDto updateWishlist(Long id, WishlistDto wishlistDto) {
-        return wishlistsDao.findById(id)
+    public WishlistDto updateWishlist(WishlistDto wishlistDto) {
+        return wishlistsDao.findById(wishlistDto.getId())
                 .map(wishlist -> {
                     wishlist.setName(wishlistDto.getName());
                     wishlist.setPrivacySetting(wishlistDto.getPrivacySetting());
 
-                    // Mappa gli items
-                    List<WishlistItem> updatedItems = wishlistDto.getItems().stream()
-                            .map(itemDto -> {
-                                WishlistItem item = modelMapper.map(itemDto, WishlistItem.class);
-                                item.setWishlist(wishlist);
-                                return item;
-                            })
-                            .collect(Collectors.toList());
-
-                    // Sostituisci gli items esistenti con quelli aggiornati
-                    wishlist.getItems().clear();
-                    wishlist.getItems().addAll(updatedItems);
-
+                    System.out.println("PS in arrivo : " + wishlistDto.getPrivacySetting());
+                    System.out.println("PS attuale : " + wishlist.getPrivacySetting());
                     // Mappa il group
+
                     GroupDto groupDto = wishlistDto.getGroup();
+                    Group newGroup;
                     if (groupDto != null && groupDto.getId() != null) {
                         Group group = groupsDao.findById(groupDto.getId())
                                 .orElseThrow(() -> new EntityNotFoundException("Group not found"));
-                        wishlist.setGroup(group);
+
+                        if (!group.equals(wishlist.getGroup())) {
+                            newGroup = wishlist.getGroup();
+                        }
+                        else {
+                            newGroup = group;
+                        }
+
                     } else {
-                        wishlist.setGroup(null);
+                        newGroup = new Group();
                     }
+                    groupsDao.save(newGroup);
+                    wishlist.setGroup(newGroup);
 
                     Wishlist savedWishlist = wishlistsDao.save(wishlist);
+                    System.out.println("PS Nuovo : " + savedWishlist.getPrivacySetting());
                     return modelMapper.map(savedWishlist, WishlistDto.class);
                 })
                 .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));

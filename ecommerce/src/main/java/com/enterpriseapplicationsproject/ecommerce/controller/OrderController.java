@@ -23,7 +23,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderController {
 
-
     private final OrdersService ordersService;
 
     @PostMapping(consumes = "application/json", path = "/add")
@@ -48,7 +47,7 @@ public class OrderController {
     }
 
     @GetMapping(consumes = "application/json", path = "/confirmed/{userId}")
-    @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
+    @PreAuthorize("#userId == authentication.credentials or hasRole('ADMIN')")
     public ResponseEntity<List<OrderDto>> getAllConfirmedOrders(@PathVariable UUID userId) {
         List<OrderDto> orders = ordersService.getAllConfirmedOrdersByUserId(userId);
         return new ResponseEntity<>(orders, HttpStatus.OK);
