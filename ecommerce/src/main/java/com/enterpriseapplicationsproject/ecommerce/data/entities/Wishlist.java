@@ -49,8 +49,15 @@ public class Wishlist {
     @Basic(optional = false)
     private String privacySetting;
 
-     //@Basic(optional = false)
-     @Access(AccessType.FIELD)
-    @Column(name = "W_TOKEN",unique = true)
+    @Basic(optional = false)
     private String wToken;
+
+    /*
+    public String getWToken() {
+        return this.wToken;
+    }
+
+    public void setWToken(String wToken) {
+        this.wToken = wToken;
+    }*/
 }

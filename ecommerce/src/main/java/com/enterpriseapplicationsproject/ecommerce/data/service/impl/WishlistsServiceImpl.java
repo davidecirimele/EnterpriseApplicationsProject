@@ -13,15 +13,12 @@ import com.enterpriseapplicationsproject.ecommerce.dto.GroupDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import lombok.Generated;
 import lombok.RequiredArgsConstructor;
-import org.antlr.v4.runtime.atn.SemanticContext;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -202,12 +199,6 @@ public class WishlistsServiceImpl implements WishlistsService {
         } catch (EmptyResultDataAccessException e) {
             throw new IllegalArgumentException("Invalid wishlist ID");
         }
-    }
-
-    @Override
-    public String generateWToken(WishlistDto wDto) {
-        UUID uuid = UUID.randomUUID();
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(uuid.toString().getBytes());
     }
 
     @Override

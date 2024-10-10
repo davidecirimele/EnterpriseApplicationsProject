@@ -99,6 +99,19 @@ public class ModelMapperConfig {
             }
         });
 
+        modelMapper.addMappings(new PropertyMap<WishlistDto, Wishlist>() {
+            @Override
+            protected void configure() {
+                map(source.getPrivacySetting(), destination.getPrivacySetting());
+                map(source.getWToken(), destination.getWToken());
+                map(source.getGroup(), destination.getGroup());
+                map(source.getUser(), destination.getUserId());
+                map(source.getItems(), destination.getItems());
+                map( source.getName(), destination.getName());
+
+            }
+        });
+
         return modelMapper;
     }
 }

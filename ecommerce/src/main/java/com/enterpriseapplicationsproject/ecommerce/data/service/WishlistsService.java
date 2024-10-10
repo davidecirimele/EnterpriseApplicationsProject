@@ -43,7 +43,5 @@ public interface WishlistsService {
     void deleteWishlist(Long id);
     WishlistDto deleteWishlistByID(Long id);
 
-    String generateWToken(WishlistDto wDto);
-
     WishlistDto getWishlistByToken(String token);
 }

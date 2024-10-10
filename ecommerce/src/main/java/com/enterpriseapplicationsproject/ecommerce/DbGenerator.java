@@ -24,7 +24,9 @@ import java.io.InputStreamReader;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class DbGenerator implements ApplicationRunner {
@@ -259,6 +261,11 @@ public class DbGenerator implements ApplicationRunner {
         userService.save(user);
     }
 
+    public String generateWToken() {
+        UUID uuid = UUID.randomUUID();
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(uuid.toString().getBytes());
+    }
+
     private void insertWishlist(String s) {
         String[] array = s.split(",");
 
@@ -283,6 +290,7 @@ public class DbGenerator implements ApplicationRunner {
         wishlist.setName(name);
         wishlist.setGroup(group);
         wishlist.setPrivacySetting(privacy);
+        wishlist.setWToken(generateWToken());
 
         // Save the Wishlist entity
         wishlistService.save(wishlist);

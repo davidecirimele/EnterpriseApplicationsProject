@@ -3,12 +3,8 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 
 import com.enterpriseapplicationsproject.ecommerce.config.security.JwtService;
 import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetailsService;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.security.SharedWishlistRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -97,12 +93,9 @@ public class WishlistController {
     @PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<Map <String,String> > shareWishlist(@RequestBody WishlistDto wDto) {
         // Estrarre i dettagli dell'utente loggato
+        if (wDto == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         String wToken = wDto.getWToken();
-        if(wToken == null){
-            wToken = wishlistService.generateWToken(wDto);
-            wDto.setWToken(wToken);
-            wishlistService.save(wDto);
-        }
         return ResponseEntity.ok(Map.of("token", wToken));
     }
     //TO test
