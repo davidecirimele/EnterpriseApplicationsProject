@@ -4,6 +4,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -29,5 +30,6 @@ public interface WishlistsDao extends JpaRepository<Wishlist, Long>,
     @Query("SELECT distinct w FROM Wishlist w JOIN w.group.members m WHERE m.id = :userId and w.userId.id <> :userId")
     List<Wishlist> findFriendWishlists(@Param("userId")UUID userId);
 
-
+    @Query("SELECT w FROM Wishlist w WHERE w.wToken = :token ")
+    Wishlist findByWToken(String token);
 }

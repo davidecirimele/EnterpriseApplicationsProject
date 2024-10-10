@@ -28,4 +28,6 @@ public class WishlistDto {
     private GroupDto group;
 
     private String privacySetting;
+
+    private String wToken;
 }

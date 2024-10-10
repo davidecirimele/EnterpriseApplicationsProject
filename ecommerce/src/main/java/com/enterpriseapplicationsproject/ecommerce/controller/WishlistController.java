@@ -2,11 +2,11 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 
 
 import com.enterpriseapplicationsproject.ecommerce.config.security.JwtService;
-import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetails;
 import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetailsService;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistsService;
-import com.enterpriseapplicationsproject.ecommerce.data.service.impl.WishlistsServiceImpl;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.SharedWishlistRequest;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -48,7 +44,7 @@ public class WishlistController {
     @GetMapping(path = "/get/{idWishlist}")
     @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> getById(@PathVariable Long idWishlist) {
-        WishlistDto w = wishlistService.getById(idWishlist);
+        WishlistDto w = wishlistService.getDtoById(idWishlist);
         if(w == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // meglio farlo nel service e gestire l'eccezione con l'handler
         return new ResponseEntity<>(w, HttpStatus.OK);
@@ -75,8 +71,8 @@ public class WishlistController {
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
-    @PostMapping(consumes =  "application/json", path = "/add")
-    //@PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
+    @PostMapping(consumes = "application/json", path = "/add")
+    @PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> add(@RequestBody WishlistDto wDto) {
         WishlistDto w = wishlistService.save(wDto);
         if (w == null)
@@ -96,47 +92,31 @@ public class WishlistController {
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
+    //To test
     @PostMapping(path = "/share")
-    @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
-    public ResponseEntity<Map <String,String> > shareWishlist(@RequestBody SharedWishlistRequest request) {
+    @PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<Map <String,String> > shareWishlist(@RequestBody WishlistDto wDto) {
         // Estrarre i dettagli dell'utente loggato
-        LoggedUserDetails userDetails = (LoggedUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        // Generare il token JWT che include le informazioni della wishlist
-        String wishlistSharedToken = jwtService.generateSharedWishlistToken(userDetails, request.getWishlistId(), 10);
-
-        Map<String, String> response = new HashMap<>();
-        response.put("token", wishlistSharedToken); // Incapsula il token in una mappa
-
-        System.out.println("Generated wToken: " + wishlistSharedToken);
-        return ResponseEntity.ok(response);
-
+        String wToken = wDto.getWToken();
+        if(wToken == null){
+            wToken = wishlistService.generateWToken(wDto);
+            wDto.setWToken(wToken);
+            wishlistService.save(wDto);
+        }
+        return ResponseEntity.ok(Map.of("token", wToken));
     }
-
-    //TO DOs
-
+    //TO test
     @PostMapping(path = "/join/{idUserToJoin}/{token}")
     @PreAuthorize("#idUserToJoin == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<String> joinWishlist(@PathVariable UUID idUserToJoin, String token) {
-        try {
-            // Analizzare il token della wishlist
-            SharedWishlistRequest tokenDetails = jwtService.parseWishlistToken(token);
-
-            // Ottenere l'ID della wishlist e l'ID dell'utente dal token
-            Long wishlistId = tokenDetails.getWishlistId();
-            String ownerUserEmail = tokenDetails.getEmail();
-
-            // Logica per aggiungere l'utente alla wishlist condivisa
-            Boolean success = wishlistService.JoinShareWishlist(wishlistId,idUserToJoin);
-
-            return success ? ResponseEntity.ok("Successfully joined the wishlist") :
-                    ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to join wishlist");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+    public ResponseEntity<Boolean> joinWishlist(@PathVariable UUID idUserToJoin, String token) {
+        Boolean resp = wishlistService.JoinShareWishlist(idUserToJoin, token);
+        if (resp){
+            return new ResponseEntity<>(resp, HttpStatus.OK);
         }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND); // meglio farlo nel service e gestire l'eccezione con l'handler
     }
 
-
+    //TO DO
     @PostMapping(consumes = "application/json", path = "/unshare")
     //@PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<String> unshare(@RequestBody WishlistDto wDto) {

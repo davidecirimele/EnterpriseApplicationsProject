@@ -21,6 +21,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -79,12 +80,14 @@ public class WishlistsServiceImpl implements WishlistsService {
 
         String wName = wishlistDto.getName();
         String wPrivacy = wishlistDto.getPrivacySetting();
+        String wToken = wishlistDto.getWToken();
 
         if (wishlistDto.getGroup() != null) {
             List<User> members = wishlistDto.getGroup().getMembers().stream()
                     .map(userDto -> modelMapper.map(userDto, User.class))
                     .collect(Collectors.toList());
-            group.setMembers(members);
+            if (!group.getMembers().equals(members))
+                group.setMembers(members);
         }
 
         group = groupsDao.save(group); // Salva ilGroup nel database
@@ -94,12 +97,12 @@ public class WishlistsServiceImpl implements WishlistsService {
         wishlist.setName(wName);
         wishlist.setPrivacySetting(wPrivacy);
         wishlist.setGroup(group); // Assegna il Group salvato
+        wishlist.setWToken(wToken);
 
         System.out.println("Dati nuova Wishlist: " + wishlist.toString());
         Wishlist w = wishlistsDao.save(wishlist);
         return modelMapper.map(w, WishlistDto.class);
     }
-
 
     @Override
     public Group getGroupByWishlistId(Long wishlistId) {
@@ -108,12 +111,11 @@ public class WishlistsServiceImpl implements WishlistsService {
 
     @Override
     @Transactional
-    public Boolean JoinShareWishlist(Long wishlistIdToJoin, UUID idUserToJoin) {
+    public Boolean JoinShareWishlist(UUID idUserToJoin, String wToken) {
         User user = usersDao.findById(idUserToJoin)
                 .orElseThrow( () -> new IllegalArgumentException("Invalid Owner email user"));
 
-        Wishlist wishlistToJoin = wishlistsDao.findById(wishlistIdToJoin)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID"));
+        Wishlist wishlistToJoin = wishlistsDao.findByWToken(wToken);
 
         if(wishlistToJoin.getUserId().equals(idUserToJoin)){
             throw new IllegalArgumentException("User is the owner of the wishlist");
@@ -128,6 +130,7 @@ public class WishlistsServiceImpl implements WishlistsService {
             group.getMembers().add(user);
             groupsDao.save(group);
         }
+        else return false;
 
         wishlistToJoin.setGroup(group);
         wishlistsDao.save(wishlistToJoin);
@@ -145,8 +148,9 @@ public class WishlistsServiceImpl implements WishlistsService {
         return true;
     }
 
+
     @Override
-    public WishlistDto getById(Long id) {
+    public WishlistDto getDtoById(Long id) {
         return wishlistsDao.findById(id).stream()
                 .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
                 .toList().get(0);
@@ -155,6 +159,13 @@ public class WishlistsServiceImpl implements WishlistsService {
                 .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
                 .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));*/
     }
+
+    /*
+    @Override
+    public Wishlist getById(Long id) {
+        Wishlist wishlist = modelMapper.map(wishlistDto, Wishlist.class);
+        return wishlistsDao.findById(id);
+    }*/
 
     @Override
     public List<WishlistDto> getWishlistsOfFriend(UUID idUser) {
@@ -182,9 +193,7 @@ public class WishlistsServiceImpl implements WishlistsService {
 
         // Elimina tutti gli elementi associati alla Wishlist
         List<WishlistItem> items = WIDao.findByWishlistId(id);
-        for (WishlistItem item : items) {
-            WIDao.delete(item);
-        }
+        WIDao.deleteAll(items);
 
         // Elimina la Wishlist
         try {
@@ -193,6 +202,18 @@ public class WishlistsServiceImpl implements WishlistsService {
         } catch (EmptyResultDataAccessException e) {
             throw new IllegalArgumentException("Invalid wishlist ID");
         }
+    }
+
+    @Override
+    public String generateWToken(WishlistDto wDto) {
+        UUID uuid = UUID.randomUUID();
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(uuid.toString().getBytes());
+    }
+
+    @Override
+    public WishlistDto getWishlistByToken(String token) {
+        Wishlist w = wishlistsDao.findByWToken(token);
+        return modelMapper.map(w,WishlistDto.class);
     }
 
 
