@@ -19,6 +19,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -28,6 +30,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Slider
@@ -55,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.model.BookFormat
 import com.example.ecommercefront_end.model.BookGenre
 import com.example.ecommercefront_end.model.BookLanguage
@@ -63,7 +67,6 @@ import java.time.LocalDate
 import java.util.Locale
 
 
-@Preview
 @Composable
 fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, currentRoute: String?, onDismiss: () -> Unit){
 
@@ -82,6 +85,8 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
 
     val minWeight by viewModel.minWeight.collectAsState()
     val maxWeight by viewModel.maxWeight.collectAsState()
+
+    val filter by viewModel.filter.collectAsState()
 
     val startingPublicationYear by viewModel.startingPublicationYear.collectAsState()
 
@@ -108,11 +113,22 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                         .heightIn(min = 200.dp, max = 600.dp)
                         .padding(16.dp)
                 ) {
-                    Text(text = "Filters",
-                        fontWeight = FontWeight.ExtraBold,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
+                    Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+                        Text(
+                            text = "Filters",
+                            fontWeight = FontWeight.ExtraBold,
+                            textAlign = TextAlign.Center
+                        )
+                        IconButton(modifier = Modifier.align(Alignment.CenterVertically),onClick = {
+                            onDismiss()
+                        }) {
+                            Icon(
+                                Icons.Filled.Close,
+                                contentDescription = "Close Filters",
+                                modifier = Modifier.size(35.dp)
+                            )
+                        }
+                    }
                     LazyColumn(
                         modifier = Modifier.padding(8.dp).weight(1f),
                         verticalArrangement = Arrangement.Center,
@@ -131,7 +147,7 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                                         String.format(Locale.ITALY, "%.2f", end).replace(",", ".")
                                             .toFloat();
                                     viewModel.updateFilter(minPrice = formattedStart.toDouble(), maxPrice = formattedEnd.toDouble())
-                                })
+                                }, oldValue1 = filter.minPrice, oldValue2 = filter.maxPrice)
                             Spacer(modifier = Modifier.height(10.dp))
                         }
 
@@ -150,7 +166,7 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                                             .toFloat();
 
                                     viewModel.updateFilter(minAge = formattedStart.toInt(), maxAge = formattedEnd.toInt())
-                                })
+                                }, oldValue1 = filter.minAge, oldValue2 = filter.maxAge)
                             Spacer(modifier = Modifier.height(10.dp))
                         }
 
@@ -186,7 +202,7 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                                             .toFloat();
 
                                     viewModel.updateFilter(minPages = formattedStart.toInt(), maxPages = formattedEnd.toInt())
-                                })
+                                }, oldValue1 = filter.minPages, oldValue2 = filter.maxPages)
 
                             Spacer(modifier = Modifier.height(10.dp))
                         }
@@ -248,14 +264,16 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                                             .toFloat();
 
                                     viewModel.updateFilter(minPublishDate = LocalDate.parse("${formattedStart.toInt()}-01-01"), maxPublishDate = LocalDate.parse("${formattedEnd.toInt()}-12-31"))
-                                })
+                                }, oldValue1 = filter.minPublishDate?.year, oldValue2 = filter.maxPublishDate?.year
+                            )
                             Spacer(modifier = Modifier.height(10.dp))
 
                         }
 
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-                        Button(onClick = { viewModel.searchBooks(navController, currentRoute) }) {
+                        Button(onClick = { viewModel.searchBooks(navController, currentRoute)
+                        onDismiss()}) {
                             Text(text = "Filter Books")
                         }
                     }
@@ -266,9 +284,17 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
 }
 
 @Composable
-fun RangeSelector(viewModel: BookViewModel,parameter: String, value1: Float, value2: Float, onValueChange: (Float, Float) -> Unit){
+fun <T : Number> RangeSelector(viewModel: BookViewModel,parameter: String, value1: Float, value2: Float, onValueChange: (Float, Float) -> Unit, oldValue1: T?, oldValue2: T?){
 
     var sliderPosition by remember { mutableStateOf(value1..value2) }
+
+    if(oldValue1 != null && oldValue2 != null)
+        sliderPosition = oldValue1.toFloat()..oldValue2.toFloat()
+    else if(oldValue1 != null && oldValue2 == null)
+        sliderPosition = oldValue1.toFloat()..value2
+    else if(oldValue1 == null && oldValue2 != null)
+        sliderPosition = value1..oldValue2.toFloat()
+
 
     Column {
         Text(text = parameter,

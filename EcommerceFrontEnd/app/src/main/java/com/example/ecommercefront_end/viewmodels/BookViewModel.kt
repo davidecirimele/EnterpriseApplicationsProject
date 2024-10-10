@@ -2,6 +2,10 @@ package com.example.ecommercefront_end.viewmodels
 
 import android.se.omapi.Session
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -59,12 +63,14 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     private val _startingPublicationYear = MutableStateFlow<LocalDate?>(null)
     val startingPublicationYear: StateFlow<LocalDate?> = _startingPublicationYear
 
-    private val _filter = MutableStateFlow<BookFilter?>(null)
-    val filter: StateFlow<BookFilter?> = _filter
+    private val _filter = MutableStateFlow<BookFilter>(BookFilter())
+    val filter: StateFlow<BookFilter> = _filter
+
+    private val _sortOption = MutableStateFlow("Newest")
+    val sortOption: StateFlow<String> = _sortOption
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
 
     private val _isLoadingFilteredBooks = MutableStateFlow(true)
     val isLoadingFilteredBooks: StateFlow<Boolean> = _isLoadingFilteredBooks.asStateFlow()
@@ -252,6 +258,11 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         _filter.value = BookFilter()
     }
 
+    fun setOrderOption(option: String){
+        _sortOption.value = option
+        sortProducts()
+    }
+
     fun searchBooks(navController: NavController, currentRoute: String?){
         if(currentRoute != null && currentRoute != "filtered-books") {
             navController.navigate("filtered-books") {
@@ -259,8 +270,25 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                     saveState = true
                 }
             }
-        } else{
-            fetchFilteredBooks()
+        }
+        fetchFilteredBooks()
+    }
+
+    fun sortProducts(){
+        if(filteredProducts.value.isNotEmpty()){
+            _filteredProducts.value = when (_sortOption.value) {
+                "Price: Low to High" -> _filteredProducts.value.sortedBy { it.price }
+                "Price: High to Low" -> _filteredProducts.value.sortedByDescending { it.price }
+                "Weight: Low to High" -> filteredProducts.value.sortedBy { it.weight }
+                "Weight: High to Low" -> filteredProducts.value.sortedByDescending { it.weight }
+                "Number of pages: Low to High" -> filteredProducts.value.sortedBy { it.pages }
+                "Number of pages: High to Low" -> filteredProducts.value.sortedByDescending { it.pages }
+                "Age: Low to High" -> filteredProducts.value.sortedBy { it.age }
+                "Age: High to Low" -> filteredProducts.value.sortedByDescending { it.age }
+                "Newest" -> filteredProducts.value.sortedByDescending { it.publishDate.year }
+                "Oldest" -> filteredProducts.value.sortedBy { it.publishDate.year }
+                else -> _filteredProducts.value
+            }
         }
     }
 }

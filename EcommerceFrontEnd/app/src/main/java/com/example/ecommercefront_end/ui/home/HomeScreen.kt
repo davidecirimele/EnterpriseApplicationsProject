@@ -26,6 +26,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -67,10 +68,12 @@ fun HomeScreen(homeViewModel: HomeViewModel, bookViewModel: BookViewModel, navCo
     val products by homeViewModel.products.collectAsState()
     val isLoading by homeViewModel.isLoading.collectAsState()
     val error by homeViewModel.error.collectAsState()
-    val showFilterOptions by homeViewModel.showFilterOptions.collectAsState()
     val topProducts = remember(products) { products.take(5) }
     val gridProducts = remember(products) { products.drop(5) } // Libri per la griglia
 
+    LaunchedEffect(Unit) {
+        bookViewModel.resetFilter()
+    }
 
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -115,13 +118,7 @@ fun HomeScreen(homeViewModel: HomeViewModel, bookViewModel: BookViewModel, navCo
                     }
                 }
             }
-            
-            if(showFilterOptions){
-                BooksFilterScreen(viewModel = bookViewModel, navController = navController, "home", onDismiss = {
-                    homeViewModel.triggerShowFilterOptions()
-                    bookViewModel.resetFilter()
-                })
-            }
+
         }
     }
 }

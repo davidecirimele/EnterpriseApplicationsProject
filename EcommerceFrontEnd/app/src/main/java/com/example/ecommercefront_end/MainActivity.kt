@@ -16,10 +16,13 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.material.icons.filled.ArrowBack
@@ -30,6 +33,7 @@ import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -136,7 +140,7 @@ fun NavigationView(navController: NavHostController) {
     val bookViewModel = remember { BookViewModel(repository = BookRepository(RetrofitClient.booksApiService)) }
 
     Scaffold(
-        topBar = { TopBar(navController, homeViewModel, bookViewModel) },
+        topBar = { TopBar(navController, bookViewModel) },
         bottomBar = { BottomBar(selectedIndex, navController) }
     ) { innerPadding ->
         NavHost(
@@ -212,7 +216,7 @@ fun NavigationView(navController: NavHostController) {
 
             composable("filtered-books") {
                 FilteredBooksScreen(
-                    viewModel = bookViewModel, navController = navController)
+                    bookViewModel = bookViewModel, navController = navController)
             }
 
             composable("addresses") {
@@ -249,17 +253,18 @@ fun NavigationView(navController: NavHostController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navHostController: NavHostController, homeViewModel: HomeViewModel, bookViewModel: BookViewModel) {
+fun TopBar(navHostController: NavHostController, bookViewModel: BookViewModel) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
     val isSearchVisible = currentRoute == "home" || currentRoute == "filtered-books"
+    var filterOptions by remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
 
     TopAppBar(
         title = {
             if (isSearchVisible) {
-                SearchBar(navHostController,homeViewModel, bookViewModel, currentRoute)
+                SearchBar(navHostController, filterOptions,{ newValue -> filterOptions = newValue } , bookViewModel, currentRoute)
             } else {
                 Text(stringResource(R.string.app_name))
             }
@@ -284,30 +289,49 @@ fun TopBar(navHostController: NavHostController, homeViewModel: HomeViewModel, b
             actionIconContentColor = colorScheme.onPrimary // Usa il colore onPrimary del tema
         )
     )
+
+    if(filterOptions) {
+        BooksFilterScreen(
+            viewModel = bookViewModel,
+            navController = navHostController,
+            currentRoute = currentRoute,
+            onDismiss = {
+                filterOptions = false
+            })
+    }
 }
 
 @Composable
-fun SearchBar(navHostController: NavHostController, homeViewModel: HomeViewModel, bookViewModel: BookViewModel, currentRoute: String?) {
+fun SearchBar(navHostController: NavHostController, filterOptions: Boolean, onFilterOptionsChange: (Boolean) -> Unit, bookViewModel: BookViewModel, currentRoute: String?) {
     var searchValue by remember { mutableStateOf("") }
 
     Row(modifier = Modifier.fillMaxWidth()) {
-        IconButton(modifier = Modifier.align(Alignment.CenterVertically),onClick = { homeViewModel.triggerShowFilterOptions()}) {
+        TextField(
+            value = searchValue,
+            onValueChange = { searchValue = it;
+                if(searchValue == "" && currentRoute == "filtered-books"){
+                    navHostController.popBackStack()
+                }
+                bookViewModel.updateFilter(title = it, author = it, publisher = it);
+                bookViewModel.searchBooks(navHostController, currentRoute)},
+            label = { Text("Search Book") },
+            shape = RoundedCornerShape(16.dp),
+            singleLine = true,
+            modifier = Modifier.widthIn(if (currentRoute == "home") 320.dp else 280.dp)
+        )
+
+        IconButton(modifier = Modifier.align(Alignment.CenterVertically),onClick = {
+            if(!filterOptions)
+                onFilterOptionsChange(true)
+            else
+                onFilterOptionsChange(false)
+        }) {
             Icon(
                 Icons.Filled.FilterAlt,
                 contentDescription = "Filter Books",
                 modifier = Modifier.size(35.dp)
             )
         }
-
-        TextField(
-            value = searchValue,
-            onValueChange = { searchValue = it;
-                bookViewModel.updateFilter(title = it, author = it, publisher = it);
-                bookViewModel.searchBooks(navHostController, currentRoute)},
-            label = { Text("Search Book") },
-            shape = RoundedCornerShape(16.dp),
-            singleLine = true
-        )
     }
 }
 
