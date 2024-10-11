@@ -314,7 +314,7 @@ fun SearchBar(navHostController: NavHostController, filterOptions: Boolean, onFi
                 }
                 bookViewModel.updateFilter(title = it, author = it, publisher = it);
                 bookViewModel.searchBooks(navHostController, currentRoute)},
-            label = { Text("Search Book") },
+            label = { Text("Search by Title, Author or Publisher") },
             shape = RoundedCornerShape(16.dp),
             singleLine = true,
             modifier = Modifier.widthIn(if (currentRoute == "home") 320.dp else 280.dp)

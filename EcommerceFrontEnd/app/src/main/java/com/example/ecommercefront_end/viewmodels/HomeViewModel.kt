@@ -74,10 +74,6 @@ class HomeViewModel(private val repository: HomeRepository) : ViewModel() {
         }
     }
 
-    fun searchBook(value: String){
-        viewModelScope.launch {
-        }
-    }
 }
 
 

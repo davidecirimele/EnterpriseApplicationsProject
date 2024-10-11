@@ -47,6 +47,12 @@ fun FilteredBooksScreen(bookViewModel: BookViewModel,navController: NavControlle
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
+    LaunchedEffect(products) {
+        coroutineScope.launch {
+            listState.scrollToItem(0)
+        }
+    }
+
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()

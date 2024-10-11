@@ -36,6 +36,9 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     private val _filteredProducts = MutableStateFlow<List<Book>>(emptyList())
     val filteredProducts: StateFlow<List<Book>> = _filteredProducts.asStateFlow()
 
+    private val _cachedProducts = MutableStateFlow<List<Book>>(emptyList())
+    val cachedProducts: StateFlow<List<Book>> = _cachedProducts.asStateFlow()
+
     private val _minPrice = MutableStateFlow<Double?>(null)
     val minPrice: StateFlow<Double?> = _minPrice
 
@@ -204,21 +207,18 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         }
     }
 
-    fun fetchFilteredBooks() {
+    private fun fetchFilteredBooks() {
         viewModelScope.launch {
             try {
-                if(filter.value != null) {
+                val response = repository.getFilteredBooks(filter.value)
 
-                    var response = repository.getFilteredBooks(filter.value!!)
-
-                    if (response.isSuccessful && response.body() != null) {
-                        _filteredProducts.value = response.body()!!
-                    } else {
-                        throw Exception("Error fetching products")
-                    }
-                }else {
-                    throw Exception("Error with filter")
+                if (response.isSuccessful && response.body() != null) {
+                    _filteredProducts.value = response.body()!!
+                    _cachedProducts.value = filteredProducts.value
+                } else {
+                    throw Exception("Error fetching products")
                 }
+
             } catch (e: Exception) {
                 _error.value = "Errore durante il caricamento dei libri: ${e.message}" // Imposta il messaggio di errore
             } finally {
@@ -271,7 +271,10 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                 }
             }
         }
-        fetchFilteredBooks()
+        if(!searchInCachedBooks()) {
+            Log.d("BookDebug", "No cached products found or matching filters, fetching from backend...")
+            fetchFilteredBooks()
+        }
     }
 
     fun sortProducts(){
@@ -290,5 +293,35 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                 else -> _filteredProducts.value
             }
         }
+    }
+
+    private fun searchInCachedBooks(): Boolean {
+        if(cachedProducts.value.isNotEmpty()){
+            Log.d("BookDebug", "Cached products found, applying filters...")
+            _filteredProducts.value = cachedProducts.value.filter { book ->
+                (filter.value.weight == null || book.weight == filter.value.weight) &&
+                        (filter.value.minPrice == null || book.price >= filter.value.minPrice!!) &&
+                        (filter.value.maxPrice == null || book.price <= filter.value.maxPrice!!) &&
+                        (filter.value.stock == null || book.stock >= filter.value.stock!!) &&
+                        ((filter.value.title == null || book.title.contains(filter.value.title!!, ignoreCase = true)) ||
+                        (filter.value.author == null || book.author.contains(filter.value.author!!, ignoreCase = true)) ||
+                                (filter.value.publisher == null || book.publisher.contains(filter.value.publisher!!, ignoreCase = true))) &&
+                        (filter.value.ISBN == null || book.ISBN.contains(filter.value.ISBN!!, ignoreCase = true)) &&
+                        (filter.value.minPages == null || book.pages >= filter.value.minPages!!) &&
+                        (filter.value.maxPages == null || book.pages <= filter.value.maxPages!!) &&
+                        (filter.value.edition == null || book.edition.equals(filter.value.edition, ignoreCase = true)) &&
+                        (filter.value.format == null || book.format == filter.value.format) &&
+                        (filter.value.genre == null || book.genre == filter.value.genre) &&
+                        (filter.value.language == null || book.language == filter.value.language) &&
+                        (filter.value.minAge == null || book.age >= filter.value.minAge!!) &&
+                        (filter.value.maxAge == null || book.age <= filter.value.maxAge!!) &&
+                        (filter.value.minPublishDate == null || !book.publishDate.isBefore(filter.value.minPublishDate)) &&
+                        (filter.value.maxPublishDate == null || !book.publishDate.isAfter(filter.value.maxPublishDate))
+            }
+            Log.d("BookDebug", "Filter values: ${filter.value}")
+            Log.d("BookDebug", "Filtered products: ${_filteredProducts.value.size}")
+            return _filteredProducts.value.isNotEmpty()
+        }
+        return false
     }
 }
