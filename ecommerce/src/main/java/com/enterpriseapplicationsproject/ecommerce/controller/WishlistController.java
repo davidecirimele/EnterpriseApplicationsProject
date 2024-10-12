@@ -68,9 +68,19 @@ public class WishlistController {
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
+    @PostMapping(path = "/share")
+    @PreAuthorize("#wDto.getUser().id == authentication.principal.getId() or hasRole('ADMIN')") //GetId() o id??
+    public ResponseEntity<Map <String,String> > shareWishlist(@RequestBody WishlistDto wDto) {
+        // Estrarre i dettagli dell'utente loggato
+        if (wDto == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        String wishlistToken = wDto.getWToken();
+        return ResponseEntity.ok(Map.of("token", wishlistToken));
+    }
+
     //TO DOO
     @GetMapping(path = "/getOfFriend/{idUser}")
-    //@PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
+    @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<WishlistDto>> getFriendWishlists(@PathVariable UUID idUser) {
         log.info("Received request for friend Wishlists");
         List<WishlistDto> w = wishlistService.getFriendWishlists(idUser);
@@ -80,15 +90,7 @@ public class WishlistController {
     }
 
     //To test
-    @PostMapping(path = "/share")
-    @PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<Map <String,String> > shareWishlist(@RequestBody WishlistDto wDto) {
-        // Estrarre i dettagli dell'utente loggato
-        if (wDto == null)
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        String wishlistToken = wDto.getWToken();
-        return ResponseEntity.ok(Map.of("token", wishlistToken));
-    }
+
     //TO test
     @PostMapping(path = "/join/{idUser}/{token}")
     @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
@@ -101,11 +103,14 @@ public class WishlistController {
     }
 
     //TO DO
-    @PostMapping(consumes = "application/json", path = "/unshare")
-    //@PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<String> unshare(@RequestBody WishlistDto wDto) {
-        String toDo = "TOdo";
-        return new ResponseEntity<>(toDo, HttpStatus.OK);
+    @PostMapping(path = "/unshare/{idUser}")
+    @PreAuthorize("#idUser == authentication.principal.getId() or #wDto.getUser().id or hasRole('ADMIN')")
+    public ResponseEntity<Boolean> unshare(@PathVariable UUID idUser, @RequestBody WishlistDto wDto) {
+        Boolean resp = wishlistService.unshareWishlist(wDto.getId(), idUser);
+        if (resp){
+            return new ResponseEntity<>(resp, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
     //
 

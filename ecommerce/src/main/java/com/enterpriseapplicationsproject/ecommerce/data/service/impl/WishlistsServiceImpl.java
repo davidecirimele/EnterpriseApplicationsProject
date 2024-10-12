@@ -4,10 +4,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.GroupsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistItemsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistsDao;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistItem;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.GroupDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
@@ -138,11 +135,28 @@ public class WishlistsServiceImpl implements WishlistsService {
 
     @Override
     @Transactional
-    public Boolean unshareWishlist(Long wishlistId) {
+    public Boolean unshareWishlist(Long wishlistId, UUID idUser) {
         Wishlist wishlist = wishlistsDao.findById(wishlistId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID"));
 
-        wishlist.setGroup(null);
+        if (wishlist == null){
+            throw new IllegalArgumentException("Wishlist not found");
+        }
+        if (wishlist.getUserId().equals(idUser)){
+            throw new IllegalArgumentException("User is the owner of the wishlist");
+        }
+        Group group = wishlist.getGroup();
+
+        if (group == null || !group.getMembers().stream().anyMatch(user -> user.getId().equals(idUser))) {
+            return false;
+        }
+        Boolean removed = group.getMembers().removeIf(user -> user.getId().equals(idUser));
+        if (!removed){
+            return false;
+
+        }
+        groupsDao.save(group);
+        wishlist.setGroup(group);
         wishlistsDao.save(wishlist);
         return true;
     }

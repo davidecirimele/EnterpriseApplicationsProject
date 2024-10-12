@@ -31,7 +31,7 @@ public interface WishlistsService {
     Boolean JoinShareWishlist(UUID idUserToJoin, String wToken);
 
     @Transactional
-    Boolean unshareWishlist(Long wishlistId);
+    Boolean unshareWishlist(Long wishlistId, UUID idUser);
 
     WishlistDto getDtoById(Long id);
 
