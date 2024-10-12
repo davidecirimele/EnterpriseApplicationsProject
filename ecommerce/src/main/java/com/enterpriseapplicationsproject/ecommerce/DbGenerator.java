@@ -290,7 +290,7 @@ public class DbGenerator implements ApplicationRunner {
         wishlist.setName(name);
         wishlist.setGroup(group);
         wishlist.setPrivacySetting(privacy);
-        wishlist.setWToken(generateWToken());
+        wishlist.setWishlistToken(generateWToken());
 
         // Save the Wishlist entity
         wishlistService.save(wishlist);

@@ -50,7 +50,7 @@ public class Wishlist {
     private String privacySetting;
 
     @Basic(optional = false)
-    private String wToken;
+    private String wishlistToken;
 
     /*
     public String getWToken() {

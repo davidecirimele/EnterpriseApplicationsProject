@@ -58,15 +58,6 @@ public class WishlistController {
     }
 
 
-    @GetMapping(path = "/getOfFriend/{idUser}")
-    //@PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
-    public  ResponseEntity<List<WishlistDto>> getOfFriend(@PathVariable UUID idUser) {
-        List<WishlistDto> w = wishlistService.getWishlistsOfFriend(idUser);
-        if(w == null)
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // meglio farlo nel service e gestire l'eccezione con l'handler
-        return new ResponseEntity<>(w, HttpStatus.OK);
-    }
-
     @PostMapping(consumes = "application/json", path = "/add")
     @PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> add(@RequestBody WishlistDto wDto) {
@@ -78,7 +69,7 @@ public class WishlistController {
     }
 
     //TO DOO
-    @GetMapping(path = "/getFriendWishlists/{idUser}")
+    @GetMapping(path = "/getOfFriend/{idUser}")
     //@PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<WishlistDto>> getFriendWishlists(@PathVariable UUID idUser) {
         log.info("Received request for friend Wishlists");
@@ -95,14 +86,14 @@ public class WishlistController {
         // Estrarre i dettagli dell'utente loggato
         if (wDto == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        String wToken = wDto.getWToken();
-        return ResponseEntity.ok(Map.of("token", wToken));
+        String wishlistToken = wDto.getWToken();
+        return ResponseEntity.ok(Map.of("token", wishlistToken));
     }
     //TO test
-    @PostMapping(path = "/join/{idUserToJoin}/{token}")
-    @PreAuthorize("#idUserToJoin == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<Boolean> joinWishlist(@PathVariable UUID idUserToJoin, String token) {
-        Boolean resp = wishlistService.JoinShareWishlist(idUserToJoin, token);
+    @PostMapping(path = "/join/{idUser}/{token}")
+    @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity <Boolean> joinWishlist(@PathVariable UUID idUser, @PathVariable String token) {
+        Boolean resp = wishlistService.JoinShareWishlist(idUser, token);
         if (resp){
             return new ResponseEntity<>(resp, HttpStatus.OK);
         }

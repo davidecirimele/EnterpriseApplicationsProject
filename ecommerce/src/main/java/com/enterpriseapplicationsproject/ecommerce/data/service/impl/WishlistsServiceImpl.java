@@ -94,7 +94,7 @@ public class WishlistsServiceImpl implements WishlistsService {
         wishlist.setName(wName);
         wishlist.setPrivacySetting(wPrivacy);
         wishlist.setGroup(group); // Assegna il Group salvato
-        wishlist.setWToken(wToken);
+        wishlist.setWishlistToken(wToken);
 
         System.out.println("Dati nuova Wishlist: " + wishlist.toString());
         Wishlist w = wishlistsDao.save(wishlist);
@@ -112,7 +112,9 @@ public class WishlistsServiceImpl implements WishlistsService {
         User user = usersDao.findById(idUserToJoin)
                 .orElseThrow( () -> new IllegalArgumentException("Invalid Owner email user"));
 
-        Wishlist wishlistToJoin = wishlistsDao.findByWToken(wToken);
+        System.out.println("Token: " + wToken);
+
+        Wishlist wishlistToJoin = wishlistsDao.findWishlistByWishlistToken(wToken);
 
         if(wishlistToJoin.getUserId().equals(idUserToJoin)){
             throw new IllegalArgumentException("User is the owner of the wishlist");
@@ -165,14 +167,6 @@ public class WishlistsServiceImpl implements WishlistsService {
     }*/
 
     @Override
-    public List<WishlistDto> getWishlistsOfFriend(UUID idUser) {
-        return wishlistsDao.findFriendWishlists(idUser)
-                .stream()
-                .map(wishlist -> modelMapper.map(wishlist, WishlistDto.class))
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public List<WishlistDto> getByLastname(String name) {
         return List.of();
     }
@@ -203,7 +197,7 @@ public class WishlistsServiceImpl implements WishlistsService {
 
     @Override
     public WishlistDto getWishlistByToken(String token) {
-        Wishlist w = wishlistsDao.findByWToken(token);
+        Wishlist w = wishlistsDao.findWishlistByWishlistToken(token);
         return modelMapper.map(w,WishlistDto.class);
     }
 

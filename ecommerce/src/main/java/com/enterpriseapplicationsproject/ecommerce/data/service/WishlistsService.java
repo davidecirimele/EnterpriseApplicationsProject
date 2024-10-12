@@ -16,6 +16,7 @@ public interface WishlistsService {
 
     List<WishlistDto> getFriendWishlists(UUID userId);
 
+
     List<Wishlist> getAll();
 
     void save(Wishlist wishlist);
@@ -36,7 +37,6 @@ public interface WishlistsService {
 
    // Wishlist getById(Long id);
 
-    List<WishlistDto> getWishlistsOfFriend(UUID idUser);
 
     List<WishlistDto> getByLastname(String name);
 
