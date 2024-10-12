@@ -279,15 +279,15 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
         ) { wishlist ->
             WishlistThumbnail( // Rimuovi il secondo key qui
                 wishlist = wishlist,
-                onClick = { onWishlistSelected(wishlist) }
+                onClick = { onWishlistSelected(wishlist) },
+                userIsOwner = user?.id?.compareTo(wishlist.user?.id) == 0
             )
         }
     }
 }
 
 @Composable
-fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit) {
-    val userIsOwner = user?.id?.equals(wishlist.user) ?: false
+fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit, userIsOwner: Boolean) {
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -297,7 +297,8 @@ fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit) {
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor =
-        if (userIsOwner) Color.Gray else Color.Cyan) // Colore di riempimento condizionale
+            if (userIsOwner) Color.Gray else Color.Cyan
+        ) // Colore di riempimento condizionale
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -329,7 +330,7 @@ fun WishlistDetails(
 ) {
     var isPrivate by remember { mutableStateOf(wishlist.privacySetting == "Private") }
     var showMenu by remember { mutableStateOf(false) } // Per gestire la visibilità del menu a comparsa
-    val userIsOwner = user?.id?.equals(wishlist.user) ?: false
+    val userIsOwner = user?.id?.compareTo(wishlist.user?.id) == 0
 
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var itemToRemove by remember { mutableStateOf<WishlistItem?>(null) }
@@ -566,9 +567,8 @@ fun WishlistDetails(
                 }
             }
         }
-
     }
-    if (tokenToShare.isNotEmpty() && userIsOwner) { // TO DO : Aggiungere un controllo per verificare se il token è già stato copiato
+    if (tokenToShare.isNotEmpty()) { // TO DO : Aggiungere un controllo per verificare se il token è già stato copiato
         clipboardManager.setText(AnnotatedString(tokenToShare))
         Toast.makeText(context, "Token copiato negli appunti!", Toast.LENGTH_SHORT).show()
         // Pulisci il tokenToShare dopo che è stato copiato

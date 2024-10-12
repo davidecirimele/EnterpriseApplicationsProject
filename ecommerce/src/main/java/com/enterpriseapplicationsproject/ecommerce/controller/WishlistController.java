@@ -68,7 +68,7 @@ public class WishlistController {
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
-    @PostMapping(path = "/share")
+    @GetMapping(path = "/share")
     @PreAuthorize("#wDto.getUser().id == authentication.principal.getId() or hasRole('ADMIN')") //GetId() o id??
     public ResponseEntity<Map <String,String> > shareWishlist(@RequestBody WishlistDto wDto) {
         // Estrarre i dettagli dell'utente loggato
