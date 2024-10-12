@@ -26,11 +26,6 @@ interface WishlistApiService {
     @RequiresAuth
     suspend fun getWishlistsByUser(@Path("idUser") idUser: UUID) : List<Wishlist>
 
-
-    @GET("wishlists/getFriendWishlists/{idUser}")
-    @RequiresAuth
-    suspend fun getFriendWishlists(@Path("idUser") idUser: UUID): List<Wishlist>
-
     @GET("wishlists/getAll")
     @RequiresAuth
     suspend fun getAllWishlist() : List<Wishlist>
@@ -47,10 +42,17 @@ interface WishlistApiService {
     @RequiresAuth
     suspend fun shareWishlist(@Body wishlist: Wishlist) : Map<String, String>
 
-    @POST("wishlists/join/{idUserToJoin}/{token}")
+    @GET("wishlists/getOfFriend/{idUser}")
     @RequiresAuth
-    suspend fun joinWishlist(@Path("idUserToJoin") idUser: UUID, @Path("token") token: String): Response<Boolean>
+    suspend fun getFriendWishlists(@Path("idUser") idUser: UUID): List<Wishlist>
 
+    @POST("wishlists/join/{idUser}/{token}")
+    @RequiresAuth
+    suspend fun joinWishlist(@Path("idUser") idUser: UUID, @Path("token") token: String): Response<Boolean>
+
+    @POST("wishlists/unshare/{idUser}")
+    @RequiresAuth
+    suspend fun unshareWishlist(@Path("idUser") idUser: UUID, @Body wishlist: Wishlist): Response<Boolean>
 
 
 }

@@ -111,4 +111,8 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
         return wApiService.getFriendWishlists(id)
     }
 
+    suspend fun unshareWishlist(id: UUID, wishlist: Wishlist): Response<Boolean> {
+        return wApiService.unshareWishlist(id, wishlist)
+    }
+
 }

@@ -8,15 +8,11 @@ import com.example.ecommercefront_end.model.Group
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.repository.WishlistRepository
-import io.ktor.util.reflect.instanceOf
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel() {
 
@@ -42,15 +38,14 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
         loadWishlistsFromBD()
     }
 
-
     private fun loadWishlistsFromBD() {
         viewModelScope.launch {
             _isLoading.value = true // Imposta il caricamento a vero all'inizio del processo
             try {
                 val currentUser = SessionManager.user
                 currentUser?.let {
-                    _wishlists.value = wRepository.getWishlistsByUser(it.id)
-                    _friendWishlists.value = wRepository.getWishlistsByFriends(it.id)
+                    val friendWishlists = wRepository.getFriendWishlist(it.id)
+                    _wishlists.value = wRepository.getWishlistsByUser(it.id) + friendWishlists
                     if (_wishlists.value.isEmpty()) {
                         _error.value = "Nessuna wishlist trovata"
                     }
@@ -197,8 +192,26 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
         }
     }
 
+    fun unshareWishlist(wishlist: Wishlist){
+        viewModelScope.launch {
+            try {
+                val currentUser = SessionManager.user
+                val response = currentUser?.let { wRepository.unshareWishlist(it.id, wishlist) }
+                if (response != null && response.isSuccessful) {
+                    Log.d("unshareWishlist", "Wishlist non più condivisa con successo")
+                } else {
+                    if (response != null) {
+                        Log.e("unshareWishlist", "Errore durante l'eliminazione della condivisione della wishlist: ${response.errorBody()}")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("unshareWishlist", "Errore durante l'eliminazione della condivisione della wishlist: ${e.message}")
+            }
+        }
+    }
 
-    fun removeWishlistItem(id: Long) {
+
+    fun deleteWishlistItem(id: Long) {
        viewModelScope.launch {
            try {
                val response = wRepository.removeWishlistItem(id)
@@ -217,7 +230,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
 
     }
 
-    fun removeWishlist(wishlistId: Long){
+    fun deleteWishlist(wishlistId: Long){
         viewModelScope.launch {
             try {
                 // Elimina la wishlist

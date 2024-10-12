@@ -115,7 +115,7 @@ public class WishlistController {
     //
 
     @PutMapping(consumes = "application/json", path = "/update")
-    //@PreAuthorize("#wDto.getUser().getId() == authentication.principal.getId() or hasRole('ADMIN')")
+    @PreAuthorize("#wDto.getUser().getId() == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> update(@RequestBody WishlistDto wDto) {
         WishlistDto w = wishlistService.updateWishlist(wDto);
         if (w == null)
@@ -124,9 +124,8 @@ public class WishlistController {
     }
 
 
-
     @DeleteMapping(path = "/delete/{idWishlist}")
-    //@PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> deleteById(@PathVariable Long idWishlist) {
         WishlistDto w = wishlistService.deleteWishlistByID(idWishlist);
         if(w == null)

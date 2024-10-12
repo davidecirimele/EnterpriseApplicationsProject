@@ -49,7 +49,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -65,6 +64,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.ecommercefront_end.SessionManager.user
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
@@ -287,6 +287,7 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
 
 @Composable
 fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit) {
+    val userIsOwner = user?.id?.equals(wishlist.user) ?: false
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -294,7 +295,9 @@ fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit) {
             .height(70.dp) // Imposta l'altezza fissa per tutte le card
             .clickable { onClick() },
         shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor =
+        if (userIsOwner) Color.Gray else Color.Cyan) // Colore di riempimento condizionale
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -307,7 +310,9 @@ fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit) {
                 text = wishlist.name,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    //.align(Alignment.CenterVertically)
             )
             Spacer(modifier = Modifier.height(4.dp))
             // Aggiungi eventuali altri dettagli della wishlist qui
@@ -324,6 +329,7 @@ fun WishlistDetails(
 ) {
     var isPrivate by remember { mutableStateOf(wishlist.privacySetting == "Private") }
     var showMenu by remember { mutableStateOf(false) } // Per gestire la visibilità del menu a comparsa
+    val userIsOwner = user?.id?.equals(wishlist.user) ?: false
 
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var itemToRemove by remember { mutableStateOf<WishlistItem?>(null) }
@@ -353,9 +359,9 @@ fun WishlistDetails(
             Row (
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ){
                 Text(
                     text = "Lista: ${wishlist.name}",
@@ -372,7 +378,7 @@ fun WishlistDetails(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }
                     ) {
-                        DropdownMenuItem(
+                    if(userIsOwner){DropdownMenuItem(
                             text = { Text("Condividi") },
                             onClick = {
                                 showMenu = false
@@ -395,6 +401,7 @@ fun WishlistDetails(
                                 )
                             }
                         )
+                    }
                         DropdownMenuItem(
                             text = { Text("Rinomina") },
                             onClick = {
@@ -412,7 +419,7 @@ fun WishlistDetails(
                         )
 
                         DropdownMenuItem(
-                            text = { Text("Elimina") },
+                            text = { Text(if (userIsOwner) "Elimina" else "Esci") },
                             onClick = {
                                 showMenu = false
                                 // Azione per eliminare la wishlist
@@ -426,17 +433,23 @@ fun WishlistDetails(
                                 )
                             }
                         )
+
                     }
                 }
                 if (showDeleteConfirmation) {
                     AlertDialog(
                         onDismissRequest = { showDeleteConfirmation = false },
-                        title = { Text("Elimina Wishlist") },
-                        text = { Text("Vuoi davvero eliminare la wishlist '${wishlist.name}'?") },
+                        title = { Text(if (userIsOwner) "Elimina Wishlist" else "Esci") },
+                        text = { Text("Vuoi davvero uscire dalla wishlist '${wishlist.name} ${if (!userIsOwner) "di" else "da"} ${wishlist.user?.firstName}'?") },
                         confirmButton = {
                             Button(onClick = {
                                 //onDeleteWishlist(wishlist) // Chiama il callback per eliminare la wishlist
-                                viewModel.removeWishlist(wishlist.id)
+                                if(userIsOwner){
+                                    viewModel.deleteWishlist(wishlist.id)
+                                }
+                                else{
+                                    viewModel.unshareWishlist(wishlist)
+                                }
                                 showDeleteConfirmation = false
                             }) {
                                 Text("Sì")
@@ -478,11 +491,30 @@ fun WishlistDetails(
                     )
                 }
             }
+
+            //Proprietario
+            if (!userIsOwner){
+                Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Di: ${wishlist.user?.firstName} ${wishlist.user?.lastName}",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
             // Sezione Privacy
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -493,6 +525,7 @@ fun WishlistDetails(
                         fontSize = 18.sp
                     )
                     Button(
+                        enabled = userIsOwner,
                         onClick = {
                             isPrivate = !isPrivate
                             if (isPrivate)
@@ -521,8 +554,9 @@ fun WishlistDetails(
 
                         WishlistItemCard(wishlistItem = item,
                             navController = navController, onRemoveClick = {
-                                viewModel.removeWishlistItem(item.id)
-                            })
+                                viewModel.deleteWishlistItem(item.id)
+                            },
+                            userIsOwner = userIsOwner)
                     }
                 }
             }
@@ -534,18 +568,16 @@ fun WishlistDetails(
         }
 
     }
-    if (tokenToShare.isNotEmpty()) { // TO DO : Aggiungere un controllo per verificare se il token è già stato copiato
+    if (tokenToShare.isNotEmpty() && userIsOwner) { // TO DO : Aggiungere un controllo per verificare se il token è già stato copiato
         clipboardManager.setText(AnnotatedString(tokenToShare))
         Toast.makeText(context, "Token copiato negli appunti!", Toast.LENGTH_SHORT).show()
         // Pulisci il tokenToShare dopo che è stato copiato
         //viewModel.clearToken()
     }
-
-
 }
 
 @Composable
-fun WishlistItemCard(wishlistItem: WishlistItem, navController: NavController,onRemoveClick: () -> Unit) {
+fun WishlistItemCard(wishlistItem: WishlistItem, navController: NavController,onRemoveClick: () -> Unit, userIsOwner: Boolean) {
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -585,8 +617,8 @@ fun WishlistItemCard(wishlistItem: WishlistItem, navController: NavController,on
                 )
             }
 
-            IconButton(onClick = onRemoveClick) {
-                Icon(imageVector = Icons.Rounded.Delete, contentDescription = "Rimuovi elemento",tint = Color.Red)
+            IconButton(onClick = onRemoveClick, enabled = userIsOwner) {
+                Icon(imageVector = Icons.Rounded.Delete, contentDescription = "Rimuovi elemento",tint = if (userIsOwner) Color.Red  else Color.Gray)
             }
         }
     }
