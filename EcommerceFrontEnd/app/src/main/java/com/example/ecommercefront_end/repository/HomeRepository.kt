@@ -26,23 +26,6 @@ class HomeRepository(private val apiService: BooksApiService) {
         }
     }
 
-    suspend fun getAllBooks(): List<Book> {
-        return try {
-            val books = apiService.getAllBooks()
-
-            if (books.isEmpty()) {
-                println("Nessun libro trovato")
-            } else {
-                println("libri presi")
-            }
-            books
-
-        } catch (e: Exception) {
-            println("Errore durante il recupero di tutti i libri: ${e.message}")
-            emptyList() // Restituisci una lista vuota in caso di errore
-        }
-    }
-
     suspend fun deleteBook(bookId: Long) {
         try {
             apiService.deleteBook(bookId)

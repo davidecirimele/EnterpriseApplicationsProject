@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -185,4 +186,17 @@ public class BooksServiceImpl implements BooksService {
     public Integer getMinBookPages() {
         return booksDao.findMinPages();
     }
+
+    @Override
+    public Double getMaxBookWeight() {
+        return booksDao.findMaxWeight();
+    }
+
+    @Override
+    public Double getMinBookWeight() {
+        return booksDao.findMinWeight();
+    }
+
+    @Override
+    public LocalDate getMinPublicationYear(){return booksDao.findMinPublicationYear();}
 }

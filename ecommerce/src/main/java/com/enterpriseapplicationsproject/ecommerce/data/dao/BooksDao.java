@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -25,5 +26,13 @@ public interface BooksDao extends JpaRepository<Book, Long>, JpaSpecificationExe
     Integer findMinPages();
     @Query("SELECT MAX(b.pages) FROM Book b")
     Integer findMaxPages();
+
+    @Query("SELECT MIN(b.weight) FROM Book b")
+    Double findMinWeight();
+    @Query("SELECT MAX(b.weight) FROM Book b")
+    Double findMaxWeight();
+
+    @Query("SELECT MIN(b.publishDate) FROM Book b")
+    LocalDate findMinPublicationYear();
 
 }

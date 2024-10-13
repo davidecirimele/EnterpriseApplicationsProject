@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -36,8 +37,9 @@ public class BookController {
         return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
-    @GetMapping("/get/filter")
+    @PostMapping("/get/filter")
     public ResponseEntity<List<Book>> filterBooks(@RequestBody BookSpecification.Filter filter) {
+        log.info("Received request for books/get/filter -> "+filter);
         List<Book> filteredBooks = booksService.getFilteredBooks(filter);
         return ResponseEntity.ok(filteredBooks);
     }
@@ -76,6 +78,24 @@ public class BookController {
     public ResponseEntity<Integer> getMinPages() {
         Integer minPages = booksService.getMinBookPages();
         return ResponseEntity.ok(minPages);
+    }
+
+    @GetMapping("/get/max-weight")
+    public ResponseEntity<Double> getMaxWeight() {
+        Double maxWeight = booksService.getMaxBookWeight();
+        return ResponseEntity.ok(maxWeight);
+    }
+
+    @GetMapping("/get/min-weight")
+    public ResponseEntity<Double> getMinWeight() {
+        Double minWeight = booksService.getMinBookWeight();
+        return ResponseEntity.ok(minWeight);
+    }
+
+    @GetMapping("/get/min-publication-date")
+    public ResponseEntity<LocalDate> getMinPublicationDate() {
+        LocalDate minPublicationDate = booksService.getMinPublicationYear();
+        return ResponseEntity.ok(minPublicationDate);
     }
 
     // da testare se consumes va bene, dato che ha un corpo nella richiesta
