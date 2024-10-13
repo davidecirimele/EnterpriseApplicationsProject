@@ -71,7 +71,7 @@ fun HomeScreen(bookViewModel: BookViewModel, navController: NavController) {
     val gridProducts = remember(products) { products.drop(5) } // Libri per la griglia
 
     LaunchedEffect(Unit) {
-        bookViewModel.resetFilter()
+        bookViewModel.clearCache()
     }
 
     if (isLoading) {

@@ -67,5 +67,5 @@ public class Book {
     private int age;
 
     @Column(name = "PUBLISH_DATE")
-    private Date publishDate;
+    private LocalDate publishDate;
 }
