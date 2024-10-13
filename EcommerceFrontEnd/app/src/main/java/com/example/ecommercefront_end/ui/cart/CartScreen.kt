@@ -25,6 +25,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.network.RetrofitClient
 
 import com.example.ecommercefront_end.repository.CartRepository
@@ -33,12 +35,31 @@ import com.example.ecommercefront_end.viewmodels.CartViewModel
 
 
 @Composable
-fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit) {
-    val cartItems by viewModel.cartItems.collectAsStateWithLifecycle() //indica che il valore è osservato e che il composable deve essere ricreato ogni volta che cambia
+fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navController: NavController) {
+    val cartItems by viewModel.cartItems.collectAsStateWithLifecycle()
     val totalAmount by viewModel.totalAmount.collectAsStateWithLifecycle()
+    LaunchedEffect(cartItems) {
+        println("Cart Items aggiornati: $cartItems")
+    }
+
+
 
     LaunchedEffect(Unit) {
-        viewModel.loadCartItems()
+        if (SessionManager.user != null) {
+            viewModel.loadCartItems()
+        }
+        else {
+            navController.navigate("userAuth"){
+                popUpTo("cart"){
+                    inclusive = true
+                }
+            }
+
+        }
+
+
+
+
 
     }
 

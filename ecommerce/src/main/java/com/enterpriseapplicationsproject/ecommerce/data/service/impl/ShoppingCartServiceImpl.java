@@ -62,16 +62,21 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    public boolean delete(Long cartId){
-        Optional<ShoppingCart> optionalSC = shoppingCartDao.findById(cartId);
+    public boolean delete(UUID userId, Long cartId){
+        Optional<ShoppingCart> optionalSC = shoppingCartDao.findByUserId(userId);
 
         if(optionalSC.isPresent())
         {
             ShoppingCart shoppingCart = optionalSC.get();
-            shoppingCart.getCartItems().clear();
+            if(shoppingCart.getId().equals(cartId)) {
+                shoppingCart.getCartItems().clear();
 
-            shoppingCartDao.save(shoppingCart);
-            return true;
+                shoppingCartDao.save(shoppingCart);
+                return true;
+            }
+            else{
+                throw new SecurityException("You can't access this resource");
+            }
         }
         else{
             throw new RuntimeException("Cart with id " + cartId + " not found");

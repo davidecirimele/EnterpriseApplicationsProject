@@ -27,6 +27,12 @@ public class PasswordValidator implements ConstraintValidator<ValidPassword,Stri
         if (value == null || value.length() < minLength || value.length() > maxLength) {
             return false;
         }
+
+        String uppercasePattern = ".*[A-Z].*";
+        if (!value.matches(uppercasePattern)) {
+            return false;
+        }
+
         String specialCharacterPattern = "[" + Pattern.quote(allowedSpecialCharacters) + "]";
 
         if (!value.matches(".*" + specialCharacterPattern + ".*")) {
@@ -34,10 +40,10 @@ public class PasswordValidator implements ConstraintValidator<ValidPassword,Stri
         }
 
         String nonAllowedSpecialCharacterPattern = "[^0-9a-zA-Z" + Pattern.quote(allowedSpecialCharacters) + "]";
-        log.info("Pattern caratteri non consentiti: " + nonAllowedSpecialCharacterPattern);
         if (value.matches(".*" + nonAllowedSpecialCharacterPattern + ".*")) {
             return false;
         }
+        log.info("La seguente password va bene: " + value);
         return true;
     }
 }

@@ -108,10 +108,10 @@ public class AuthController {
 
         return ResponseEntity.ok(new AuthenticationResponse(newAccessToken, newRefreshToken));
     }
-
     @PostMapping("/validate-token")
-    public ResponseEntity<Boolean> validateToken(@RequestBody AccessTokenValidationDto request) {
+    public ResponseEntity<AccessTokenValidationDto> validateToken(@RequestBody AccessTokenValidationDto request) {
         String token = request.getToken();
-        return ResponseEntity.ok(jwtService.isTokenValid(token));
+        return ResponseEntity.ok(authService.validateToken(request));
     }
+
 }
