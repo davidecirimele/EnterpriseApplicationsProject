@@ -103,7 +103,7 @@ public class ModelMapperConfig {
             @Override
             protected void configure() {
                 map(source.getPrivacySetting(), destination.getPrivacySetting());
-                map(source.getWToken(), destination.getWishlistToken());
+                map(source.getWishlistToken(), destination.getWishlistToken());
                 map(source.getGroup(), destination.getGroup());
                 map(source.getUser(), destination.getUserId());
                 map(source.getItems(), destination.getItems());
@@ -117,7 +117,7 @@ public class ModelMapperConfig {
             protected void configure() {
                 map(source.getPrivacySetting(), destination.getPrivacySetting());
                 // Aggiungi questa riga per mappare wToken esplicitamente
-                map(source.getWishlistToken(), destination.getWToken());
+                map(source.getWishlistToken(), destination.getWishlistToken());
                 map(source.getGroup(), destination.getGroup());
                 map(source.getUserId(), destination.getUser());
                 map(source.getItems(), destination.getItems());

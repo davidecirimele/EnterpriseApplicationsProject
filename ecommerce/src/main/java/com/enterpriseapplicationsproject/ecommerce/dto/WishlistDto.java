@@ -28,5 +28,5 @@ public class WishlistDto {
 
     private String privacySetting;
 
-    private String wToken;
+    private String wishlistToken;
 }

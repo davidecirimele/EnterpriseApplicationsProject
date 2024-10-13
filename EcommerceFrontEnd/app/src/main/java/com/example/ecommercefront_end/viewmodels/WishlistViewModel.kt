@@ -140,7 +140,8 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
                     items = wItemsList, // Lista vuota di elementi
                     user = SessionManager.user, // Nessun utente associato dato che non è loggato
                     group = defaultGroup, // Gruppo predefinito
-                    privacySetting = privacySetting
+                    privacySetting = privacySetting,
+                    wishlistToken = "" // Nessun token per ora
                 )
 
                 // Salva la nuova wishlist nel database tramite il repository

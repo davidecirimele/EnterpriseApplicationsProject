@@ -16,6 +16,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -74,7 +75,7 @@ public class WishlistsServiceImpl implements WishlistsService {
 
         String wName = wishlistDto.getName();
         String wPrivacy = wishlistDto.getPrivacySetting();
-        String wToken = wishlistDto.getWToken();
+        String wToken = wishlistDto.getWishlistToken();
 
         if (wishlistDto.getGroup() != null) {
             List<User> members = wishlistDto.getGroup().getMembers().stream()
@@ -82,6 +83,10 @@ public class WishlistsServiceImpl implements WishlistsService {
                     .collect(Collectors.toList());
             if (!group.getMembers().equals(members))
                 group.setMembers(members);
+        }
+
+        if(wToken == null){
+            wToken = generateWToken();
         }
 
         group = groupsDao.save(group); // Salva ilGroup nel database
@@ -252,6 +257,11 @@ public class WishlistsServiceImpl implements WishlistsService {
                     return modelMapper.map(savedWishlist, WishlistDto.class);
                 })
                 .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));
+    }
+
+    public String generateWToken() {
+        UUID uuid = UUID.randomUUID();
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(uuid.toString().getBytes());
     }
 
 

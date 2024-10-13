@@ -74,7 +74,7 @@ public class WishlistController {
         // Estrarre i dettagli dell'utente loggato
         if (wDto == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        String wishlistToken = wDto.getWToken();
+        String wishlistToken = wDto.getWishlistToken();
         return ResponseEntity.ok(Map.of("token", wishlistToken));
     }
 
@@ -117,6 +117,7 @@ public class WishlistController {
     @PutMapping(consumes = "application/json", path = "/update")
     @PreAuthorize("#wDto.getUser().getId() == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> update(@RequestBody WishlistDto wDto) {
+        System.out.println("WishlistDto userID: " + wDto.getUser().getId());
         WishlistDto w = wishlistService.updateWishlist(wDto);
         if (w == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

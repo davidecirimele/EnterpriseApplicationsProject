@@ -76,7 +76,6 @@ fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) 
     val wListItems by viewModel.wishlistItems.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-
     // Gestione della selezione della wishlist
     val selectedWishlist = remember(wLists) {
         mutableStateOf(wLists.firstOrNull())
@@ -297,7 +296,7 @@ fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit, userIsOwner: Bool
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor =
-            if (userIsOwner) Color.Gray else Color.Cyan
+            if (userIsOwner) Color.LightGray else Color.Cyan
         ) // Colore di riempimento condizionale
     ) {
         Column(
@@ -384,15 +383,10 @@ fun WishlistDetails(
                             onClick = {
                                 showMenu = false
                                 // Azione per condividere la wishlist
-                                if (tokenToShare.isNotEmpty()) {
-                                    Log.d("WishlistDetails", "Token da copiare: $tokenToShare")
-                                    clipboardManager.setText(AnnotatedString(tokenToShare))
-                                    Toast.makeText(context, "Token copiato negli appunti!", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    // Altrimenti, fai la chiamata all'API e copia il token quando disponibile
-                                    viewModel.shareWishlist(wishlist)
-                                    Log.d("WishlistDetails", "Chiamata all'API per condivisione in corso...")
-                                }
+                                val token = wishlist.wishlistToken
+                                clipboardManager.setText(AnnotatedString(token))
+                                Log.d("WishlistDetails", "Token da copiare: $token")
+                                Toast.makeText(context, "Token copiato negli appunti!", Toast.LENGTH_SHORT).show()
                             },
                             leadingIcon = {
                                 Icon(
@@ -568,12 +562,13 @@ fun WishlistDetails(
             }
         }
     }
+    /*
     if (tokenToShare.isNotEmpty()) { // TO DO : Aggiungere un controllo per verificare se il token è già stato copiato
         clipboardManager.setText(AnnotatedString(tokenToShare))
         Toast.makeText(context, "Token copiato negli appunti!", Toast.LENGTH_SHORT).show()
         // Pulisci il tokenToShare dopo che è stato copiato
         //viewModel.clearToken()
-    }
+    }*/
 }
 
 @Composable
