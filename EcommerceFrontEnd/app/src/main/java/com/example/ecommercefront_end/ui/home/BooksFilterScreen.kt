@@ -90,7 +90,7 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
 
     val startingPublicationYear by viewModel.startingPublicationYear.collectAsState()
 
-    val isLoading by viewModel.isLoading.collectAsState()
+    val isLoading by viewModel.isLoadingFilteredBooks.collectAsState()
     
     if(isLoading)
     {
@@ -180,7 +180,7 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                             ChoiceSelector(
                                 parameter = "Genre",
                                 choiches = genres,
-                                selectedChoice = "All",
+                                selectedChoice = filter.genre.toString(),
                                 onChoiceSelected = { selectedChoice ->
                                     viewModel.updateFilter(genre = BookGenre.valueOf(selectedChoice))
                                 })
@@ -211,7 +211,8 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                                 viewModel,
                                 "Weight (Kg)",
                                 minWeight!!.toFloat(),
-                                maxWeight!!.toFloat()
+                                maxWeight!!.toFloat(),
+                                filter.weight
                             );
 
                             Spacer(modifier = Modifier.height(10.dp))
@@ -225,7 +226,7 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                             ChoiceSelector(
                                 parameter = "Format",
                                 choiches = formats,
-                                selectedChoice = "All",
+                                selectedChoice = filter.format.toString(),
                                 onChoiceSelected = { selectedChoice ->
                                     viewModel.updateFilter(format = BookFormat.valueOf(selectedChoice))
                                 })
@@ -241,7 +242,7 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                             ChoiceSelector(
                                 parameter = "Language",
                                 choiches = languages,
-                                selectedChoice = "All",
+                                selectedChoice = filter.language.toString(),
                                 onChoiceSelected = { selectedChoice ->
                                     viewModel.updateFilter(language = BookLanguage.valueOf(selectedChoice))
                                 })
@@ -327,7 +328,13 @@ fun ChoiceSelector(
     onChoiceSelected: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf(selectedChoice) }
+
+    var selectedText by remember { mutableStateOf("All") }
+
+    if(selectedChoice == "null")
+    {
+        selectedText = selectedChoice
+    }
 
     Column {
         Text(
@@ -371,8 +378,12 @@ fun ChoiceSelector(
 }
 
 @Composable
-fun ValueSlider(viewModel: BookViewModel,parameter: String, value1: Float, value2: Float) {
+fun <T : Number> ValueSlider(viewModel: BookViewModel,parameter: String, value1: Float, value2: Float, oldValue1: T?) {
     var sliderPosition by remember { mutableFloatStateOf(value1) }
+
+    if(oldValue1 != null)
+        sliderPosition = oldValue1.toFloat()
+
     Column {
         Text(text = parameter, fontWeight = FontWeight.Bold)
         Slider(
@@ -380,9 +391,6 @@ fun ValueSlider(viewModel: BookViewModel,parameter: String, value1: Float, value
             onValueChange = { sliderPosition = it },
             valueRange = value1..value2
         )
-        if(parameter == "Publication Year")
-            Text(text = "${sliderPosition.toInt()}")
-        else
-            Text(text = "%.2f".format(Locale.ITALY, sliderPosition).replace(",", "."))
+        Text(text = "%.2f".format(Locale.ITALY, sliderPosition).replace(",", "."))
     }
 }

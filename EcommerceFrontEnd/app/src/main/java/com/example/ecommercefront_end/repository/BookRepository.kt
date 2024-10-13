@@ -31,4 +31,5 @@ class BookRepository(private val apiService : BooksApiService)  {
 
     suspend fun getFilteredBooks(filter: BookFilter) = apiService.getFilteredBooks(filter)
 
+    suspend fun getAllBooks() = apiService.getAllBooks()
 }

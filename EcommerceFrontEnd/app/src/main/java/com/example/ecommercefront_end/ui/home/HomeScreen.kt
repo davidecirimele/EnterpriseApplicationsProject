@@ -48,7 +48,6 @@ import coil.request.CachePolicy
 import com.android.volley.toolbox.ImageRequest
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.viewmodels.BookViewModel
-import com.example.ecommercefront_end.viewmodels.HomeViewModel
 
 var testImgs : List<String> = listOf("https://mockuptree.com/wp-content/uploads/edd/2019/10/free-Book-mockup-150x150.jpg",
     "https://images.thegreatestbooks.org/m8kb7ah2lhy960dbp473zna11wb4",
@@ -64,10 +63,10 @@ fun Modifier.productCardModifier(height: Dp, width: Dp, navController: NavContro
         .clickable { navController.navigate("/books_details/${bookId}") }
 }
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel, bookViewModel: BookViewModel, navController: NavController) {
-    val products by homeViewModel.products.collectAsState()
-    val isLoading by homeViewModel.isLoading.collectAsState()
-    val error by homeViewModel.error.collectAsState()
+fun HomeScreen(bookViewModel: BookViewModel, navController: NavController) {
+    val products by bookViewModel.allProducts.collectAsState()
+    val isLoading by bookViewModel.isLoadingAllBooks.collectAsState()
+    val error by bookViewModel.error.collectAsState()
     val topProducts = remember(products) { products.take(5) }
     val gridProducts = remember(products) { products.drop(5) } // Libri per la griglia
 

@@ -26,7 +26,7 @@ interface BooksApiService {
     suspend fun getBook(@Path("idBook") idBook: Long) : Book
 
     @GET("books/getAll")
-    suspend fun getAllBooks() : List<Book>
+    suspend fun getAllBooks() : Response<List<Book>>
 
     @GET("books/get/max-price")
     suspend fun getMaxPrice() : Response<Double>

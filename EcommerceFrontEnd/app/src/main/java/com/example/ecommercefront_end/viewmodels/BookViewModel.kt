@@ -39,6 +39,9 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     private val _cachedProducts = MutableStateFlow<List<Book>>(emptyList())
     val cachedProducts: StateFlow<List<Book>> = _cachedProducts.asStateFlow()
 
+    private val _allProducts = MutableStateFlow<List<Book>>(emptyList())
+    val allProducts: StateFlow<List<Book>> = _allProducts.asStateFlow()
+
     private val _minPrice = MutableStateFlow<Double?>(null)
     val minPrice: StateFlow<Double?> = _minPrice
 
@@ -72,8 +75,14 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     private val _sortOption = MutableStateFlow("Newest")
     val sortOption: StateFlow<String> = _sortOption
 
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    private val _bookFlow = MutableStateFlow<Book?>(null)
+    val bookFlow: StateFlow<Book?> = _bookFlow.asStateFlow()
+
+    private val _isLoadingAllBooks = MutableStateFlow(true)
+    val isLoadingAllBooks: StateFlow<Boolean> = _isLoadingAllBooks.asStateFlow()
+
+    private val _isLoadingData = MutableStateFlow(true)
+    val isLoadingData: StateFlow<Boolean> = _isLoadingData.asStateFlow()
 
     private val _isLoadingFilteredBooks = MutableStateFlow(true)
     val isLoadingFilteredBooks: StateFlow<Boolean> = _isLoadingFilteredBooks.asStateFlow()
@@ -81,6 +90,9 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    init {
+        fetchAllProducts()
+    }
 
     fun fetchBooksData(){
         viewModelScope.launch {
@@ -102,7 +114,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
             } catch (e: Exception) {
                 Log.e("Book Error", "Error loading books data", e)
             }finally {
-                _isLoading.value = false
+                _isLoadingData.value = false
             }
         }
     }
@@ -204,6 +216,25 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
             }
         } catch (e: Exception) {
             Log.d("BookDebug", "startingPublicationYear: ${_startingPublicationYear.value}")
+        }
+    }
+
+    fun fetchAllProducts(){
+        viewModelScope.launch {
+            try {
+                val response = repository.getAllBooks()
+
+                if (response.isSuccessful && response.body() != null) {
+                    _allProducts.value = response.body()!!
+                } else {
+                    throw Exception("Error fetching products")
+                }
+
+            } catch (e: Exception) {
+                _error.value = "Errore durante il caricamento dei libri: ${e.message}" // Imposta il messaggio di errore
+            } finally {
+                _isLoadingAllBooks.value = false
+            }
         }
     }
 
@@ -323,5 +354,14 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
             return _filteredProducts.value.isNotEmpty()
         }
         return false
+    }
+
+
+
+    fun loadBook(id: Long) {
+        viewModelScope.launch {
+            val book = _allProducts.value.find { it.id == id }
+            _bookFlow.value = book
+        }
     }
 }
