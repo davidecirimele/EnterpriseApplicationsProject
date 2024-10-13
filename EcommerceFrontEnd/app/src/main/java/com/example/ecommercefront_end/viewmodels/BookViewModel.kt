@@ -92,6 +92,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
     init {
         fetchAllProducts()
+        fetchBooksData()
     }
 
     fun fetchBooksData(){
@@ -219,7 +220,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         }
     }
 
-    fun fetchAllProducts(){
+    private fun fetchAllProducts(){
         viewModelScope.launch {
             try {
                 val response = repository.getAllBooks()
@@ -287,6 +288,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
     fun resetFilter(){
         _filter.value = BookFilter()
+        clearCache()
     }
 
     fun setOrderOption(option: String){
@@ -319,8 +321,8 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                 "Number of pages: High to Low" -> filteredProducts.value.sortedByDescending { it.pages }
                 "Age: Low to High" -> filteredProducts.value.sortedBy { it.age }
                 "Age: High to Low" -> filteredProducts.value.sortedByDescending { it.age }
-                "Newest" -> filteredProducts.value.sortedByDescending { it.publishDate.year }
-                "Oldest" -> filteredProducts.value.sortedBy { it.publishDate.year }
+                "Newest" -> _filteredProducts.value.sortedByDescending { it.publishDate.year}
+                "Oldest" -> _filteredProducts.value.sortedBy { it.publishDate.year}
                 else -> _filteredProducts.value
             }
         }
@@ -356,6 +358,9 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         return false
     }
 
+    fun clearCache(){
+        _cachedProducts.value = emptyList<Book>()
+    }
 
 
     fun loadBook(id: Long) {

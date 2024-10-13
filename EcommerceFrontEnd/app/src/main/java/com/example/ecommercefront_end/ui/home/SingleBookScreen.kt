@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.navigation.NavHostController
 import com.example.ecommercefront_end.SessionManager
 import java.time.format.DateTimeFormatter
 import com.example.ecommercefront_end.model.Book
@@ -45,7 +46,7 @@ import com.example.ecommercefront_end.repository.CartRepository
 import kotlinx.coroutines.launch
 
 @Composable
-fun BookDetailsScreen(book: Book, cartRepository: CartRepository ) {
+fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController: NavHostController) {
     var selectedQuantity by remember { mutableStateOf(1) }
     var shippingAddress by remember { mutableStateOf("Via Roma 1") }
 

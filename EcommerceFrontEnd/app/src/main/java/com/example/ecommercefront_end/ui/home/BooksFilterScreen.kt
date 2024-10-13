@@ -70,10 +70,6 @@ import java.util.Locale
 @Composable
 fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, currentRoute: String?, onDismiss: () -> Unit){
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchBooksData();
-    }
-
     val minBookPrice by viewModel.minPrice.collectAsState()
     val maxBookPrice by viewModel.maxPrice.collectAsState()
 
@@ -90,7 +86,7 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
 
     val startingPublicationYear by viewModel.startingPublicationYear.collectAsState()
 
-    val isLoading by viewModel.isLoadingFilteredBooks.collectAsState()
+    val isLoading by viewModel.isLoadingData.collectAsState()
     
     if(isLoading)
     {
@@ -159,10 +155,10 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                                 maxBookAge!!.toFloat(),
                                 onValueChange = { start, end ->
                                     val formattedStart =
-                                        String.format(Locale.ITALY, "%.2f", start).replace(",", ".")
+                                        String.format(Locale.ITALY, "%.0f", start).replace(",", ".")
                                             .toFloat();
                                     val formattedEnd =
-                                        String.format(Locale.ITALY, "%.2f", end).replace(",", ".")
+                                        String.format(Locale.ITALY, "%.0f", end).replace(",", ".")
                                             .toFloat();
 
                                     viewModel.updateFilter(minAge = formattedStart.toInt(), maxAge = formattedEnd.toInt())
@@ -195,10 +191,10 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                                 maxBookPages!!.toFloat(),
                                 onValueChange = { start, end ->
                                     val formattedStart =
-                                        String.format(Locale.ITALY, "%.2f", start).replace(",", ".")
+                                        String.format(Locale.ITALY, "%.0f", start).replace(",", ".")
                                             .toFloat();
                                     val formattedEnd =
-                                        String.format(Locale.ITALY, "%.2f", end).replace(",", ".")
+                                        String.format(Locale.ITALY, "%.0f", end).replace(",", ".")
                                             .toFloat();
 
                                     viewModel.updateFilter(minPages = formattedStart.toInt(), maxPages = formattedEnd.toInt())
@@ -273,8 +269,12 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
 
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
+                        Button(onClick = { viewModel.resetFilter() }) {
+                            Text(text = "Clear Filter")
+                        }
+                        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
                         Button(onClick = { viewModel.searchBooks(navController, currentRoute)
-                        onDismiss()}) {
+                            onDismiss()}) {
                             Text(text = "Filter Books")
                         }
                     }
@@ -289,12 +289,17 @@ fun <T : Number> RangeSelector(viewModel: BookViewModel,parameter: String, value
 
     var sliderPosition by remember { mutableStateOf(value1..value2) }
 
-    if(oldValue1 != null && oldValue2 != null)
-        sliderPosition = oldValue1.toFloat()..oldValue2.toFloat()
-    else if(oldValue1 != null && oldValue2 == null)
-        sliderPosition = oldValue1.toFloat()..value2
-    else if(oldValue1 == null && oldValue2 != null)
-        sliderPosition = value1..oldValue2.toFloat()
+    LaunchedEffect(value1, value2, oldValue1, oldValue2) {
+        sliderPosition = if (oldValue1 != null && oldValue2 != null) {
+            oldValue1.toFloat()..oldValue2.toFloat()
+        } else if (oldValue1 != null) {
+            oldValue1.toFloat()..value2
+        } else if (oldValue2 != null) {
+            value1..oldValue2.toFloat()
+        } else {
+            value1..value2
+        }
+    }
 
 
     Column {
@@ -331,9 +336,10 @@ fun ChoiceSelector(
 
     var selectedText by remember { mutableStateOf("All") }
 
-    if(selectedChoice == "null")
-    {
-        selectedText = selectedChoice
+    LaunchedEffect(selectedChoice) {
+        if (selectedChoice != "null" && selectedChoice != null) {
+            selectedText = selectedChoice
+        }
     }
 
     Column {
@@ -381,8 +387,10 @@ fun ChoiceSelector(
 fun <T : Number> ValueSlider(viewModel: BookViewModel,parameter: String, value1: Float, value2: Float, oldValue1: T?) {
     var sliderPosition by remember { mutableFloatStateOf(value1) }
 
-    if(oldValue1 != null)
-        sliderPosition = oldValue1.toFloat()
+    LaunchedEffect(oldValue1) {
+        if (oldValue1 != null)
+            sliderPosition = oldValue1.toFloat()
+    }
 
     Column {
         Text(text = parameter, fontWeight = FontWeight.Bold)
