@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CutCornerShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 //import androidx.compose.material3.BottomNavigation
 //import androidx.compose.material3.BottomNavigationItem
 
@@ -84,7 +83,6 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -122,7 +120,6 @@ import com.example.ecommercefront_end.viewmodels.HomeViewModel
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
 import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
-import androidx.compose.ui.Alignment
 import kotlinx.coroutines.async
 
 
@@ -184,7 +181,7 @@ fun NavigationView(navController: NavHostController) {
                 val book by homeViewModel.bookFlow.collectAsState()
 
                 book?.let {
-                    BookDetailsScreen(book = it, cartRepository = CartRepository(RetrofitClient.cartApiService), navController = navController)
+                    BookDetailsScreen(book = it, cartRepository = CartRepository(RetrofitClient.cartApiService))
                 } ?: Text("Libro non trovato")
             }
 
@@ -424,7 +421,7 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
 fun HomePage() {
     val navHostController = rememberNavController()
     val selectedIndex = remember { mutableIntStateOf(0) }
-    Scaffold(topBar = { TopBar(navHostController) },
+    Scaffold(topBar = { TopBar(navHostController, ) },
         bottomBar = { BottomBar(selectedIndex, navHostController) },
         floatingActionButton = { AddToCartFloatingButton { /* Add your action here */ } },
         floatingActionButtonPosition = FabPosition.End
