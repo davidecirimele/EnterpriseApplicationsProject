@@ -27,6 +27,6 @@ interface AuthApiService {
     suspend fun register(@Body user: SaveUser): Response<UserDetails>
 
     @POST("auth/validate-token")
-    suspend fun validateToken(@Body accessToken : AccessToken) : Response<Boolean>
+    suspend fun validateToken(@Body accessToken : AccessToken) : Response<AccessToken>
 
 }

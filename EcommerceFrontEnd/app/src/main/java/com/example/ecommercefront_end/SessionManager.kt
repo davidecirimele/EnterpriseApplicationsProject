@@ -11,6 +11,7 @@ import com.auth0.android.jwt.JWT
 import com.example.ecommercefront_end.model.AccessToken
 import com.example.ecommercefront_end.model.RefreshToken
 import com.example.ecommercefront_end.model.User
+import com.example.ecommercefront_end.model.UserId
 import com.example.ecommercefront_end.network.AuthApiService
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.AuthRepository
@@ -84,7 +85,7 @@ object SessionManager {
                         user = decodeJwtToken(tokenMustValidated)
                         println("user: ${user?.firstName}, ${user?.lastName}")
                         return@launch
-                    } else {
+                    } else if (validatedToken != null && validatedToken.code() == 401) {
                         val tokenResponse = authRepository?.refreshToken(RefreshToken(_refreshToken))
                         if (tokenResponse != null) {
                             println( "tokenResponseBody: ${tokenResponse.body()}")
@@ -150,6 +151,13 @@ object SessionManager {
 
     fun setAuthRepository(authRepository: AuthRepository){
         this.authRepository = authRepository
+    }
+
+    fun getUser(): UserId {
+        println("Sto recuperando l'utente")
+        val userId = user?.id ?: throw IllegalStateException("User not logged in")
+        println("UserId recuperato: $userId")
+        return UserId(userId)
     }
 
 

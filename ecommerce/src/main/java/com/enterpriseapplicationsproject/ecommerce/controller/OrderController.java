@@ -40,10 +40,10 @@ public class OrderController {
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
-    @PutMapping(consumes = "application/json", path = "/cancel/{orderId}")
-    @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
-    public ResponseEntity<OrderDto> cancelOrder(@PathVariable Long orderId) {
-         OrderDto cancelledOrder = ordersService.setOrderStatusToCancelled(orderId);
+    @PutMapping(consumes = "application/json", path = "/cancel/{orderId}/{userId}")
+    @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<OrderDto> cancelOrder(@PathVariable Long orderId , @PathVariable UUID userId) {
+         OrderDto cancelledOrder = ordersService.setOrderStatusToCancelled(orderId, userId);
         return new ResponseEntity<>(cancelledOrder, HttpStatus.OK);
     }
 

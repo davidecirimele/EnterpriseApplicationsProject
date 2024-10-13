@@ -3,18 +3,17 @@ package com.enterpriseapplicationsproject.ecommerce.config.security.filter;
 import com.enterpriseapplicationsproject.ecommerce.config.security.JwtService;
 import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetails;
 import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetailsService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.io.IOException;
 
@@ -38,7 +37,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         jwt = authHeader.substring(7);
-        String tokenType = jwtService.extractClaim(jwt, claims -> claims.get("type", String.class));
+        String tokenType;
+        try {
+            tokenType = jwtService.extractClaim(jwt, claims -> claims.get("type", String.class));
+        }
+
+        catch (ExpiredJwtException e){
+            throw e;
+        }
+
 
         String requestURI = request.getRequestURI();
 
@@ -58,9 +65,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-
-
-        if(jwtService.isTokenValid(jwt)){
+            try{
+                jwtService.isTokenValid(jwt);
+            }
+            catch (ExpiredJwtException e){
+                throw e;
+            }
             username = jwtService.extractUsername(jwt);
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             LoggedUserDetails userDetails = (LoggedUserDetails) this.userDetailsService.loadUserByUsername(username);
@@ -73,7 +83,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
-        }
+
 
 
 

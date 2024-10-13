@@ -2,9 +2,9 @@ package com.example.ecommercefront_end.repository
 
 import com.example.ecommercefront_end.network.CartApiService
 import com.example.ecommercefront_end.model.QuantityCartItem
-import com.example.ecommercefront_end.model.CartItemId
 import com.example.ecommercefront_end.model.ShoppingCart
 import com.example.ecommercefront_end.model.UserId
+import retrofit2.Response
 import java.util.UUID
 
 class CartRepository(
@@ -17,9 +17,9 @@ class CartRepository(
         return try {
             println("Sto cercando il carrello")
             val response = apiService.getCart(userId)
-            println("Risposta ricevuta $response")
+            //println("Risposta ricevuta $response")
             if (response.isSuccessful) {
-                println("Carrello ricevuto")
+                //println("Carrello ricevuto")
                 println("Carrello: ${response.body()}")
                 Result.success(response.body())
             } else {
@@ -40,8 +40,22 @@ class CartRepository(
         apiService.updateQuantity(userId, cartId, itemId, quantityCartItem)
     }
 
-    suspend fun removeItem( itemId: Long, cartId: Long, userId: UUID){
-        apiService.removeItem(userId,cartId,itemId)
+    suspend fun removeItem( itemId: Long, cartId: Long, userId: UUID): Response<Void> {
+       return  apiService.removeItem(userId,cartId,itemId)
+
     }
 
+    suspend fun addCartItem (userId: UUID, quantity: Int, bookId: Long){
+        val cartRes = getCart(userId)
+        cartRes.onSuccess { cart ->
+            if (cart != null) {
+                println("cart items: " + cart.cartItems)
+                val cartId = cart.id
+                val quantityCartItem = QuantityCartItem(quantity)
+                apiService.insertItem(userId, cartId, bookId, quantityCartItem)
+
+            }
+        }
+
+    }
 }

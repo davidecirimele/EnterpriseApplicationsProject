@@ -2,6 +2,7 @@ package com.example.ecommercefront_end.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.example.ecommercefront_end.SessionManager
 
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,21 +26,25 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     val totalAmount: StateFlow<Double> = _totalAmount
 
 
+
     fun loadCartItems() {
         viewModelScope.launch {
+
             try {
                 println("sto caricando il carrello")
 
-                val cart = repository.getCart(getUser().userId)
+                val cart = SessionManager.user?.let { repository.getCart(it.id) }
 
-                cart.onSuccess { cart_ ->
-                    if (cart_ != null) {
-                        _shoppingCart.value = cart_
-                        _cartItems.value = cart_.cartItems
+                if (cart != null) {
+                    cart.onSuccess { cart_ ->
+                        if (cart_ != null) {
+                            _shoppingCart.value = cart_
+                            _cartItems.value = cart_.cartItems
+                        }
+                        updateTotalAmount()
+                    }.onFailure { e ->
+                        println("Errore: ${e.message}")
                     }
-                    updateTotalAmount()
-                }.onFailure { e ->
-                    println("Errore: ${e.message}")
                 }
             } catch (e: Exception) {
                 // Gestire l'errore, ad esempio mostrando un messaggio all'utente
@@ -74,25 +79,27 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
         viewModelScope.launch {
             try {
                 val userId = SessionManager.user?.id
-                if (userId != null)
-                    shoppingCart.value?.let { repository.removeItem(item.id, it.id, userId) }
-                _cartItems.value = _cartItems.value.filterNot { it.id == item.id }
+                if (userId != null) {
+                    println("shpping cart items pre delete: ${_cartItems.value}")
+                    shoppingCart.value?.let {
+                        repository.removeItem(item.id, it.id, userId)
+                        println("shpping cart items post delete: ${_cartItems.value}")
+                        _cartItems.value = _cartItems.value.filterNot { it.id == item.id }.toList()
+                        println("Lista aggiornata dopo rimozione: ${_cartItems.value}")
+                        updateTotalAmount()
+
+                    }
+
+
+                }
 
             } catch (e: Exception) {
-                // Gestire l'errore
+                println()
             }
         }
-        updateTotalAmount()
     }
 
     private fun updateTotalAmount() {
         _totalAmount.value = _cartItems.value.sumOf { it.bookId.price * it.quantity }
-    }
-
-
-    private fun getUser(): UserId {
-        val userId = SessionManager.user?.id
-        println("UserId recuperato: $userId")
-        return UserId(userId ?: throw IllegalStateException("User not logged in"))
     }
 }

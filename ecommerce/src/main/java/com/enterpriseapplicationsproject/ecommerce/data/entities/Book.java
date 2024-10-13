@@ -1,7 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.data.entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -50,12 +49,15 @@ public class Book {
     private String edition;
 
     @Column(name = "FORMAT")
+    @Enumerated(EnumType.STRING)
     private BookFormat format;
 
     @Column(name = "GENRE")
+    @Enumerated(EnumType.STRING)
     private BookGenre genre;
 
     @Column(name = "LANGUAGE")
+    @Enumerated(EnumType.STRING)
     private BookLanguage language;
 
     @Column(name = "PUBLISHER")
@@ -64,8 +66,6 @@ public class Book {
     @Column(name = "AGE")
     private int age;
 
-    @NotNull
     @Column(name = "PUBLISH_DATE")
-    private LocalDate publishDate;
-
+    private Date publishDate;
 }

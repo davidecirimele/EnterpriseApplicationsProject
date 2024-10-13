@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end.ui.cart
 
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 
@@ -18,10 +19,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.asImageBitmap
 
 import com.example.ecommercefront_end.model.CartItem
 import com.example.ecommercefront_end.model.OrderItem
-
+import java.io.File
 
 
 @Composable
@@ -38,12 +40,15 @@ fun CartItem(
     ) {
         // Immagine del prodotto
         //FIXME : add image url
-        /*Image(
-            //painter = rememberAsyncImagePainter(model = item.book.imgUrl),
-            modifier = Modifier
-                .size(80.dp)
-                .padding(end = 16.dp)
+
+        /*val bitmap = BitmapFactory.decodeByteArray(item.bookId.cover, 0, item.bookId.cover.size)
+        Image(
+            bitmap = bitmap.asImageBitmap(),
+            contentDescription = "Product image",
+            modifier = Modifier.size(100.dp),
+            contentScale = androidx.compose.ui.layout.ContentScale.Crop
         )*/
+
 
         // Dettagli del prodotto
         Column(modifier = Modifier.weight(1f)) {

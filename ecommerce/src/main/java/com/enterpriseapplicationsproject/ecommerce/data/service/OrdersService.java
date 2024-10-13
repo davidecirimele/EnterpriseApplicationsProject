@@ -14,7 +14,7 @@ public interface OrdersService {
 
     List<OrderDto> getAllOrdersByUserId(UUID userId);
 
-    OrderDto setOrderStatusToCancelled(Long orderId);
+    OrderDto setOrderStatusToCancelled(Long orderId, UUID userId);
 
     List<OrderDto> getAllConfirmedOrdersByUserId(UUID userId);
 

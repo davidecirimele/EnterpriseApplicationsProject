@@ -1,13 +1,9 @@
 package com.enterpriseapplicationsproject.ecommerce.config.security;
 
-import com.enterpriseapplicationsproject.ecommerce.exception.InvalidJwtException;
-import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -124,15 +120,10 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token) {
-        try {
+
             Jwts.parser().setSigningKey(getSignInKey()).build().parseClaimsJws(token);
             return true;
 
-
-        }
-        catch (Exception e) {
-            throw new InvalidJwtException("Invalid token");
-        }
     }
 
     public boolean isTokenExpired(String token) {
@@ -144,16 +135,13 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        try {
+
             return Jwts.parser()
                     .setSigningKey(getSignInKey())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
 
-        } catch (Exception e) {
-            throw new InvalidJwtException("Invalid token");
-        }
     }
 
     private Key getSignInKey() {
