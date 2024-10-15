@@ -18,6 +18,7 @@ import com.example.ecommercefront_end.model.BookFormat
 import com.example.ecommercefront_end.model.BookGenre
 import com.example.ecommercefront_end.model.BookLanguage
 import com.example.ecommercefront_end.model.SaveAddress
+import com.example.ecommercefront_end.model.SaveBook
 
 import com.example.ecommercefront_end.model.UserId
 
@@ -304,8 +305,8 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                 }
             }
         }
-        if(!searchInCachedBooks()) {
-            Log.d("BookDebug", "No cached products found or matching filters, fetching from backend...")
+        if(searchInCachedBooks()<10) {
+            Log.d("BookDebug", "Too few cached products found, fetching from backend...")
             fetchFilteredBooks()
         }
     }
@@ -328,7 +329,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         }
     }
 
-    private fun searchInCachedBooks(): Boolean {
+    private fun searchInCachedBooks(): Int {
         if(cachedProducts.value.isNotEmpty()){
             Log.d("BookDebug", "Cached products found, applying filters...")
             _filteredProducts.value = cachedProducts.value.filter { book ->
@@ -353,9 +354,8 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
             }
             Log.d("BookDebug", "Filter values: ${filter.value}")
             Log.d("BookDebug", "Filtered products: ${_filteredProducts.value.size}")
-            return _filteredProducts.value.isNotEmpty()
         }
-        return false
+        return _filteredProducts.value.size
     }
 
     fun clearCache(){
@@ -367,6 +367,22 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         viewModelScope.launch {
             val book = _allProducts.value.find { it.id == id }
             _bookFlow.value = book
+        }
+    }
+
+    fun insertBook(book: SaveBook){
+        viewModelScope.launch {
+            try {
+                if (SessionManager.user == null) { //RICORDATI DI MODIFICARLO PER IL CONTROLLO ADMIN
+                    repository.insertBook(book)
+                    fetchAllProducts()
+                    Log.d("BookViewModel", "Book added: ${_allProducts.value}")
+                }
+                else
+                    Log.d("UserDebug", "User is null")
+            } catch (e: Exception) {
+                Log.d("UserDebug", "Error adding Book: $book")
+            }
         }
     }
 }

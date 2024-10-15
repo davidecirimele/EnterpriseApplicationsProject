@@ -5,6 +5,7 @@ import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.model.CartItemId
 import com.example.ecommercefront_end.model.QuantityCartItem
 import com.example.ecommercefront_end.model.SaveAddress
+import com.example.ecommercefront_end.model.SaveBook
 import com.example.ecommercefront_end.model.ShoppingCart
 import retrofit2.Response
 
@@ -20,7 +21,7 @@ import java.util.UUID
 interface BooksApiService {
 
     @POST("books/add")
-    suspend fun insertBook(insertBook: Book)
+    suspend fun insertBook(@Body book: SaveBook) : Response<Book>
 
     @GET("books/get/{idBook}")
     suspend fun getBook(@Path("idBook") idBook: Long) : Book

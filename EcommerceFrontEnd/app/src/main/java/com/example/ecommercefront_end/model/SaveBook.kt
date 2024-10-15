@@ -1,17 +1,14 @@
 package com.example.ecommercefront_end.model
 
 import com.google.gson.annotations.SerializedName
-import retrofit2.http.Multipart
-import java.io.File
 import java.time.LocalDate
 
-data class Book(
-    val id: Long,
+data class SaveBook(
     val title: String,
     val author: String,
 
     @SerializedName("isbn")
-    val ISBN: String, // Annotazione per mappare la proprietà "isbn"
+    val ISBN: String,
 
     val pages: Int,
     val edition: String,
@@ -20,10 +17,8 @@ data class Book(
     val language: BookLanguage,
     val publisher: String,
     val age: Int,
-    val publishDate: LocalDate, // Annotazione per mappare la proprietà "publish_date"
+    val publishDate: LocalDate,
     val weight: Double,
     val price: Double,
     val stock: Int,
-    //val image: ByteArray,
-
 )

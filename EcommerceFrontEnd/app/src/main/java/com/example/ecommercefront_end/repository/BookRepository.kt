@@ -4,12 +4,15 @@ import android.util.Log
 import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.model.SaveAddress
+import com.example.ecommercefront_end.model.SaveBook
 import com.example.ecommercefront_end.model.UserId
 import com.example.ecommercefront_end.network.BooksApiService
 
 import java.util.UUID
 
 class BookRepository(private val apiService : BooksApiService)  {
+
+    suspend fun insertBook(book: SaveBook) = apiService.insertBook(book)
 
     suspend fun getMaxPrice() = apiService.getMaxPrice()
 

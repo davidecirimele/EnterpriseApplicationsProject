@@ -6,6 +6,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.BookNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -109,12 +110,12 @@ public class BookController {
     }
 
     @PostMapping(consumes = "application/json", path = "/add")
-    @PreAuthorize("hasRole('ADMIN') and isAuthenticated()")
-    public ResponseEntity<BookDto> add(@RequestBody SaveBookDto bDto) {
-        BookDto b = booksService.save(bDto);
-        if (b == null)
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(b, HttpStatus.OK);
+    public ResponseEntity<BookDto> addBook(@Valid @RequestBody SaveBookDto book){
+        log.info("Sono nel cazzo di controller e questo è il DTO "+book);
+        BookDto savedBook = booksService.save(book);
+        if(savedBook == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
     }
 
     @DeleteMapping(consumes = "application/json", path = "/delete/{idBook}")

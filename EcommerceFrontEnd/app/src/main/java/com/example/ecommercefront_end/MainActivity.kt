@@ -75,6 +75,7 @@ import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.ui.user.AccountManagerScreen
 import com.example.ecommercefront_end.ui.user.AddressesScreen
 import com.example.ecommercefront_end.ui.admin.AdminHomeScreen
+import com.example.ecommercefront_end.ui.admin.InsertProductScreen
 import com.example.ecommercefront_end.ui.user.InsertAddressScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
 import com.example.ecommercefront_end.ui.user.UserAuthScreen
@@ -153,6 +154,10 @@ fun NavigationView(navController: NavHostController) {
                 book?.let {
                     BookDetailsScreen(book = it, cartRepository = CartRepository(RetrofitClient.cartApiService), navController)
                 } ?: Text("Libro non trovato")
+            }
+
+            composable("insert-product") {
+                InsertProductScreen(viewModel = bookViewModel, navController)
             }
 
             composable("cart") {
