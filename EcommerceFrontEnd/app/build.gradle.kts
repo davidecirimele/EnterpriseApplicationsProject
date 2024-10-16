@@ -1,4 +1,3 @@
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -77,17 +76,21 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose.android)
     implementation(libs.volley)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.compose.material)
+
     implementation(libs.androidx.activity)
     ksp(libs.androidx.room.compiler)
     implementation(kotlin("stdlib-jdk8"))
@@ -97,6 +100,12 @@ dependencies {
     implementation (libs.jwtdecode)
 
     implementation("com.google.android.material:material:1.4.0")
+
+    // Mantieni Material 2 per BottomNavigation
+    implementation("androidx.compose.material:material:1.4.3")
+
+    // Material 3
+    implementation("androidx.compose.material3:material3:1.1.1")
 }
 
 kotlin {

@@ -6,6 +6,7 @@ import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.DiscriminatorValue;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,10 +21,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-
-
 public class LoggedUserDetails implements UserDetails{
 
+    @Getter
     private UUID id;
     private String email;
     private String password;
@@ -50,6 +50,7 @@ public class LoggedUserDetails implements UserDetails{
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
     }
+
 
     @Override
     public String getPassword() {

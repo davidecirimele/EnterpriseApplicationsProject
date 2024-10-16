@@ -1,5 +1,7 @@
 package com.example.ecommercefront_end.ui.wishlist
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -53,20 +56,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.ecommercefront_end.SessionManager.user
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
+
 
 @Composable
 fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) {
     val wLists by viewModel.wishlists.collectAsState()
     val wListItems by viewModel.wishlistItems.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    val error by viewModel.error.collectAsState()
 
     // Gestione della selezione della wishlist
     val selectedWishlist = remember(wLists) {
@@ -77,19 +85,9 @@ fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) 
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
-    } else if (error != null) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = error.toString())
-        }
     } else {
         // Ricarica gli elementi della wishlist selezionata
-        LaunchedEffect(selectedWishlist.value) {
-            selectedWishlist.value?.let {
-                viewModel.loadWishlistItemsFromDB(it.id)
-            }
-        }
-
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
+             LazyColumn(modifier = Modifier.fillMaxSize()) {
             item {
                 WishlistsList(
                     wishlists = wLists,
@@ -118,51 +116,127 @@ fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) 
 
 
 @Composable
-fun AddWishlistDialog(onDismissRequest: () -> Unit, onAddWishlist: (String, Boolean, String) -> Unit) {
+fun AddWishlistDialog(
+    onDismissRequest: () -> Unit,
+    onAddWishlist: (String, Boolean) -> Unit,
+    onJoinWishlist: (String) -> Unit
+) {
+    var showCreateWishlist by remember { mutableStateOf(false) }
     var wishlistName by remember { mutableStateOf("") }
     var isPrivate by remember { mutableStateOf(false) }
-    var otherParam by remember { mutableStateOf("") }
 
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text("Crea una nuova lista") },
-        text = {
-            Column {
-                TextField(
-                    value = wishlistName,
-                    onValueChange = { wishlistName = it },
-                    label = { Text("Nome della lista") }
-                )
-                Row {
-                    Checkbox(
-                        checked = isPrivate,
-                        onCheckedChange = { isPrivate = it }
+    var tokenShared by remember { mutableStateOf("") }
+    var showJoinWishlist by remember { mutableStateOf(false) }
+
+    if (showCreateWishlist) {
+        // Dialogo per creare una nuova wishlist
+        AlertDialog(
+            onDismissRequest = { showCreateWishlist = false },
+            title = { Text("Crea una nuova lista" ,
+                modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally))
+            },
+            text = {
+                Column {
+                    TextField(
+                        value = wishlistName,
+                        onValueChange = { wishlistName = it },
+                        label = { Text("Nome della lista") }
                     )
-                    Text(text = "Privata", modifier = Modifier.align(Alignment.CenterVertically))
+                    Row {
+                        Checkbox(
+                            checked = isPrivate,
+                            onCheckedChange = { isPrivate = it }
+                        )
+                        Text("Privata", modifier = Modifier.align(Alignment.CenterVertically))
+                    }
                 }
-            }
-        },
-        confirmButton = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround // Centra i bottoni
-            ) {
-                Button(onClick = { onAddWishlist(wishlistName, isPrivate, otherParam) }) {
-                    Text("Crea")
+            },
+            confirmButton = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    Button(onClick = {
+                        onAddWishlist(wishlistName, isPrivate)
+                        showCreateWishlist = false
+                    }) {
+                        Text("Crea")
+                    }
+                    Button(onClick = { showCreateWishlist = false }) {
+                        Text("Annulla")
+                    }
                 }
-                Button(onClick = onDismissRequest) {
+            },
+            dismissButton = null
+        )
+    }else if(showJoinWishlist){
+        // Dialogo per unirsi alla wishlist di un amico
+        AlertDialog(
+            onDismissRequest = { showJoinWishlist = false },
+            title = { Text("Unisciti alla lista di un amico",
+                modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)
+            ) },
+            text = {
+                Column {
+                    TextField(
+                        value = tokenShared,
+                        onValueChange = { tokenShared = it },
+                        label = { Text("Inserisci il token ricevuto") }
+                    )
+                }
+            },
+            confirmButton = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    Button(onClick = {
+                        onJoinWishlist(tokenShared)
+                        showJoinWishlist = false
+                    }) {
+                        Text("Partecipa")
+                    }
+                    Button(onClick = { showJoinWishlist = false }) {
+                        Text("Annulla")
+                    }
+                }
+            },
+            dismissButton = null
+        )
+    }else {
+        // Dialogo con le opzioni
+        AlertDialog(
+            onDismissRequest = onDismissRequest,
+            title = { Text("Scegli un'opzione") },
+            text = {
+                Column {
+                    Button(onClick = { showCreateWishlist = true }) {
+                        Text("Crea una nuova lista")
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(onClick = { showJoinWishlist = true }) {
+                        Text("Unisciti alla lista di un amico")
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = onDismissRequest,
+                    modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)
+                ) {
                     Text("Annulla")
                 }
-            }
-        },
-        dismissButton = null // Non è più necessario
-        //... (altri parametri)
-    )
+            },
+            dismissButton = null
+        )
+    }
 }
 
 @Composable
 fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWishlistSelected: (Wishlist) -> Unit) {
-    var showAddWishlist by remember { mutableStateOf(false) }
+    var showAddWishlistMain by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
@@ -176,36 +250,43 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
-        IconButton(onClick = { showAddWishlist = true }) {
+        IconButton(onClick = { showAddWishlistMain = true }) {
             Icon(imageVector = Icons.Filled.AddCircleOutline, contentDescription = "Aggiungi Lista", tint = Color.Green)
         }
     }
-    if (showAddWishlist) {
+    if (showAddWishlistMain) {
         AddWishlistDialog(
-            onDismissRequest = { showAddWishlist = false },
-            onAddWishlist = { wishlistName, isPrivate, otherParam ->
-                viewModel.addWishlist(wishlistName, isPrivate, otherParam)// Crea la lista con più parametri
-                showAddWishlist = false
+            onDismissRequest = { showAddWishlistMain = false },
+            onAddWishlist = { wishlistName, isPrivate -> // wishlistName e isPrivate sono i parametri passati dal dialogo
+                viewModel.addWishlist(wishlistName, isPrivate)
+                showAddWishlistMain = false
+            },
+            onJoinWishlist = { token -> // token è il parametro passato dal dialogo
+                viewModel.joinWishlist(token)
+                showAddWishlistMain = false
             }
         )
     }
-
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
     ) {
-        items(wishlists) { wishlist ->
-            WishlistThumbnail(
+        items(
+            items = wishlists,
+            key = { item -> item.id } // Chiave a livello di items
+        ) { wishlist ->
+            WishlistThumbnail( // Rimuovi il secondo key qui
                 wishlist = wishlist,
-                onClick = { onWishlistSelected(wishlist) }
+                onClick = { onWishlistSelected(wishlist) },
+                userIsOwner = user?.id?.compareTo(wishlist.user?.id) == 0
             )
         }
     }
 }
 
 @Composable
-fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit) {
+fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit, userIsOwner: Boolean) {
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -213,7 +294,10 @@ fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit) {
             .height(70.dp) // Imposta l'altezza fissa per tutte le card
             .clickable { onClick() },
         shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor =
+            if (userIsOwner) Color.LightGray else Color.Cyan
+        ) // Colore di riempimento condizionale
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -226,7 +310,9 @@ fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit) {
                 text = wishlist.name,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    //.align(Alignment.CenterVertically)
             )
             Spacer(modifier = Modifier.height(4.dp))
             // Aggiungi eventuali altri dettagli della wishlist qui
@@ -243,179 +329,250 @@ fun WishlistDetails(
 ) {
     var isPrivate by remember { mutableStateOf(wishlist.privacySetting == "Private") }
     var showMenu by remember { mutableStateOf(false) } // Per gestire la visibilità del menu a comparsa
+    val userIsOwner = user?.id?.compareTo(wishlist.user?.id) == 0
 
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var itemToRemove by remember { mutableStateOf<WishlistItem?>(null) }
     var showRenameDialog by remember { mutableStateOf(false) }
     var newWishlistName by remember { mutableStateOf(wishlist.name) }
 
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
 
+    val tokenToShare by viewModel.tokenToShare.collectAsState()
+    val clipboardManager: ClipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        // Titolo della lista
-        Row (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ){
-            Text(
-                text = "Lista: ${wishlist.name}",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
+    // Ricarica gli elementi della wishlist selezionata
+    LaunchedEffect(key1 = wishlist.id) {
+        viewModel.loadWishlistItemsFromDB(wishlist.id)
+    }
 
-            // Menu a comparsa
-            Box{
-                IconButton(onClick = { showMenu = !showMenu }) {
-                    Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "Menu", tint = Color.Blue)
-                }
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Condividi") },
-                        onClick = {
-                            showMenu = false
-                            // Azione per condividere la wishlist
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Filled.Share,
-                                contentDescription = "Condividi",
-                                tint = Color.Blue
-                            )
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Rinomina") },
-                        onClick = {
-                            showMenu = false
-                            // Azione per rinominare la wishlist
-                            showRenameDialog = true
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Filled.Edit,
-                                contentDescription = "Rinomina",
-                                tint = Color.Blue
-                            )
-                        }
-                    )
-
-                    DropdownMenuItem(
-                        text = { Text("Elimina") },
-                        onClick = {
-                            showMenu = false
-                            // Azione per eliminare la wishlist
-                            showDeleteConfirmation = true
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = "Elimina",
-                                tint = Color.Red
-                            )
-                        }
-                    )
-                }
-            }
-            if (showDeleteConfirmation) {
-                AlertDialog(
-                    onDismissRequest = { showDeleteConfirmation = false },
-                    title = { Text("Elimina Wishlist") },
-                    text = { Text("Vuoi davvero eliminare la wishlist '${wishlist.name}'?") },
-                    confirmButton = {
-                        Button(onClick = {
-                            //onDeleteWishlist(wishlist) // Chiama il callback per eliminare la wishlist
-                            viewModel.removeWishlist(wishlist.id)
-                            showDeleteConfirmation = false
-                        }) {
-                            Text("Sì")
-                        }
-                    },
-                    dismissButton = {
-                        Button(onClick = { showDeleteConfirmation = false }) {
-                            Text("No")
-                        }
-                    }
-                )
-            }
-
-            // Dialogo di rinomina
-            if (showRenameDialog) {
-                AlertDialog(
-                    onDismissRequest = { showRenameDialog = false },
-                    title = { Text("Rinomina Wishlist") },
-                    text = {
-                        OutlinedTextField(
-                            value = newWishlistName,
-                            onValueChange = { newWishlistName = it },
-                            label = { Text("Nuovo nome") }
-                        )
-                    },
-                    confirmButton = {
-                        Button(onClick = {
-                            //onRenameWishlist(wishlist, newWishlistName) // Chiama il callback per rinominare la wishlist
-                            showRenameDialog = false
-                        }) {
-                            Text("Rinomina")
-                        }
-                    },
-                    dismissButton = {
-                        Button(onClick = { showRenameDialog = false }) {
-                            Text("Annulla")
-                        }
-                    }
-                )
-            }
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
         }
-        // Sezione Privacy
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Privacy text e bottone per modificare lo stato di privacy
-            Row(verticalAlignment = Alignment.CenterVertically) {
+    }
+    else {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Titolo della lista
+            Row (
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ){
                 Text(
-                    text = "Privacy: ",
-                    fontSize = 18.sp
+                    text = "Lista: ${wishlist.name}",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
                 )
-                Button(
-                    onClick = { isPrivate = !isPrivate },
-                    modifier = Modifier.height(36.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp)
-                ) {
-                    Icon(
-                        imageVector = if (isPrivate) Icons.Rounded.Lock else Icons.Rounded.LockOpen,
-                        contentDescription = "Cambia Privacy",
-                        modifier = Modifier.size(ButtonDefaults.IconSize)
+
+                // Menu a comparsa
+                Box{
+                    IconButton(onClick = { showMenu = !showMenu }) {
+                        Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "Menu", tint = Color.Blue)
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                    if(userIsOwner){DropdownMenuItem(
+                            text = { Text("Condividi") },
+                            onClick = {
+                                showMenu = false
+                                // Azione per condividere la wishlist
+                                val token = wishlist.wishlistToken
+                                clipboardManager.setText(AnnotatedString(token))
+                                Log.d("WishlistDetails", "Token da copiare: $token")
+                                Toast.makeText(context, "Token copiato negli appunti!", Toast.LENGTH_SHORT).show()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Filled.Share,
+                                    contentDescription = "Condividi",
+                                    tint = Color.Blue
+                                )
+                            }
+                        )
+                    }
+                        DropdownMenuItem(
+                            text = { Text("Rinomina") },
+                            onClick = {
+                                showMenu = false
+                                // Azione per rinominare la wishlist
+                                showRenameDialog = true
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Filled.Edit,
+                                    contentDescription = "Rinomina",
+                                    tint = Color.Blue
+                                )
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text(if (userIsOwner) "Elimina" else "Esci") },
+                            onClick = {
+                                showMenu = false
+                                // Azione per eliminare la wishlist
+                                showDeleteConfirmation = true
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = "Elimina",
+                                    tint = Color.Red
+                                )
+                            }
+                        )
+
+                    }
+                }
+                if (showDeleteConfirmation) {
+                    AlertDialog(
+                        onDismissRequest = { showDeleteConfirmation = false },
+                        title = { Text(if (userIsOwner) "Elimina Wishlist" else "Esci") },
+                        text = { Text("Vuoi davvero uscire dalla wishlist '${wishlist.name} ${if (!userIsOwner) "di" else "da"} ${wishlist.user?.firstName}'?") },
+                        confirmButton = {
+                            Button(onClick = {
+                                //onDeleteWishlist(wishlist) // Chiama il callback per eliminare la wishlist
+                                if(userIsOwner){
+                                    viewModel.deleteWishlist(wishlist.id)
+                                }
+                                else{
+                                    viewModel.unshareWishlist(wishlist)
+                                }
+                                showDeleteConfirmation = false
+                            }) {
+                                Text("Sì")
+                            }
+                        },
+                        dismissButton = {
+                            Button(onClick = { showDeleteConfirmation = false }) {
+                                Text("No")
+                            }
+                        }
                     )
-                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                    Text(if (isPrivate) "Private" else "Public")
+                }
+
+                // Dialogo di rinomina
+                if (showRenameDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showRenameDialog = false },
+                        title = { Text("Rinomina Wishlist") },
+                        text = {
+                            OutlinedTextField(
+                                value = newWishlistName,
+                                onValueChange = { newWishlistName = it },
+                                label = { Text("Nuovo nome") }
+                            )
+                        },
+                        confirmButton = {
+                            Button(onClick = {
+                                viewModel.updateWishlist(wishlist.id, newWishlistName, "", null) // Chiama il callback per rinominare la wishlist
+                                showRenameDialog = false
+                            }) {
+                                Text("Rinomina")
+                            }
+                        },
+                        dismissButton = {
+                            Button(onClick = { showRenameDialog = false }) {
+                                Text("Annulla")
+                            }
+                        }
+                    )
                 }
             }
 
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Column {
-            items.forEach { item ->
-                WishlistItemCard(wishlistItem = item,
+            //Proprietario
+            if (!userIsOwner){
+                Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Di: ${wishlist.user?.firstName} ${wishlist.user?.lastName}",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+            // Sezione Privacy
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Privacy text e bottone per modificare lo stato di privacy
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Privacy: ",
+                        fontSize = 18.sp
+                    )
+                    Button(
+                        enabled = userIsOwner,
+                        onClick = {
+                            isPrivate = !isPrivate
+                            if (isPrivate)
+                                viewModel.updateWishlist(wishlist.id, "", "Private", null)
+                            else
+                                viewModel.updateWishlist(wishlist.id, "", "Public", null)
+                        },
+                        modifier = Modifier.height(36.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isPrivate) Icons.Rounded.Lock else Icons.Rounded.LockOpen,
+                            contentDescription = "Cambia Privacy",
+                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                        )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text(if (isPrivate) "Private" else "Public")
+                    }
+                }
+
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            if (!items.isNullOrEmpty()) {
+                Column {
+                    items.forEach { item ->
+
+                        WishlistItemCard(wishlistItem = item,
                             navController = navController, onRemoveClick = {
-                    viewModel.removeWishlistItem(item.id)
-                })
+                                viewModel.deleteWishlistItem(item.id)
+                            },
+                            userIsOwner = userIsOwner)
+                    }
+                }
+            }
+            else {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = "Errore durante il caricamento degli elementi: ${error.toString()}")
+                }
             }
         }
     }
+    /*
+    if (tokenToShare.isNotEmpty()) { // TO DO : Aggiungere un controllo per verificare se il token è già stato copiato
+        clipboardManager.setText(AnnotatedString(tokenToShare))
+        Toast.makeText(context, "Token copiato negli appunti!", Toast.LENGTH_SHORT).show()
+        // Pulisci il tokenToShare dopo che è stato copiato
+        //viewModel.clearToken()
+    }*/
 }
 
 @Composable
-fun WishlistItemCard(wishlistItem: WishlistItem, navController: NavController,onRemoveClick: () -> Unit) {
+fun WishlistItemCard(wishlistItem: WishlistItem, navController: NavController,onRemoveClick: () -> Unit, userIsOwner: Boolean) {
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -455,8 +612,8 @@ fun WishlistItemCard(wishlistItem: WishlistItem, navController: NavController,on
                 )
             }
 
-            IconButton(onClick = onRemoveClick) {
-                Icon(imageVector = Icons.Rounded.Delete, contentDescription = "Rimuovi elemento",tint = Color.Red)
+            IconButton(onClick = onRemoveClick, enabled = userIsOwner) {
+                Icon(imageVector = Icons.Rounded.Delete, contentDescription = "Rimuovi elemento",tint = if (userIsOwner) Color.Red  else Color.Gray)
             }
         }
     }
