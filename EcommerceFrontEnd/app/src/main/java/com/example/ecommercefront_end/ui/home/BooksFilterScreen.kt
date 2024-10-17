@@ -120,10 +120,10 @@ fun BooksFilterScreen(viewModel: BookViewModel, onDismiss: () -> Unit){
 
                     var genres = emptyArray<String>()
 
-                    BookGenre.entries.forEach{
+                    /*BookGenre.entries.forEach{
                         genre ->genres.
                     }
-                    ChoiceSelector(choiches = BookGenre.entries, selectedChoice = "All", onChoiceSelected = {})
+                    ChoiceSelector(choiches = BookGenre.entries, selectedChoice = "All", onChoiceSelected = {})*/
 
                     Spacer(modifier = Modifier.height(10.dp))
 

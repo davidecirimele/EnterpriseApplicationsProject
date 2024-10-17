@@ -1,6 +1,6 @@
 package com.example.ecommercefront_end
 
-import android.annotation.SuppressLint
+import CheckoutViewModel
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -61,17 +61,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -87,10 +78,13 @@ import com.example.ecommercefront_end.repository.AddressRepository
 import com.example.ecommercefront_end.repository.AuthRepository
 import com.example.ecommercefront_end.repository.BookRepository
 import com.example.ecommercefront_end.repository.CartRepository
+import com.example.ecommercefront_end.repository.CheckoutRepository
 import com.example.ecommercefront_end.repository.HomeRepository
 import com.example.ecommercefront_end.repository.WishlistRepository
 import com.example.ecommercefront_end.ui.user.EditAddressScreen
 import com.example.ecommercefront_end.ui.cart.CartScreen
+import com.example.ecommercefront_end.ui.checkout.CheckoutAddressScreen
+import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
 import com.example.ecommercefront_end.ui.home.BookDetailsScreen
 import com.example.ecommercefront_end.ui.home.BooksFilterScreen
 import com.example.ecommercefront_end.ui.home.HomeScreen
@@ -109,7 +103,6 @@ import com.example.ecommercefront_end.viewmodels.HomeViewModel
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
 import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
-import androidx.compose.ui.Alignment
 import kotlinx.coroutines.async
 
 
@@ -129,7 +122,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
 
+    override fun onResume() {
+        super.onResume()
+        SessionManager.init(this)
     }
 }
 
@@ -145,8 +142,10 @@ fun NavigationView(navController: NavHostController) {
     val addressViewModel = remember { AddressViewModel(repository = AddressRepository(RetrofitClient.addressApiService)) }
     val bookViewModel = remember { BookViewModel(repository = BookRepository(RetrofitClient.booksApiService)) }
 
+    val checkoutViewModel = remember { CheckoutViewModel( CheckoutRepository( RetrofitClient.checkoutApiService)) }
+
     Scaffold(
-        topBar = { TopBar(navController) },
+        topBar = { TopBar(navController, homeViewModel) },
         bottomBar = { BottomBar(selectedIndex, navController) }
     ) { innerPadding ->
         NavHost(
@@ -156,7 +155,7 @@ fun NavigationView(navController: NavHostController) {
         ) {
             composable("home") {
                 selectedIndex.value = 0
-                HomeScreen(homeViewModel = homeViewModel, navController)
+                HomeScreen(homeViewModel = homeViewModel, bookViewModel = bookViewModel,navController)
             }
 
             composable("/books_details/{idBook}", arguments = listOf(navArgument("idBook") { type = NavType.LongType })) { backStackEntry ->
@@ -177,7 +176,9 @@ fun NavigationView(navController: NavHostController) {
 
             composable("cart") {
                 selectedIndex.value = 2
-                CartScreen(viewModel = cartViewModel, navController = navController, onCheckoutClick = { /* Add your action here */ })
+                CartScreen(viewModel = cartViewModel, onCheckoutClick = {
+                    navController.navigate("checkout")
+                }, navController)
 
             }
             composable("wishlist") {
@@ -247,15 +248,26 @@ fun NavigationView(navController: NavHostController) {
                 }
             }
 
+            composable("checkout") {
+                CheckoutScreen(
+                    viewModel = checkoutViewModel,
+                    onConfirmOrder = {
+                        // Implementa la logica per confermare l'ordine
+                    }, navController = navController)
+            }
+
+            composable("checkout-addresses") {
+              CheckoutAddressScreen(viewModel = checkoutViewModel, navController = navController)
+            }
+
         }
 
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navHostController: NavHostController) {
+fun TopBar(navHostController: NavHostController, homeViewModel: HomeViewModel) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
@@ -265,7 +277,7 @@ fun TopBar(navHostController: NavHostController) {
     TopAppBar(
         title = {
             if (isSearchVisible) {
-                SearchBar()
+                SearchBar(homeViewModel)
             } else {
                 Text(stringResource(R.string.app_name))
             }
@@ -277,13 +289,6 @@ fun TopBar(navHostController: NavHostController) {
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.back)
                     )
-                }
-            }
-        },
-        actions = {
-            if (isSearchVisible) {
-                IconButton(onClick = { /* Handle settings click */ }) {
-                    Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings))
                 }
             }
         },
@@ -324,24 +329,8 @@ fun SearchBar(homeViewModel: HomeViewModel) {
 
 @Composable
 fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostController) {
-    BottomNavigation(
-        backgroundColor = MaterialTheme.colorScheme.surface,
-        modifier = Modifier
-            .height(67.dp)
-            .drawBehind {
-                val borderSize = 1.dp.toPx()
-                val borderColor = Color.White.toArgb()
-
-                drawLine(
-                    color = Color(borderColor),
-                    start = Offset(0f, 0f),
-                    end = Offset(size.width, 0f),
-                    strokeWidth = borderSize
-                )
-            }
-            )
-    {
-        BottomNavigationItem(
+    NavigationBar {
+        NavigationBarItem(
             selected = selectedIndex.value == 0,
             onClick = {
                 selectedIndex.value = 0
@@ -355,30 +344,16 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             },
             icon = {
                 Icon(
-                    modifier = if (selectedIndex.value == 0) { // Applica l'ombra solo se selezionato
-                        Modifier.shadow(
-                            elevation = 4.dp,
-                            shape = CutCornerShape(topStart = 8.dp, topEnd = 8.dp),
-                            spotColor = MaterialTheme.colorScheme.primary
-                        )
-                    } else {
-                        Modifier
-                    },
-                    imageVector = Icons.Filled.Home,
-                    contentDescription = stringResource(R.string.home),
-
+                    Icons.Filled.Home,
+                    contentDescription = stringResource(R.string.home)
                 )
-            },
-            selectedContentColor = MaterialTheme.colorScheme.primary,
-            unselectedContentColor = MaterialTheme.colorScheme.onSurface // Centra verticalmente
+            }
         )
-        // Ripeti per gli altri elementi della Navigation Bar
-        // ...
-        BottomNavigationItem(
+        NavigationBarItem(
             selected = selectedIndex.value == 1,
             onClick = {
                 selectedIndex.value = 1
-                if (SessionManager.user == null)
+                if(SessionManager.user == null)
                     navHostController.navigate("userAuth") {
                         popUpTo(navHostController.graph.startDestinationId) {
                             saveState = true
@@ -386,7 +361,7 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
                         launchSingleTop = true
                         restoreState = true
                     }
-                else {
+                else
                     navHostController.navigate("account-manager") {
                         popUpTo(navHostController.graph.startDestinationId) {
                             saveState = true
@@ -394,27 +369,16 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
                         launchSingleTop = true
                         restoreState = true
                     }
-                }
-            },
-            icon = {Icon(
-                modifier = if (selectedIndex.value == 1) { // Applica l'ombra solo se selezionato
-                    Modifier.shadow(
-                        elevation = 4.dp,
-                        shape = CutCornerShape(topStart = 8.dp, topEnd = 8.dp),
-                        spotColor = MaterialTheme.colorScheme.primary
-                    )
-                } else {
-                    Modifier
-                },
-                imageVector = Icons.Filled.AccountCircle,
-                contentDescription = stringResource(R.string.user),
 
-            )
             },
-            selectedContentColor = MaterialTheme.colorScheme.primary,
-            unselectedContentColor = MaterialTheme.colorScheme.onSurface
+            icon = {
+                Icon(
+                    Icons.Filled.AccountCircle,
+                    contentDescription = stringResource(R.string.user)
+                )
+            }
         )
-        BottomNavigationItem(
+        NavigationBarItem(
             selected = selectedIndex.value == 2,
             onClick = {
                 selectedIndex.value = 2
@@ -428,25 +392,12 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             },
             icon = {
                 Icon(
-                    modifier = if (selectedIndex.value == 2) { // Applica l'ombra solo se selezionato
-                        Modifier.shadow(
-                            elevation = 4.dp,
-                            shape = CutCornerShape(topStart = 8.dp, topEnd = 8.dp),
-                            spotColor = MaterialTheme.colorScheme.primary
-
-                        )
-                    } else {
-                        Modifier
-                    },
-                    imageVector = Icons.Filled.ShoppingCart,
-                    contentDescription = stringResource(R.string.cart),
-
+                    Icons.Filled.ShoppingCart,
+                    contentDescription = stringResource(R.string.cart)
                 )
-            },
-            selectedContentColor = MaterialTheme.colorScheme.primary,
-            unselectedContentColor = MaterialTheme.colorScheme.onSurface
+            }
         )
-        BottomNavigationItem(
+        NavigationBarItem(
             selected = selectedIndex.value == 3,
             onClick = {
                 selectedIndex.value = 3
@@ -460,28 +411,17 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             },
             icon = {
                 Icon(
-                    modifier = if (selectedIndex.value == 3) { // Applica l'ombra solo se selezionato
-                        Modifier.shadow(
-                            elevation = 4.dp,
-                            shape = CutCornerShape(topStart = 8.dp, topEnd = 8.dp),
-                            spotColor = MaterialTheme.colorScheme.primary
-                        )
-                    } else {
-                        Modifier
-                    },
-                    imageVector = Icons.Filled.Favorite,
+                    Icons.Filled.Favorite,
                     contentDescription = stringResource(R.string.favorite)
-
                 )
-            },
-            selectedContentColor = MaterialTheme.colorScheme.primary,
-            unselectedContentColor = MaterialTheme.colorScheme.onSurface
+            }
         )
     }
 }
 
+
 @Composable
-fun HomePage() {
+fun HomePage() {/*
     val navHostController = rememberNavController()
     val selectedIndex = remember { mutableIntStateOf(0) }
     Scaffold(topBar = { TopBar(navHostController) },
@@ -492,7 +432,7 @@ fun HomePage() {
         Box(modifier = Modifier.padding(it)) {
             NavigationView(navController = navHostController)
         }
-    }
+    }*/
 }
 @Composable
 fun AddToCartFloatingButton(onClick: () -> Unit) {

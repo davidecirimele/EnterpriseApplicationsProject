@@ -72,6 +72,8 @@ fun HomeScreen(homeViewModel: HomeViewModel, bookViewModel: BookViewModel, navCo
     val gridProducts = remember(products) { products.drop(5) } // Libri per la griglia
 
 
+
+
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
