@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.example.ecommercefront_end.viewmodels.HomeViewModel
+//import com.example.ecommercefront_end.viewmodels.HomeViewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,7 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.ecommercefront_end.SessionManager
 import java.time.format.DateTimeFormatter
 import com.example.ecommercefront_end.model.Book
@@ -47,7 +47,7 @@ import com.example.ecommercefront_end.repository.CartRepository
 import kotlinx.coroutines.launch
 
 @Composable
-fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController: NavController) {
+fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController: NavHostController) {
     var selectedQuantity by remember { mutableStateOf(1) }
     var shippingAddress by remember { mutableStateOf("Via Roma 1") }
 
@@ -399,11 +399,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
 
                         )
                         Text(
-                            text = if (book.age != null) {
-                                "${book.age}"
-                            }else {
-                                "--" // O un altro messaggio di default
-                            },
+                            text = "${book.age}",
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -420,11 +416,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
 
                         )
                         Text(
-                            text = if (book.publishDate != null) {
-                                book.publishDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                            } else {
-                                "--" // O un altro messaggio di default
-                            },
+                            text = book.publishDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -441,11 +433,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
 
                         )
                         Text(
-                            if (book.weight != null) {
-                                "${book.weight} kg"
-                            } else {
-                                " --" // O un altro messaggio di default
-                            },
+                            text = "${book.weight} kg",
                             modifier = Modifier.weight(1f)
                         )
                     }

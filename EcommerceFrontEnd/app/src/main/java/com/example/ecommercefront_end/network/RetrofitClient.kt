@@ -17,7 +17,7 @@ object RetrofitClient {
 
     private const val SAMUELES_URL = "https://192.168.1.54:8081/api/v1/" //URL di Samuele S
 
-    private const val DAVIDES_URL = "https://192.168.1.4:8080/api/v1/"
+    private const val DAVIDES_URL = "https://10.0.2.2:8080/api/v1/"
 
     private val client: OkHttpClient by lazy {
         val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
@@ -55,7 +55,7 @@ object RetrofitClient {
 
     val retrofit: Retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(DAVIDES_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create(
                 GsonBuilder()

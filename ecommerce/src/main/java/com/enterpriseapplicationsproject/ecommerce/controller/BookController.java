@@ -6,6 +6,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.BookNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -36,8 +38,9 @@ public class BookController {
         return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
-    @GetMapping("/get/filter")
+    @PostMapping("/get/filter")
     public ResponseEntity<List<Book>> filterBooks(@RequestBody BookSpecification.Filter filter) {
+        log.info("Received request for books/get/filter -> "+filter);
         List<Book> filteredBooks = booksService.getFilteredBooks(filter);
         return ResponseEntity.ok(filteredBooks);
     }
@@ -78,6 +81,24 @@ public class BookController {
         return ResponseEntity.ok(minPages);
     }
 
+    @GetMapping("/get/max-weight")
+    public ResponseEntity<Double> getMaxWeight() {
+        Double maxWeight = booksService.getMaxBookWeight();
+        return ResponseEntity.ok(maxWeight);
+    }
+
+    @GetMapping("/get/min-weight")
+    public ResponseEntity<Double> getMinWeight() {
+        Double minWeight = booksService.getMinBookWeight();
+        return ResponseEntity.ok(minWeight);
+    }
+
+    @GetMapping("/get/min-publication-date")
+    public ResponseEntity<LocalDate> getMinPublicationDate() {
+        LocalDate minPublicationDate = booksService.getMinPublicationYear();
+        return ResponseEntity.ok(minPublicationDate);
+    }
+
     // da testare se consumes va bene, dato che ha un corpo nella richiesta
     @GetMapping(consumes = "application/json", path = "/get/{idBook}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -89,12 +110,12 @@ public class BookController {
     }
 
     @PostMapping(consumes = "application/json", path = "/add")
-    @PreAuthorize("hasRole('ADMIN') and isAuthenticated()")
-    public ResponseEntity<BookDto> add(@RequestBody SaveBookDto bDto) {
-        BookDto b = booksService.save(bDto);
-        if (b == null)
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(b, HttpStatus.OK);
+    public ResponseEntity<BookDto> addBook(@Valid @RequestBody SaveBookDto book){
+        log.info("Sono nel cazzo di controller e questo è il DTO "+book);
+        BookDto savedBook = booksService.save(book);
+        if(savedBook == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
     }
 
     @DeleteMapping(consumes = "application/json", path = "/delete/{idBook}")

@@ -26,10 +26,6 @@ public class Book {
     private Double weight;
 
     @Basic(optional = false)
-    @Column(name = "INSERT_DATE")
-    private LocalDate insertDate;
-
-    @Basic(optional = false)
     @Column(name = "PRICE")
     private Double price;
 
@@ -55,22 +51,21 @@ public class Book {
     @Column(name = "FORMAT")
     @Enumerated(EnumType.STRING)
     private BookFormat format;
+
     @Column(name = "GENRE")
     @Enumerated(EnumType.STRING)
     private BookGenre genre;
+
     @Column(name = "LANGUAGE")
     @Enumerated(EnumType.STRING)
     private BookLanguage language;
 
     @Column(name = "PUBLISHER")
     private String publisher;
+
     @Column(name = "AGE")
     private int age;
-    @Column(name = "PUBLISH_DATE")
-    private Date publishDate;
 
-    @PrePersist
-    protected void onCreate() {
-        this.insertDate = LocalDate.now();
-    }
+    @Column(name = "PUBLISH_DATE")
+    private LocalDate publishDate;
 }

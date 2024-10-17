@@ -1,5 +1,10 @@
 package com.example.ecommercefront_end.model;
 
+import static java.util.Collections.emptyList;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public enum BookGenre {
     FANTASY,
     SCIENCE_FICTION,
@@ -13,4 +18,7 @@ public enum BookGenre {
     HISTORY,
     CHILDREN,
     YOUNG_ADULT
+
 }
+
+

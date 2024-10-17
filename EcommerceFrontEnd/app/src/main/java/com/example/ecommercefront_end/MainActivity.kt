@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -78,19 +79,19 @@ import com.example.ecommercefront_end.repository.AddressRepository
 import com.example.ecommercefront_end.repository.AuthRepository
 import com.example.ecommercefront_end.repository.BookRepository
 import com.example.ecommercefront_end.repository.CartRepository
-import com.example.ecommercefront_end.repository.CheckoutRepository
 import com.example.ecommercefront_end.repository.HomeRepository
 import com.example.ecommercefront_end.repository.WishlistRepository
 import com.example.ecommercefront_end.ui.user.EditAddressScreen
 import com.example.ecommercefront_end.ui.cart.CartScreen
-import com.example.ecommercefront_end.ui.checkout.CheckoutAddressScreen
-import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
 import com.example.ecommercefront_end.ui.home.BookDetailsScreen
 import com.example.ecommercefront_end.ui.home.BooksFilterScreen
+import com.example.ecommercefront_end.ui.home.FilteredBooksScreen
 import com.example.ecommercefront_end.ui.home.HomeScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.ui.user.AccountManagerScreen
 import com.example.ecommercefront_end.ui.user.AddressesScreen
+import com.example.ecommercefront_end.ui.admin.AdminHomeScreen
+import com.example.ecommercefront_end.ui.admin.InsertProductScreen
 import com.example.ecommercefront_end.ui.user.InsertAddressScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
 import com.example.ecommercefront_end.ui.user.UserAuthScreen
@@ -136,7 +137,7 @@ fun NavigationView(navController: NavHostController) {
     val selectedIndex = remember { mutableIntStateOf(0) }
 
     // Usa remember per mantenere i ViewModel
-    val homeViewModel = remember { HomeViewModel(repository = HomeRepository(RetrofitClient.booksApiService)) }
+    //val homeViewModel = remember { HomeViewModel(repository = HomeRepository(RetrofitClient.booksApiService)) }
     val cartViewModel = remember { CartViewModel(repository = CartRepository(RetrofitClient.cartApiService)) }
     val accountViewModel = remember { AccountViewModel(repository = AccountRepository(RetrofitClient.userApiService)) }
     val addressViewModel = remember { AddressViewModel(repository = AddressRepository(RetrofitClient.addressApiService)) }
@@ -145,7 +146,7 @@ fun NavigationView(navController: NavHostController) {
     val checkoutViewModel = remember { CheckoutViewModel( CheckoutRepository( RetrofitClient.checkoutApiService)) }
 
     Scaffold(
-        topBar = { TopBar(navController, homeViewModel) },
+        topBar = { TopBar(navController, bookViewModel) },
         bottomBar = { BottomBar(selectedIndex, navController) }
     ) { innerPadding ->
         NavHost(
@@ -155,7 +156,12 @@ fun NavigationView(navController: NavHostController) {
         ) {
             composable("home") {
                 selectedIndex.value = 0
-                HomeScreen(homeViewModel = homeViewModel, bookViewModel = bookViewModel,navController)
+                HomeScreen(bookViewModel = bookViewModel,navController)
+            }
+
+            composable("admin-home") {
+                selectedIndex.value = 0
+                AdminHomeScreen(bookViewModel = bookViewModel, navHostController = navController)
             }
 
             composable("/books_details/{idBook}", arguments = listOf(navArgument("idBook") { type = NavType.LongType })) { backStackEntry ->
@@ -163,15 +169,19 @@ fun NavigationView(navController: NavHostController) {
 
                 // Carica il libro corrispondente all'id
                 LaunchedEffect(idBook) {
-                    homeViewModel.loadBook(idBook)
+                    bookViewModel.loadBook(idBook)
                 }
 
                 // Osserva i cambiamenti del libro
-                val book by homeViewModel.bookFlow.collectAsState()
+                val book by bookViewModel.bookFlow.collectAsState()
 
                 book?.let {
-                    BookDetailsScreen(book = it, cartRepository = CartRepository(RetrofitClient.cartApiService), navController = navController)
+                    BookDetailsScreen(book = it, cartRepository = CartRepository(RetrofitClient.cartApiService), navController)
                 } ?: Text("Libro non trovato")
+            }
+
+            composable("insert-product") {
+                InsertProductScreen(viewModel = bookViewModel, navController)
             }
 
             composable("cart") {
@@ -221,6 +231,11 @@ fun NavigationView(navController: NavHostController) {
                     navHostController = navController)
             }
 
+            composable("filtered-books") {
+                FilteredBooksScreen(
+                    bookViewModel = bookViewModel, navController = navController)
+            }
+
             composable("addresses") {
 
                 LaunchedEffect(Unit) {
@@ -267,17 +282,18 @@ fun NavigationView(navController: NavHostController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navHostController: NavHostController, homeViewModel: HomeViewModel) {
+fun TopBar(navHostController: NavHostController, bookViewModel: BookViewModel) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
-    val isSearchVisible = currentRoute == "home"
+    val isSearchVisible = currentRoute == "home" || currentRoute == "filtered-books" || currentRoute == "admin-home"
+    var filterOptions by remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
 
     TopAppBar(
         title = {
             if (isSearchVisible) {
-                SearchBar(homeViewModel)
+                SearchBar(navHostController, filterOptions,{ newValue -> filterOptions = newValue } , bookViewModel, currentRoute)
             } else {
                 Text(stringResource(R.string.app_name))
             }
@@ -302,14 +318,43 @@ fun TopBar(navHostController: NavHostController, homeViewModel: HomeViewModel) {
             actionIconContentColor = colorScheme.onPrimary // Usa il colore onPrimary del tema
         )
     )
+
+    if(filterOptions) {
+        BooksFilterScreen(
+            viewModel = bookViewModel,
+            navController = navHostController,
+            currentRoute = currentRoute,
+            onDismiss = {
+                filterOptions = false
+            })
+    }
 }
 
 @Composable
-fun SearchBar(homeViewModel: HomeViewModel) {
+fun SearchBar(navHostController: NavHostController, filterOptions: Boolean, onFilterOptionsChange: (Boolean) -> Unit, bookViewModel: BookViewModel, currentRoute: String?) {
     var searchValue by remember { mutableStateOf("") }
 
     Row(modifier = Modifier.fillMaxWidth()) {
-        IconButton(modifier = Modifier.align(Alignment.CenterVertically),onClick = { homeViewModel.triggerShowFilterOptions()}) {
+        TextField(
+            value = searchValue,
+            onValueChange = { searchValue = it;
+                if(searchValue == "" && currentRoute == "filtered-books"){
+                    navHostController.popBackStack()
+                }
+                bookViewModel.updateFilter(title = it, author = it, publisher = it);
+                bookViewModel.searchBooks(navHostController, currentRoute)},
+            label = { Text("Search by Title, Author or Publisher") },
+            shape = RoundedCornerShape(16.dp),
+            singleLine = true,
+            modifier = Modifier.widthIn(if (currentRoute == "home") 320.dp else 280.dp)
+        )
+
+        IconButton(modifier = Modifier.align(Alignment.CenterVertically),onClick = {
+            if(!filterOptions)
+                onFilterOptionsChange(true)
+            else
+                onFilterOptionsChange(false)
+        }) {
             Icon(
                 Icons.Filled.FilterAlt,
                 contentDescription = "Filter Books",
@@ -334,7 +379,7 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             selected = selectedIndex.value == 0,
             onClick = {
                 selectedIndex.value = 0
-                navHostController.navigate("home") {
+                navHostController.navigate("admin-home") {
                     popUpTo(navHostController.graph.startDestinationId) {
                         saveState = true
                     }
@@ -420,20 +465,7 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
 }
 
 
-@Composable
-fun HomePage() {/*
-    val navHostController = rememberNavController()
-    val selectedIndex = remember { mutableIntStateOf(0) }
-    Scaffold(topBar = { TopBar(navHostController) },
-        bottomBar = { BottomBar(selectedIndex, navHostController) },
-        floatingActionButton = { AddToCartFloatingButton { /* Add your action here */ } },
-        floatingActionButtonPosition = FabPosition.End
-    ) {
-        Box(modifier = Modifier.padding(it)) {
-            NavigationView(navController = navHostController)
-        }
-    }*/
-}
+
 @Composable
 fun AddToCartFloatingButton(onClick: () -> Unit) {
     FloatingActionButton(onClick = onClick) {

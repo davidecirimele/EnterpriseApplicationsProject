@@ -49,6 +49,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.jackson.core)
+    implementation (libs.jackson.annotations)
     implementation ("com.squareup.okhttp3:logging-interceptor:4.10.0")
     implementation("io.ktor:ktor-client-core:2.3.4")
     implementation("io.ktor:ktor-client-cio:2.3.4")
