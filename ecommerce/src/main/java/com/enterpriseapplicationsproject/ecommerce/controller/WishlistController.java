@@ -89,7 +89,20 @@ public class WishlistController {
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
-    //To test
+    @PostMapping(path = "/share")
+    @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
+    public ResponseEntity<Map <String,String> > shareWishlist(@RequestBody SharedWishlistRequest request) {
+        // Estrarre i dettagli dell'utente loggato
+        LoggedUserDetails userDetails = (LoggedUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        // Generare il token JWT che include le informazioni della wishlist
+        String wishlistSharedToken = jwtService.generateSharedWishlistToken(userDetails, request.getWishlistId(), 1);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("token", wishlistSharedToken); // Incapsula il token in una mappa
+
+        System.out.println("Generated wToken: " + wishlistSharedToken);
+        return ResponseEntity.ok(response);
 
     //TO test
     @PostMapping(path = "/join/{idUser}/{token}")
@@ -101,6 +114,8 @@ public class WishlistController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND); // meglio farlo nel service e gestire l'eccezione con l'handler
     }
+
+    //TO DOs
 
     //TO DO
     @PostMapping(path = "/unshare/{idUser}")
@@ -123,6 +138,7 @@ public class WishlistController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
+
 
 
     @DeleteMapping(path = "/delete/{idWishlist}")

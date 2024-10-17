@@ -1,6 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.config;
 
 import com.enterpriseapplicationsproject.ecommerce.dto.ServiceError;
+import com.enterpriseapplicationsproject.ecommerce.exception.AddressNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -31,24 +32,48 @@ public class ExceptionHandlerFilter  extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             filterChain.doFilter(request, response);
-        } catch (JwtException e) {
-            int status = HttpStatus.UNAUTHORIZED.value();
-            String message = "Token not valid";
+        } catch (Exception e) {
+            if (e instanceof JwtException || e instanceof AuthenticationException) {
 
-            ServiceError error = new ServiceError(
-                    status,
-                    new Date(),
-                    request.getRequestURI(),
-                    message
-            );
 
-            response.setStatus(status);
-            response.setContentType("application/json");
-            String json = objectMapper.writeValueAsString(error);
-            response.getWriter().write(json);
-            response.getWriter().flush();
+                int status = HttpStatus.UNAUTHORIZED.value();
+                String message = "Token not valid";
+
+                ServiceError error = new ServiceError(
+                        status,
+                        new Date(),
+                        request.getRequestURI(),
+                        message
+                );
+
+                response.setStatus(status);
+                response.setContentType("application/json");
+                String json = objectMapper.writeValueAsString(error);
+                response.getWriter().write(json);
+                response.getWriter().flush();
+
+            } else if (e instanceof AddressNotFoundException) {
+                int status = HttpStatus.NOT_FOUND.value();
+                String message = "Address not found";
+
+                ServiceError error = new ServiceError(
+                        status,
+                        new Date(),
+                        request.getRequestURI(),
+                        message
+                );
+
+                response.setStatus(status);
+                response.setContentType("application/json");
+                String json = objectMapper.writeValueAsString(error);
+                response.getWriter().write(json);
+                response.getWriter().flush();
+            } else {
+                throw e;
+            }
+
+            }
         }
-    }
 
 
 }
