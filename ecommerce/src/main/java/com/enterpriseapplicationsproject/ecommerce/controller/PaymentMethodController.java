@@ -28,10 +28,10 @@ public class PaymentMethodController {
 
     @PostMapping(consumes = "application/json", path = "/add")
     @PreAuthorize("#paymentMethodDto.user.userId == authentication.principal.getId()")
-    public ResponseEntity<SavePaymentMethodDto> addPaymentMethod( @Valid @RequestBody SavePaymentMethodDto paymentMethodDto) {
+    public ResponseEntity<PaymentMethodDto> addPaymentMethod( @Valid @RequestBody SavePaymentMethodDto paymentMethodDto) {
         System.out.println("PaymentMethodDto: " + paymentMethodDto.toString());
 
-        SavePaymentMethodDto paymentMethod = paymentMethodService.addPaymentMethod(paymentMethodDto);
+        PaymentMethodDto paymentMethod = paymentMethodService.addPaymentMethod(paymentMethodDto);
         return new ResponseEntity<>(paymentMethod, HttpStatus.CREATED);
     }
 

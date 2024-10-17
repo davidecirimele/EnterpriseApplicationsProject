@@ -34,7 +34,7 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
 
 
     @Override
-    public SavePaymentMethodDto addPaymentMethod(SavePaymentMethodDto paymentMethodDto) {
+    public PaymentMethodDto addPaymentMethod(SavePaymentMethodDto paymentMethodDto) {
         User user = userDao.findById(paymentMethodDto.getUser().getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
         EncryptionUtils encryptionUtils = new EncryptionUtils(encryptionConfig.getSecretKey());
         String encryptedCardNumber;
@@ -49,7 +49,7 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
         paymentMethod.setUser(user);
         paymentMethod.setCardNumber(encryptedCardNumber);
         PaymentMethod pm = paymentMethodsDao.save(paymentMethod);
-        return modelMapper.map(pm, SavePaymentMethodDto.class);
+        return modelMapper.map(pm, PaymentMethodDto.class);
     }
 
     @Override

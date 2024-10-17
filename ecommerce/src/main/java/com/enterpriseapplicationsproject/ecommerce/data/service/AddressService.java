@@ -26,7 +26,7 @@ public interface AddressService {
 
     AddressDto save(Address address);
 
-    public SaveAddressDto insertAddress(UUID userId, SaveAddressDto addressDto);
+    public AddressDto insertAddress(UUID userId, SaveAddressDto addressDto);
 
     public AddressDto updateDefaultAddress(Long id);
 

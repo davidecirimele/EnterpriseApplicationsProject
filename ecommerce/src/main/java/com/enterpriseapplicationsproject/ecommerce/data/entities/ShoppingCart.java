@@ -20,26 +20,25 @@ public class ShoppingCart {
     @JoinColumn(name = "USER_ID", referencedColumnName = "ID")
     private User userId;
 
-    @OneToMany(mappedBy = "cartId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "cartId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<CartItem> cartItems;
 
     @Transient
     private Double total;
 
 
-    @PreUpdate
-    @PrePersist
-    private void calculateTotal() {
-        Double totalf = 0.0;
+    public Double getTotal() {
 
-        if(cartItems == null)
-            cartItems = new ArrayList<CartItem>();
-
-        for (CartItem item : cartItems) {
-            total += item.getBookId().getPrice() * item.getQuantity();
+        if (cartItems == null || cartItems.isEmpty()) {
+            return 0.0;
         }
-        this.total = totalf;
+
+        return this.total =  cartItems.stream()
+                .mapToDouble(item -> item.getQuantity() * item.getPrice())
+                .sum();
     }
+
+
 
     @Override
     public String toString() {

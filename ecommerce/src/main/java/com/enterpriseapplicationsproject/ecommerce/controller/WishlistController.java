@@ -93,24 +93,24 @@ public class WishlistController {
         LoggedUserDetails userDetails = (LoggedUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         // Generare il token JWT che include le informazioni della wishlist
-        String wishlistSharedToken = jwtService.generateSharedWishlistToken(userDetails, request.getWishlistId(), 1);
+        //String wishlistSharedToken = jwtService.generateSharedWishlistToken(userDetails, request.getWishlistId(), 1);
 
         Map<String, String> response = new HashMap<>();
-        response.put("token", wishlistSharedToken); // Incapsula il token in una mappa
+        //response.put("token", wishlistSharedToken); // Incapsula il token in una mappa
 
-        System.out.println("Generated wToken: " + wishlistSharedToken);
+        //System.out.println("Generated wToken: " + wishlistSharedToken);
         return ResponseEntity.ok(response);
 
     }
 
     //TO DOs
 
-    @PostMapping(path = "/join/{idUserToJoin}/{token}")
+    /*@PostMapping(path = "/join/{idUserToJoin}/{token}")
     @PreAuthorize("#idUserToJoin == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<String> joinWishlist(@PathVariable UUID idUserToJoin, String token) {
         try {
             // Analizzare il token della wishlist
-            SharedWishlistRequest tokenDetails = jwtService.parseWishlistToken(token);
+            //SharedWishlistRequest tokenDetails = jwtService.parseWishlistToken(token);
 
             // Ottenere l'ID della wishlist e l'ID dell'utente dal token
             Long wishlistId = tokenDetails.getWishlistId();
@@ -125,7 +125,7 @@ public class WishlistController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
         }
     }
-
+*/
 
     @PostMapping(consumes = "application/json", path = "/unshare")
     //@PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
