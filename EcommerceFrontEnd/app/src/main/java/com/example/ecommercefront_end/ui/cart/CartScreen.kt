@@ -38,9 +38,7 @@ import com.example.ecommercefront_end.viewmodels.CartViewModel
 fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navController: NavController) {
     val cartItems by viewModel.cartItems.collectAsStateWithLifecycle()
     val totalAmount by viewModel.totalAmount.collectAsStateWithLifecycle()
-    LaunchedEffect(cartItems) {
-        println("Cart Items aggiornati: $cartItems")
-    }
+
 
 
 

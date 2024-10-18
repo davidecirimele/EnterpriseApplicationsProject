@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface PaymentMethodsService {
 
-    public SavePaymentMethodDto addPaymentMethod(SavePaymentMethodDto paymentMethodDto);
+    public PaymentMethodDto addPaymentMethod(SavePaymentMethodDto paymentMethodDto);
 
     public PaymentMethodDto getPaymentMethodByUserId(UUID userId);
 

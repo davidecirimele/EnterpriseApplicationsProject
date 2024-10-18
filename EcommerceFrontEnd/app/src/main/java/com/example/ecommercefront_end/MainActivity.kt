@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end
 
+import CheckoutViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
@@ -140,7 +141,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
 
+    override fun onResume() {
+        super.onResume()
+        SessionManager.init(this)
     }
 }
 
@@ -150,10 +155,13 @@ fun NavigationView(navController: NavHostController) {
     val selectedIndex = remember { mutableIntStateOf(0) }
 
     // Usa remember per mantenere i ViewModel
+    val homeViewModel = remember { HomeViewModel(repository = HomeRepository(RetrofitClient.booksApiService)) }
     val cartViewModel = remember { CartViewModel(repository = CartRepository(RetrofitClient.cartApiService)) }
     val accountViewModel = remember { AccountViewModel(repository = AccountRepository(RetrofitClient.userApiService)) }
     val addressViewModel = remember { AddressViewModel(repository = AddressRepository(RetrofitClient.addressApiService)) }
     val bookViewModel = remember { BookViewModel(repository = BookRepository(RetrofitClient.booksApiService)) }
+
+    val checkoutViewModel = remember { CheckoutViewModel( CheckoutRepository( RetrofitClient.checkoutApiService)) }
 
     Scaffold(
         topBar = { TopBar(navController, bookViewModel) },
@@ -192,7 +200,9 @@ fun NavigationView(navController: NavHostController) {
 
             composable("cart") {
                 selectedIndex.value = 2
-                CartScreen(viewModel = cartViewModel, navController = navController, onCheckoutClick = { /* Add your action here */ })
+                CartScreen(viewModel = cartViewModel, onCheckoutClick = {
+                    navController.navigate("checkout")
+                }, navController)
 
             }
             composable("wishlist") {
@@ -265,6 +275,18 @@ fun NavigationView(navController: NavHostController) {
                 if (addressId != null) {
                     EditAddressScreen(viewModel = addressViewModel, navController = navController, addressId)
                 }
+            }
+
+            composable("checkout") {
+                CheckoutScreen(
+                    viewModel = checkoutViewModel,
+                    onConfirmOrder = {
+                        // Implementa la logica per confermare l'ordine
+                    }, navController = navController)
+            }
+
+            composable("checkout-addresses") {
+              CheckoutAddressScreen(viewModel = checkoutViewModel, navController = navController)
             }
 
         }
@@ -353,6 +375,14 @@ fun SearchBar(navHostController: NavHostController, filterOptions: Boolean, onFi
                 modifier = Modifier.size(35.dp)
             )
         }
+
+        TextField(
+            value = searchValue,
+            onValueChange = { searchValue = it },
+            label = { Text("Search Book") },
+            shape = RoundedCornerShape(16.dp),
+            singleLine = true
+        )
     }
 }
 

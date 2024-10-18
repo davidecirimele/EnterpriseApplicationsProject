@@ -90,10 +90,10 @@ public class AddressController {
 
     @PostMapping(consumes = "application/json", path = "/{userId}/insert-address")
     @PreAuthorize("#userId == authentication.principal.getId()")
-    public ResponseEntity<SaveAddressDto> insertAddress(@PathVariable UUID userId, @RequestBody SaveAddressDto addressDto){
+    public ResponseEntity<AddressDto> insertAddress(@PathVariable UUID userId, @RequestBody SaveAddressDto addressDto){
         log.info("Received request for addresses/{userId}/insert-address");
 
-        SaveAddressDto addedAddress = addressService.insertAddress(userId, addressDto);
+        AddressDto addedAddress = addressService.insertAddress(userId, addressDto);
         return new ResponseEntity<>(addedAddress, HttpStatus.CREATED);
     }
 

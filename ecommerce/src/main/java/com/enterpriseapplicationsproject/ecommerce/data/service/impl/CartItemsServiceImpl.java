@@ -5,11 +5,13 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.CartItemsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.ShoppingCartsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
 import com.enterpriseapplicationsproject.ecommerce.data.service.CartItemsService;
+import com.enterpriseapplicationsproject.ecommerce.data.service.ShoppingCartService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,6 +29,8 @@ public class CartItemsServiceImpl implements CartItemsService {
     private final BooksDao booksDao;
 
     private final ModelMapper modelMapper;
+
+    private final ShoppingCartService shoppingCartService;
 
     @Override
     public List<CartItemDto> getCartItems(UUID userId, Long cartId) {
@@ -56,12 +60,14 @@ public class CartItemsServiceImpl implements CartItemsService {
     }
 
     @Override
+    @Transactional
     public CartItemDto insert(QuantityCartItemDto insertCartItemDto, UUID userId, Long cartId, Long bookId) {
         Optional<ShoppingCart> optionalCart = shoppingCartsDao.findByUserId(userId);
         Optional<Book> optionalBook = booksDao.findById(bookId);
         if(optionalCart.isPresent() && optionalBook.isPresent())
         {
             ShoppingCart cart = optionalCart.get();
+            System.out.println("shopping cart items: " +cart.getCartItems().size());
 
             if(cart.getId().equals(cartId)) {
                 Book book = optionalBook.get();
@@ -70,16 +76,19 @@ public class CartItemsServiceImpl implements CartItemsService {
                     if (c.getBookId().getId().equals(book.getId())) {
                         c.setQuantity(c.getQuantity() + insertCartItemDto.getQuantity());
                         cartItemsDao.save(c);
+
+
                         return modelMapper.map(c, CartItemDto.class);
                     }
                 }
+                System.out.println(cart.getTotal());
 
                 CartItem cartItem = new CartItem();
                 cartItem.setCartId(cart);
                 cartItem.setBookId(book);
                 cartItem.setPrice(book.getPrice());
                 cartItem.setQuantity(insertCartItemDto.getQuantity());
-
+                cart.getCartItems().add(cartItem);
                 CartItem insertedItem = cartItemsDao.save(cartItem);
                 return modelMapper.map(insertedItem, CartItemDto.class);
             }
@@ -102,9 +111,13 @@ public class CartItemsServiceImpl implements CartItemsService {
             ShoppingCart shoppingCart = optionalCart.get();
             CartItem cartItem = optionalCartItem.get();
 
+            System.out.println("shoppingCart total before delete" + shoppingCart.getTotal());
+
             log.info("found shoppingCart: "+shoppingCart.getId()+", passed cartID: "+cartId+", passed itemId: "+itemId+"foundItemCartID: "+cartItem.getCartId());
             if (shoppingCart.getId().equals(cartId) && cartItem.getCartId().getId().equals(cartId)) {
                 cartItemsDao.delete(optionalCartItem.get());
+                System.out.println("shoppingCart total after delete: " +shoppingCart.getTotal());
+                shoppingCart.getCartItems().remove(cartItem);
                 return true;
             }
             else{
@@ -130,6 +143,8 @@ public class CartItemsServiceImpl implements CartItemsService {
                 if (quantityCartItem.getQuantity() > 0) {
                     cartItem.setQuantity(quantityCartItem.getQuantity());
                     cartItemsDao.save(cartItem);
+                    //shoppingCartsDao.save(shoppingCart);
+                    System.out.println("shoppingCart total after update: " +shoppingCart.getTotal());
                     return modelMapper.map(cartItem, CartItemDto.class);
                 } else {
                     cartItemsDao.delete(cartItem);
