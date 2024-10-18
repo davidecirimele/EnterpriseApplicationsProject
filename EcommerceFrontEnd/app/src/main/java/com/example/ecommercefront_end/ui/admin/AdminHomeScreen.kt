@@ -52,19 +52,18 @@ fun AdminHomeScreen(bookViewModel: BookViewModel, navHostController: NavHostCont
     val products by bookViewModel.allProducts.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()){
-        Column() {
-            Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
-                Text(
-                    text = "All products",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 35.sp
-                )
-            }
-            Spacer(modifier = Modifier.padding(8.dp))
-            addNewProductCard(navHostController = navHostController)
-            Spacer(modifier = Modifier.padding(8.dp))
+
+        Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+            Text(
+                text = "All products",
+                fontWeight = FontWeight.Bold,
+                fontSize = 35.sp,
+                modifier = Modifier.padding(8.dp)
+            )
         }
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+
+        Spacer(modifier = Modifier.padding(2.dp))
+        LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
             if(products.isNotEmpty()) {
                 for ((index,product) in products.withIndex())
                     item {
@@ -85,6 +84,10 @@ fun AdminHomeScreen(bookViewModel: BookViewModel, navHostController: NavHostCont
                     Text(text = "No books")
                 }
             }
+        }
+        Spacer(modifier = Modifier.padding(2.dp))
+        Row(modifier = Modifier.fillMaxWidth()){
+            addNewProductCard(navHostController = navHostController)
         }
     }
 }

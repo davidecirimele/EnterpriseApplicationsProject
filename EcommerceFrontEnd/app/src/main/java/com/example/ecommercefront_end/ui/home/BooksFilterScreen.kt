@@ -67,6 +67,7 @@ import java.time.LocalDate
 import java.util.Locale
 
 
+@Preview
 @Composable
 fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, currentRoute: String?, onDismiss: () -> Unit){
 
@@ -311,6 +312,9 @@ fun <T : Number> RangeSelector(viewModel: BookViewModel,parameter: String, value
             onValueChange = { range -> sliderPosition = range
                 onValueChange(range.start, range.endInclusive)},
             valueRange = value1..value2,
+            onValueChangeFinished = {
+            //viewModel.updatePriceSliderValue(sliderPosition)
+            },
             )
         Row(modifier = Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween) {
             if (parameter == "Price (Euros)") {
