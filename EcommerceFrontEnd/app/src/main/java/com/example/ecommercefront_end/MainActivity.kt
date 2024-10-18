@@ -79,7 +79,8 @@ import com.example.ecommercefront_end.repository.AddressRepository
 import com.example.ecommercefront_end.repository.AuthRepository
 import com.example.ecommercefront_end.repository.BookRepository
 import com.example.ecommercefront_end.repository.CartRepository
-import com.example.ecommercefront_end.repository.HomeRepository
+import com.example.ecommercefront_end.repository.CheckoutRepository
+
 import com.example.ecommercefront_end.repository.WishlistRepository
 import com.example.ecommercefront_end.ui.user.EditAddressScreen
 import com.example.ecommercefront_end.ui.cart.CartScreen
@@ -92,6 +93,8 @@ import com.example.ecommercefront_end.ui.user.AccountManagerScreen
 import com.example.ecommercefront_end.ui.user.AddressesScreen
 import com.example.ecommercefront_end.ui.admin.AdminHomeScreen
 import com.example.ecommercefront_end.ui.admin.InsertProductScreen
+import com.example.ecommercefront_end.ui.checkout.CheckoutAddressScreen
+import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
 import com.example.ecommercefront_end.ui.user.InsertAddressScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
 import com.example.ecommercefront_end.ui.user.UserAuthScreen
@@ -100,7 +103,7 @@ import com.example.ecommercefront_end.viewmodels.AccountViewModel
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
 import com.example.ecommercefront_end.viewmodels.BookViewModel
 import com.example.ecommercefront_end.viewmodels.CartViewModel
-import com.example.ecommercefront_end.viewmodels.HomeViewModel
+
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
 import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
