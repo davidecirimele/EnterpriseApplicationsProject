@@ -41,7 +41,7 @@ build/
 !**/src/test/**/build/
 
 # application.properties
-application.properties
+src/main/resources/application.properties
 
 # Gradle specific
 out/
