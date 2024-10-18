@@ -3,6 +3,8 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 
 import com.enterpriseapplicationsproject.ecommerce.config.security.JwtService;
 import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetailsService;
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimitingService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +27,20 @@ public class WishlistController {
 
     private final WishlistsService wishlistService;
 
+    private final RateLimitingService rateLimitingService;
     private final JwtService jwtService;
     private final LoggedUserDetailsService loggedUserDetailsService;
 
+
+
+    @RateLimit(requests = 5, timeWindow = 30)
     @GetMapping(path= "/getAll")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<WishlistDto>> getAll() {
+        // Verifica il rate limiting per questo utente
+        //if (!rateLimitingService.tryAcquireForUser(userId)) {
+            //return ResponseEntity.status(429).body(null); // Too Many Requests
+
         List<WishlistDto> wishlists = wishlistService.getAllSorted();
         if (wishlists.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
