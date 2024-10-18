@@ -29,7 +29,7 @@ public class BookController {
 
     @GetMapping(path = "/getAll")
     //@PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<BookDto>> getAll() {
+    public ResponseEntity< List<BookDto> > getAll() {
         log.info("Received request for books/getAll");
         List<BookDto> books = booksService.getAllSorted();
         if (books.isEmpty())
