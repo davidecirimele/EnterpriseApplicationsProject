@@ -13,13 +13,11 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
 object RetrofitClient {
-    private const val BASE_URL = "https://10.0.2.2:8081/api/v1/"
+    private const val BASE_URL = "https://192.168.1.5:8443/api/v1/"
 
-    private const val BASE_2_URL = "https://192.168.1.5:8443/api/v1/"
+    private const val SAMUELES_URL = "https://192.168.1.54:8081/api/v1/" //URL di Samuele S
 
-    private const val SAMUELES_URL = "https://192.168.50.2:8081/api/v1/" //URL di Samuele S
-
-    private const val DAVIDES_URL = "https://10.0.2.2:8080/api/v1/"
+    private const val DAVIDES_URL = "https://192.168.1.4:8080/api/v1/"
 
     private val client: OkHttpClient by lazy {
         val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
@@ -57,7 +55,7 @@ object RetrofitClient {
 
     val retrofit: Retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl(DAVIDES_URL)
+            .baseUrl(BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create(
                 GsonBuilder()
@@ -97,6 +95,10 @@ object RetrofitClient {
 
     val addressApiService: AddressApiService by lazy {
         retrofit.create(AddressApiService::class.java)
+    }
+
+    val checkoutApiService: CheckoutApiService by lazy {
+        retrofit.create(CheckoutApiService::class.java)
     }
 }
 

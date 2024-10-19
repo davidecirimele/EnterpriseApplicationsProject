@@ -1,9 +1,11 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 
 import com.enterpriseapplicationsproject.ecommerce.data.dao.ShoppingCartsDao;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.CartItem;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.ShoppingCart;
 import com.enterpriseapplicationsproject.ecommerce.data.service.ShoppingCartService;
 import com.enterpriseapplicationsproject.ecommerce.dto.ShoppingCartDto;
+import com.enterpriseapplicationsproject.ecommerce.exception.ShoppingCartNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         if(optionalShoppingCart.isPresent())
         {
             ShoppingCart cart = optionalShoppingCart.get();
+            System.out.println("total" + cart.getTotal());
             return modelMapper.map(cart, ShoppingCartDto.class);
         }
         else{
@@ -90,5 +93,18 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         return modelMapper.map(savedCart, ShoppingCartDto.class);
     }
 
+    @Override
+    public Double getTotal(UUID userId) {
+        Optional<ShoppingCart> optionalShoppingCart = shoppingCartDao.findByUserId(userId);
 
+        if(optionalShoppingCart.isPresent())
+        {
+            ShoppingCart cart = optionalShoppingCart.get();
+            return cart.getTotal();
+        }
+        else{
+            throw new ShoppingCartNotFoundException("This user does not have a shopping cart");
+        }
+    }
 }
+

@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -162,9 +163,10 @@ public class AuthServiceImpl implements  AuthService{
                     throw new JwtException("Token is revoked");
                 }
 
-                String username = jwtService.extractUsername(accessTokenValidationDto.getToken());
+                UUID userId = jwtService.extractUserId(accessTokenValidationDto.getToken());
 
-                userDao.findByCredentialEmail(username).orElseThrow(() -> new UserNotFoundException("User not found"));
+                userDao.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
+
 
                 return accessTokenValidationDto;
             } catch (JwtException e) {

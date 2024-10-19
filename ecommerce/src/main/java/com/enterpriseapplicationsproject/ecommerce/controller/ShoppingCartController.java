@@ -53,6 +53,13 @@ public class ShoppingCartController {
         ShoppingCartDto savedCart = shoppingCartService.saveCart(ShoppingCartDto);
         return new ResponseEntity<>(savedCart, HttpStatus.OK);
     }*/
+
+    @GetMapping("/get/total/{userId}")
+    @PreAuthorize("#userId == authentication.principal.getId()")
+    public ResponseEntity<Double> getTotal(@PathVariable UUID userId) {
+        Double total = shoppingCartService.getTotal(userId);
+        return new ResponseEntity<>(total, HttpStatus.OK);
+    }
 }
 
 
