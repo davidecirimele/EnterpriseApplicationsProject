@@ -21,7 +21,7 @@ public class RateLimitingService {
     private final Map<String, Bucket> userBuckets = new ConcurrentHashMap<>();
 
     // Configurazione per il rate limit: numero massimo di richieste e finestra temporale
-    private static final int REQUESTS_PER_MINUTE_IP = 100;
+    private static final int REQUESTS_PER_MINUTE_IP = 80;
     private static final int REQUESTS_PER_MINUTE_USER = 10;
 
     // Metodo per ottenere un bucket basato su IP

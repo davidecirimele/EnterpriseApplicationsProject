@@ -47,7 +47,7 @@ public class Wishlist {
     //non posso mettere long perchè
 
     @Basic(optional = false)
-    private String privacySetting;
+    private WishlistPrivacy privacySetting;
 
     @Basic(optional = false)
     private String wishlistToken;
@@ -61,3 +61,4 @@ public class Wishlist {
         this.wToken = wToken;
     }*/
 }
+

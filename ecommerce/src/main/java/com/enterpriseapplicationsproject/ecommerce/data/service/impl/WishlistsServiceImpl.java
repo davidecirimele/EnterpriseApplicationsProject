@@ -73,7 +73,7 @@ public class WishlistsServiceImpl implements WishlistsService {
         group.setGroupName(gName);
 
         String wName = wishlistDto.getName();
-        String wPrivacy = wishlistDto.getPrivacySetting();
+        WishlistPrivacy wPrivacy = wishlistDto.getPrivacySetting();
         String wToken = wishlistDto.getWishlistToken();
 
         if (wishlistDto.getGroup() != null) {
@@ -146,18 +146,17 @@ public class WishlistsServiceImpl implements WishlistsService {
         if (wishlist == null){
             throw new IllegalArgumentException("Wishlist not found");
         }
-        if (wishlist.getUserId().equals(idUser)){
+        if (wishlist.getUserId().toString() .equals(idUser.toString())){
             throw new IllegalArgumentException("User is the owner of the wishlist");
         }
         Group group = wishlist.getGroup();
 
-        if (group == null || !group.getMembers().stream().anyMatch(user -> user.getId().equals(idUser))) {
+        if (group == null || group.getMembers().stream().noneMatch(user -> user.getId().equals(idUser))) {
             return false;
         }
-        Boolean removed = group.getMembers().removeIf(user -> user.getId().equals(idUser));
+        boolean removed = group.getMembers().removeIf(user -> user.getId().equals(idUser));
         if (!removed){
             return false;
-
         }
         groupsDao.save(group);
         wishlist.setGroup(group);

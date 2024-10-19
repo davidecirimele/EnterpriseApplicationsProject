@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Objects;
+
 @Aspect
 @Component
 @RequiredArgsConstructor
@@ -19,12 +21,22 @@ public class RateLimitingAspect {
 
     @Around("@annotation(rateLimit) && args(.., request)")
     public Object rateLimit(ProceedingJoinPoint joinPoint, RateLimit rateLimit, HttpServletRequest request) throws Throwable {
-        String userId = request.getUserPrincipal().getName(); // Puoi personalizzarlo in base a come gestisci l'ID utente
 
-        if (rateLimitingService.tryAcquire(userId, rateLimit.requests(), 3)) {
-            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Too many requests from user " + userId);
+        String type = rateLimit.type().toString();
+        if (type.equals("IP")) {
+            String clientIP = request.getRemoteAddr();
+
+            if (rateLimitingService.tryAcquireForIp(clientIP)) {
+                throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Too many requests from IP " + clientIP);
+            }
+
+        } else if (type.equals("USER")) {
+            String user = request.getRemoteUser();
+
+            if (rateLimitingService.tryAcquireForUser(user)) {
+                throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Too many requests from IP " + user);
+            }
         }
-
         return joinPoint.proceed();
     }
 }

@@ -1,10 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
 
-import com.enterpriseapplicationsproject.ecommerce.config.security.JwtService;
-import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetailsService;
-import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
-import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimitingService;
+import com.enterpriseapplicationsproject.ecommerce.config.security.*;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import lombok.RequiredArgsConstructor;
@@ -33,41 +30,40 @@ public class WishlistController {
 
 
 
-    @RateLimit(requests = 5, timeWindow = 30)
+    @RateLimit(requests = 5, timeWindow = 10)//limite di richieste
     @GetMapping(path= "/getAll")
-    @PreAuthorize("isAuthenticated()")
+    //@PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<WishlistDto>> getAll() {
-        // Verifica il rate limiting per questo utente
-        //if (!rateLimitingService.tryAcquireForUser(userId)) {
-            //return ResponseEntity.status(429).body(null); // Too Many Requests
-
         List<WishlistDto> wishlists = wishlistService.getAllSorted();
         if (wishlists.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(wishlists, HttpStatus.OK);
     }
 
+    @RateLimit(requests = 5, timeWindow = 10, type = RateLimitType.USER)
     @GetMapping(path = "/get/{idWishlist}")
     @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> getById(@PathVariable Long idWishlist) {
         WishlistDto w = wishlistService.getDtoById(idWishlist);
         if(w == null)
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // meglio farlo nel service e gestire l'eccezione con l'handler
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
 
+    @RateLimit(requests = 5, timeWindow = 10, type = RateLimitType.USER)
     @GetMapping(path = "/getByUser/{idUser}")
     @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<WishlistDto>> getByUser(@PathVariable UUID idUser) {
         log.info("Received request for addresses/{idUser}");
         List<WishlistDto> w = wishlistService.getWishlistsByUser(idUser);
         if(w == null)
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // meglio farlo nel service e gestire l'eccezione con l'handler
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
 
+    @RateLimit(requests = 5, timeWindow = 10, type = RateLimitType.USER)
     @PostMapping(consumes = "application/json", path = "/add")
     @PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> add(@RequestBody WishlistDto wDto) {
@@ -78,6 +74,7 @@ public class WishlistController {
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
+    @RateLimit(requests = 5, timeWindow = 10, type = RateLimitType.USER)
     @GetMapping(path = "/share")
     @PreAuthorize("#wDto.getUser().id == authentication.principal.getId() or hasRole('ADMIN')") //GetId() o id??
     public ResponseEntity<Map <String,String> > shareWishlist(@RequestBody WishlistDto wDto) {
@@ -88,7 +85,9 @@ public class WishlistController {
         return ResponseEntity.ok(Map.of("token", wishlistToken));
     }
 
+
     //TO DOO
+    @RateLimit(requests = 5, timeWindow = 10, type = RateLimitType.USER)
     @GetMapping(path = "/getOfFriend/{idUser}")
     @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<WishlistDto>> getFriendWishlists(@PathVariable UUID idUser) {
@@ -99,9 +98,9 @@ public class WishlistController {
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
-    //To test
 
     //TO test
+    @RateLimit(requests = 5, timeWindow = 10, type = RateLimitType.USER)
     @PostMapping(path = "/join/{idUser}/{token}")
     @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity <Boolean> joinWishlist(@PathVariable UUID idUser, @PathVariable String token) {
@@ -112,9 +111,11 @@ public class WishlistController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND); // meglio farlo nel service e gestire l'eccezione con l'handler
     }
 
+
     //TO DO
+    @RateLimit(requests = 5, timeWindow = 10, type = RateLimitType.USER)
     @PostMapping(path = "/unshare/{idUser}")
-    @PreAuthorize("#idUser == authentication.principal.getId() or #wDto.getUser().id or hasRole('ADMIN')")
+    @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<Boolean> unshare(@PathVariable UUID idUser, @RequestBody WishlistDto wDto) {
         Boolean resp = wishlistService.unshareWishlist(wDto.getId(), idUser);
         if (resp){
@@ -124,6 +125,8 @@ public class WishlistController {
     }
     //
 
+
+    @RateLimit(requests = 5, timeWindow = 10, type = RateLimitType.USER)
     @PutMapping(consumes = "application/json", path = "/update")
     @PreAuthorize("#wDto.getUser().getId() == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> update(@RequestBody WishlistDto wDto) {
@@ -135,21 +138,15 @@ public class WishlistController {
     }
 
 
+    @RateLimit(requests = 5, timeWindow = 10, type = RateLimitType.USER)
     @DeleteMapping(path = "/delete/{idWishlist}")
-    @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
+    //@PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> deleteById(@PathVariable Long idWishlist) {
         WishlistDto w = wishlistService.deleteWishlistByID(idWishlist);
         if(w == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
-    /*
-
-    @GetMapping("/wishlists/test")
-    public ResponseEntity<List<WishlistDto>> test(@RequestParam("name") String name) {
-        return ResponseEntity.ok(wishlistService.getByLastname(name));
-    }*/
-
 
 
 }

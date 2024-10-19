@@ -279,7 +279,7 @@ public class DbGenerator implements ApplicationRunner {
         int userIndex = Integer.parseInt(array[0]) - 1;  // Index for the user
         String name = array[1];
         int groupIndex = Integer.parseInt(array[2]) - 1; // Index for the group
-        String privacy = array[3];
+        WishlistPrivacy privacy = WishlistPrivacy.valueOf(array[3]);
 
         // Retrieve the User and Group entities by their index in the corresponding lists
         List<UserDto> allUsersDto = userService.getAllDto();
