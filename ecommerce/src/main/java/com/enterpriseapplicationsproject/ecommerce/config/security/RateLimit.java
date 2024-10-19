@@ -12,7 +12,7 @@ public @interface RateLimit {
 
     int requests() default 6;  // Numero massimo di richieste consentite
     int timeWindow() default 8;  // Finestra di tempo in secondi
-    RateLimitType type() default RateLimitType.IP;  // Tipo di rate limit (per IP o per utente)
+    String type() default "IP";  // Tipo di rate limit (per IP o per utente)
 
 }
 

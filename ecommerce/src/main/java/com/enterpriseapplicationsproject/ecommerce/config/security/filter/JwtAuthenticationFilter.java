@@ -36,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String clientIP = request.getRemoteAddr();
-        if (rateLimitingService.tryAcquireForIp(clientIP)) {
+        if (!rateLimitingService.tryAcquireForIp(clientIP)) {
             response.setStatus(TOO_MANY_REQUESTS);
             response.getWriter().write("Too many requests from IP " + clientIP);
             return;

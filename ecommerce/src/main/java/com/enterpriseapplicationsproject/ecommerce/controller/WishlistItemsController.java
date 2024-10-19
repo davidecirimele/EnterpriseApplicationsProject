@@ -33,7 +33,7 @@ public class WishlistItemsController {
         return new ResponseEntity<>(wishlistItems, HttpStatus.OK);
     }
 
-    @RateLimit(requests = 5, timeWindow = 10, type = RateLimitType.USER)
+    @RateLimit(requests = 5, timeWindow = 10, type = "USER")
     @GetMapping( path = "/getByWishlistId/{idWishlist}")
     //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<WishlistItemDto>> getByWishlistId(@PathVariable Long idWishlist) {
@@ -44,7 +44,7 @@ public class WishlistItemsController {
         return new ResponseEntity<>(wishlistItems, HttpStatus.OK);
     }
 
-    @RateLimit(requests = 5, timeWindow = 10, type = RateLimitType.USER)
+    @RateLimit(requests = 5, timeWindow = 10, type = "USER")
     @GetMapping(consumes = "application/json", path = "/get/{idWishlistItem}")
     //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<WishlistItemDto> getById(@PathVariable Long idWishlistItem) {
@@ -64,7 +64,7 @@ public class WishlistItemsController {
         return new ResponseEntity<>(wi, HttpStatus.OK);
     }
 
-    @RateLimit(requests = 5, timeWindow = 10, type = RateLimitType.USER)
+    @RateLimit(requests = 5, timeWindow = 10, type = "USER")
     @PostMapping(consumes = "application/json", path = "/add")
     @PreAuthorize("#wishlistItem.getWishlist().getUserId() == authentication.principal.getId()")
     public ResponseEntity<WishlistItemDto> addItemToWishlist(@RequestBody  WishlistItem wishlistItem) {
@@ -74,7 +74,7 @@ public class WishlistItemsController {
         return new ResponseEntity<>(wi, HttpStatus.OK);
     }
 
-    @RateLimit(requests = 5, timeWindow = 10, type = RateLimitType.USER)
+    @RateLimit(requests = 5, timeWindow = 10, type = "USER")
     @DeleteMapping( path = "/delete/{idWishlistItem}")
     @PreAuthorize("#wishlistItem.getWishlist().getUserId() == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<WishlistItemDto> deleteItemToWishlist(@PathVariable Long idWishlistItem ) {
