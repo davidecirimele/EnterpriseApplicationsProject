@@ -27,9 +27,6 @@ import androidx.compose.foundation.shape.CutCornerShape
 //import androidx.compose.material3.BottomNavigation
 //import androidx.compose.material3.BottomNavigationItem
 
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
-
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -95,11 +92,12 @@ import com.example.ecommercefront_end.network.CartApiService
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.repository.AddressRepository
+import com.example.ecommercefront_end.repository.AdminRepository
 import com.example.ecommercefront_end.repository.AuthRepository
 import com.example.ecommercefront_end.repository.BookRepository
 import com.example.ecommercefront_end.repository.CartRepository
-import com.example.ecommercefront_end.repository.HomeRepository
 import com.example.ecommercefront_end.repository.WishlistRepository
+import com.example.ecommercefront_end.ui.admin.AdminCatalogueScreen
 import com.example.ecommercefront_end.ui.user.EditAddressScreen
 import com.example.ecommercefront_end.ui.cart.CartScreen
 import com.example.ecommercefront_end.ui.home.BookDetailsScreen
@@ -110,6 +108,9 @@ import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.ui.user.AccountManagerScreen
 import com.example.ecommercefront_end.ui.user.AddressesScreen
 import com.example.ecommercefront_end.ui.admin.AdminHomeScreen
+import com.example.ecommercefront_end.ui.admin.AdminSingleBookScreen
+import com.example.ecommercefront_end.ui.admin.AdminUserDetailsScreen
+import com.example.ecommercefront_end.ui.admin.AdminUsersListScreen
 import com.example.ecommercefront_end.ui.admin.InsertProductScreen
 import com.example.ecommercefront_end.ui.user.InsertAddressScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
@@ -117,12 +118,14 @@ import com.example.ecommercefront_end.ui.user.UserAuthScreen
 import com.example.ecommercefront_end.ui.wishlist.WishlistsScreen
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
+import com.example.ecommercefront_end.viewmodels.AdminViewModel
 import com.example.ecommercefront_end.viewmodels.BookViewModel
 import com.example.ecommercefront_end.viewmodels.CartViewModel
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
 import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
 import kotlinx.coroutines.async
+import java.util.UUID
 
 
 class MainActivity : ComponentActivity() {
@@ -155,6 +158,7 @@ fun NavigationView(navController: NavHostController) {
     val accountViewModel = remember { AccountViewModel(repository = AccountRepository(RetrofitClient.userApiService)) }
     val addressViewModel = remember { AddressViewModel(repository = AddressRepository(RetrofitClient.addressApiService)) }
     val bookViewModel = remember { BookViewModel(repository = BookRepository(RetrofitClient.booksApiService)) }
+    val adminViewModel = remember { AdminViewModel(repository = AdminRepository(RetrofitClient.adminApiService)) }
 
     Scaffold(
         topBar = { TopBar(navController, bookViewModel) },
@@ -172,7 +176,17 @@ fun NavigationView(navController: NavHostController) {
 
             composable("admin-home") {
                 selectedIndex.value = 0
-                AdminHomeScreen(bookViewModel = bookViewModel, navHostController = navController)
+                AdminHomeScreen(navHostController = navController)
+            }
+
+            composable("admin-catalogue") {
+                selectedIndex.value = 0
+                AdminCatalogueScreen(bookViewModel = bookViewModel, navHostController = navController)
+            }
+
+            composable("admin-users-list") {
+                selectedIndex.value = 0
+                AdminUsersListScreen(viewModel = adminViewModel, navHostController = navController)
             }
 
             composable("/books_details/{idBook}", arguments = listOf(navArgument("idBook") { type = NavType.LongType })) { backStackEntry ->
@@ -189,6 +203,43 @@ fun NavigationView(navController: NavHostController) {
                 book?.let {
                     BookDetailsScreen(book = it, cartRepository = CartRepository(RetrofitClient.cartApiService), navController)
                 } ?: Text("Libro non trovato")
+            }
+
+            composable("/admin/book_details/{idBook}", arguments = listOf(navArgument("idBook") { type = NavType.LongType })) { backStackEntry ->
+                val idBook = backStackEntry.arguments?.getLong("idBook") ?: 0L
+
+                // Carica il libro corrispondente all'id
+                LaunchedEffect(idBook) {
+                    bookViewModel.loadBook(idBook)
+                }
+
+                // Osserva i cambiamenti del libro
+                val book by bookViewModel.bookFlow.collectAsState()
+
+                book?.let {
+                    AdminSingleBookScreen(book = it, bookViewModel = bookViewModel)
+                } ?: Text("Book not found")
+            }
+
+            composable("/admin/user_details/{userId}", arguments = listOf(navArgument("userId") { type = NavType.StringType })) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId")?.let {
+                    try {
+                        UUID.fromString(it)
+                    } catch (e: IllegalArgumentException) {
+                        null  // oppure gestisci l'errore in un altro modo
+                    }
+                }
+
+                LaunchedEffect(userId) {
+                    if(userId != null)
+                        adminViewModel.loadUser(userId)
+                }
+
+                val user by adminViewModel.userFlow.collectAsState()
+
+                user?.let {
+                    AdminUserDetailsScreen(user = it, addressViewModel = addressViewModel, navController)
+                } ?: Text("User not found")
             }
 
             composable("insert-product") {

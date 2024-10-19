@@ -28,13 +28,13 @@ public class SaveBookDto {
     @NotBlank(message = "Edition is mandatory")
     private String edition;
 
-    @NotBlank(message = "Format is mandatory")
+    @NotNull(message = "Format is mandatory")
     private BookFormat format;
 
-    @NotBlank(message = "Genre is mandatory")
+    @NotNull(message = "Genre is mandatory")
     private BookGenre genre;
 
-    @NotBlank(message = "Language is mandatory")
+    @NotNull(message = "Language is mandatory")
     private BookLanguage language;
 
     @NotBlank(message = "Publisher is mandatory")

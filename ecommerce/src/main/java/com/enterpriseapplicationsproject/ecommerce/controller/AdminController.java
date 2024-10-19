@@ -34,13 +34,6 @@ public class AdminController {
         return ResponseEntity.ok(authService.registerAdmin(userDto));
     }
 
-    @GetMapping("/all-users")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserDto>> allUsers() {
-        List<UserDto> users = userService.getAllDto();
-        return new ResponseEntity<>(users, HttpStatus.OK);
-    }
-
     @GetMapping("/all-tokens")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<RefreshTokenDto>> allTokens() {

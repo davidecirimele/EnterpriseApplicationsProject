@@ -16,7 +16,7 @@ public interface UserService {
 
     UserDto getByEmail(String email);
 
-    List<UserDto> getAllDto();
+    List<UserDetailsDto> getAllDto();
 
     UserDetailsDto getUserDetailsById(UUID id);
 

@@ -305,10 +305,14 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                 }
             }
         }
-        if(searchInCachedBooks()<10) {
+
+        fetchFilteredBooks()
+
+        /*
+        if(!searchInCachedBooks()) {
             Log.d("BookDebug", "Too few cached products found, fetching from backend...")
             fetchFilteredBooks()
-        }
+        }*/
     }
 
     fun sortProducts(){
@@ -329,7 +333,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         }
     }
 
-    private fun searchInCachedBooks(): Int {
+    private fun searchInCachedBooks(): Boolean {
         if(cachedProducts.value.isNotEmpty()){
             Log.d("BookDebug", "Cached products found, applying filters...")
             _filteredProducts.value = cachedProducts.value.filter { book ->
@@ -355,7 +359,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
             Log.d("BookDebug", "Filter values: ${filter.value}")
             Log.d("BookDebug", "Filtered products: ${_filteredProducts.value.size}")
         }
-        return _filteredProducts.value.size
+        return _filteredProducts.value.isNotEmpty()
     }
 
     fun clearCache(){

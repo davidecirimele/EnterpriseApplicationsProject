@@ -13,9 +13,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -24,8 +27,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.ecommercefront_end.model.Address
@@ -51,7 +58,10 @@ import com.example.ecommercefront_end.viewmodels.AddressViewModel
 import com.example.ecommercefront_end.viewmodels.BookViewModel
 import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
 import com.google.gson.annotations.SerializedName
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostController){
@@ -68,14 +78,15 @@ fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostControll
     var genre by remember { mutableStateOf("") }
     var language by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
-    var publishDate by remember { mutableStateOf("") }
+    var publishDate by remember { mutableStateOf(LocalDate.now()) }
     var weight by remember { mutableStateOf("") }
 
     Column(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier
                     .padding(top = 32.dp)
-                    .padding(horizontal = 16.dp).weight(1f),
+                    .padding(horizontal = 16.dp)
+                    .weight(1f),
                 verticalArrangement = Arrangement.Center,
             ) {
                 item {
@@ -262,16 +273,7 @@ fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostControll
                 }
 
                 item {
-                    OutlinedTextField(
-                        value = publishDate,
-                        onValueChange = {
-                            publishDate = it
-                        },
-                        label = { Text("publishDate") },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        singleLine = true,
-                    )
+                    insertDate{selectedDate -> publishDate = selectedDate}
 
                     Spacer(modifier = Modifier.height(10.dp))
                 }
@@ -308,10 +310,11 @@ fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostControll
                         genre = BookGenre.valueOf(genre),
                         language = BookLanguage.valueOf(language),
                         age = age.toInt(),
-                        publishDate = LocalDate.parse(publishDate),
+                        publishDate = publishDate,
                         weight = weight.toDouble()
                     )
                 )
+                viewModel.fetchBooksData()
                 navController.navigate("admin-home") {
                     popUpTo("admin-home") {
                         saveState = true
@@ -321,11 +324,79 @@ fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostControll
             enabled = title.isNotEmpty() && author.isNotEmpty() && publisher.isNotEmpty() &&
                     price.isNotEmpty() && stock.isNotEmpty() && isbn.isNotEmpty() &&
                     pages.isNotEmpty() && edition.isNotEmpty() && format.isNotEmpty() &&
-                    genre.isNotEmpty() && language.isNotEmpty() && age.isNotEmpty() &&
-                    publishDate.isNotEmpty() && weight.isNotEmpty()
+                    genre.isNotEmpty() && language.isNotEmpty() && age.isNotEmpty()
+                    && weight.isNotEmpty()
         ) {
             Text("Save Product", style = MaterialTheme.typography.bodyLarge)
         }
     }
 
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun insertDate(onDateSelected: (LocalDate) -> Unit) {
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    OutlinedTextField(
+        value = selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+        onValueChange = { },
+        label = { Text("Publish Date") },
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        readOnly = true,
+        trailingIcon = {
+            IconButton(onClick = { showDatePicker = true }) {
+                Icon(Icons.Filled.CalendarToday, contentDescription = "Select date")
+            }
+        }
+    )
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                Button(onClick = { showDatePicker = false }) {
+                    Text("OK")
+                }
+            },
+            shape = RoundedCornerShape(16.dp),
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Back")
+                }
+            }
+        ) {
+            val datePickerState = rememberDatePickerState(
+                initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.systemDefault())
+                    .toInstant().toEpochMilli(),
+                yearRange = IntRange(1900, LocalDate.now().year),
+                selectableDates = object : SelectableDates {
+                    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                        val selected = Instant.ofEpochMilli(utcTimeMillis)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate()
+                        return selected.isBefore(LocalDate.now()) || selected.isEqual(LocalDate.now())
+                    }
+                }
+            )
+
+            // Aggiorna selectedDate quando la data selezionata cambia
+            LaunchedEffect(datePickerState.selectedDateMillis) {
+                if (datePickerState.selectedDateMillis != null) {
+                    val newDate = Instant.ofEpochMilli(datePickerState.selectedDateMillis!!)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+                    selectedDate = newDate
+                    // Passa la data selezionata al lambda
+                    onDateSelected(newDate)
+                }
+            }
+
+            DatePicker(
+                state = datePickerState,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
 }

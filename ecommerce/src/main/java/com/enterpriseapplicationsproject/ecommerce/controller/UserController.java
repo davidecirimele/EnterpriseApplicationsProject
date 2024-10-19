@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -33,6 +34,12 @@ public class UserController {
         System.out.println("ROLE: "+userService.getUserRole(id));
         UserDetailsDto user = userService.getUserDetailsById(id);
         return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+    @GetMapping("/all-users")
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserDetailsDto>> allUsers() {
+        List<UserDetailsDto> users = userService.getAllDto();
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @PutMapping(value = "{userId}/change-password", consumes = MediaType.APPLICATION_JSON_VALUE)

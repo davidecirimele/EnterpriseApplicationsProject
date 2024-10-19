@@ -51,7 +51,6 @@ fun AccountManagerScreen(viewModel: AccountViewModel, navHostController: NavHost
     }
 }
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun UserCard(userDetails: UserDetails){
     Row(modifier = Modifier.fillMaxWidth()) {
