@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -40,6 +41,9 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -67,6 +71,7 @@ import androidx.navigation.NavController
 import com.example.ecommercefront_end.SessionManager.user
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
+import com.example.ecommercefront_end.model.WishlistPrivacy
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
 
 
@@ -115,25 +120,33 @@ fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) 
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddWishlistDialog(
     onDismissRequest: () -> Unit,
-    onAddWishlist: (String, Boolean) -> Unit,
+    onAddWishlist: (String, WishlistPrivacy) -> Unit,
     onJoinWishlist: (String) -> Unit
 ) {
     var showCreateWishlist by remember { mutableStateOf(false) }
     var wishlistName by remember { mutableStateOf("") }
-    var isPrivate by remember { mutableStateOf(false) }
 
     var tokenShared by remember { mutableStateOf("") }
     var showJoinWishlist by remember { mutableStateOf(false) }
+
+    var expanded by remember { mutableStateOf(false) }
+    var selectedPrivacy by remember {
+        mutableStateOf(WishlistPrivacy.PUBLIC)
+    }
+    val privacyOptions = listOf(WishlistPrivacy.PUBLIC, WishlistPrivacy.SHARED, WishlistPrivacy.PRIVATE)
 
     if (showCreateWishlist) {
         // Dialogo per creare una nuova wishlist
         AlertDialog(
             onDismissRequest = { showCreateWishlist = false },
             title = { Text("Crea una nuova lista" ,
-                modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally))
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentWidth(Alignment.CenterHorizontally))
             },
             text = {
                 Column {
@@ -142,12 +155,39 @@ fun AddWishlistDialog(
                         onValueChange = { wishlistName = it },
                         label = { Text("Nome della lista") }
                     )
-                    Row {
-                        Checkbox(
-                            checked = isPrivate,
-                            onCheckedChange = { isPrivate = it }
+                    ExposedDropdownMenuBox(
+                        expanded = expanded ,
+                        onExpandedChange = {
+                            expanded = !expanded
+                        }) {
+                        TextField(
+                            readOnly = true,
+                            value = selectedPrivacy.name,
+                            onValueChange = {},
+                            label = { Text("Privacy") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(
+                                    expanded = expanded
+                                )
+                            },
+                            colors = ExposedDropdownMenuDefaults
+                                .textFieldColors()
                         )
-                        Text("Privata", modifier = Modifier.align(Alignment.CenterVertically))
+                        ExposedDropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            privacyOptions.forEach { privacy ->
+                                DropdownMenuItem(
+                                    text = { Text(privacy.name) },
+                                    onClick = {
+                                        selectedPrivacy = privacy
+                                        expanded = false
+                                    }
+                                )
+                            }
+                        }
+
                     }
                 }
             },
@@ -157,7 +197,7 @@ fun AddWishlistDialog(
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     Button(onClick = {
-                        onAddWishlist(wishlistName, isPrivate)
+                        onAddWishlist(wishlistName, selectedPrivacy)
                         showCreateWishlist = false
                     }) {
                         Text("Crea")
@@ -174,7 +214,9 @@ fun AddWishlistDialog(
         AlertDialog(
             onDismissRequest = { showJoinWishlist = false },
             title = { Text("Unisciti alla lista di un amico",
-                modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentWidth(Alignment.CenterHorizontally)
             ) },
             text = {
                 Column {
@@ -224,7 +266,9 @@ fun AddWishlistDialog(
             confirmButton = {
                 Button(
                     onClick = onDismissRequest,
-                    modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentWidth(Alignment.CenterHorizontally)
                 ) {
                     Text("Annulla")
                 }
@@ -257,8 +301,8 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
     if (showAddWishlistMain) {
         AddWishlistDialog(
             onDismissRequest = { showAddWishlistMain = false },
-            onAddWishlist = { wishlistName, isPrivate -> // wishlistName e isPrivate sono i parametri passati dal dialogo
-                viewModel.addWishlist(wishlistName, isPrivate)
+            onAddWishlist = { wishlistName, PrivacySettings -> // wishlistName e isPrivate sono i parametri passati dal dialogo
+                viewModel.addWishlist(wishlistName, PrivacySettings)
                 showAddWishlistMain = false
             },
             onJoinWishlist = { token -> // token è il parametro passato dal dialogo
@@ -327,7 +371,8 @@ fun WishlistDetails(
     navController: NavController,
     viewModel: WishlistViewModel
 ) {
-    var isPrivate by remember { mutableStateOf(wishlist.privacySetting == "Private") }
+
+    var privacyOptions by remember { mutableStateOf(wishlist.privacySetting) }
     var showMenu by remember { mutableStateOf(false) } // Per gestire la visibilità del menu a comparsa
     val userIsOwner = user?.id?.compareTo(wishlist.user?.id) == 0
 
@@ -472,7 +517,7 @@ fun WishlistDetails(
                         },
                         confirmButton = {
                             Button(onClick = {
-                                viewModel.updateWishlist(wishlist.id, newWishlistName, "", null) // Chiama il callback per rinominare la wishlist
+                                viewModel.updateWishlist(wishlist.id, newWishlistName, privacyOptions, null) // Chiama il callback per rinominare la wishlist
                                 showRenameDialog = false
                             }) {
                                 Text("Rinomina")
@@ -522,22 +567,44 @@ fun WishlistDetails(
                     Button(
                         enabled = userIsOwner,
                         onClick = {
-                            isPrivate = !isPrivate
-                            if (isPrivate)
-                                viewModel.updateWishlist(wishlist.id, "", "Private", null)
-                            else
-                                viewModel.updateWishlist(wishlist.id, "", "Public", null)
+                            var privacySetting = wishlist.privacySetting
+                            if (wishlist.privacySetting == WishlistPrivacy.PRIVATE)
+                                privacySetting = WishlistPrivacy.SHARED
+
+                            else if (wishlist.privacySetting == WishlistPrivacy.SHARED)
+                                privacySetting = WishlistPrivacy.PUBLIC
+
+                            else if (wishlist.privacySetting == WishlistPrivacy.PUBLIC)
+                                privacySetting = WishlistPrivacy.PRIVATE
+
+                            viewModel.updateWishlist(wishlist.id, "", privacySetting, null)
                         },
                         modifier = Modifier.height(36.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp)
                     ) {
                         Icon(
-                            imageVector = if (isPrivate) Icons.Rounded.Lock else Icons.Rounded.LockOpen,
+                            imageVector =
+                            if (wishlist.privacySetting == WishlistPrivacy.PRIVATE)
+                                Icons.Rounded.Lock
+
+                            else if (wishlist.privacySetting == WishlistPrivacy.SHARED)
+                                Icons.Rounded.Share
+
+                            else Icons.Rounded.LockOpen,
+
                             contentDescription = "Cambia Privacy",
                             modifier = Modifier.size(ButtonDefaults.IconSize)
                         )
                         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                        Text(if (isPrivate) "Private" else "Public")
+                        Text(
+                            if (wishlist.privacySetting == WishlistPrivacy.PRIVATE)
+                                "Private"
+
+                            else if (wishlist.privacySetting == WishlistPrivacy.SHARED)
+                                "Shared"
+
+                            else "Public"
+                        )
                     }
                 }
 

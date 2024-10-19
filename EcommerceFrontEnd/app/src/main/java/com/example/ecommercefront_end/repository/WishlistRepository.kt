@@ -40,7 +40,7 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
     suspend fun getFriendWishlist(userId : UUID): List<Wishlist>{
         return try {
             val wishlists = wApiService.getFriendWishlists(userId)
-            println("Cercando wishlist per amico "+ userId)
+            println("Cercando wishlist per amico $userId")
             if (wishlists.isEmpty()) {
                 println("Nessuna lista dei desideri trovata per l amico")
             } else {

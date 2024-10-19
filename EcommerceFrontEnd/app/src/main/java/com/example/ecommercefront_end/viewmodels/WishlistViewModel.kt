@@ -7,6 +7,7 @@ import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Group
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
+import com.example.ecommercefront_end.model.WishlistPrivacy
 import com.example.ecommercefront_end.repository.WishlistRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -118,7 +119,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
     }
 
 
-    fun addWishlist(name: String, isPrivate: Boolean) {
+    fun addWishlist(name: String, PrivacySettings: WishlistPrivacy) {
         viewModelScope.launch {
             try {
                 // Crea una lista vuota di elementi per la nuova wishlist
@@ -131,7 +132,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
                     members = emptyList() // Nessun membro per ora
                 )
                 // Imposta la privacy della wishlist
-                val privacySetting = if (isPrivate) "Private" else "Public"
+                val privacySetting = WishlistPrivacy.entries.toTypedArray()
 
                 // Crea un nuovo oggetto Wishlist con i parametri forniti
                 val newWishlist = Wishlist(
@@ -140,7 +141,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
                     items = wItemsList, // Lista vuota di elementi
                     user = SessionManager.user, // Nessun utente associato dato che non è loggato
                     group = defaultGroup, // Gruppo predefinito
-                    privacySetting = privacySetting,
+                    privacySetting = PrivacySettings,
                     wishlistToken = "" // Nessun token per ora
                 )
 
@@ -156,7 +157,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
             }
         }
     }
-    fun updateWishlist(id: Long, name: String, privacySettings: String, group: Group?){
+    fun updateWishlist(id: Long, name: String, privacySettings: WishlistPrivacy, group: Group?){
         viewModelScope.launch {
             try {
                 val wishlist = _wishlists.value.find { it.id == id }

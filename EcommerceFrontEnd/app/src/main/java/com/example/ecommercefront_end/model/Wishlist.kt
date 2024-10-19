@@ -7,7 +7,8 @@ data class Wishlist(
     var name: String,
     val user: User?,
     var group: Group,
-    var privacySetting: String,
+    var privacySetting: WishlistPrivacy,
     val wishlistToken: String
 )
+
 
