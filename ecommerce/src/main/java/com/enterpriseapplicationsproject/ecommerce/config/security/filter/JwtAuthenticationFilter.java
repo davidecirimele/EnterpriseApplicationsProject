@@ -31,12 +31,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
     // fa il parsing del token e controlla se l'utente è autenticato
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         String clientIP = request.getRemoteAddr();
-        if (!rateLimitingService.tryAcquireForIp(clientIP)) {
+        if (!rateLimitingService.tryAcquire(clientIP, null, null)) {
             response.setStatus(TOO_MANY_REQUESTS);
             response.getWriter().write("Too many requests from IP " + clientIP);
             return;

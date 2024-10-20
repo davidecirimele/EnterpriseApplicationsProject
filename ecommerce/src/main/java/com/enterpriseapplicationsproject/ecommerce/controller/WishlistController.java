@@ -3,6 +3,7 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 
 import com.enterpriseapplicationsproject.ecommerce.config.security.*;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistsService;
+import com.enterpriseapplicationsproject.ecommerce.dto.UserIdDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,7 @@ public class WishlistController {
     private final LoggedUserDetailsService loggedUserDetailsService;
 
 
-    @RateLimit(requests = 5, timeWindow = 10)//limite di richieste
+    @RateLimit//limite di richieste
     @GetMapping(path= "/getAll")
     //@PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<WishlistDto>> getAll() {
@@ -39,7 +40,7 @@ public class WishlistController {
         return new ResponseEntity<>(wishlists, HttpStatus.OK);
     }
 
-    @RateLimit(requests = 5, timeWindow = 10, type = "USER")
+    @RateLimit(type = "USER")
     @GetMapping(path = "/get/{idWishlist}")
     @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> getById(@PathVariable Long idWishlist) {
@@ -50,7 +51,7 @@ public class WishlistController {
     }
 
 
-    @RateLimit(requests = 5, timeWindow = 10, type = "USER")
+    @RateLimit(type = "USER")
     @GetMapping(path = "/getByUser/{idUser}")
     @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<WishlistDto>> getByUser(@PathVariable UUID idUser) {
@@ -62,7 +63,7 @@ public class WishlistController {
     }
 
 
-    @RateLimit(requests = 5, timeWindow = 10, type = "USER")
+    @RateLimit(type = "USER")
     @PostMapping(consumes = "application/json", path = "/add")
     @PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> add(@RequestBody WishlistDto wDto) {
@@ -73,7 +74,7 @@ public class WishlistController {
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
-    @RateLimit(requests = 5, timeWindow = 10, type = "USER")
+    @RateLimit(type = "USER")
     @GetMapping(path = "/share")
     @PreAuthorize("#wDto.getUser().id == authentication.principal.getId() or hasRole('ADMIN')") //GetId() o id??
     public ResponseEntity<Map <String,String> > shareWishlist(@RequestBody WishlistDto wDto) {
@@ -86,7 +87,7 @@ public class WishlistController {
 
 
     //TO DOO
-    @RateLimit(requests = 5, timeWindow = 10, type = "USER")
+    @RateLimit(type = "USER")
     @GetMapping(path = "/getOfFriend/{idUser}")
     @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<WishlistDto>> getFriendWishlists(@PathVariable UUID idUser) {
@@ -99,7 +100,7 @@ public class WishlistController {
 
 
     //TO test
-    @RateLimit(requests = 5, timeWindow = 10, type = "USER")
+    @RateLimit(type = "USER")
     @PostMapping(path = "/join/{idUser}/{token}")
     @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity <Boolean> joinWishlist(@PathVariable UUID idUser, @PathVariable String token) {
@@ -112,7 +113,7 @@ public class WishlistController {
 
 
     //TO DO
-    @RateLimit(requests = 5, timeWindow = 10, type = "USER")
+    @RateLimit(type = "USER")
     @PostMapping(path = "/unshare/{idUser}")
     @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<Boolean> unshare(@PathVariable UUID idUser, @RequestBody WishlistDto wDto) {
@@ -125,7 +126,7 @@ public class WishlistController {
     //
 
 
-    @RateLimit(requests = 5, timeWindow = 10, type = "USER")
+    @RateLimit(type = "USER")
     @PutMapping(consumes = "application/json", path = "/update")
     @PreAuthorize("#wDto.getUser().getId() == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<WishlistDto> update(@RequestBody WishlistDto wDto) {
@@ -137,11 +138,11 @@ public class WishlistController {
     }
 
 
-    @RateLimit(requests = 5, timeWindow = 10, type = "USER")
-    @DeleteMapping(path = "/delete/{idWishlist}")
-    //@PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
-    public ResponseEntity<WishlistDto> deleteById(@PathVariable Long idWishlist) {
-        WishlistDto w = wishlistService.deleteWishlistByID(idWishlist);
+    @RateLimit(type = "USER")
+    @DeleteMapping(path = "/delete/{idWishlist}/{idUser}")
+    @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<WishlistDto> deleteById(@PathVariable Long idWishlist, @PathVariable UUID idUser) {
+        WishlistDto w = wishlistService.deleteWishlistByID(idWishlist, idUser);
         if(w == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(w, HttpStatus.OK);

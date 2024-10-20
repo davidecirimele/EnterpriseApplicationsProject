@@ -229,10 +229,18 @@ public class WishlistsServiceImpl implements WishlistsService {
     }
 
     @Override
-    public WishlistDto deleteWishlistByID(Long id) {
+    public WishlistDto deleteWishlistByID(Long id, UUID idUser) {
         // Trova la Wishlist usando il suo ID
         Wishlist w = wishlistsDao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));
+
+        if (w == null) {
+            throw new IllegalArgumentException("Wishlist not found");
+        }
+
+        if (!w.getUserId().toString() .equals (idUser.toString())) {
+            throw new IllegalArgumentException("User not authorized to delete this wishlist");
+        }
 
         // Elimina tutti gli elementi associati alla Wishlist
         List<WishlistItem> items = WIDao.findByWishlistId(id);

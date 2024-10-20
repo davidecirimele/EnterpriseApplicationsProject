@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,33 +23,40 @@ import java.util.Objects;
 public class RateLimitingAspect {
 
     private final RateLimitingService rateLimitingService;
-    private static final Logger log = (Logger) org.slf4j.LoggerFactory.getLogger(RateLimitingAspect.class);
+
+    @Around("@annotation(rateLimit) && args(.., request)")
+    public Object rateLimit(ProceedingJoinPoint joinPoint, RateLimit rateLimit, HttpServletRequest request) throws Throwable {
+        // Se HttpServletRequest viene passato come argomento
+        return handleRateLimit(joinPoint, rateLimit, request);
+    }
 
     @Around("@annotation(rateLimit)")
-    public Object rateLimit(ProceedingJoinPoint joinPoint, RateLimit rateLimit) throws Throwable {
-
+    public Object rateLimitNoArgs(ProceedingJoinPoint joinPoint, RateLimit rateLimit) throws Throwable {
+        // Se HttpServletRequest non viene passato come argomento, recuperalo dal contesto
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
+        return handleRateLimit(joinPoint, rateLimit, request);
+    }
 
-        System.out.println("RateLimitingAspect.rateLimit");
+    private Object handleRateLimit(ProceedingJoinPoint joinPoint, RateLimit rateLimit, HttpServletRequest request) throws Throwable {
         String type = rateLimit.type();
         System.out.println("type: " + type);
 
-        if (type.equals("IP")) {
+        if ("IP".equals(type)) {
             String clientIP = request.getRemoteAddr();
-            System.out.println("Checking rate limit for IP: " + clientIP);
+            System.out.println("clientIP: " + clientIP);
 
-            if (!rateLimitingService.tryAcquireForIp(clientIP)) {
+            if (!rateLimitingService.tryAcquire(clientIP, rateLimit.requests(), rateLimit.timeWindow())) {
                 System.out.println("Rate limit exceeded for IP: " + clientIP);
                 throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Too many requests from IP " + clientIP);
             }
 
-        } else if (type.equals("USER")) {
+        } else if ("USER".equals(type)) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String user = (authentication != null) ? authentication.getName() : null;
-            System.out.println("Checking rate limit for User: " + user);
-            System.out.println("Rate at which user can access: " + rateLimitingService);
+            System.out.println("user: " + user);
 
-            if (user == null || !rateLimitingService.tryAcquireForUser(user)) {
+
+            if (user == null || !rateLimitingService.tryAcquire(user, rateLimit.requests(), rateLimit.timeWindow())) {
                 System.out.println("Rate limit exceeded for User: " + user);
                 throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Too many requests from User " + user);
             }

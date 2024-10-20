@@ -12,6 +12,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,16 +36,16 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
 
 
     @Override
-    public WishlistItemDto deleteItemById(Long idWishlistItem) {
+    public WishlistItemDto deleteItemById(Long idWishlistItem, UUID idUser) {
         WishlistItem wishlistItem = wishlistItemsDao.findById(idWishlistItem)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist item ID"));
 
         Wishlist wishlist = wishlistsDao.findById(wishlistItem.getWishlist().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID"));
 
-        /*
-        if (!wishlist.getItems().contains(wishlistItem))
-            throw new IllegalArgumentException("Item not in wishlist");*/
+        if (!wishlist.getUserId().toString() .equals  (idUser.toString()))
+            throw new IllegalArgumentException("User not authorized to delete item from wishlist");
+
 
         wishlist.getItems().remove(wishlistItem);
         try {
@@ -58,8 +59,20 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
     }
 
     @Override
-    public List<WishlistItemDto> getItemsByWishlistId(Long id) {
-        return wishlistItemsDao.findByWishlistId(id).stream()
+    public List<WishlistItemDto> getItemsByWishlistId(Long id, UUID idUser) {
+        Wishlist wishlist = wishlistsDao.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID"));
+
+        if (wishlist == null) {
+            throw new IllegalArgumentException("Wishlist not found");
+        }
+
+        if (!wishlist.getUserId().getId().equals(idUser))
+            throw new IllegalArgumentException("User not authorized to view items in wishlist");
+
+        List<WishlistItem> wishlistItems = wishlistItemsDao.findByWishlistId(id);
+
+        return wishlistItems.stream()
                 .map(wi -> modelMapper.map(wi, WishlistItemDto.class))
                 .collect(Collectors.toList());
     }
