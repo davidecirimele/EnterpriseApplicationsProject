@@ -160,13 +160,19 @@ fun NavigationView(navController: NavHostController) {
     val bookViewModel = remember { BookViewModel(repository = BookRepository(RetrofitClient.booksApiService)) }
     val adminViewModel = remember { AdminViewModel(repository = AdminRepository(RetrofitClient.adminApiService)) }
 
+    val startDestination = if (SessionManager.user?.role == "ROLE_ADMIN") {
+        "admin-home"
+    } else {
+        "home"
+    }
+
     Scaffold(
         topBar = { TopBar(navController, bookViewModel) },
         bottomBar = { BottomBar(selectedIndex, navController) }
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "home",
+            startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("home") {
@@ -419,12 +425,23 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             selected = selectedIndex.value == 0,
             onClick = {
                 selectedIndex.value = 0
-                navHostController.navigate("admin-home") {
-                    popUpTo(navHostController.graph.startDestinationId) {
-                        saveState = true
+                if(SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN") {
+                    navHostController.navigate("home") {
+                        popUpTo(navHostController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
                     }
-                    launchSingleTop = true
-                    restoreState = true
+                }
+                else if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN"){
+                    navHostController.navigate("admin-home") {
+                        popUpTo(navHostController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 }
             },
             icon = {

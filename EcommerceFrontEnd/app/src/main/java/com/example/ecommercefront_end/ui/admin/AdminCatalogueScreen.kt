@@ -14,16 +14,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -49,7 +54,9 @@ fun Modifier.bookEntryModifier(navController: NavController, bookId: Long) = com
 @Composable
 fun AdminCatalogueScreen(bookViewModel: BookViewModel, navHostController: NavHostController){
 
-    val products by bookViewModel.allProducts.collectAsState()
+    val products by bookViewModel.filteredProducts.collectAsState()
+
+    var searchValue by remember { mutableStateOf("") }
 
     Column(modifier = Modifier.fillMaxSize()){
 
@@ -59,6 +66,20 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navHostController: NavHos
                 fontWeight = FontWeight.Bold,
                 fontSize = 35.sp,
                 modifier = Modifier.padding(8.dp)
+            )
+        }
+
+        Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+            TextField(
+                value = searchValue,
+                onValueChange = { searchValue = it;
+                    bookViewModel.updateFilter(title = it, author = it, publisher = it);
+                    bookViewModel.searchBooks(navController = navHostController,"admin-catalogue")
+                },
+                label = { Text("Search by Title, Author, Publisher or ISBN") },
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
             )
         }
 

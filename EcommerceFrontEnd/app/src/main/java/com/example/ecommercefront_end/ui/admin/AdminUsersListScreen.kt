@@ -64,7 +64,7 @@ fun Modifier.userEntryModifier(navController: NavController, userId: UUID) = com
 @Composable
 fun AdminUsersListScreen(viewModel: AdminViewModel, navHostController: NavHostController){
 
-    val users by viewModel.users.collectAsState()
+    val users by viewModel.filteredUsers.collectAsState()
     var searchValue by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
@@ -76,7 +76,9 @@ fun AdminUsersListScreen(viewModel: AdminViewModel, navHostController: NavHostCo
         Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
             TextField(
                 value = searchValue,
-                onValueChange = { searchValue = it;},
+                onValueChange = { searchValue = it;
+                    viewModel.filterUser(searchValue)
+                                },
                 label = { Text("Search by Name, Surname, ID or Email") },
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true,

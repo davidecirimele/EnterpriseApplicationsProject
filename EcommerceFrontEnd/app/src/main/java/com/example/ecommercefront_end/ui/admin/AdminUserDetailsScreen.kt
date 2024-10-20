@@ -86,7 +86,7 @@ fun AdminUserDetailsScreen(user: UserDetails, addressViewModel: AddressViewModel
                         Spacer(modifier = Modifier.padding(8.dp))
                         Text(
                             text = user.firstName,
-                            fontSize = 24.sp,
+                            fontSize = 20.sp,
                             modifier = Modifier
                                 .padding(bottom = 8.dp)
                         )
@@ -125,6 +125,23 @@ fun AdminUserDetailsScreen(user: UserDetails, addressViewModel: AddressViewModel
                                 .padding(bottom = 8.dp)
                         )
                     }
+                    Spacer(modifier = Modifier.padding(8.dp))
+                    Row {
+                        Text(
+                            text = "Phone Number",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp,
+                            modifier = Modifier
+                                .padding(bottom = 8.dp)
+                        )
+                        Spacer(modifier = Modifier.padding(8.dp))
+                        Text(
+                            text = user.phoneNumber,
+                            fontSize = 20.sp,
+                            modifier = Modifier
+                                .padding(bottom = 8.dp)
+                        )
+                    }
                 }
             }
 
@@ -138,6 +155,7 @@ fun AdminUserDetailsScreen(user: UserDetails, addressViewModel: AddressViewModel
                 ) {
                     Text(
                         text = "Addresses",
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }

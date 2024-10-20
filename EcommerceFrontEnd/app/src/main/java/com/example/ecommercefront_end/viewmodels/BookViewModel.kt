@@ -228,6 +228,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
                 if (response.isSuccessful && response.body() != null) {
                     _allProducts.value = response.body()!!
+                    _filteredProducts.value = _allProducts.value
                 } else {
                     throw Exception("Error fetching products")
                 }
@@ -298,7 +299,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     }
 
     fun searchBooks(navController: NavController, currentRoute: String?){
-        if(currentRoute != null && currentRoute != "filtered-books") {
+        if(currentRoute != null && (currentRoute != "filtered-books" && currentRoute != "admin-catalogue")) {
             navController.navigate("filtered-books") {
                 popUpTo("home") {
                     saveState = true
@@ -377,7 +378,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     fun insertBook(book: SaveBook){
         viewModelScope.launch {
             try {
-                if (SessionManager.user == null) { //RICORDATI DI MODIFICARLO PER IL CONTROLLO ADMIN
+                if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
                     repository.insertBook(book)
                     fetchAllProducts()
                     Log.d("BookViewModel", "Book added: ${_allProducts.value}")

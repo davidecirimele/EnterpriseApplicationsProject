@@ -17,8 +17,11 @@ import java.util.UUID
 
 class AdminViewModel(private val repository: AdminRepository): ViewModel()  {
 
-    private val _users = MutableStateFlow<List<UserDetails>?>(null)
+    private val _users = MutableStateFlow<List<UserDetails>?>(emptyList())
     val users: StateFlow<List<UserDetails>?> = _users
+
+    private val _filteredUsers = MutableStateFlow<List<UserDetails>?>(emptyList())
+    val filteredUsers: StateFlow<List<UserDetails>?> = _filteredUsers
 
     private val _userFlow = MutableStateFlow<UserDetails?>(null)
     val userFlow: StateFlow<UserDetails?> = _userFlow.asStateFlow()
@@ -28,8 +31,10 @@ class AdminViewModel(private val repository: AdminRepository): ViewModel()  {
             var response = repository.getAllUsers()
 
             if (response != null) {
-                if(response.isSuccessful && response.body()!=null)
+                if(response.isSuccessful && response.body()!=null) {
                     _users.value = response.body()
+                    _filteredUsers.value = response.body()
+                }
             }
             else{
                 throw Exception()
@@ -39,10 +44,27 @@ class AdminViewModel(private val repository: AdminRepository): ViewModel()  {
         }
     }
 
-    suspend fun loadUser(userId: UUID) {
+    fun loadUser(userId: UUID) {
         viewModelScope.launch {
             val user = _users.value?.find { it.id == userId }
             _userFlow.value = user
+        }
+    }
+
+    fun filterUser(value : String? = null){
+        viewModelScope.launch {
+            try {
+                if (users.value!!.isNotEmpty()) {
+                    _filteredUsers.value = users.value?.filter { user ->
+                        (value == null || (user.firstName.contains(value, ignoreCase = true))) ||
+                                (user.lastName.contains(value, ignoreCase = true)) ||
+                                (user.id.toString().contains(value, ignoreCase = true)) ||
+                                (user.email.contains(value, ignoreCase = true))
+                    }
+                }
+            }catch (e: Exception){
+                Log.e("AdminError", "Error filtering users", e)
+            }
         }
     }
 
