@@ -37,7 +37,6 @@ import java.util.UUID;
 public class AuthServiceImpl implements  AuthService{
 
     private final UsersDao userDao;
-
     private final ShoppingCartsDao shoppingCartsDao;
     private final ModelMapper modelMapper;
     private final JwtService jwtService;

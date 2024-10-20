@@ -110,8 +110,8 @@ public class BookController {
     }
 
     @PostMapping(consumes = "application/json", path = "/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BookDto> addBook(@Valid @RequestBody SaveBookDto book){
-        log.info("Sono nel cazzo di controller e questo è il DTO "+book);
         BookDto savedBook = booksService.save(book);
         if(savedBook == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -129,6 +129,7 @@ public class BookController {
 
 
     @PostMapping("/{id}/update-cover")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateBookCover(@PathVariable Long id, @RequestParam("cover") MultipartFile coverImage) {
         try {
             booksService.updateBookCover(id, coverImage);

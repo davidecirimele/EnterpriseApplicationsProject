@@ -29,14 +29,14 @@ public class UserController {
     private final RefreshTokenService refreshTokenService;
 
     @GetMapping("/{id}")
-    @PreAuthorize("#id == authentication.principal.getId()")
+    @PreAuthorize("#id == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<UserDetailsDto> getUserById(@PathVariable UUID id) {
         System.out.println("ROLE: "+userService.getUserRole(id));
         UserDetailsDto user = userService.getUserDetailsById(id);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
     @GetMapping("/all-users")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserDetailsDto>> allUsers() {
         List<UserDetailsDto> users = userService.getAllDto();
         return new ResponseEntity<>(users, HttpStatus.OK);
@@ -81,7 +81,7 @@ public class UserController {
     }
 
     @DeleteMapping(value = "{userId}/delete-account", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("#userId == authentication.principal.getId() or hasAuthority('ADMIN')")
+    @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<UserDto> deleteAccount(@PathVariable UUID userId){
         try{
             userService.delete(userId);

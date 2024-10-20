@@ -51,7 +51,7 @@ public class SecurityConfig {
                     .authorizeHttpRequests(auth -> {
                         auth.requestMatchers("/api/v1/auth/**").permitAll();
                         auth.requestMatchers("/api/v1/paymentMethods/add").authenticated();
-                        auth.requestMatchers("/api/v1/users/**").permitAll(); //Ricordati di rimettere authenticated
+                        auth.requestMatchers("/api/v1/users/**").authenticated();
                         auth.requestMatchers("/api/v1/addresses/**").authenticated();
                         auth.requestMatchers("/api/v1/shopping-cart/**").authenticated();
                         auth.requestMatchers("/api/v1/shopping-cart/cart/**").authenticated();;
@@ -59,8 +59,7 @@ public class SecurityConfig {
                         auth.requestMatchers("api/v1/admin/all-users").authenticated();
                         auth.requestMatchers("api/v1/admin/register").permitAll();
                         auth.requestMatchers("/error").permitAll();
-                                auth.requestMatchers("/api/v1/books/add").permitAll();
-                        //auth.requestMatchers("/api/v1/books/add").authenticated();
+                        auth.requestMatchers("/api/v1/books/add").authenticated();
                         auth.requestMatchers("/api/v1/books/getAll").permitAll(); //testing home front end
                                 auth.requestMatchers("/api/v1/books/get/*").permitAll();
                         auth.requestMatchers("/api/v1/wishlists/**").permitAll();
