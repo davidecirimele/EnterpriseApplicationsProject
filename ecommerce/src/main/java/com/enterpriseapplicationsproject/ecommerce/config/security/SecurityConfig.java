@@ -51,6 +51,8 @@ public class SecurityConfig {
                     .authorizeHttpRequests(auth -> {
                         auth.requestMatchers("/api/v1/auth/**").permitAll();
                         auth.requestMatchers("/api/v1/paymentMethods/add").authenticated();
+                        auth.requestMatchers("/api/v1/paymentMethods/get/**").authenticated();
+                        auth.requestMatchers("/api/v1/paymentMethods/delete/**").authenticated();
                         auth.requestMatchers("/api/v1/users/**").authenticated();
                         auth.requestMatchers("/api/v1/addresses/**").authenticated();
                         auth.requestMatchers("/api/v1/shopping-cart/**").authenticated();
