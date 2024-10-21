@@ -278,6 +278,10 @@ fun NavigationView(navController: NavHostController) {
               CheckoutAddressScreen(viewModel = checkoutViewModel, navController = navController)
             }
 
+            composable("checkout-payment") {
+                CheckoutPaymentScreen(viewModel = checkoutViewModel, navController = navController)
+            }
+
         }
 
     }
@@ -382,7 +386,7 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             selected = selectedIndex.value == 0,
             onClick = {
                 selectedIndex.value = 0
-                navHostController.navigate("admin-home") {
+                navHostController.navigate("home") {
                     popUpTo(navHostController.graph.startDestinationId) {
                         saveState = true
                     }
