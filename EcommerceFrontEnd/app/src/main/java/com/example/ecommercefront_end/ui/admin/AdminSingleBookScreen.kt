@@ -2,6 +2,7 @@ package com.example.ecommercefront_end.ui.admin
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,17 +11,29 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
@@ -30,7 +43,10 @@ import com.example.ecommercefront_end.viewmodels.BookViewModel
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun AdminSingleBookScreen(book: Book, bookViewModel: BookViewModel){
+fun AdminSingleBookScreen(book: Book, bookViewModel: BookViewModel) {
+
+    var showEditPriceField by remember { mutableStateOf(false) }
+    var showRestockField by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = Modifier
@@ -89,6 +105,7 @@ fun AdminSingleBookScreen(book: Book, bookViewModel: BookViewModel){
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                if(!showRestockField)
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Row {
                         Text(
@@ -99,13 +116,21 @@ fun AdminSingleBookScreen(book: Book, bookViewModel: BookViewModel){
                     }
                     Spacer(modifier = Modifier.padding(8.dp))
                     Row {
-                        Button(onClick = { /*TODO*/ }) {
-                            Text(text = "Edit Price",
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.align(Alignment.CenterVertically))
+                        Text(text = "Edit Price",
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.align(Alignment.CenterVertically).clickable { showEditPriceField = true })
+                    }
+                    if(showEditPriceField){
+                        Spacer(modifier = Modifier.padding(8.dp))
+                        Row {
+                            TextFieldWithSubmitButton({ newPrice ->
+                                bookViewModel.updatePrice(newPrice.toDouble(), bookId = book.id);
+                                showEditPriceField = false;
+                            }, book.id)
                         }
                     }
                 }
+                if(!showEditPriceField)
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Row {
                             Text("Stock Quantity: ${book.stock}",
@@ -114,11 +139,17 @@ fun AdminSingleBookScreen(book: Book, bookViewModel: BookViewModel){
                         }
                         Spacer(modifier = Modifier.padding(8.dp))
                         Row {
-                            Button(onClick = {/*TODO*/} ) {
-                                Text("Restock",
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.align(Alignment.CenterVertically))
-                            }
+                            Text("Restock",
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.align(Alignment.CenterVertically).clickable { showRestockField = true })
+                        }
+                        if(showRestockField){
+                            Spacer(modifier = Modifier.padding(8.dp))
+                            Row{
+                            TextFieldWithSubmitButton({
+                                newStock -> bookViewModel.restock(newStock.toInt(), bookId = book.id);
+                                showRestockField = false },book.id)
+                                }
                         }
                     }
             }
@@ -364,6 +395,38 @@ fun AdminSingleBookScreen(book: Book, bookViewModel: BookViewModel){
                     }
                 }
             }
+
+        }
+    }
+}
+
+@Composable
+fun TextFieldWithSubmitButton(
+    onSubmit: (String) -> Unit, bookId: Long
+) {
+    var text by remember { mutableStateOf("") }
+
+    Row{
+        TextField(
+            value = text,
+            onValueChange = { text = it },
+            modifier = Modifier.weight(1f),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    onSubmit(text)
+                }
+            )
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Button(onClick = {
+            onSubmit(text)
+        }) {
+            Text("Submit")
         }
     }
 }

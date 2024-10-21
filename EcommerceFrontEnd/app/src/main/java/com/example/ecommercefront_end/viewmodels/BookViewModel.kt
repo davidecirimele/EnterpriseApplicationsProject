@@ -17,8 +17,10 @@ import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.model.BookFormat
 import com.example.ecommercefront_end.model.BookGenre
 import com.example.ecommercefront_end.model.BookLanguage
+import com.example.ecommercefront_end.model.Price
 import com.example.ecommercefront_end.model.SaveAddress
 import com.example.ecommercefront_end.model.SaveBook
+import com.example.ecommercefront_end.model.Stock
 
 import com.example.ecommercefront_end.model.UserId
 
@@ -387,6 +389,40 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                     Log.d("UserDebug", "User is null")
             } catch (e: Exception) {
                 Log.d("UserDebug", "Error adding Book: $book")
+            }
+        }
+    }
+
+    fun updatePrice(newPrice: Double, bookId: Long){
+        viewModelScope.launch {
+            try {
+                if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
+                    Log.d("UserDebug", "NewPrice ${Price(newPrice)}")
+                    repository.updatePrice(bookId, Price(newPrice))
+                    fetchAllProducts()
+                    loadBook(bookId)
+                }
+                else
+                    Log.d("UserDebug", "User is null")
+            } catch (e: Exception) {
+                e.message?.let { Log.d("UserDebug", it) }
+            }
+        }
+    }
+
+    fun restock(newStock: Int, bookId: Long){
+        viewModelScope.launch {
+            try {
+                if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
+                    Log.d("UserDebug", "NewStock $newStock")
+                    repository.updateStock(bookId, Stock(newStock))
+                    fetchAllProducts()
+                    loadBook(bookId)
+                }
+                else
+                    Log.d("UserDebug", "User is null")
+            } catch (e: Exception) {
+                Log.d("UserDebug", "Error updating Book stock")
             }
         }
     }

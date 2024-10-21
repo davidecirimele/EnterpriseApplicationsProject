@@ -47,6 +47,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.model.UserDetails
 import com.example.ecommercefront_end.network.RetrofitClient
@@ -80,11 +81,13 @@ fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: Addres
         item{
         UserInfo(userDetails, defaultAddress,  accountViewModel = accountViewModel, addressViewModel, navHostController)
         }
-        item {
-            Spacer(modifier = Modifier.height(20.dp))
-        }
-        item {
-            Options(navHostController)
+        if(SessionManager.user != null && SessionManager.user!!.role!="ROLE_ADMIN") {
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+            item {
+                Options(navHostController)
+            }
         }
     }
 }
@@ -182,24 +185,30 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
             }, onError = {isErrorPhoneNumberTriggered = true})
             }
         }
-        Spacer(modifier = Modifier.height(30.dp))
-        Row {
-            Column() {
-                if(defaultAddress != null) {
-                    Text(
-                        text = "Default Address:",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    AddressView(address = defaultAddress, addressViewModel, navController, false)
+        if(SessionManager.user != null && SessionManager.user!!.role!="ROLE_ADMIN") {
+            Spacer(modifier = Modifier.height(30.dp))
+            Row {
+                Column() {
+                    if (defaultAddress != null) {
+                        Text(
+                            text = "Default Address:",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        AddressView(
+                            address = defaultAddress,
+                            addressViewModel,
+                            navController,
+                            false
+                        )
+                    } else
+                        Text(
+                            text = "No Default Address",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
                 }
-                else
-                    Text(
-                        text = "No Default Address",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
             }
         }
             /*user?.phoneNumber?.let {
