@@ -32,7 +32,7 @@ public class WishlistController {
 
     @RateLimit//limite di richieste
     @GetMapping(path= "/getAll")
-    //@PreAuthorize("isAuthenticated()")
+    //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<WishlistDto>> getAll() {
         List<WishlistDto> wishlists = wishlistService.getAllSorted();
         if (wishlists.isEmpty())

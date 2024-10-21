@@ -157,15 +157,17 @@ public class WishlistsServiceImpl implements WishlistsService {
         }
 
         Group group = wishlistToJoin.getGroup();
-        if (group == null || !group.getMembers().contains(user)) {
-            if (group == null) {
-                group = new Group();
-                group.setGroupName("Group " + wishlistToJoin.getName());
-            }
-            group.getMembers().add(user);
-            groupsDao.save(group);
+
+        if (group == null) {
+            group = new Group();
+            group.setGroupName("Group " + wishlistToJoin.getName());
         }
-        else return false;
+        if (group.getMembers().contains(user)){
+            throw new IllegalArgumentException("User is already in the group");
+        }
+
+        group.getMembers().add(user);
+        groupsDao.save(group);
 
         wishlistToJoin.setGroup(group);
         wishlistsDao.save(wishlistToJoin);

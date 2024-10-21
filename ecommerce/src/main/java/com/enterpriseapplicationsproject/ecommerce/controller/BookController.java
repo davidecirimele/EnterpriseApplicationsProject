@@ -44,6 +44,7 @@ public class BookController {
         return ResponseEntity.ok(filteredBooks);
     }
 
+
     @GetMapping("/get/max-price")
     public ResponseEntity<Double> getMaxPrice() {
         Double maxPrice = booksService.getMaxBookPrice();
@@ -109,7 +110,7 @@ public class BookController {
     }
 
     @PostMapping(consumes = "application/json", path = "/add")
-    @PreAuthorize("hasRole('ADMIN') and isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN') ")
     public ResponseEntity<BookDto> add(@RequestBody SaveBookDto bDto) {
         BookDto b = booksService.save(bDto);
         if (b == null)
