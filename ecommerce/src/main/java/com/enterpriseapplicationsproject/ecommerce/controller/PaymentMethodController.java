@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -35,17 +36,17 @@ public class PaymentMethodController {
         return new ResponseEntity<>(paymentMethod, HttpStatus.CREATED);
     }
 
-    @GetMapping(consumes = "application/json", path = "/get/{userId}")
+    @GetMapping(path = "/get/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
-    public ResponseEntity<PaymentMethodDto> getPaymentMethodByUserId(@PathVariable UUID userId) {
-        PaymentMethodDto paymentMethod = paymentMethodService.getPaymentMethodByUserId(userId);
+    public ResponseEntity<List<PaymentMethodDto>> getAllPaymentMethodByUserId(@PathVariable UUID userId) {
+        List<PaymentMethodDto> paymentMethod = paymentMethodService.getAllPaymentMethodByUserId(userId);
         return new ResponseEntity<>(paymentMethod, HttpStatus.OK);
     }
 
-    @DeleteMapping(consumes = "application/json", path = "/delete/{userId}")
+    @DeleteMapping(path = "/delete/{paymentMethodId}/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
-    public ResponseEntity<PaymentMethodDto> deletePaymentMethodByUserId(@PathVariable UUID userId) {
-        PaymentMethodDto paymentMethod = paymentMethodService.deletePaymentMethodByUserId(userId);
-        return new ResponseEntity<>(paymentMethod, HttpStatus.OK);
+    public ResponseEntity<Void> deletePaymentMethodByUserId(@PathVariable UUID userId, @PathVariable Long paymentMethodId) {
+       paymentMethodService.deletePaymentMethodByUserId(userId, paymentMethodId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

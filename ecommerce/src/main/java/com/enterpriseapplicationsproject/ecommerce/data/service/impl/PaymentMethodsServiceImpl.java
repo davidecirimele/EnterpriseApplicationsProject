@@ -7,6 +7,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.dto.SavePaymentMethodDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.DecryptionErrorException;
 import com.enterpriseapplicationsproject.ecommerce.exception.EncryptionErrorException;
+import com.enterpriseapplicationsproject.ecommerce.exception.UnauthorizedAccessException;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserNotFoundException;
 import com.enterpriseapplicationsproject.ecommerce.utils.EncryptionUtils;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.PaymentMethodsDao;
@@ -17,8 +18,11 @@ import com.enterpriseapplicationsproject.ecommerce.dto.PaymentMethodDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +39,7 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
 
     @Override
     public PaymentMethodDto addPaymentMethod(SavePaymentMethodDto paymentMethodDto) {
+        System.out.println("PaymentMethodDto: " + paymentMethodDto.toString());
         User user = userDao.findById(paymentMethodDto.getUser().getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
         EncryptionUtils encryptionUtils = new EncryptionUtils(encryptionConfig.getSecretKey());
         String encryptedCardNumber;
@@ -53,26 +58,38 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
     }
 
     @Override
-    public PaymentMethodDto getPaymentMethodByUserId(UUID userId) {
-        PaymentMethod paymentMethod = paymentMethodsDao.findByUserId(userId);
+    public List<PaymentMethodDto> getAllPaymentMethodByUserId(UUID userId) {
+        List<PaymentMethod> paymentMethod = paymentMethodsDao.findAllByUserId(userId);
+        System.out.println("PaymentMethod: " + paymentMethod.toString());
         EncryptionUtils encryptionUtils = new EncryptionUtils(encryptionConfig.getSecretKey());
-        String decryptedCardNumber;
-        try {
-            decryptedCardNumber = encryptionUtils.decrypt(paymentMethod.getCardNumber());
-        }
-        catch (Exception e){
-            throw  new DecryptionErrorException("Error decrypting card number");
-        }
-        PaymentMethodDto paymentMethodDto = modelMapper.map(paymentMethod, PaymentMethodDto.class);
-        paymentMethodDto.setCardNumber(MaskCardNumber(decryptedCardNumber));
+        List<PaymentMethodDto> paymentMethodDtoList = paymentMethod.stream().map(pm -> {
+            String decryptedCardNumber;
+            try {
+                decryptedCardNumber = encryptionUtils.decrypt(pm.getCardNumber());
+            } catch (Exception e) {
+                throw new DecryptionErrorException("Error decrypting card number");
+            }
+            // Maschera il numero di carta e lo imposta su PaymentMethodDto
+            PaymentMethodDto paymentMethodDto = modelMapper.map(pm, PaymentMethodDto.class);
+            paymentMethodDto.setCardNumber(MaskCardNumber(decryptedCardNumber));
+            return paymentMethodDto;
+        }).collect(Collectors.toList());
 
-        return paymentMethodDto;
+        System.out.println("PaymentMethodDtoList: " + paymentMethodDtoList.toString());
+
+        return paymentMethodDtoList;
     }
 
     @Override
-    public PaymentMethodDto deletePaymentMethodByUserId(UUID userId) {
-        PaymentMethod paymentMethod = paymentMethodsDao.deleteByUserId(userId);
-        return modelMapper.map(paymentMethod, PaymentMethodDto.class);
+    @Transactional
+    public Void deletePaymentMethodByUserId(UUID userId, Long paymentMethodId) {
+        System.out.println("userId: " + userId + " paymentMethodId: " + paymentMethodId);
+         Integer res = paymentMethodsDao.deleteByUserIdAndPaymentMethodId(userId, paymentMethodId);
+        if (res == 0) {
+            throw new UnauthorizedAccessException("Unauthorized access");
+        }
+        return null;
+
     }
 
     private String MaskCardNumber(String cardNumber) {
