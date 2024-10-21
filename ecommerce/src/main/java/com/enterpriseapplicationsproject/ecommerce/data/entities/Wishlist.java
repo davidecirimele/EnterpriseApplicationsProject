@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @Table(name= "Wishlists", uniqueConstraints =
@@ -47,4 +48,16 @@ public class Wishlist {
 
     @Basic(optional = false)
     private String privacySetting;
+
+    @Basic(optional = false)
+    private String wishlistToken;
+
+    /*
+    public String getWToken() {
+        return this.wToken;
+    }
+
+    public void setWToken(String wToken) {
+        this.wToken = wToken;
+    }*/
 }

@@ -70,9 +70,9 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public List<UserDto> getAllDto() {
+    public List<UserDetailsDto> getAllDto() {
         List<User> users = userDao.findAll();
-        return users.stream().map(user1 -> modelMapper.map(user1, UserDto.class)).toList();
+        return users.stream().map(user1 -> modelMapper.map(user1, UserDetailsDto.class)).toList();
     }
 
     public List<User> getAll() {

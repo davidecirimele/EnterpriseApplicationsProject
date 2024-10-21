@@ -29,7 +29,7 @@ public class AddressController {
     private final UserService userService;
 
     @GetMapping("/all")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AddressDto>> getAddresses() {
         log.info("Received request for addresses/all");
         List<AddressDto> addresses = addressService.getAddresses();
@@ -37,7 +37,7 @@ public class AddressController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("#id == authentication.principal.getId()")
+    @PreAuthorize("#id == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<AddressDto>> getValidAddressesByUserId(@PathVariable UUID id) {
         log.info("Received request for addresses/{id}");
         User user = userService.getUserById(id);
@@ -50,7 +50,7 @@ public class AddressController {
     }
 
     @GetMapping("/{id}/default")
-    @PreAuthorize("#id == authentication.principal.getId()")
+    @PreAuthorize("#id == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<AddressDto> getDefaultAddressByUserId(@PathVariable UUID id) {
         log.info("Received request for addresses/{id}/default");
         User user = userService.getUserById(id);
@@ -63,7 +63,7 @@ public class AddressController {
     }
 
     @GetMapping("/{userId}/{id}")
-    @PreAuthorize("#userId == authentication.principal.getId()")
+    @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<AddressDto> getValidAddressByUserId(@PathVariable UUID userId, @PathVariable Long id) {
         log.info("Received request for addresses/{userId}/{id}");
         User user = userService.getUserById(userId);
@@ -76,7 +76,7 @@ public class AddressController {
     }
 
     @GetMapping("/all/{id}")
-    @PreAuthorize("#id == authentication.principal.getId() or hasAuthority('ADMIN')")
+    @PreAuthorize("#id == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<AddressDto>> getAddressByUserId(@PathVariable UUID id) {
         log.info("Received request for addresses/all/{id}");
         User user = userService.getUserById(id);
@@ -99,7 +99,7 @@ public class AddressController {
 
 
     @DeleteMapping("/{addressId}/delete")
-    @PreAuthorize("#userId.userId == authentication.principal.getId()")
+    @PreAuthorize("#userId.userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<Boolean> deleteAddress(@PathVariable Long addressId, @RequestBody UserIdDto userId) {
         log.info("Received request for addresses/{addressId}/delete");
         boolean isRemoved = addressService.deleteAddress(addressId);
@@ -110,7 +110,7 @@ public class AddressController {
     }
 
     @PutMapping("/{addressId}/update-default")
-    @PreAuthorize("#userId.userId == authentication.principal.getId()")
+    @PreAuthorize("#userId.userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<AddressDto> updateDefaultAddress(@PathVariable Long addressId, @RequestBody UserIdDto userId) {
         log.info("Received request for addresses/{addressId}/update-default");
         AddressDto updatedAddress= addressService.updateDefaultAddress(addressId);

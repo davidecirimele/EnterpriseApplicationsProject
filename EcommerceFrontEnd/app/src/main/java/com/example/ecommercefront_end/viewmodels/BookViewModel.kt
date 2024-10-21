@@ -228,6 +228,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
                 if (response.isSuccessful && response.body() != null) {
                     _allProducts.value = response.body()!!
+                    _filteredProducts.value = _allProducts.value
                 } else {
                     throw Exception("Error fetching products")
                 }
@@ -298,17 +299,21 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     }
 
     fun searchBooks(navController: NavController, currentRoute: String?){
-        if(currentRoute != null && currentRoute != "filtered-books") {
+        if(currentRoute != null && (currentRoute != "filtered-books" && currentRoute != "admin-catalogue")) {
             navController.navigate("filtered-books") {
                 popUpTo("home") {
                     saveState = true
                 }
             }
         }
-        if(searchInCachedBooks()<10) {
+
+        fetchFilteredBooks()
+
+        /*
+        if(!searchInCachedBooks()) {
             Log.d("BookDebug", "Too few cached products found, fetching from backend...")
             fetchFilteredBooks()
-        }
+        }*/
     }
 
     fun sortProducts(){
@@ -329,7 +334,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         }
     }
 
-    private fun searchInCachedBooks(): Int {
+    private fun searchInCachedBooks(): Boolean {
         if(cachedProducts.value.isNotEmpty()){
             Log.d("BookDebug", "Cached products found, applying filters...")
             _filteredProducts.value = cachedProducts.value.filter { book ->
@@ -355,7 +360,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
             Log.d("BookDebug", "Filter values: ${filter.value}")
             Log.d("BookDebug", "Filtered products: ${_filteredProducts.value.size}")
         }
-        return _filteredProducts.value.size
+        return _filteredProducts.value.isNotEmpty()
     }
 
     fun clearCache(){
@@ -373,7 +378,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     fun insertBook(book: SaveBook){
         viewModelScope.launch {
             try {
-                if (SessionManager.user == null) { //RICORDATI DI MODIFICARLO PER IL CONTROLLO ADMIN
+                if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
                     repository.insertBook(book)
                     fetchAllProducts()
                     Log.d("BookViewModel", "Book added: ${_allProducts.value}")

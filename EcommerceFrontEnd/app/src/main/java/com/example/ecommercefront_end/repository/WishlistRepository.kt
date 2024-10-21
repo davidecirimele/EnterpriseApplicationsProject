@@ -37,6 +37,24 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
         }
     }
 
+    suspend fun getFriendWishlist(userId : UUID): List<Wishlist>{
+        return try {
+            val wishlists = wApiService.getFriendWishlists(userId)
+            println("Cercando wishlist per amico "+ userId)
+            if (wishlists.isEmpty()) {
+                println("Nessuna lista dei desideri trovata per l amico")
+            } else {
+                println("Liste dei desideri amico prese")
+            }
+            wishlists
+
+        } catch (e: Exception) {
+            println("Errore durante il recupero di tutte le liste dei desideri: ${e.message}")
+            emptyList() // Restituisci una lista vuota in caso di errore
+        }
+    }
+
+
     suspend fun getAllWishlists() : List<Wishlist> {
         return try {
             val wishlists = wApiService.getAllWishlist()
@@ -91,6 +109,10 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
 
     suspend fun getWishlistsByFriends(id: UUID): List<Wishlist> {
         return wApiService.getFriendWishlists(id)
+    }
+
+    suspend fun unshareWishlist(id: UUID, wishlist: Wishlist): Response<Boolean> {
+        return wApiService.unshareWishlist(id, wishlist)
     }
 
 }

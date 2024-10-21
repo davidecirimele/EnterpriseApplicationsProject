@@ -99,6 +99,33 @@ public class ModelMapperConfig {
             }
         });
 
+        modelMapper.addMappings(new PropertyMap<WishlistDto, Wishlist>() {
+            @Override
+            protected void configure() {
+                map(source.getPrivacySetting(), destination.getPrivacySetting());
+                map(source.getWishlistToken(), destination.getWishlistToken());
+                map(source.getGroup(), destination.getGroup());
+                map(source.getUser(), destination.getUserId());
+                map(source.getItems(), destination.getItems());
+                map( source.getName(), destination.getName());
+
+            }
+        });
+
+        modelMapper.addMappings(new PropertyMap<Wishlist, WishlistDto>() {
+            @Override
+            protected void configure() {
+                map(source.getPrivacySetting(), destination.getPrivacySetting());
+                // Aggiungi questa riga per mappare wToken esplicitamente
+                map(source.getWishlistToken(), destination.getWishlistToken());
+                map(source.getGroup(), destination.getGroup());
+                map(source.getUserId(), destination.getUser());
+                map(source.getItems(), destination.getItems());
+                map(source.getName(), destination.getName());
+            }
+        });
+
+
         return modelMapper;
     }
 }

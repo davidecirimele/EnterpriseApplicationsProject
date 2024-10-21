@@ -2,6 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.dto;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistItem;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -13,8 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
-@ToString
 public class WishlistDto {
 
     private Long id;
@@ -28,4 +27,6 @@ public class WishlistDto {
     private GroupDto group;
 
     private String privacySetting;
+
+    private String wishlistToken;
 }

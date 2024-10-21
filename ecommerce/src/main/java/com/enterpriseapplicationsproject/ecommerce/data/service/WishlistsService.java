@@ -16,6 +16,7 @@ public interface WishlistsService {
 
     List<WishlistDto> getFriendWishlists(UUID userId);
 
+
     List<Wishlist> getAll();
 
     void save(Wishlist wishlist);
@@ -27,15 +28,20 @@ public interface WishlistsService {
     WishlistDto updateWishlist(WishlistDto wishlistDto);
 
     @Transactional
-    Boolean JoinShareWishlist(Long wishlistId, UUID idUser);
+    Boolean JoinShareWishlist(UUID idUserToJoin, String wToken);
 
     @Transactional
-    Boolean unshareWishlist(Long wishlistId);
+    Boolean unshareWishlist(Long wishlistId, UUID idUser);
 
-    WishlistDto getById(Long id);
+    WishlistDto getDtoById(Long id);
+
+   // Wishlist getById(Long id);
+
 
     List<WishlistDto> getByLastname(String name);
 
     void deleteWishlist(Long id);
     WishlistDto deleteWishlistByID(Long id);
+
+    WishlistDto getWishlistByToken(String token);
 }
