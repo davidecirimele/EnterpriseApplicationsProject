@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end
 
+import CheckoutViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
@@ -96,6 +97,8 @@ import com.example.ecommercefront_end.repository.AdminRepository
 import com.example.ecommercefront_end.repository.AuthRepository
 import com.example.ecommercefront_end.repository.BookRepository
 import com.example.ecommercefront_end.repository.CartRepository
+import com.example.ecommercefront_end.repository.CheckoutRepository
+
 import com.example.ecommercefront_end.repository.WishlistRepository
 import com.example.ecommercefront_end.ui.admin.AdminCatalogueScreen
 import com.example.ecommercefront_end.ui.user.EditAddressScreen
@@ -112,6 +115,9 @@ import com.example.ecommercefront_end.ui.admin.AdminSingleBookScreen
 import com.example.ecommercefront_end.ui.admin.AdminUserDetailsScreen
 import com.example.ecommercefront_end.ui.admin.AdminUsersListScreen
 import com.example.ecommercefront_end.ui.admin.InsertProductScreen
+import com.example.ecommercefront_end.ui.checkout.CheckoutAddressScreen
+import com.example.ecommercefront_end.ui.checkout.CheckoutPaymentScreen
+import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
 import com.example.ecommercefront_end.ui.user.InsertAddressScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
 import com.example.ecommercefront_end.ui.user.UserAuthScreen
@@ -163,6 +169,7 @@ fun NavigationView(navController: NavHostController) {
     val addressViewModel = remember { AddressViewModel(repository = AddressRepository(RetrofitClient.addressApiService)) }
     val bookViewModel = remember { BookViewModel(repository = BookRepository(RetrofitClient.booksApiService)) }
     val adminViewModel = remember { AdminViewModel(repository = AdminRepository(RetrofitClient.adminApiService)) }
+    val checkoutViewModel = remember { CheckoutViewModel(checkoutRepository = CheckoutRepository(RetrofitClient.checkoutApiService)) }
 
     val startDestination = if (SessionManager.user?.role == "ROLE_ADMIN") {
         "admin-home"
@@ -258,7 +265,7 @@ fun NavigationView(navController: NavHostController) {
 
             composable("cart") {
                 selectedIndex.value = 2
-                CartScreen(viewModel = cartViewModel, navController = navController, onCheckoutClick = { /* Add your action here */ })
+                CartScreen(viewModel = cartViewModel, navController = navController, onCheckoutClick = { navController.navigate("checkout") })
 
             }
             composable("wishlist") {
