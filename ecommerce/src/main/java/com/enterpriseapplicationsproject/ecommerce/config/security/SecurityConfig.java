@@ -48,24 +48,26 @@ public class SecurityConfig {
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             http
                     .csrf(AbstractHttpConfigurer::disable).exceptionHandling(AbstractHttpConfigurer::disable)
-                    .authorizeHttpRequests(auth -> {
-                        auth.requestMatchers("/api/v1/auth/**").permitAll();
-                        auth.requestMatchers("/api/v1/paymentMethods/add").authenticated();
-                        auth.requestMatchers("/api/v1/paymentMethods/get/**").authenticated();
-                        auth.requestMatchers("/api/v1/paymentMethods/delete/**").authenticated();
-                        auth.requestMatchers("/api/v1/users/**").authenticated();
-                        auth.requestMatchers("/api/v1/addresses/**").authenticated();
-                        auth.requestMatchers("/api/v1/shopping-cart/**").authenticated();
-                        auth.requestMatchers("/api/v1/shopping-cart/cart/**").authenticated();;
-                        auth.requestMatchers("api/v1/admin/all-tokens").authenticated();
-                        auth.requestMatchers("api/v1/admin/all-users").authenticated();
-                        auth.requestMatchers("api/v1/admin/register").permitAll();
-                        auth.requestMatchers("/error").permitAll();
-                        auth.requestMatchers("/api/v1/books/add").authenticated();
-                        auth.requestMatchers("/api/v1/books/getAll").permitAll(); //testing home front end
+                    .exceptionHandling(AbstractHttpConfigurer::disable)
+                    .authorizeHttpRequests(auth -> {auth
+                            .requestMatchers("/api/v1/auth/**").permitAll();
+                    auth.requestMatchers("/api/v1/paymentMethods/add").authenticated();
+                    auth.requestMatchers("/api/v1/paymentMethods/get/{userId}").authenticated();
+                    auth.requestMatchers("/api/v1/paymentMethods/delete/{paymentMethodId}/{userId}").authenticated();
+                    auth.requestMatchers("/api/v1/users/**").authenticated();
+                    auth.requestMatchers("/api/v1/addresses/**").authenticated();
+                    auth.requestMatchers("/api/v1/shopping-cart/**").authenticated();
+                    auth.requestMatchers("/api/v1/shopping-cart/cart/**").authenticated();;
+                    auth.requestMatchers("api/v1/admin/all-tokens").authenticated();
+                    auth.requestMatchers("api/v1/admin/all-users").authenticated();
+                    auth.requestMatchers("api/v1/admin/register").permitAll();
+                    auth.requestMatchers("/error").permitAll();
+                    auth.requestMatchers("/api/v1/books/add").authenticated();
+                    auth.requestMatchers("/api/v1/books/getAll").permitAll(); //testing home front end
                                 auth.requestMatchers("/api/v1/books/get/*").permitAll();
-                        auth.requestMatchers("/api/v1/wishlists/**").permitAll();
-                        auth.requestMatchers("/api/v1/wishlist-items/**").permitAll();
+                    auth.requestMatchers("/api/v1/wishlists/**").permitAll();
+                    auth.requestMatchers("/api/v1/wishlist-items/**").permitAll();
+                    auth.requestMatchers("/api/v1/shopping-cart/get/total/**").authenticated();
                     }
                     )
                     .sessionManagement(session -> session
@@ -74,6 +76,8 @@ public class SecurityConfig {
                     .authenticationProvider(authenticationProvider())
                     .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                     .addFilterBefore(ExceptionHandlerFilter, JwtAuthenticationFilter.class);
+
+
 
             return http.build();
         }
