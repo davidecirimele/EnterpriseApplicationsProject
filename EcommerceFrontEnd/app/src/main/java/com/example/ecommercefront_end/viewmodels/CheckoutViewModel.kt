@@ -7,8 +7,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Address
+import com.example.ecommercefront_end.model.CardProvider
 import com.example.ecommercefront_end.model.PaymentMethod
+import com.example.ecommercefront_end.model.PaymentMethodType
 import com.example.ecommercefront_end.model.SaveAddress
+import com.example.ecommercefront_end.model.SavePaymentMethod
 import com.example.ecommercefront_end.repository.AddressRepository
 import com.example.ecommercefront_end.repository.CheckoutRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +19,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 
 class CheckoutViewModel(private val checkoutRepository: CheckoutRepository) : ViewModel() {
-
 
     private val _street = MutableStateFlow("")
     val street: StateFlow<String> = _street
@@ -36,14 +38,15 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository) : Vi
     private val _additionalInfo = MutableStateFlow("")
     val additionalInfo: StateFlow<String> = _additionalInfo
 
-
-
     private val _addresses = MutableStateFlow<List<Address>>(emptyList())
     val addresses: StateFlow<List<Address>> = _addresses
 
     // Stato per l'indirizzo di spedizione selezionato
     private val _selectedAddress = MutableStateFlow<Address?>(null)
     val selectedAddress: StateFlow<Address?> = _selectedAddress
+
+    private val _paymentMethods = MutableStateFlow<List<PaymentMethod>>(emptyList())
+    val paymentMethods: StateFlow<List<PaymentMethod>> = _paymentMethods
 
     // Stato per il metodo di pagamento selezionato
     private val _selectedPaymentMethod = MutableStateFlow<PaymentMethod?>(null)
@@ -60,6 +63,27 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository) : Vi
     private val _addressBeingEdited = MutableStateFlow<Address?>(null)
     val addressBeingEdited: StateFlow<Address?> = _addressBeingEdited
 
+    private val _cardHolderName = MutableStateFlow("")
+    val cardHolderName: StateFlow<String> = _cardHolderName
+
+    private val _cardNumber = MutableStateFlow("")
+    val cardNumber: StateFlow<String> = _cardNumber
+
+    private val _expirationDate = MutableStateFlow("")
+    val expirationDate: StateFlow<String> = _expirationDate
+
+    private val _paymentMethodType = MutableStateFlow<PaymentMethodType?>(null)
+    val paymentMethodType: StateFlow<PaymentMethodType?> = _paymentMethodType
+
+    private val _selectedCardProvider = MutableStateFlow<CardProvider?>(null)
+    val selectedCardProvider: StateFlow<CardProvider?> = _selectedCardProvider
+
+    private val _isAddingNewPaymentMethod = MutableStateFlow(false)
+    val isAddingNewPaymentMethod: StateFlow<Boolean> = _isAddingNewPaymentMethod
+
+    private val _selectedPaymentMethodType = MutableStateFlow<PaymentMethodType?>(null)
+    val selectedPaymentMethodType: StateFlow<PaymentMethodType?> = _selectedPaymentMethodType
+
     // Funzione per attivare o disattivare la modalità di modifica di un indirizzo
     fun toggleEditAddress(address: Address?) {
         if (_addressBeingEdited.value == address) {
@@ -69,13 +93,12 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository) : Vi
         }
     }
 
-
     // Funzione per selezionare l'indirizzo
     fun selectAddress(address: Address) {
         _selectedAddress.value = address
     }
 
-    fun prepareNewAdddress(){
+    fun prepareNewAdddress() {
         _addressBeingEdited.value = null
         _street.value = ""
         _province.value = ""
@@ -94,7 +117,7 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository) : Vi
         _additionalInfo.value = address.additionalInfo
     }
 
-    fun onSaveClick(address: Address?){
+    fun onSaveClick(address: Address?) {
         if (address != null && _addressBeingEdited.value != null) {
             println("indirizzo da salvare: $address")
             onSaveEdit(address)
@@ -103,10 +126,7 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository) : Vi
         }
     }
 
-
-
-
-    fun  addAndSelectNewAddress(newAddress: SaveAddress, sessionManager: SessionManager) {
+    fun addAndSelectNewAddress(newAddress: SaveAddress, sessionManager: SessionManager) {
         viewModelScope.launch {
             _addresses.value = _addresses.value.toMutableList().apply {
                 checkoutRepository.addShippingAddress(newAddress, sessionManager)
@@ -124,30 +144,30 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository) : Vi
     }
 
     fun onStreetChange(street: String) {
-            this._street.value = street
+        this._street.value = street
         println("street immessa: $street")
         print("street nel viewmodel: ${_street.value}")
     }
 
     fun onCityChange(city: String) {
-            this._city.value = city
+        this._city.value = city
     }
 
     fun onPostalCodeChange(postalCode: String) {
-            this._postalCode.value = postalCode
+        this._postalCode.value = postalCode
     }
 
     fun onAdditionalInfoChange(additionalInfo: String) {
-            this._additionalInfo.value = additionalInfo
+        this._additionalInfo.value = additionalInfo
 
     }
 
     fun onStateChange(state: String) {
-            this._state.value = state
+        this._state.value = state
     }
 
     fun onProvinceChange(province: String) {
-            this._province.value = province
+        this._province.value = province
     }
 
     fun onSave() {
@@ -166,7 +186,7 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository) : Vi
         }
     }
 
-    fun onSaveEdit( address: Address){
+    fun onSaveEdit(address: Address) {
         viewModelScope.launch {
             val addressId = address.id
             val newAddress = SaveAddress(
@@ -184,68 +204,172 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository) : Vi
         }
     }
 
-
-
     // Funzione per selezionare il metodo di pagamento
     fun selectPaymentMethod(paymentMethod: PaymentMethod) {
         _selectedPaymentMethod.value = paymentMethod
     }
 
-    // Funzione per aggiornare il totale
-    fun updateTotalAmount(total: Double) {
-        _totalAmount.value = total
-    }
-
-    // Funzione per confermare l'ordine (placeholder)
-    fun confirmOrder(): Boolean {
-        return _selectedAddress.value != null && _selectedPaymentMethod.value != null
-    }
-
-    fun loadCheckoutData() {
+    fun onAddPaymentMethodClick() {
         viewModelScope.launch {
-            try {
+            val user = SessionManager.getUser()
+            val newPaymentMethod = SavePaymentMethod(
+                user = user,
+                cardHolderName = _cardHolderName.value,
+                cardNumber = _cardNumber.value,
+                paymentMethodType = _selectedPaymentMethodType.value,
+                provider = _selectedCardProvider.value,
+                expirationDate = _expirationDate.value
+            )
+            val res = checkoutRepository.addPaymentMethod(newPaymentMethod)
+            if (res.isSuccessful) {
+                resetPaymentMethodForm()
+                val pm = checkoutRepository.getPaymentMethods(user.userId)
+                if (pm.isSuccessful && pm.body() != null) {
+                    val payments = pm.body()
+                    if (payments != null) {
+                        _paymentMethods.value = payments
+                    }
+
+                }
+            }
+        }
+    }
+
+
+
+        fun toggleAddNewPaymentMethod() {
+            _isAddingNewPaymentMethod.value = !_isAddingNewPaymentMethod.value
+        }
+
+        fun onCardNumberChange(cardNumber: String) {
+            _cardNumber.value = cardNumber
+        }
+
+        fun onExpirationDateChange(expirationDate: String) {
+            _expirationDate.value = expirationDate
+        }
+
+        fun onCardHolderNameChange(cardHolderName: String) {
+            _cardHolderName.value = cardHolderName
+        }
+
+        fun selectCardProvider(cardProvider: CardProvider?) {
+            _selectedCardProvider.value = cardProvider
+        }
+
+        fun resetPaymentMethodForm() {
+            _cardHolderName.value = ""
+            _cardNumber.value = ""
+            _expirationDate.value = ""
+        }
+
+        fun selectPaymentMethodType(paymentMethodType: PaymentMethodType) {
+            _selectedPaymentMethodType.value = paymentMethodType
+        }
+
+
+        fun deletePaymentMethod(paymentMethod: Long) {
+            viewModelScope.launch {
                 val user = SessionManager.user?.id
-                if (user != null) {
-                    if (_selectedAddress.value == null) {
-                        val response =
-                            checkoutRepository.getShippingAddress(user) // Chiamata alla funzione suspend
-                        if (response.isSuccessful) {  // Controlla se la richiesta è andata a buon fine
-                            val address =
-                                response.body()  // Ottieni il corpo della risposta (Address?)
-                            if (address != null) {
-                                _selectedAddress.value = address  // Imposta l'indirizzo selezionato
+                if (user != null)
+                    checkoutRepository.deletePaymentMethod(user, paymentMethod)
+                _paymentMethods.value = _paymentMethods.value.toMutableList().apply {
+                    removeIf { it.id == paymentMethod }
+                }
+
+                if (_selectedPaymentMethod.value?.id == paymentMethod) {
+                    _selectedPaymentMethod.value = _paymentMethods.value.firstOrNull()
+
+                }
+            }
+        }
+
+
+        // Funzione per confermare l'ordine (placeholder)
+        fun confirmOrder(): Boolean {
+            return _selectedAddress.value != null && _selectedPaymentMethod.value != null
+        }
+
+        fun loadCheckoutData() {
+            viewModelScope.launch {
+                try {
+                    val user = SessionManager.user?.id
+                    if (user != null) {
+                        if (_selectedAddress.value == null) {
+                            val response =
+                                checkoutRepository.getShippingAddress(user)
+                            if (response.isSuccessful) {
+                                val address =
+                                    response.body()
+                                if (address != null) {
+                                    _selectedAddress.value = address
+                                }
+                            } else {
+                                _selectedAddress.value = null
                             }
-                        } else {
-                            _selectedAddress.value = null
                         }
+                        println("mDp selezionato: ${_selectedPaymentMethod.value}")
+                        if (_selectedPaymentMethod.value == null) {
+                            val response = checkoutRepository.getPaymentMethods(user)
+                            println("response status: ${response.isSuccessful}")
+                            if (response.isSuccessful) {
+                                val paymentMethods = response.body()
+                                println("metodi di pagamento: $paymentMethods")
+                                if (paymentMethods != null) {
+                                    _paymentMethods.value = paymentMethods
+                                    _selectedPaymentMethod.value = paymentMethods.firstOrNull()
+                                    println("")
+                                }
+                            }
+                        }
+
+
+                        _totalAmount.value =
+                            checkoutRepository.getOrderTotal(user) // Ottieni il totale dell'ordine
                     }
-
-
-                    _totalAmount.value = checkoutRepository.getOrderTotal(user) // Ottieni il totale dell'ordine
+                } catch (e: Exception) {
+                    // Gestire l'errore
                 }
-            } catch (e: Exception) {
-                // Gestire l'errore
             }
         }
-    }
 
-    fun loadAddresses() {
-        viewModelScope.launch {
-            try {
-                val user = SessionManager.user?.id
-                if (user != null) {
-                    val response = checkoutRepository.getShippingAddresses(user)
-                    if (response.isSuccessful) {
-                        val addresses = response.body()
-                        if (addresses != null) {
-                            _addresses.value = addresses
+        fun loadAddresses() {
+            viewModelScope.launch {
+                try {
+                    val user = SessionManager.user?.id
+                    if (user != null) {
+                        val response = checkoutRepository.getShippingAddresses(user)
+                        if (response.isSuccessful) {
+                            val addresses = response.body()
+                            if (addresses != null) {
+                                _addresses.value = addresses
+                            }
                         }
                     }
+                } catch (e: Exception) {
+                    // Gestire l'errore
                 }
-            } catch (e: Exception) {
-                // Gestire l'errore
             }
         }
+
+        fun loadPaymentMethods() {
+            viewModelScope.launch {
+                try {
+                    val user = SessionManager.user?.id
+                    if (user != null) {
+                        val response = checkoutRepository.getPaymentMethods(user)
+                        if (response.isSuccessful) {
+                            val paymentMethods = response.body()
+                            if (paymentMethods != null) {
+                                _paymentMethods.value = paymentMethods
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Gestire l'errore
+                }
+            }
+        }
+
     }
 
-}

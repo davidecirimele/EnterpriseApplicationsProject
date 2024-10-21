@@ -54,9 +54,9 @@ fun CheckoutScreen(viewModel: CheckoutViewModel, onConfirmOrder: () -> Unit, nav
         CheckoutSectionWithArrow(
             title = "Payment Method",
             content = viewModel.selectedPaymentMethod.collectAsState().value?.let {
-                "${it.cardHolderName} - **** ${it.cardNumber.takeLast(4)}"
+                "${it.cardHolderName} - ${it.cardNumber}"
             } ?: "Select a payment method",
-            onClick = { /* Naviga alla schermata di selezione del metodo di pagamento */ }
+            onClick = { navController.navigate("checkout-payment") }
         )
 
         Spacer(modifier = Modifier.height(16.dp))

@@ -4,8 +4,8 @@ data class SavePaymentMethod(
 
         val user : UserId,
         val cardHolderName : String,
-        val paymentMethodType : Enum<PaymentMethodType>,
-        val provider : Enum <CardProvider>,
+        val paymentMethodType : PaymentMethodType?,
+        val provider : CardProvider?,
         val cardNumber: String,
         val expirationDate: String
 

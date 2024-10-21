@@ -1,6 +1,11 @@
 package com.example.ecommercefront_end.network
 
 import com.example.ecommercefront_end.SessionManager
+import com.example.ecommercefront_end.model.CardProvider
+import com.example.ecommercefront_end.model.CardProviderAdapter
+
+import com.example.ecommercefront_end.model.PaymentMethodType
+import com.example.ecommercefront_end.model.PaymentMethodTypeAdapter
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -59,7 +64,8 @@ object RetrofitClient {
             .client(client)
             .addConverterFactory(GsonConverterFactory.create(
                 GsonBuilder()
-                    .registerTypeAdapter(LocalDate::class.java, LocalDateAdapter())
+                    .registerTypeAdapter(LocalDate::class.java, LocalDateAdapter()).registerTypeAdapter(PaymentMethodType::class.java,  PaymentMethodTypeAdapter() )
+                    .registerTypeAdapter(CardProvider::class.java, CardProviderAdapter())
                     .create()
             ))
             .build()

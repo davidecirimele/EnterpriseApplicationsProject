@@ -1,12 +1,14 @@
 package com.example.ecommercefront_end.network
 
 import com.example.ecommercefront_end.model.Address
+import com.example.ecommercefront_end.model.PaymentMethod
 import com.example.ecommercefront_end.model.RequiresAuth
 import com.example.ecommercefront_end.model.SaveAddress
 import com.example.ecommercefront_end.model.SavePaymentMethod
 import com.example.ecommercefront_end.model.UserId
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -48,14 +50,22 @@ interface CheckoutApiService {
 
     // Recupera la lista dei metodi di pagamento dell'utente
     @GET("paymentMethods/get/{userId}")
-    suspend fun getPaymentMethods(@Path("userId") userId: Long)
+    @RequiresAuth
+    suspend fun getPaymentMethods(@Path("userId") userId: UUID) : Response<List<PaymentMethod>?>
+
+    @DELETE("paymentMethods/delete/{paymentMethodId}/{userId}")
+    @RequiresAuth
+    suspend fun deletePaymentMethod(
+        @Path("userId") userId: UUID,
+        @Path("paymentMethodId") paymentMethodId: Long
+    )
 
     // Aggiunge un nuovo metodo di pagamento
     @POST("paymentMethods/add")
+    @RequiresAuth
     suspend fun addPaymentMethod(
-        @Path("userId") userId: Long,
         @Body paymentMethod: SavePaymentMethod
-    )
+    ) : Response<PaymentMethod>
 
     // Recupera il totale dell'ordine
     @GET("shopping-cart/get/total/{userId}")
