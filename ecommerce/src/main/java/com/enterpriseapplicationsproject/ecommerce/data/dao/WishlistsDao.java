@@ -27,6 +27,7 @@ public interface WishlistsDao extends JpaRepository<Wishlist, Long>,
     @Query("SELECT distinct w FROM Wishlist w JOIN w.group.members m WHERE m.id = :userId and w.privacySetting <> com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistPrivacy.PRIVATE and w.userId.id <> :userId")
     List<Wishlist> findFriendWishlists(@Param("userId")UUID userId);
 
+    Wishlist findWishlistByGroup_Id(Long groupId);
     /*
     @Query("SELECT w FROM Wishlist w WHERE w.wishlistToken = :token")
     Wishlist findByToken(@Param("token") String token);

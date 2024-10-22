@@ -117,7 +117,7 @@ public class WishlistController {
     @PostMapping(path = "/unshare/{idUser}")
     @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<Boolean> unshare(@PathVariable UUID idUser, @RequestBody WishlistDto wDto) {
-        Boolean resp = wishlistService.unshareWishlist(wDto.getId(), idUser);
+        boolean resp = wishlistService.unshareWishlist(wDto.getId(), idUser);
         if (resp){
             return new ResponseEntity<>(resp, HttpStatus.OK);
         }

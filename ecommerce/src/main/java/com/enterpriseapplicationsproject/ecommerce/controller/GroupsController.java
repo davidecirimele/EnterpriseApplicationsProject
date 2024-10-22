@@ -1,10 +1,13 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.service.GroupsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.GroupDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -18,9 +21,11 @@ public class GroupsController {
 
     private final GroupsService groupsService;
 
-    @GetMapping("/{groupId}")
-    public ResponseEntity<GroupDto> getById(@PathVariable("groupId") Long id) {
-        GroupDto group = groupsService.findGroupById(id);
+    @RateLimit
+    @GetMapping("/getById/{idUser}/{idGroup}")
+    @PreAuthorize(" #idUser == authentication.principal.getId() or hasRole('ADMIN') ")
+    public ResponseEntity<GroupDto> getById(@PathVariable("idUser") UUID idUser, @PathVariable("idGroup") Long id) {
+        GroupDto group = groupsService.findGroupById(id, idUser);
         if (group == null) {
             return ResponseEntity.notFound().build();
         }
@@ -39,21 +44,36 @@ public class GroupsController {
         return ResponseEntity.ok(newGroup);
     }
 
+    @RateLimit
+    @PostMapping("/addUser/{idUser}/{token}")
+    @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<Boolean> addUserToGroup(@PathVariable("idUser") UUID idUser, @PathVariable("token") String token) {
+        boolean resp = groupsService.addUserToGroup(idUser, token);
+        if (resp)
+            return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+
+    @RateLimit
+    @DeleteMapping("/removeUser/{idUserToRemove}/{idGroup}/{idUser}")
+    @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
+    public ResponseEntity<Boolean> removeUserFromGroup(@PathVariable("idGroup") Long idGroup, @PathVariable("idUser") UUID idUser,@PathVariable("idUserToRemove") UUID idUsrToRemove) {
+        boolean resp = groupsService.removeUserFromGroup(idUsrToRemove,idGroup, idUser);
+        if (resp)
+            return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+
+
     @DeleteMapping("/{groupId}")
     public ResponseEntity<Void> delete(@PathVariable("groupId") Long id) {
         groupsService.deleteGroup(id);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{groupId}/users/{userId}")
-    public ResponseEntity<Void> addUserToGroup(@PathVariable("groupId") Long groupId, @PathVariable("userId") UUID userId) {
-        groupsService.addUserToGroup(groupId, userId);
-        return ResponseEntity.ok().build();
-    }
 
-    @DeleteMapping("/{groupId}/users/{userId}")
-    public ResponseEntity<Void> removeUserFromGroup(@PathVariable("groupId") Long groupId, @PathVariable("userId") UUID userId) {
-        groupsService.removeUserFromGroup(groupId, userId);
-        return ResponseEntity.ok().build();
-    }
+
+
 }
