@@ -53,17 +53,20 @@ class AdminViewModel(private val repository: AdminRepository): ViewModel()  {
 
     fun filterUser(value : String? = null){
         viewModelScope.launch {
-            try {
-                if (users.value!!.isNotEmpty()) {
-                    _filteredUsers.value = users.value?.filter { user ->
-                        (value == null || (user.firstName.contains(value, ignoreCase = true))) ||
-                                (user.lastName.contains(value, ignoreCase = true)) ||
-                                (user.id.toString().contains(value, ignoreCase = true)) ||
-                                (user.email.contains(value, ignoreCase = true))
+            if (users.value != null) {
+                try {
+                    if (users.value!!.isNotEmpty()) {
+                        _filteredUsers.value = users.value?.filter { user ->
+                            (value == null ||
+                                    user.firstName?.contains(value, ignoreCase = true) ?: false ||
+                                    user.lastName?.contains(value, ignoreCase = true) ?: false ||
+                                    user.id?.toString()?.contains(value, ignoreCase = true) ?: false ||
+                                    user.email?.contains(value, ignoreCase = true) ?: false)
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.e("AdminError", "Error filtering users", e)
                 }
-            }catch (e: Exception){
-                Log.e("AdminError", "Error filtering users", e)
             }
         }
     }

@@ -3,11 +3,13 @@ package com.example.ecommercefront_end.network
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.model.CartItemId
+import com.example.ecommercefront_end.model.Price
 import com.example.ecommercefront_end.model.QuantityCartItem
 import com.example.ecommercefront_end.model.RequiresAuth
 import com.example.ecommercefront_end.model.SaveAddress
 import com.example.ecommercefront_end.model.SaveBook
 import com.example.ecommercefront_end.model.ShoppingCart
+import com.example.ecommercefront_end.model.Stock
 import retrofit2.Response
 
 import retrofit2.http.Body
@@ -65,4 +67,12 @@ interface BooksApiService {
 
     @POST("books/get/filter")
     suspend fun getFilteredBooks(@Body filter: BookFilter) : Response<List<Book>>
+
+    @PUT("books/edit-price/{bookId}")
+    @RequiresAuth
+    suspend fun updatePrice(@Path("bookId") bookId: Long, @Body newPrice: Price): Response<Book>
+
+    @PUT("books/edit-stock/{bookId}")
+    @RequiresAuth
+    suspend fun updateStock(@Path("bookId") bookId: Long, @Body newStock: Stock): Response<Book>
 }

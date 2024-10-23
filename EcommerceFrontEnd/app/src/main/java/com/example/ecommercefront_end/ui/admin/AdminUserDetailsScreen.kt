@@ -68,7 +68,7 @@ fun AdminUserDetailsScreen(user: UserDetails, addressViewModel: AddressViewModel
                         )
                         Spacer(modifier = Modifier.padding(8.dp))
                         Text(
-                            text = user.id.toString(),
+                            text = user.id.toString()?:"Null",
                             fontSize = 24.sp,
                             modifier = Modifier
                                 .padding(bottom = 8.dp)
@@ -85,7 +85,7 @@ fun AdminUserDetailsScreen(user: UserDetails, addressViewModel: AddressViewModel
                         )
                         Spacer(modifier = Modifier.padding(8.dp))
                         Text(
-                            text = user.firstName,
+                            text = user.firstName?:"Null",
                             fontSize = 20.sp,
                             modifier = Modifier
                                 .padding(bottom = 8.dp)
@@ -102,7 +102,7 @@ fun AdminUserDetailsScreen(user: UserDetails, addressViewModel: AddressViewModel
                         )
                         Spacer(modifier = Modifier.padding(8.dp))
                         Text(
-                            text = user.lastName,
+                            text = user.lastName?:"Null",
                             fontSize = 20.sp,
                             modifier = Modifier
                                 .padding(bottom = 8.dp)
@@ -119,7 +119,7 @@ fun AdminUserDetailsScreen(user: UserDetails, addressViewModel: AddressViewModel
                         )
                         Spacer(modifier = Modifier.padding(8.dp))
                         Text(
-                            text = user.email,
+                            text = user.email?:"Null",
                             fontSize = 20.sp,
                             modifier = Modifier
                                 .padding(bottom = 8.dp)
@@ -136,7 +136,7 @@ fun AdminUserDetailsScreen(user: UserDetails, addressViewModel: AddressViewModel
                         )
                         Spacer(modifier = Modifier.padding(8.dp))
                         Text(
-                            text = user.phoneNumber,
+                            text = user.phoneNumber?:"Null",
                             fontSize = 20.sp,
                             modifier = Modifier
                                 .padding(bottom = 8.dp)

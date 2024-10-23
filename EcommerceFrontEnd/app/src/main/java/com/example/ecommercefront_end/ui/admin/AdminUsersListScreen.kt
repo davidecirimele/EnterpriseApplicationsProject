@@ -134,7 +134,7 @@ fun UserCard(user: UserDetails, navHostController: NavHostController){
                             Column {
                                 Text("Name", fontWeight = FontWeight.Bold)
                                 Text(
-                                    text = user.firstName,
+                                    text = user.firstName?:"Null",
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -142,7 +142,7 @@ fun UserCard(user: UserDetails, navHostController: NavHostController){
                             Column {
                                 Text("Surname", fontWeight = FontWeight.Bold)
                                 Text(
-                                    text = user.lastName,
+                                    text = user.lastName?:"Null",
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -154,7 +154,7 @@ fun UserCard(user: UserDetails, navHostController: NavHostController){
                 Row(modifier = Modifier.padding(8.dp)) {
                     Column {
                         Text("Email", fontWeight = FontWeight.Bold)
-                        Text(text = user.email,
+                        Text(text = user.email?:"Null",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis)
                     }
@@ -164,7 +164,7 @@ fun UserCard(user: UserDetails, navHostController: NavHostController){
                     Column {
                         Text("ID", fontWeight = FontWeight.Bold)
                         Text(
-                            text = user.id.toString(),
+                            text = user.id.toString()?:"Null",
                             maxLines = 1,
                         )
                     }

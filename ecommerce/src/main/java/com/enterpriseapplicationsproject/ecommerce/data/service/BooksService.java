@@ -3,7 +3,9 @@ package com.enterpriseapplicationsproject.ecommerce.data.service;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.BookSpecification;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.PriceDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.StockDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.BookNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +38,10 @@ public interface BooksService {
     void saveBook(BookDto bookDto) throws IOException, IOException;
 
     void updateBookCover(Long bookId, MultipartFile coverImage) throws IOException, BookNotFoundException;
+
+    BookDto updatePrice(Long bookId, PriceDto newPrice) throws IOException, BookNotFoundException;
+
+    BookDto updateStock(Long bookId, StockDto newStock) throws IOException, BookNotFoundException;
 
     Double getMaxBookPrice();
 

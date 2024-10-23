@@ -197,12 +197,10 @@ fun NavigationView(navController: NavHostController) {
             }
 
             composable("admin-catalogue") {
-                selectedIndex.value = 0
                 AdminCatalogueScreen(bookViewModel = bookViewModel, navHostController = navController)
             }
 
             composable("admin-users-list") {
-                selectedIndex.value = 0
                 AdminUsersListScreen(viewModel = adminViewModel, navHostController = navController)
             }
 
@@ -452,7 +450,7 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
             selected = selectedIndex.value == 0,
             onClick = {
                 selectedIndex.value = 0
-                if(SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN") {
+                if(SessionManager.user == null || (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN")) {
                     navHostController.navigate("home") {
                         popUpTo(navHostController.graph.startDestinationId) {
                             saveState = true
@@ -507,44 +505,47 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
                 )
             }
         )
-        NavigationBarItem(
-            selected = selectedIndex.value == 2,
-            onClick = {
-                selectedIndex.value = 2
-                navHostController.navigate("cart") {
-                    popUpTo(navHostController.graph.startDestinationId) {
-                        saveState = true
+        if(SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN")
+            NavigationBarItem(
+                selected = selectedIndex.value == 2,
+                onClick = {
+                    selectedIndex.value = 2
+                    navHostController.navigate("cart") {
+                        popUpTo(navHostController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
                     }
-                    launchSingleTop = true
-                    restoreState = true
+                },
+                icon = {
+                    Icon(
+                        Icons.Filled.ShoppingCart,
+                        contentDescription = stringResource(R.string.cart)
+                    )
                 }
-            },
-            icon = {
-                Icon(
-                    Icons.Filled.ShoppingCart,
-                    contentDescription = stringResource(R.string.cart)
-                )
-            }
-        )
-        NavigationBarItem(
-            selected = selectedIndex.value == 3,
-            onClick = {
-                selectedIndex.value = 3
-                navHostController.navigate("wishlist") {
-                    popUpTo(navHostController.graph.startDestinationId) {
-                        saveState = true
+            )
+
+        if(SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN")
+            NavigationBarItem(
+                selected = selectedIndex.value == 3,
+                onClick = {
+                    selectedIndex.value = 3
+                    navHostController.navigate("wishlist") {
+                        popUpTo(navHostController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
                     }
-                    launchSingleTop = true
-                    restoreState = true
+                },
+                icon = {
+                    Icon(
+                        Icons.Filled.Favorite,
+                        contentDescription = stringResource(R.string.favorite)
+                    )
                 }
-            },
-            icon = {
-                Icon(
-                    Icons.Filled.Favorite,
-                    contentDescription = stringResource(R.string.favorite)
-                )
-            }
-        )
+            )
     }
 }
 

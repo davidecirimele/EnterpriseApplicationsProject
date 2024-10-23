@@ -4,7 +4,9 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.BookSpecification;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
 import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.PriceDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.StockDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.BookNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -138,6 +140,32 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Errore nel salvataggio della cover.");
         } catch (BookNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Libro non trovato.");
+        }
+    }
+
+    @PutMapping("/edit-price/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BookDto> updateBookPrice(@PathVariable Long id, @RequestBody PriceDto newPrice) {
+        try {
+            BookDto book = booksService.updatePrice(id, newPrice);
+            return new ResponseEntity<>(book,HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (BookNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/edit-stock/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BookDto> updateBookPrice(@PathVariable Long id, @RequestBody StockDto newStock) {
+        try {
+            BookDto book = booksService.updateStock(id, newStock);
+            return new ResponseEntity<>(book,HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (BookNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 }
