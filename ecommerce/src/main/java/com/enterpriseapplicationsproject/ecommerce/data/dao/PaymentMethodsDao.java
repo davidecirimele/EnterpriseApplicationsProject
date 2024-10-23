@@ -16,5 +16,7 @@ public interface PaymentMethodsDao extends JpaRepository<PaymentMethod, Long> {
 
     List<PaymentMethod> findAllByUserId(UUID userId);
 
+    PaymentMethod findByUserIdAndPaymentMethodId(UUID userId, Long paymentMethodId);
+
     Integer deleteByUserIdAndPaymentMethodId(UUID userId, Long paymentMethodId);
 }

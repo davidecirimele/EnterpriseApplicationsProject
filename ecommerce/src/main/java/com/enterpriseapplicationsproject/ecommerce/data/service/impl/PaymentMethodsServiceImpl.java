@@ -82,14 +82,31 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
 
     @Override
     @Transactional
-    public Void deletePaymentMethodByUserId(UUID userId, Long paymentMethodId) {
+    public void deletePaymentMethodByUserId(UUID userId, Long paymentMethodId) {
         System.out.println("userId: " + userId + " paymentMethodId: " + paymentMethodId);
          Integer res = paymentMethodsDao.deleteByUserIdAndPaymentMethodId(userId, paymentMethodId);
         if (res == 0) {
             throw new UnauthorizedAccessException("Unauthorized access");
         }
-        return null;
 
+    }
+
+    @Override
+    public PaymentMethodDto getPaymentMethodByUserId(UUID userId, Long paymentMethodId) {
+        PaymentMethod paymentMethod = paymentMethodsDao.findByUserIdAndPaymentMethodId(userId, paymentMethodId);
+        if (paymentMethod == null) {
+            throw new UnauthorizedAccessException("Unauthorized access");
+        }
+        EncryptionUtils encryptionUtils = new EncryptionUtils(encryptionConfig.getSecretKey());
+        String decryptedCardNumber;
+        try {
+            decryptedCardNumber = encryptionUtils.decrypt(paymentMethod.getCardNumber());
+        } catch (Exception e) {
+            throw new DecryptionErrorException("Error decrypting card number");
+        }
+        PaymentMethodDto paymentMethodDto = modelMapper.map(paymentMethod, PaymentMethodDto.class);
+        paymentMethodDto.setCardNumber(MaskCardNumber(decryptedCardNumber));
+        return paymentMethodDto;
     }
 
     private String MaskCardNumber(String cardNumber) {
