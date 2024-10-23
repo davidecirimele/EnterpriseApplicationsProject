@@ -142,7 +142,7 @@ fun NavigationView(navController: NavHostController) {
     val addressViewModel = remember { AddressViewModel(repository = AddressRepository(RetrofitClient.addressApiService)) }
     val bookViewModel = remember { BookViewModel(repository = BookRepository(RetrofitClient.booksApiService)) }
     val adminViewModel = remember { AdminViewModel(repository = AdminRepository(RetrofitClient.adminApiService)) }
-    val checkoutViewModel = remember { CheckoutViewModel(checkoutRepository = CheckoutRepository(RetrofitClient.checkoutApiService)) }
+    val checkoutViewModel = remember { CheckoutViewModel(checkoutRepository = CheckoutRepository(RetrofitClient.checkoutApiService), cartViewModel = cartViewModel) }
 
     val startDestination = if (SessionManager.user?.role == "ROLE_ADMIN") {
         "admin-home"

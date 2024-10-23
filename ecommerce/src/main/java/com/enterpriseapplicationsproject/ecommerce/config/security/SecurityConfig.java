@@ -54,6 +54,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/v1/paymentMethods/add").authenticated();
                     auth.requestMatchers("/api/v1/paymentMethods/get/{userId}").authenticated();
                     auth.requestMatchers("/api/v1/paymentMethods/delete/{paymentMethodId}/{userId}").authenticated();
+                    auth.requestMatchers("/api/v1/paymentMethods/get/{userId}/{paymentMethodId}").authenticated();
                     auth.requestMatchers("/api/v1/users/**").authenticated();
                     auth.requestMatchers("/api/v1/addresses/**").authenticated();
                     auth.requestMatchers("/api/v1/shopping-cart/**").authenticated();

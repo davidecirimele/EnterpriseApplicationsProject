@@ -12,5 +12,7 @@ public interface PaymentMethodsService {
 
     public List<PaymentMethodDto> getAllPaymentMethodByUserId(UUID userId);
 
-    public Void deletePaymentMethodByUserId(UUID userId, Long paymentMethodId);
+    public PaymentMethodDto getPaymentMethodByUserId(UUID userId, Long paymentMethodId);
+
+    public void deletePaymentMethodByUserId(UUID userId, Long paymentMethodId);
 }

@@ -53,12 +53,21 @@ interface CheckoutApiService {
     @RequiresAuth
     suspend fun getPaymentMethods(@Path("userId") userId: UUID) : Response<List<PaymentMethod>?>
 
+    @GET("paymentMethods/get/{userId}/{paymentMethodId}")
+    @RequiresAuth
+    suspend fun getPaymentMethod(
+        @Path("userId") userId: UUID,
+        @Path("paymentMethodId") paymentMethodId: Long
+    ) : Response<PaymentMethod?>
+
     @DELETE("paymentMethods/delete/{paymentMethodId}/{userId}")
     @RequiresAuth
     suspend fun deletePaymentMethod(
         @Path("userId") userId: UUID,
         @Path("paymentMethodId") paymentMethodId: Long
     )
+
+
 
     // Aggiunge un nuovo metodo di pagamento
     @POST("paymentMethods/add")
@@ -67,8 +76,4 @@ interface CheckoutApiService {
         @Body paymentMethod: SavePaymentMethod
     ) : Response<PaymentMethod>
 
-    // Recupera il totale dell'ordine
-    @GET("shopping-cart/get/total/{userId}")
-    @RequiresAuth
-    suspend fun getOrderTotal(@Path("userId") userId: UUID): Double
 }

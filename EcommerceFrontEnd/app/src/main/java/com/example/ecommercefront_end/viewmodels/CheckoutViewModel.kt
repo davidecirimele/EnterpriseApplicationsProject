@@ -14,11 +14,15 @@ import com.example.ecommercefront_end.model.SaveAddress
 import com.example.ecommercefront_end.model.SavePaymentMethod
 import com.example.ecommercefront_end.repository.AddressRepository
 import com.example.ecommercefront_end.repository.CheckoutRepository
+import com.example.ecommercefront_end.viewmodels.CartViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 
 
-class CheckoutViewModel(private val checkoutRepository: CheckoutRepository) : ViewModel() {
+class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, private val cartViewModel: CartViewModel) : ViewModel() {
 
     private val _street = MutableStateFlow("")
     val street: StateFlow<String> = _street
@@ -83,6 +87,14 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository) : Vi
 
     private val _selectedPaymentMethodType = MutableStateFlow<PaymentMethodType?>(null)
     val selectedPaymentMethodType: StateFlow<PaymentMethodType?> = _selectedPaymentMethodType
+
+    val isCheckoutEnabled: StateFlow<Boolean> = combine(
+        _selectedAddress,
+        _selectedPaymentMethod
+    ) { address, paymentMethod ->
+        address != null && paymentMethod != null  // Il pulsante è abilitato solo se entrambi sono selezionati
+    }.stateIn(viewModelScope, SharingStarted.Lazily, false)
+
 
     // Funzione per attivare o disattivare la modalità di modifica di un indirizzo
     fun toggleEditAddress(address: Address?) {
@@ -220,20 +232,25 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository) : Vi
                 provider = _selectedCardProvider.value,
                 expirationDate = _expirationDate.value
             )
-            val res = checkoutRepository.addPaymentMethod(newPaymentMethod)
-            if (res.isSuccessful) {
+            val addResponse = checkoutRepository.addPaymentMethod(newPaymentMethod)
+            val paymentMethod = addResponse.body()
+            if (paymentMethod != null) {
                 resetPaymentMethodForm()
-                val pm = checkoutRepository.getPaymentMethods(user.userId)
-                if (pm.isSuccessful && pm.body() != null) {
-                    val payments = pm.body()
-                    if (payments != null) {
-                        _paymentMethods.value = payments
-                    }
 
+
+                val getResponse = checkoutRepository.getPaymentMethod(user.userId, paymentMethod.id)
+                if (getResponse.isSuccessful) {
+                    getResponse.body()?.let { pm ->
+                        _paymentMethods.value = _paymentMethods.value.toMutableList().apply {
+                            add(pm)
+                        }
+                        _selectedPaymentMethod.value = pm
+                    }
                 }
             }
         }
     }
+
 
 
 
@@ -286,8 +303,10 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository) : Vi
 
 
         // Funzione per confermare l'ordine (placeholder)
-        fun confirmOrder(): Boolean {
-            return _selectedAddress.value != null && _selectedPaymentMethod.value != null
+        fun confirmOrder() {
+            
+
+
         }
 
         fun loadCheckoutData() {
@@ -324,8 +343,7 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository) : Vi
                         }
 
 
-                        _totalAmount.value =
-                            checkoutRepository.getOrderTotal(user) // Ottieni il totale dell'ordine
+                        _totalAmount.value = cartViewModel.totalAmount.value
                     }
                 } catch (e: Exception) {
                     // Gestire l'errore

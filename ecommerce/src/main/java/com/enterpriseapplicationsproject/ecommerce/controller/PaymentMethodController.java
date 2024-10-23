@@ -43,6 +43,13 @@ public class PaymentMethodController {
         return new ResponseEntity<>(paymentMethod, HttpStatus.OK);
     }
 
+    @GetMapping(path = "/get/{userId}/{paymentMethodId}")
+    @PreAuthorize("#userId == authentication.principal.getId()")
+    public ResponseEntity<PaymentMethodDto> getPaymentMethodByUserId(@PathVariable UUID userId, @PathVariable Long paymentMethodId) {
+        PaymentMethodDto paymentMethod = paymentMethodService.getPaymentMethodByUserId(userId, paymentMethodId);
+        return new ResponseEntity<>(paymentMethod, HttpStatus.OK);
+    }
+
     @DeleteMapping(path = "/delete/{paymentMethodId}/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<Void> deletePaymentMethodByUserId(@PathVariable UUID userId, @PathVariable Long paymentMethodId) {
