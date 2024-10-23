@@ -68,4 +68,12 @@ public class Book {
 
     @Column(name = "PUBLISH_DATE")
     private LocalDate publishDate;
+
+    @Column(name = "AVAILABLE")
+    private boolean available;
+
+    @PrePersist
+    public void prePersist() {
+        this.available = true;
+    }
 }

@@ -34,6 +34,9 @@ interface BooksApiService {
     @RequiresAuth
     suspend fun getAllBooks() : Response<List<Book>>
 
+    @GET("books/get-catalogue")
+    suspend fun getCatalogue() : Response<List<Book>>
+
     @GET("books/get/max-price")
     suspend fun getMaxPrice() : Response<Double>
 
@@ -61,9 +64,13 @@ interface BooksApiService {
     @GET("books/get/min-publication-date")
     suspend fun getMinPublicationYear() : Response<LocalDate>
 
-    @DELETE("books/delete/{idBook}")
+    @PUT("books/delete/{idBook}")
     @RequiresAuth
     suspend fun deleteBook(@Path("idBook") idBook: Long)
+
+    @PUT("books/restore/{idBook}")
+    @RequiresAuth
+    suspend fun restoreBook(@Path("idBook") idBook: Long)
 
     @POST("books/get/filter")
     suspend fun getFilteredBooks(@Body filter: BookFilter) : Response<List<Book>>

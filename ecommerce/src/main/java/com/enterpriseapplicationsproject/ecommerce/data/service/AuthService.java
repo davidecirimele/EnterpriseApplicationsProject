@@ -8,7 +8,7 @@ import java.util.Map;
 public interface AuthService {
     UserDetailsDto registerUser(SaveUserDto userDto);
 
-    SaveUserDto registerAdmin(SaveUserDto userDto);
+    UserDetailsDto registerAdmin(SaveUserDto userDto);
 
     Map<String, String> loginUser(CredentialDto loginDto);
 

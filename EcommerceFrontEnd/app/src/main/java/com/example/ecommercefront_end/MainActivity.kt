@@ -1,21 +1,15 @@
 package com.example.ecommercefront_end
 
 import CheckoutViewModel
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,8 +17,6 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CutCornerShape
 //import androidx.compose.material3.BottomNavigation
 //import androidx.compose.material3.BottomNavigationItem
 
@@ -32,33 +24,24 @@ import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.AddBox
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -71,16 +54,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -89,7 +63,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.ecommercefront_end.network.CartApiService
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.repository.AddressRepository
@@ -104,8 +77,8 @@ import com.example.ecommercefront_end.ui.admin.AdminCatalogueScreen
 import com.example.ecommercefront_end.ui.user.EditAddressScreen
 import com.example.ecommercefront_end.ui.cart.CartScreen
 import com.example.ecommercefront_end.ui.home.BookDetailsScreen
-import com.example.ecommercefront_end.ui.home.BooksFilterScreen
-import com.example.ecommercefront_end.ui.home.FilteredBooksScreen
+import com.example.ecommercefront_end.ui.books.BooksFilterScreen
+import com.example.ecommercefront_end.ui.books.FilteredBooksScreen
 import com.example.ecommercefront_end.ui.home.HomeScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.ui.user.AccountManagerScreen
@@ -228,11 +201,10 @@ fun NavigationView(navController: NavHostController) {
                     bookViewModel.loadBook(idBook)
                 }
 
-                // Osserva i cambiamenti del libro
                 val book by bookViewModel.bookFlow.collectAsState()
 
                 book?.let {
-                    AdminSingleBookScreen(book = it, bookViewModel = bookViewModel)
+                    AdminSingleBookScreen(bookViewModel = bookViewModel, navHostController = navController)
                 } ?: Text("Book not found")
             }
 
@@ -253,7 +225,7 @@ fun NavigationView(navController: NavHostController) {
                 val user by adminViewModel.userFlow.collectAsState()
 
                 user?.let {
-                    AdminUserDetailsScreen(user = it, addressViewModel = addressViewModel, navController)
+                    AdminUserDetailsScreen(user = it, navController)
                 } ?: Text("User not found")
             }
 
@@ -296,7 +268,7 @@ fun NavigationView(navController: NavHostController) {
                 LaunchedEffect(Unit) {
                     Log.d("MyAccountScreen", "SessionManager.user: ${SessionManager.user}")
                     val userDetailsJob = async {accountViewModel.loadUserDetails(forceReload = true)}
-                    val defaultAddress = async {addressViewModel.fetchDefaultAddress(forceReload = true)}
+                    val defaultAddress = async {addressViewModel.fetchDefaultAddress()}
 
                     userDetailsJob.await()
                     defaultAddress.await()
@@ -311,30 +283,45 @@ fun NavigationView(navController: NavHostController) {
                     bookViewModel = bookViewModel, navController = navController)
             }
 
-            composable("addresses") {
-
-                LaunchedEffect(Unit) {
-                    addressViewModel.fetchUserAddresses(forceReload = true)
+            composable("addresses/{userId}", arguments = listOf(navArgument("userId") { type = NavType.StringType })) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId")?.let {
+                    try {
+                        UUID.fromString(it)
+                    } catch (e: IllegalArgumentException) {
+                        null  // oppure gestisci l'errore in un altro modo
+                    }
                 }
-                val _addressApiService = RetrofitClient.addressApiService
-                val repository = AddressRepository(_addressApiService)
-                AddressesScreen(
-                    viewModel = addressViewModel, navController)
+
+                LaunchedEffect(userId) {
+                    addressViewModel.fetchUserAddresses(userId)
+                }
+
+                AddressesScreen(userId, viewModel = addressViewModel, navController)
             }
 
-            composable("insert-address") {
-                val _addressApiService = RetrofitClient.addressApiService
-                val repository = AddressRepository(_addressApiService)
-                InsertAddressScreen(viewModel = addressViewModel, navController)
+            composable("insert-address/{userId}", arguments = listOf(navArgument("userId") { type = NavType.StringType })) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId")?.let {
+                    try {
+                        UUID.fromString(it)
+                    } catch (e: IllegalArgumentException) {
+                        null  // oppure gestisci l'errore in un altro modo
+                    }
+                }
+
+                InsertAddressScreen(viewModel = addressViewModel, navController, userId)
             }
 
-            composable(
-                route = "edit-address/{addressId}",
-                arguments = listOf(navArgument("addressId") { type = NavType.LongType })
-            ) { backStackEntry ->
+            composable("edit-address/{userId}/{addressId}", arguments = listOf(navArgument("userId") { type = NavType.StringType },navArgument("addressId") { type = NavType.LongType })) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId")?.let {
+                    try {
+                        UUID.fromString(it)
+                    } catch (e: IllegalArgumentException) {
+                        null  // oppure gestisci l'errore in un altro modo
+                    }
+                }
                 val addressId = backStackEntry.arguments?.getLong("addressId")
                 if (addressId != null) {
-                    EditAddressScreen(viewModel = addressViewModel, navController = navController, addressId)
+                    EditAddressScreen(viewModel = addressViewModel, navController = navController, userId, addressId)
                 }
             }
 

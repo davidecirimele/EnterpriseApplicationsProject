@@ -27,11 +27,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.ecommercefront_end.model.SaveAddress
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
+import java.util.UUID
 
 @Composable
-fun EditAddressScreen(viewModel: AddressViewModel, navController: NavHostController, addressId: Long) {
+fun EditAddressScreen(viewModel: AddressViewModel, navController: NavHostController, userId: UUID?=null, addressId: Long) {
     LaunchedEffect(Unit) {
-        viewModel.fetchAddressById(addressId)
+        viewModel.fetchAddressById(userId,addressId)
     }
 
     val address by viewModel.addressToEdit.collectAsState()
@@ -149,6 +150,7 @@ fun EditAddressScreen(viewModel: AddressViewModel, navController: NavHostControl
                     onClick = {
                         address?.let {
                             viewModel.editAddress(
+                                userId,
                                 it.id,
                                 SaveAddress(
                                     street,
@@ -160,11 +162,7 @@ fun EditAddressScreen(viewModel: AddressViewModel, navController: NavHostControl
                                 )
                             )
                         }
-                        navController.navigate("addresses"){
-                            popUpTo("my-account") {
-                                saveState = true
-                            }
-                        }
+                        navController.popBackStack()
                     },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = street.isNotBlank() && province.isNotBlank() && city.isNotBlank() && state.isNotBlank() && postalCode.isNotBlank()

@@ -32,9 +32,10 @@ import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.AddressRepository
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
+import java.util.UUID
 
 @Composable
-fun AddressView(address: Address, addressViewModel: AddressViewModel, navController: NavHostController, showButtons: Boolean){
+fun AddressView(address: Address, userId: UUID?=null, addressViewModel: AddressViewModel, navController: NavHostController, showButtons: Boolean){
 
     var checked by remember { mutableStateOf(address.defaultAddress) }
 
@@ -112,8 +113,8 @@ fun AddressView(address: Address, addressViewModel: AddressViewModel, navControl
                 ) {
                     Button(onClick = {
                         val addressId = address.id
-                        navController.navigate("edit-address/$addressId") {
-                            popUpTo("addresses") {
+                        navController.navigate("edit-address/$userId/$addressId") {
+                            popUpTo("addresses/$userId") {
                                 saveState = true
                             }
                         }
@@ -126,7 +127,7 @@ fun AddressView(address: Address, addressViewModel: AddressViewModel, navControl
                     }
                     if (!address.defaultAddress) {
                         Spacer(modifier = Modifier.width(8.dp))
-                        defaultCheckBox(checked, addressViewModel, address, navController)
+                        defaultCheckBox(checked, addressViewModel, address, userId, navController)
                         {
                             checked = it
                         }
@@ -144,7 +145,7 @@ fun AddressView(address: Address, addressViewModel: AddressViewModel, navControl
             confirmButton = {
                 Button(
                     onClick = {
-                        addressViewModel.removeAddress(address)
+                        addressViewModel.removeAddress(userId,address)
                         showDialog = false
                     }
                 ) {
@@ -163,7 +164,7 @@ fun AddressView(address: Address, addressViewModel: AddressViewModel, navControl
 }
 
 @Composable
-fun defaultCheckBox(checked : Boolean, addressViewModel: AddressViewModel, address: Address, navController: NavHostController, onCheckedChange: (Boolean) -> Unit){
+fun defaultCheckBox(checked : Boolean, addressViewModel: AddressViewModel, address: Address, userId: UUID?=null, navController: NavHostController, onCheckedChange: (Boolean) -> Unit){
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -177,7 +178,7 @@ fun defaultCheckBox(checked : Boolean, addressViewModel: AddressViewModel, addre
             checked = checked,
             onCheckedChange = {
                 onCheckedChange(it)
-                addressViewModel.setDefaultAddress(address)
+                addressViewModel.setDefaultAddress(userId, address)
                 navController.navigate("my-account") {
                     popUpTo("account-manager") { saveState = true }
                 }

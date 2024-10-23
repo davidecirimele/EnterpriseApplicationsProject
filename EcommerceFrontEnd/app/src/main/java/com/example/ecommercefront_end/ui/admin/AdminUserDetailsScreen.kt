@@ -32,19 +32,14 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.UserDetails
 import com.example.ecommercefront_end.ui.home.testImgs
+import com.example.ecommercefront_end.ui.user.AccountOptions
 import com.example.ecommercefront_end.ui.user.AddressView
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
 import com.example.ecommercefront_end.viewmodels.BookViewModel
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun AdminUserDetailsScreen(user: UserDetails, addressViewModel: AddressViewModel, navHostController: NavHostController){
-
-    val addresses by addressViewModel.addresses.collectAsState()
-
-    LaunchedEffect(Unit){
-        addressViewModel.fetchUserAddresses()
-    }
+fun AdminUserDetailsScreen(user: UserDetails, navHostController: NavHostController){
 
     Card(modifier = Modifier.fillMaxSize().background(color = Color.Gray)) {
         LazyColumn(
@@ -153,23 +148,11 @@ fun AdminUserDetailsScreen(user: UserDetails, addressViewModel: AddressViewModel
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Addresses",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    AccountOptions(user.id,"/admin/user_details/${user.id}",navHostController)
                 }
             }
 
-            if (addresses.isNullOrEmpty()) {
-                item {
-                    Text(text = "No addresses available", modifier = Modifier.padding(16.dp))
-                }
-            } else {
-                items(addresses!!) { address ->
-                    AddressView(address = address, addressViewModel, navHostController, true)
-                }
-            }
+
         }
         Column(
             modifier = Modifier

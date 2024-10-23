@@ -28,5 +28,5 @@ data class BookFilter (
     val publishDate : LocalDate? = null,
     val minPublishDate : LocalDate? = null,
     val maxPublishDate : LocalDate? = null,
-
+    val available : Boolean? = true
     )

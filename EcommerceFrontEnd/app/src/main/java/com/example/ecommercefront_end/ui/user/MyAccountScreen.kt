@@ -86,7 +86,7 @@ fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: Addres
                 Spacer(modifier = Modifier.height(20.dp))
             }
             item {
-                Options(navHostController)
+                AccountOptions(userDetails?.id,"my-account",navHostController)
             }
         }
     }
@@ -196,12 +196,15 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
                             fontSize = 20.sp
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        AddressView(
-                            address = defaultAddress,
-                            addressViewModel,
-                            navController,
-                            false
-                        )
+                        if (userDetails != null) {
+                            AddressView(
+                                address = defaultAddress,
+                                userDetails.id,
+                                addressViewModel,
+                                navController,
+                                false
+                            )
+                        }
                     } else
                         Text(
                             text = "No Default Address",
@@ -219,28 +222,6 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
                     fontSize = 20.sp
                 )
             }*/
-    }
-
-}
-
-@Composable
-fun Options(navHostController: NavHostController){
-    Column {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-            Button(onClick = { navHostController.navigate("addresses") }) {
-                Text(text = "Addresses")
-            }
-        }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-            Button(onClick = { /*TODO*/ }) {
-                Text(text = "Payment Methods")
-            }
-        }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-            Button(onClick = { /*TODO*/ }) {
-                Text(text = "Transactions")
-            }
-        }
     }
 
 }
