@@ -52,22 +52,34 @@ public class OrdersServiceImpl implements OrdersService {
         User user = usersDao.findById(orderDto.getUserId().getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
         ShoppingCart shoppingCart = shoppingCartDao.findByUserId(orderDto.getUserId().getUserId()).orElseThrow(() -> new ShoppingCartNotFoundException("Shopping cart not found"));
         Address add = addressesDao.findById(orderDto.getAddress().getId()).orElseThrow(() -> new AddressNotFoundException("Address not found"));
+        //System.out.println("address" + add.toString());
+
         if (!add.getUserId().getId().equals(user.getId())) {
             throw new UnauthorizedAccessException("Unauthorized access to this address");
         }
         PaymentMethod paymentMethod = paymentMethodsDao.findById(orderDto.getPaymentMethodId().getPaymentMethodId()).orElseThrow(() -> new PaymentMethodNotFoundException("Payment method not found"));
+        //System.out.println("payment method" + paymentMethod.toString());
         if (!paymentMethod.getUser().getId().equals(user.getId())) {
             throw new UnauthorizedAccessException("Unauthorized access to this payment method");
         }
         if (!validateOrder(shoppingCart)) {
             throw new OutOfStockException("Products out of stock");
         }
-        Order order = setOrder(shoppingCart, user, paymentMethod);
+        Order order = setOrder(shoppingCart, user, paymentMethod, add);
+        //System.out.println(order);
         Order savedOr = ordersDao.save(order);
+        //System.out.println("ordine salvato" + savedOr);
+        List<OrderItem> orderItems = getOrderItems(shoppingCart, savedOr);
+        savedOr.setOrderItems(orderItems);
+        System.out.println("order items" + orderItems.size());
+        System.out.println("ordine con gli order items" + savedOr.getOrderItems().size());
+        Order fullOrder = ordersDao.save(savedOr);
+
+
         downProductStock(shoppingCart);
         Transaction transaction = transactionsService.addTransaction(user, savedOr, paymentMethod, savedOr.getTotalAmount(), PaymentStatus.APPROVED, LocalDate.now());
         transactionsDao.save(transaction);
-        return modelMapper.map(savedOr, SaveOrderDto.class);
+        return modelMapper.map(fullOrder, SaveOrderDto.class);
     }
 
     @Override
@@ -105,20 +117,15 @@ public class OrdersServiceImpl implements OrdersService {
         return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
     }
 
-    private Order setOrder( ShoppingCart shoppingCart, User user, PaymentMethod paymentMethod) {
+    private Order setOrder( ShoppingCart shoppingCart, User user, PaymentMethod paymentMethod, Address address) {
         Order order = new Order();
-        List<OrderItem> orderItems = shoppingCart.getCartItems().stream().map(item -> {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setBook(item.getBookId());
-            orderItem.setQuantity(item.getQuantity());
-            return orderItem;
-        }).collect(Collectors.toList());
+
         order.setOrderStatus(OrderStatus.CONFIRMED);
         order.setPaymentMethod(paymentMethod);
         order.setTotalAmount(shoppingCart.getTotal());
         order.setOrderDate(LocalDate.now());
         order.setUser(user);
-        order.setOrderItems(orderItems);
+        order.setAddress(address);
         return order;
     }
 
@@ -136,5 +143,15 @@ public class OrdersServiceImpl implements OrdersService {
             }
         }
         return true;
+    }
+
+    private List<OrderItem> getOrderItems(ShoppingCart shoppingCart, Order order) {
+        return shoppingCart.getCartItems().stream().map(item -> {
+            OrderItem orderItem = new OrderItem();
+            orderItem.setBook(item.getBookId());
+            orderItem.setOrder(order);
+            orderItem.setQuantity(item.getQuantity());
+            return orderItem;
+        }).collect(Collectors.toList());
     }
 }
