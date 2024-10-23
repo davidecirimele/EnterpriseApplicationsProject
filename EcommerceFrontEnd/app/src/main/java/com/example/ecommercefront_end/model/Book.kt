@@ -15,9 +15,9 @@ data class Book(
 
     val pages: Int,
     val edition: String,
-    val format: BookFormat? = null, // Proprietà opzionale
-    val genre: BookGenre? = null, // Proprietà opzionale
-    val language: BookLanguage? = null, // Proprietà opzionale
+    val format: BookFormat,
+    val genre: BookGenre,
+    val language: BookLanguage,
     val publisher: String,
     val age: Int,
     val publishDate: LocalDate, // Annotazione per mappare la proprietà "publish_date"

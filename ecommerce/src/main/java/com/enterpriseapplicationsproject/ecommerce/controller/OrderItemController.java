@@ -1,6 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
 
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.service.OrderItemsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.OrderItemDto;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class OrderItemController {
 
     private final OrderItemsService orderItemsService;
 
+    @RateLimit(type ="USER")
     @GetMapping(consumes = "application/json", path = "/get/{orderId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<OrderItemDto>> getOrderItemsByOrderId(@PathVariable Long orderId) {

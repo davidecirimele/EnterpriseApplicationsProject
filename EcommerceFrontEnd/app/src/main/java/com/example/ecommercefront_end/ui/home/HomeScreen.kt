@@ -74,6 +74,8 @@ fun HomeScreen(bookViewModel: BookViewModel, navController: NavController) {
         bookViewModel.clearCache()
     }
 
+
+
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()

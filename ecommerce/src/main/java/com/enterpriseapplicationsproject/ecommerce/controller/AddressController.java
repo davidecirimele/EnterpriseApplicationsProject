@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.AddressService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
@@ -28,16 +29,18 @@ public class AddressController {
 
     private final UserService userService;
 
+    @RateLimit(type ="USER")
     @GetMapping("/all")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AddressDto>> getAddresses() {
         log.info("Received request for addresses/all");
         List<AddressDto> addresses = addressService.getAddresses();
         return new ResponseEntity<>(addresses, HttpStatus.OK);
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/{id}")
-    @PreAuthorize("#id == authentication.principal.getId()")
+    @PreAuthorize("#id == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<AddressDto>> getValidAddressesByUserId(@PathVariable UUID id) {
         log.info("Received request for addresses/{id}");
         User user = userService.getUserById(id);
@@ -49,8 +52,9 @@ public class AddressController {
         }
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/{id}/default")
-    @PreAuthorize("#id == authentication.principal.getId()")
+    @PreAuthorize("#id == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<AddressDto> getDefaultAddressByUserId(@PathVariable UUID id) {
         log.info("Received request for addresses/{id}/default");
         User user = userService.getUserById(id);
@@ -62,8 +66,9 @@ public class AddressController {
         }
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/{userId}/{id}")
-    @PreAuthorize("#userId == authentication.principal.getId()")
+    @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<AddressDto> getValidAddressByUserId(@PathVariable UUID userId, @PathVariable Long id) {
         log.info("Received request for addresses/{userId}/{id}");
         User user = userService.getUserById(userId);
@@ -75,8 +80,9 @@ public class AddressController {
         }
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/all/{id}")
-    @PreAuthorize("#id == authentication.principal.getId() or hasAuthority('ADMIN')")
+    @PreAuthorize("#id == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<AddressDto>> getAddressByUserId(@PathVariable UUID id) {
         log.info("Received request for addresses/all/{id}");
         User user = userService.getUserById(id);
@@ -88,18 +94,20 @@ public class AddressController {
         }
     }
 
+    @RateLimit(type ="USER")
     @PostMapping(consumes = "application/json", path = "/{userId}/insert-address")
     @PreAuthorize("#userId == authentication.principal.getId()")
-    public ResponseEntity<SaveAddressDto> insertAddress(@PathVariable UUID userId, @RequestBody SaveAddressDto addressDto){
+    public ResponseEntity<AddressDto> insertAddress(@PathVariable UUID userId, @RequestBody SaveAddressDto addressDto){
         log.info("Received request for addresses/{userId}/insert-address");
 
-        SaveAddressDto addedAddress = addressService.insertAddress(userId, addressDto);
+        AddressDto addedAddress = addressService.insertAddress(userId, addressDto);
         return new ResponseEntity<>(addedAddress, HttpStatus.CREATED);
     }
 
 
+    @RateLimit(type ="USER")
     @DeleteMapping("/{addressId}/delete")
-    @PreAuthorize("#userId.userId == authentication.principal.getId()")
+    @PreAuthorize("#userId.userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<Boolean> deleteAddress(@PathVariable Long addressId, @RequestBody UserIdDto userId) {
         log.info("Received request for addresses/{addressId}/delete");
         boolean isRemoved = addressService.deleteAddress(addressId);
@@ -110,13 +118,14 @@ public class AddressController {
     }
 
     @PutMapping("/{addressId}/update-default")
-    @PreAuthorize("#userId.userId == authentication.principal.getId()")
+    @PreAuthorize("#userId.userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<AddressDto> updateDefaultAddress(@PathVariable Long addressId, @RequestBody UserIdDto userId) {
         log.info("Received request for addresses/{addressId}/update-default");
         AddressDto updatedAddress= addressService.updateDefaultAddress(addressId);
         return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
     }
 
+    @RateLimit(type ="USER")
     @PutMapping("/{userId}/{addressId}/edit-address")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<AddressDto> updateAddress(@PathVariable UUID userId, @PathVariable Long addressId, @RequestBody SaveAddressDto addressDto) {

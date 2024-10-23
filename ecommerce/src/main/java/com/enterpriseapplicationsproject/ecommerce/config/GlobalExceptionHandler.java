@@ -12,14 +12,18 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -124,9 +128,6 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.valueOf(HttpStatus.FORBIDDEN.value()), req, ex.getMessage());
     }
 
-
-
-
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.BAD_GATEWAY)
     public String onResourceNotFoundException(WebRequest req, NullPointerException ex){
@@ -154,4 +155,5 @@ public class GlobalExceptionHandler {
         return output;
 
     }
+
 }

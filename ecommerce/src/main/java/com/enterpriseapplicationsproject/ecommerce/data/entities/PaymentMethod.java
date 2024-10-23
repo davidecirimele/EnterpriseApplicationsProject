@@ -27,9 +27,11 @@ public class PaymentMethod {
     private String cardHolderName;
 
     @Column(name = "TYPE", nullable = false)
+    @Enumerated(EnumType.STRING)
     private PaymentMethodType paymentMethodType;
 
     @Column(name = "PROVIDER", nullable = false)
+    @Enumerated(EnumType.STRING)
     private CardProvider provider;
 
     @Column(name = "CARD_NUMBER", nullable = false)

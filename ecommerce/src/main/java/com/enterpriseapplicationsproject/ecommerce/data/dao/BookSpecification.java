@@ -70,9 +70,6 @@ public class BookSpecification {
                 if (filter.getMaxPrice() != null) {
                     predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("price"), filter.getMaxPrice()));
                 }
-                if (filter.getISBN() != null) {
-                    predicates.add(criteriaBuilder.equal(root.get("ISBN"), filter.getISBN()));
-                }
                 if (filter.getFormat() != null) {
                     predicates.add(criteriaBuilder.equal(root.get("format"), filter.getFormat()));
                 }
@@ -92,6 +89,9 @@ public class BookSpecification {
                 }
                 if (filter.getPublisher() != null) {
                     orPredicates.add(criteriaBuilder.like(root.get("publisher"), "%" + filter.getPublisher() + "%"));
+                }
+                if (filter.getISBN() != null) {
+                    orPredicates.add(criteriaBuilder.equal(root.get("ISBN"), filter.getISBN()));
                 }
 
                 if (!orPredicates.isEmpty()) {

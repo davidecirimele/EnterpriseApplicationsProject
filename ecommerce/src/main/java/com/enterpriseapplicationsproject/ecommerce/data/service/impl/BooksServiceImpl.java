@@ -5,7 +5,9 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.BooksDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
 import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.PriceDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.StockDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.BookNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -25,6 +27,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -155,6 +158,40 @@ public class BooksServiceImpl implements BooksService {
         // Aggiorna il percorso dell'immagine nel database
         book.setImagePath(filePath.toString());
         booksDao.save(book);
+    }
+
+    @Override
+    public BookDto updatePrice(Long bookId, PriceDto newPrice) throws IOException, BookNotFoundException {
+        Optional<Book> optionalBook = booksDao.findById(bookId);
+        if (optionalBook.isEmpty()) {
+            throw new BookNotFoundException("Libro non trovato");
+        }
+
+        Book book = optionalBook.get();
+
+        if(newPrice.getPrice() > 0 && !Objects.equals(newPrice.getPrice(), book.getPrice())) {
+            book.setPrice(newPrice.getPrice());
+            Book savedBook = booksDao.save(book);
+            return modelMapper.map(savedBook, BookDto.class);
+        }
+        return null;
+    }
+
+    @Override
+    public BookDto updateStock(Long bookId, StockDto newStock) throws IOException, BookNotFoundException {
+        Optional<Book> optionalBook = booksDao.findById(bookId);
+        if (optionalBook.isEmpty()) {
+            throw new BookNotFoundException("Libro non trovato");
+        }
+
+        Book book = optionalBook.get();
+
+        if(newStock.getStock() > 0 && !Objects.equals(newStock.getStock(), book.getStock())) {
+            book.setStock(newStock.getStock());
+            Book savedBook = booksDao.save(book);
+            return modelMapper.map(savedBook, BookDto.class);
+        }
+        return null;
     }
 
     @Override

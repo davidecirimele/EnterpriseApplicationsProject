@@ -3,10 +3,7 @@ package com.enterpriseapplicationsproject.ecommerce;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
 import com.enterpriseapplicationsproject.ecommerce.data.service.*;
 
-import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.GroupDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.*;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
@@ -163,8 +160,8 @@ public class DbGenerator implements ApplicationRunner {
         String zipCode = array[5];
         String additionalInfo = array[6];
 
-        List<UserDto> allUsers = userService.getAllDto();
-        UserDto userDto = allUsers.get(counter);
+        List<UserDetailsDto> allUsers = userService.getAllDto();
+        UserDetailsDto userDto = allUsers.get(counter);
 
         User user = userService.getUserById(userDto.getId());
 
@@ -282,8 +279,8 @@ public class DbGenerator implements ApplicationRunner {
         WishlistPrivacy privacy = WishlistPrivacy.valueOf(array[3]);
 
         // Retrieve the User and Group entities by their index in the corresponding lists
-        List<UserDto> allUsersDto = userService.getAllDto();
-        UserDto udto = allUsersDto.get(userIndex); // Retrieve all users as entities
+        List<UserDetailsDto> allUsersDto = userService.getAllDto();
+        UserDetailsDto udto = allUsersDto.get(userIndex); // Retrieve all users as entities
         User user = userService.getUserById(udto.getId());
 
         List<GroupDto> allGroupsDto = groupService.getAllGroups();
@@ -340,8 +337,8 @@ public class DbGenerator implements ApplicationRunner {
         int groupIndex = Integer.parseInt(array[0]) - 1;
         int memberIndex = Integer.parseInt(array[1]) - 1;
 
-        List<UserDto> allUsersDto = userService.getAllDto();
-        UserDto udto = allUsersDto.get(memberIndex);
+        List<UserDetailsDto> allUsersDto = userService.getAllDto();
+        UserDetailsDto udto = allUsersDto.get(memberIndex);
         User user = userService.getUserById(udto.getId());
 
         List<GroupDto> allGroupsDto = groupService.getAllGroups();

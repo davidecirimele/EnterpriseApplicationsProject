@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+//import com.example.ecommercefront_end.viewmodels.HomeViewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -111,7 +112,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "${"%,.2f".format(book.price)} €",
+                    text = "€ ${"%,.2f".format(book.price)}",
                     fontSize = 31.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.CenterVertically)
@@ -398,11 +399,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
 
                         )
                         Text(
-                            text = if (book.age != null) {
-                                "${book.age}"
-                            }else {
-                                "--" // O un altro messaggio di default
-                            },
+                            text = "${book.age}",
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -419,11 +416,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
 
                         )
                         Text(
-                            text = if (book.publishDate != null) {
-                                book.publishDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                            } else {
-                                "--" // O un altro messaggio di default
-                            },
+                            text = book.publishDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -440,11 +433,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
 
                         )
                         Text(
-                            if (book.weight != null) {
-                                "${book.weight} kg"
-                            } else {
-                                " --" // O un altro messaggio di default
-                            },
+                            text = "${book.weight} kg",
                             modifier = Modifier.weight(1f)
                         )
                     }

@@ -17,7 +17,10 @@ import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.model.BookFormat
 import com.example.ecommercefront_end.model.BookGenre
 import com.example.ecommercefront_end.model.BookLanguage
+import com.example.ecommercefront_end.model.Price
 import com.example.ecommercefront_end.model.SaveAddress
+import com.example.ecommercefront_end.model.SaveBook
+import com.example.ecommercefront_end.model.Stock
 
 import com.example.ecommercefront_end.model.UserId
 
@@ -227,6 +230,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
                 if (response.isSuccessful && response.body() != null) {
                     _allProducts.value = response.body()!!
+                    _filteredProducts.value = _allProducts.value
                 } else {
                     throw Exception("Error fetching products")
                 }
@@ -297,17 +301,21 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     }
 
     fun searchBooks(navController: NavController, currentRoute: String?){
-        if(currentRoute != null && currentRoute != "filtered-books") {
+        if(currentRoute != null && (currentRoute != "filtered-books" && currentRoute != "admin-catalogue")) {
             navController.navigate("filtered-books") {
                 popUpTo("home") {
                     saveState = true
                 }
             }
         }
+
+        fetchFilteredBooks()
+
+        /*
         if(!searchInCachedBooks()) {
-            Log.d("BookDebug", "No cached products found or matching filters, fetching from backend...")
+            Log.d("BookDebug", "Too few cached products found, fetching from backend...")
             fetchFilteredBooks()
-        }
+        }*/
     }
 
     fun sortProducts(){
@@ -353,9 +361,8 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
             }
             Log.d("BookDebug", "Filter values: ${filter.value}")
             Log.d("BookDebug", "Filtered products: ${_filteredProducts.value.size}")
-            return _filteredProducts.value.isNotEmpty()
         }
-        return false
+        return _filteredProducts.value.isNotEmpty()
     }
 
     fun clearCache(){
@@ -367,6 +374,56 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         viewModelScope.launch {
             val book = _allProducts.value.find { it.id == id }
             _bookFlow.value = book
+        }
+    }
+
+    fun insertBook(book: SaveBook){
+        viewModelScope.launch {
+            try {
+                if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
+                    repository.insertBook(book)
+                    fetchAllProducts()
+                    Log.d("BookViewModel", "Book added: ${_allProducts.value}")
+                }
+                else
+                    Log.d("UserDebug", "User is null")
+            } catch (e: Exception) {
+                Log.d("UserDebug", "Error adding Book: $book")
+            }
+        }
+    }
+
+    fun updatePrice(newPrice: Double, bookId: Long){
+        viewModelScope.launch {
+            try {
+                if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
+                    Log.d("UserDebug", "NewPrice ${Price(newPrice)}")
+                    repository.updatePrice(bookId, Price(newPrice))
+                    fetchAllProducts()
+                    loadBook(bookId)
+                }
+                else
+                    Log.d("UserDebug", "User is null")
+            } catch (e: Exception) {
+                e.message?.let { Log.d("UserDebug", it) }
+            }
+        }
+    }
+
+    fun restock(newStock: Int, bookId: Long){
+        viewModelScope.launch {
+            try {
+                if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
+                    Log.d("UserDebug", "NewStock $newStock")
+                    repository.updateStock(bookId, Stock(newStock))
+                    fetchAllProducts()
+                    loadBook(bookId)
+                }
+                else
+                    Log.d("UserDebug", "User is null")
+            } catch (e: Exception) {
+                Log.d("UserDebug", "Error updating Book stock")
+            }
         }
     }
 }

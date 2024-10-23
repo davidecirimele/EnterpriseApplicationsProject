@@ -33,14 +33,14 @@ public class GroupsController {
     }
 
     @PutMapping("/{groupId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')") //never used yet
     public ResponseEntity<GroupDto> update(@PathVariable("groupId") Long id, @RequestBody GroupDto groupDto) {
         GroupDto updatedGroup = groupsService.updateGroup(id, groupDto);
         return ResponseEntity.ok(updatedGroup);
     }
 
     @PostMapping("/add")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')") //never used yet
     public ResponseEntity<GroupDto> add(@RequestBody GroupDto groupDto) {
         GroupDto newGroup = groupsService.createGroup(groupDto);
         return ResponseEntity.ok(newGroup);
@@ -70,7 +70,7 @@ public class GroupsController {
 
     @RateLimit
     @DeleteMapping("/{groupId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')") //never used yet
     public ResponseEntity<Void> delete(@PathVariable("groupId") Long id) {
         groupsService.deleteGroup(id);
         return ResponseEntity.ok().build();

@@ -43,15 +43,17 @@ fun AccountManagerScreen(viewModel: AccountViewModel, navHostController: NavHost
 
     val userDetails by viewModel.userDetails.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.SpaceEvenly){
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(8.dp), verticalArrangement = Arrangement.SpaceEvenly){
         userDetails?.let { UserCard(it) }
         OptionsSection(navHostController)
+        if(SessionManager.user != null && SessionManager.user!!.role!="ROLE_ADMIN")
         HistorySection()
         Buttons(navHostController)
     }
 }
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun UserCard(userDetails: UserDetails){
     Row(modifier = Modifier.fillMaxWidth()) {
@@ -80,19 +82,23 @@ fun OptionsSection(navHostController: NavHostController){
                 }}) {
                     Text(text = "My Account")
                 }
-                Spacer(modifier = Modifier.width(20.dp))
-                Button(onClick = { /*TODO*/ }) {
-                    Text(text = "My Orders")
+                if(SessionManager.user != null && SessionManager.user!!.role!="ROLE_ADMIN") {
+                    Spacer(modifier = Modifier.width(20.dp))
+                    Button(onClick = { /*TODO*/ }) {
+                        Text(text = "My Orders")
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(20.dp))
-            Row {
-                Button(onClick = { /*TODO*/ }) {
-                    Text(text = "My Groups")
-                }
-                Spacer(modifier = Modifier.width(20.dp))
-                Button(onClick = { /*TODO*/ }) {
-                    Text(text = "My Reviews")
+            if(SessionManager.user != null && SessionManager.user!!.role!="ROLE_ADMIN") {
+                Spacer(modifier = Modifier.height(20.dp))
+                Row {
+                    Button(onClick = { /*TODO*/ }) {
+                        Text(text = "My Groups")
+                    }
+                    Spacer(modifier = Modifier.width(20.dp))
+                    Button(onClick = { /*TODO*/ }) {
+                        Text(text = "My Reviews")
+                    }
                 }
             }
         }

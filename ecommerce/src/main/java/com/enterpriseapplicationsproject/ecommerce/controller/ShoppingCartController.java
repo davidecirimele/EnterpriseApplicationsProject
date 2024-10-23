@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.service.ShoppingCartService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
@@ -22,6 +23,8 @@ public class ShoppingCartController {
 
     private final ShoppingCartService shoppingCartService;
 
+
+    @RateLimit(type ="USER")
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<ShoppingCartDto>> all() {
@@ -29,6 +32,7 @@ public class ShoppingCartController {
         return new ResponseEntity<>(shoppingCarts, HttpStatus.OK);
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/get/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<ShoppingCartDto> get(@PathVariable UUID userId) {
@@ -36,6 +40,7 @@ public class ShoppingCartController {
         return new ResponseEntity<>(shoppingCart, HttpStatus.OK);
     }
 
+    @RateLimit(type ="USER")
     @DeleteMapping("/{userId}/{cartId}/clear")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<Void> deleteShoppingCart(@PathVariable UUID userId, @PathVariable Long cartId) {
@@ -53,6 +58,14 @@ public class ShoppingCartController {
         ShoppingCartDto savedCart = shoppingCartService.saveCart(ShoppingCartDto);
         return new ResponseEntity<>(savedCart, HttpStatus.OK);
     }*/
+
+    @RateLimit(type ="USER")
+    @GetMapping("/get/total/{userId}")
+    @PreAuthorize("#userId == authentication.principal.getId()")
+    public ResponseEntity<Double> getTotal(@PathVariable UUID userId) {
+        Double total = shoppingCartService.getTotal(userId);
+        return new ResponseEntity<>(total, HttpStatus.OK);
+    }
 }
 
 

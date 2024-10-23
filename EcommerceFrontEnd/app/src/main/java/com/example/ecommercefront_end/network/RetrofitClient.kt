@@ -1,6 +1,11 @@
 package com.example.ecommercefront_end.network
 
 import com.example.ecommercefront_end.SessionManager
+import com.example.ecommercefront_end.model.CardProvider
+import com.example.ecommercefront_end.model.CardProviderAdapter
+
+import com.example.ecommercefront_end.model.PaymentMethodType
+import com.example.ecommercefront_end.model.PaymentMethodTypeAdapter
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -13,11 +18,9 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
 object RetrofitClient {
-    private const val BASE_URL = "https://10.0.2.2:8081/api/v1/"
+    private const val BASE_URL = "https://192.168.1.7:8443/api/v1/"
 
-    private const val BASE_2_URL = "https://192.168.1.5:8443/api/v1/"
-
-    private const val SAMUELES_URL = "https://192.168.50.2:8081/api/v1/" //URL di Samuele S
+    private const val SAMUELES_URL = "https://192.168.1.54:8081/api/v1/" //URL di Samuele S
 
     private const val DAVIDES_URL = "https://10.0.2.2:8080/api/v1/"
 
@@ -61,7 +64,8 @@ object RetrofitClient {
             .client(client)
             .addConverterFactory(GsonConverterFactory.create(
                 GsonBuilder()
-                    .registerTypeAdapter(LocalDate::class.java, LocalDateAdapter())
+                    .registerTypeAdapter(LocalDate::class.java, LocalDateAdapter()).registerTypeAdapter(PaymentMethodType::class.java,  PaymentMethodTypeAdapter() )
+                    .registerTypeAdapter(CardProvider::class.java, CardProviderAdapter())
                     .create()
             ))
             .build()
@@ -69,6 +73,10 @@ object RetrofitClient {
 
     val authApiService: AuthApiService by lazy {
         retrofit.create(AuthApiService::class.java)
+    }
+
+    val adminApiService: AdminApiService by lazy {
+        retrofit.create(AdminApiService::class.java)
     }
 
     val userApiService: UserApiService by lazy {
@@ -93,6 +101,10 @@ object RetrofitClient {
 
     val addressApiService: AddressApiService by lazy {
         retrofit.create(AddressApiService::class.java)
+    }
+
+    val checkoutApiService: CheckoutApiService by lazy {
+        retrofit.create(CheckoutApiService::class.java)
     }
 }
 

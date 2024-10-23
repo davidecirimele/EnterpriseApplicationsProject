@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.service.TransactionsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.TransactionDto;
 import jakarta.validation.Valid;
@@ -29,6 +30,7 @@ public class TransactionController {
 
     }*/
 
+    @RateLimit(type ="USER")
     @GetMapping(consumes =  "application/json", path = "/get/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<List<TransactionDto>> getUserTransactions(@PathVariable UUID userId){

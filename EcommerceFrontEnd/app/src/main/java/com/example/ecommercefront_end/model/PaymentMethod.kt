@@ -3,10 +3,10 @@ package com.example.ecommercefront_end.model
 data class PaymentMethod (
 
     val id: Long,
-    val user : User,
+    val user : UserId,
     val cardHolderName : String,
-    val paymentMethodType : Enum<PaymentMethodType>,
-    val provider : Enum <CardProvider>,
+    val paymentMethodType : PaymentMethodType,
+    val provider : CardProvider,
     val cardNumber: String,
     val expirationDate: String
 )

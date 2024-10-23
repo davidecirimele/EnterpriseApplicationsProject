@@ -1,6 +1,7 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
 
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.service.PaymentMethodsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.PaymentMethodDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SavePaymentMethodDto;
@@ -13,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -26,26 +28,37 @@ public class PaymentMethodController {
 
     private final PaymentMethodsService paymentMethodService;
 
+    @RateLimit(type ="USER")
     @PostMapping(consumes = "application/json", path = "/add")
     @PreAuthorize("#paymentMethodDto.user.userId == authentication.principal.getId()")
-    public ResponseEntity<SavePaymentMethodDto> addPaymentMethod( @Valid @RequestBody SavePaymentMethodDto paymentMethodDto) {
+    public ResponseEntity<PaymentMethodDto> addPaymentMethod( @Valid @RequestBody SavePaymentMethodDto paymentMethodDto) {
         System.out.println("PaymentMethodDto: " + paymentMethodDto.toString());
 
-        SavePaymentMethodDto paymentMethod = paymentMethodService.addPaymentMethod(paymentMethodDto);
+        PaymentMethodDto paymentMethod = paymentMethodService.addPaymentMethod(paymentMethodDto);
         return new ResponseEntity<>(paymentMethod, HttpStatus.CREATED);
     }
 
-    @GetMapping(consumes = "application/json", path = "/get/{userId}")
+    @RateLimit(type ="USER")
+    @GetMapping(path = "/get/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
-    public ResponseEntity<PaymentMethodDto> getPaymentMethodByUserId(@PathVariable UUID userId) {
-        PaymentMethodDto paymentMethod = paymentMethodService.getPaymentMethodByUserId(userId);
+    public ResponseEntity<List<PaymentMethodDto>> getAllPaymentMethodByUserId(@PathVariable UUID userId) {
+        List<PaymentMethodDto> paymentMethod = paymentMethodService.getAllPaymentMethodByUserId(userId);
         return new ResponseEntity<>(paymentMethod, HttpStatus.OK);
     }
 
-    @DeleteMapping(consumes = "application/json", path = "/delete/{userId}")
+    @RateLimit(type ="USER")
+    @GetMapping(path = "/get/{userId}/{paymentMethodId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
-    public ResponseEntity<PaymentMethodDto> deletePaymentMethodByUserId(@PathVariable UUID userId) {
-        PaymentMethodDto paymentMethod = paymentMethodService.deletePaymentMethodByUserId(userId);
+    public ResponseEntity<PaymentMethodDto> getPaymentMethodByUserId(@PathVariable UUID userId, @PathVariable Long paymentMethodId) {
+        PaymentMethodDto paymentMethod = paymentMethodService.getPaymentMethodByUserId(userId, paymentMethodId);
         return new ResponseEntity<>(paymentMethod, HttpStatus.OK);
+    }
+
+    @RateLimit(type ="USER")
+    @DeleteMapping(path = "/delete/{paymentMethodId}/{userId}")
+    @PreAuthorize("#userId == authentication.principal.getId()")
+    public ResponseEntity<Void> deletePaymentMethodByUserId(@PathVariable UUID userId, @PathVariable Long paymentMethodId) {
+       paymentMethodService.deletePaymentMethodByUserId(userId, paymentMethodId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -8,6 +8,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.AddressService;
 import com.enterpriseapplicationsproject.ecommerce.dto.AddressDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.AddressIdDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveAddressDto;
+import com.enterpriseapplicationsproject.ecommerce.exception.AddressNotFoundException;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -60,7 +61,7 @@ public class AddressServiceImpl implements AddressService {
             return modelMapper.map(address, AddressDto.class);
         }
         else{
-            throw new RuntimeException("Default address not found");
+            throw new AddressNotFoundException("Default address not found");
         }
     }
 
@@ -106,8 +107,9 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public SaveAddressDto insertAddress(UUID userId, SaveAddressDto addressDto) {
+    public AddressDto insertAddress(UUID userId, SaveAddressDto addressDto) {
         User user = userDao.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
+
 
         Address address = modelMapper.map(addressDto, Address.class);
         address.setUser(user);
@@ -116,7 +118,7 @@ public class AddressServiceImpl implements AddressService {
             address.setDefaultAddress(true);
         address.setIsValidAddress(true);
         Address savedAddress = addressesDao.save(address);
-        return modelMapper.map(savedAddress, SaveAddressDto.class);
+        return modelMapper.map(savedAddress, AddressDto.class);
     }
 
     @Override

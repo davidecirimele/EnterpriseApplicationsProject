@@ -1,11 +1,15 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.BookSpecification;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
 import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
 import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.PriceDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.StockDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.BookNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,9 +31,10 @@ public class BookController {
 
     private final BooksService booksService;
 
+    @RateLimit(type ="USER")
     @GetMapping(path = "/getAll")
     //@PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity< List<BookDto> > getAll() {
+    public ResponseEntity<List<BookDto>> getAll() {
         log.info("Received request for books/getAll");
         List<BookDto> books = booksService.getAllSorted();
         if (books.isEmpty())
@@ -37,6 +42,7 @@ public class BookController {
         return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
+    @RateLimit(type ="USER")
     @PostMapping("/get/filter")
     public ResponseEntity<List<Book>> filterBooks(@RequestBody BookSpecification.Filter filter) {
         log.info("Received request for books/get/filter -> "+filter);
@@ -44,55 +50,63 @@ public class BookController {
         return ResponseEntity.ok(filteredBooks);
     }
 
-
+    @RateLimit(type ="USER")
     @GetMapping("/get/max-price")
     public ResponseEntity<Double> getMaxPrice() {
         Double maxPrice = booksService.getMaxBookPrice();
         return ResponseEntity.ok(maxPrice);
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/get/min-price")
     public ResponseEntity<Double> getMinPrice() {
         Double minPrice = booksService.getMinBookPrice();
         return ResponseEntity.ok(minPrice);
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/get/max-age")
     public ResponseEntity<Integer> getMaxAge() {
         Integer maxAge = booksService.getMaxBookAge();
         return ResponseEntity.ok(maxAge);
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/get/min-age")
     public ResponseEntity<Integer> getMinAge() {
         Integer minAge = booksService.getMinBookAge();
         return ResponseEntity.ok(minAge);
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/get/max-pages")
     public ResponseEntity<Integer> getMaxPages() {
         Integer maxPages = booksService.getMaxBookPages();
         return ResponseEntity.ok(maxPages);
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/get/min-pages")
     public ResponseEntity<Integer> getMinPages() {
         Integer minPages = booksService.getMinBookPages();
         return ResponseEntity.ok(minPages);
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/get/max-weight")
     public ResponseEntity<Double> getMaxWeight() {
         Double maxWeight = booksService.getMaxBookWeight();
         return ResponseEntity.ok(maxWeight);
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/get/min-weight")
     public ResponseEntity<Double> getMinWeight() {
         Double minWeight = booksService.getMinBookWeight();
         return ResponseEntity.ok(minWeight);
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/get/min-publication-date")
     public ResponseEntity<LocalDate> getMinPublicationDate() {
         LocalDate minPublicationDate = booksService.getMinPublicationYear();
@@ -100,6 +114,7 @@ public class BookController {
     }
 
     // da testare se consumes va bene, dato che ha un corpo nella richiesta
+    @RateLimit(type ="USER")
     @GetMapping(consumes = "application/json", path = "/get/{idBook}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BookDto> getById(@PathVariable("idBook") Long id) {
@@ -109,15 +124,17 @@ public class BookController {
         return new ResponseEntity<>(b, HttpStatus.OK);
     }
 
+    @RateLimit(type ="USER")
     @PostMapping(consumes = "application/json", path = "/add")
-    @PreAuthorize("hasRole('ADMIN') ")
-    public ResponseEntity<BookDto> add(@RequestBody SaveBookDto bDto) {
-        BookDto b = booksService.save(bDto);
-        if (b == null)
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(b, HttpStatus.OK);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BookDto> addBook(@Valid @RequestBody SaveBookDto book){
+        BookDto savedBook = booksService.save(book);
+        if(savedBook == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
     }
 
+    @RateLimit(type ="USER")
     @DeleteMapping(consumes = "application/json", path = "/delete/{idBook}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BookDto> delete(@PathVariable("idBook") Long id) {
@@ -128,7 +145,9 @@ public class BookController {
     }
 
 
+    @RateLimit(type ="USER")
     @PostMapping("/{id}/update-cover")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateBookCover(@PathVariable Long id, @RequestParam("cover") MultipartFile coverImage) {
         try {
             booksService.updateBookCover(id, coverImage);
@@ -137,6 +156,34 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Errore nel salvataggio della cover.");
         } catch (BookNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Libro non trovato.");
+        }
+    }
+
+    @RateLimit(type ="USER")
+    @PutMapping("/edit-price/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BookDto> updateBookPrice(@PathVariable Long id, @RequestBody PriceDto newPrice) {
+        try {
+            BookDto book = booksService.updatePrice(id, newPrice);
+            return new ResponseEntity<>(book,HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (BookNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @RateLimit(type ="USER")
+    @PutMapping("/edit-stock/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BookDto> updateBookPrice(@PathVariable Long id, @RequestBody StockDto newStock) {
+        try {
+            BookDto book = booksService.updateStock(id, newStock);
+            return new ResponseEntity<>(book,HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (BookNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 }
