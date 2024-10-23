@@ -51,8 +51,14 @@ public class OrdersServiceImpl implements OrdersService {
     public SaveOrderDto addOrder(CheckoutRequestDto orderDto) {
         User user = usersDao.findById(orderDto.getUserId().getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
         ShoppingCart shoppingCart = shoppingCartDao.findByUserId(orderDto.getUserId().getUserId()).orElseThrow(() -> new ShoppingCartNotFoundException("Shopping cart not found"));
-        addressesDao.findById(orderDto.getAddress().getId()).orElseThrow(() -> new AddressNotFoundException("Address not found"));
+        Address add = addressesDao.findById(orderDto.getAddress().getId()).orElseThrow(() -> new AddressNotFoundException("Address not found"));
+        if (!add.getUserId().getId().equals(user.getId())) {
+            throw new UnauthorizedAccessException("Unauthorized access to this address");
+        }
         PaymentMethod paymentMethod = paymentMethodsDao.findById(orderDto.getPaymentMethodId().getPaymentMethodId()).orElseThrow(() -> new PaymentMethodNotFoundException("Payment method not found"));
+        if (!paymentMethod.getUser().getId().equals(user.getId())) {
+            throw new UnauthorizedAccessException("Unauthorized access to this payment method");
+        }
         if (!validateOrder(shoppingCart)) {
             throw new OutOfStockException("Products out of stock");
         }
@@ -107,7 +113,7 @@ public class OrdersServiceImpl implements OrdersService {
             orderItem.setQuantity(item.getQuantity());
             return orderItem;
         }).collect(Collectors.toList());
-        order.setOrderStatus(OrderStatus.PENDING);
+        order.setOrderStatus(OrderStatus.CONFIRMED);
         order.setPaymentMethod(paymentMethod);
         order.setTotalAmount(shoppingCart.getTotal());
         order.setOrderDate(LocalDate.now());

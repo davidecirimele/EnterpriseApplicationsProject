@@ -3,8 +3,10 @@ package com.enterpriseapplicationsproject.ecommerce.data.service;
 import com.enterpriseapplicationsproject.ecommerce.dto.OrderItemDto;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface OrderItemsService {
 
-    public List<OrderItemDto> getOrderItemsByOrderId(Long orderId);
+
+    List<OrderItemDto> getOrderItemsByOrderId(Long orderId, UUID userId);
 }
