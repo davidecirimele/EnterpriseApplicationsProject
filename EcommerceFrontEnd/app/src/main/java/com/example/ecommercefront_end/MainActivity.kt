@@ -82,6 +82,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -118,6 +119,7 @@ import com.example.ecommercefront_end.ui.admin.InsertProductScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutAddressScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutPaymentScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
+import com.example.ecommercefront_end.ui.checkout.OrderConfirmationScreen
 import com.example.ecommercefront_end.ui.user.InsertAddressScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
 import com.example.ecommercefront_end.ui.user.UserAuthScreen
@@ -169,7 +171,7 @@ fun NavigationView(navController: NavHostController) {
     val addressViewModel = remember { AddressViewModel(repository = AddressRepository(RetrofitClient.addressApiService)) }
     val bookViewModel = remember { BookViewModel(repository = BookRepository(RetrofitClient.booksApiService)) }
     val adminViewModel = remember { AdminViewModel(repository = AdminRepository(RetrofitClient.adminApiService)) }
-    val checkoutViewModel = remember { CheckoutViewModel(checkoutRepository = CheckoutRepository(RetrofitClient.checkoutApiService), cartViewModel = cartViewModel) }
+    val checkoutViewModel = remember { CheckoutViewModel(checkoutRepository = CheckoutRepository(RetrofitClient.checkoutApiService), cartViewModel = cartViewModel, navController = navController) }
 
     val startDestination = if (SessionManager.user?.role == "ROLE_ADMIN") {
         "admin-home"
@@ -341,9 +343,7 @@ fun NavigationView(navController: NavHostController) {
             composable("checkout") {
                 CheckoutScreen(
                     viewModel = checkoutViewModel,
-                    onConfirmOrder = {
-                        // Implementa la logica per confermare l'ordine
-                    }, navController = navController)
+                    navController = navController)
             }
 
             composable("checkout-addresses") {
@@ -352,6 +352,10 @@ fun NavigationView(navController: NavHostController) {
 
             composable("checkout-payment") {
                 CheckoutPaymentScreen(viewModel = checkoutViewModel, navController = navController)
+            }
+
+            composable("order-confirmation"){
+                OrderConfirmationScreen( navController = navController, checkoutViewModel = checkoutViewModel)
             }
 
         }
