@@ -78,7 +78,7 @@ public class AuthServiceImpl implements  AuthService{
     }
 
     @Override
-    public SaveUserDto registerAdmin(SaveUserDto userDto) {
+    public UserDetailsDto registerAdmin(SaveUserDto userDto) {
         System.out.println("Admin UserDto: " + userDto);
 
         userDao.findByCredentialEmail(userDto.getCredential().getEmail()).ifPresent(u -> {
@@ -97,7 +97,7 @@ public class AuthServiceImpl implements  AuthService{
 
         userDao.save(admin);
 
-        return modelMapper.map(admin, SaveUserDto.class);
+        return modelMapper.map(admin, UserDetailsDto.class);
     }
 
     @Override

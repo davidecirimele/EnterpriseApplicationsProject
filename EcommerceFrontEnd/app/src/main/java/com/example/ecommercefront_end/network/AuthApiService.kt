@@ -24,7 +24,10 @@ interface AuthApiService {
     suspend fun login(@Body credentials: Credential): Response<Map<String, String>>
 
     @POST("auth/register")
-    suspend fun register(@Body user: SaveUser): Response<UserDetails>
+    suspend fun registerUser(@Body user: SaveUser): Response<UserDetails>
+
+    @POST("admin/register")
+    suspend fun registerAdmin(@Body user: SaveUser): Response<UserDetails>
 
     @POST("auth/validate-token")
     suspend fun validateToken(@Body accessToken : AccessToken) : Response<AccessToken>

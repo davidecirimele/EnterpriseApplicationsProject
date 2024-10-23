@@ -447,23 +447,23 @@ fun RegistrationStep2(registrationViewModel: RegistrationViewModel, onRegistrati
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            /*
+
             OutlinedTextField(
                 value = admin,
                 onValueChange = { admin = it },
-                label = { Text("Codice ADMIN") },
+                label = { Text("ADMIN Code") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true
             )
             Text(
-                text = "Facoltativo",
+                text = "Insert Admin Code",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .padding(top = 4.dp)
                     .offset(x = 8.dp),
             )
-            Spacer(modifier = Modifier.height(10.dp))*/
+            Spacer(modifier = Modifier.height(10.dp))
 
 
         /* Indirizzo
@@ -511,7 +511,7 @@ fun RegistrationStep2(registrationViewModel: RegistrationViewModel, onRegistrati
             }
 
             Button(onClick = {
-                registrationViewModel.updateUserDetails(selectedDate, phoneNumber)
+                registrationViewModel.updateUserDetails(selectedDate, phoneNumber, admin)
                 registrationViewModel.register(onRegistrationComplete)
                 onNext() // Passa al prossimo step
             },

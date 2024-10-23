@@ -31,10 +31,19 @@ public class BookController {
     private final BooksService booksService;
 
     @GetMapping(path = "/getAll")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<BookDto>> getAll() {
         log.info("Received request for books/getAll");
         List<BookDto> books = booksService.getAllSorted();
+        if (books.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(books, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/get-catalogue")
+    public ResponseEntity<List<BookDto>> getAllAvailable() {
+        log.info("Received request for books/get-catalogue");
+        List<BookDto> books = booksService.getAllAvailable();
         if (books.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(books, HttpStatus.OK);
@@ -120,7 +129,7 @@ public class BookController {
         return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
     }
 
-    @DeleteMapping(consumes = "application/json", path = "/delete/{idBook}")
+    @PutMapping(path = "/delete/{idBook}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BookDto> delete(@PathVariable("idBook") Long id) {
         BookDto b = booksService.deleteBook(id);
@@ -129,6 +138,14 @@ public class BookController {
         return new ResponseEntity<>(b, HttpStatus.OK);
     }
 
+    @PutMapping(path = "/restore/{idBook}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BookDto> restore(@PathVariable("idBook") Long id) {
+        BookDto b = booksService.restoreBook(id);
+        if (b == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(b, HttpStatus.OK);
+    }
 
     @PostMapping("/{id}/update-cover")
     @PreAuthorize("hasRole('ADMIN')")

@@ -30,7 +30,7 @@ public class AdminController {
     private final RefreshTokenService refreshTokenService;
 
     @PostMapping(consumes = "application/json", path = "/register")
-    public ResponseEntity<SaveUserDto> registerUser(@RequestBody  SaveUserDto userDto) {
+    public ResponseEntity<UserDetailsDto> registerAdmin(@RequestBody  SaveUserDto userDto) {
         return ResponseEntity.ok(authService.registerAdmin(userDto));
     }
 

@@ -17,9 +17,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddBox
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -42,6 +44,7 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import com.example.ecommercefront_end.model.Book
+import com.example.ecommercefront_end.ui.books.BooksFilterScreen
 import com.example.ecommercefront_end.ui.home.testImgs
 import com.example.ecommercefront_end.viewmodels.BookViewModel
 
@@ -58,6 +61,12 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navHostController: NavHos
 
     var searchValue by remember { mutableStateOf("") }
 
+    var filterOptions by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        bookViewModel.fetchAllAvailableProducts();
+    }
+
     Column(modifier = Modifier.fillMaxSize()){
 
         Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
@@ -69,7 +78,7 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navHostController: NavHos
             )
         }
 
-        Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+        Row(modifier = Modifier.fillMaxWidth()) {
             TextField(
                 value = searchValue,
                 onValueChange = { searchValue = it;
@@ -79,8 +88,16 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navHostController: NavHos
                 label = { Text("Search by Title, Author, Publisher or ISBN") },
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
             )
+            IconButton(modifier = Modifier.weight(1f).align(Alignment.CenterVertically),onClick = {
+                filterOptions = !filterOptions
+            }) {
+                Icon(
+                    Icons.Filled.FilterAlt,
+                    contentDescription = "Filter Catalogue",
+                    modifier = Modifier.size(35.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.padding(2.dp))
@@ -112,6 +129,16 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navHostController: NavHos
         Row(modifier = Modifier.fillMaxWidth()){
             addNewProductCard(navHostController = navHostController)
         }
+    }
+
+    if(filterOptions) {
+        BooksFilterScreen(
+            viewModel = bookViewModel,
+            navController = navHostController,
+            currentRoute = "admin-catalogue",
+            onDismiss = {
+                filterOptions = false
+            })
     }
 }
 

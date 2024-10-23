@@ -39,6 +39,7 @@ public class BookSpecification {
         private LocalDate publishDate;
         private LocalDate minPublishDate;
         private LocalDate maxPublishDate;
+        private Boolean available;
     }
 
     public static Specification<Book> bookFilter(BookSpecification.Filter filter) {
@@ -131,6 +132,9 @@ public class BookSpecification {
                 }
                 if (filter.getMaxPages() != null) {
                     predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("pages"), filter.getMaxPages()));
+                }
+                if (filter.getAvailable() != null) {
+                    predicates.add(criteriaBuilder.equal(root.get("available"), filter.getAvailable()));
                 }
 
                 return query.where(predicates.toArray(new Predicate[0])).getRestriction();
