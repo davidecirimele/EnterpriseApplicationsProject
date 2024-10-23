@@ -27,10 +27,6 @@ class CheckoutRepository(private val checkoutApiService: CheckoutApiService) {
         return checkoutApiService.getPaymentMethods(userId)
     }
 
-    // Recupera il totale dell'ordine
-    suspend fun getOrderTotal(userId: UUID): Double {
-        return checkoutApiService.getOrderTotal(userId)
-    }
 
     // Aggiorna l'indirizzo di spedizione
     suspend fun addShippingAddress(address: SaveAddress, sessionManager: SessionManager) : Address? {
@@ -61,6 +57,10 @@ class CheckoutRepository(private val checkoutApiService: CheckoutApiService) {
         println("metodo di pagamento che sto cancellando:$paymentMethodId")
         println("userId: $userId")
         return checkoutApiService.deletePaymentMethod(userId, paymentMethodId)
+    }
+
+    suspend fun getPaymentMethod(userId: UUID, paymentMethodId: Long) : Response<PaymentMethod?> {
+        return checkoutApiService.getPaymentMethod(userId, paymentMethodId)
     }
 
 
