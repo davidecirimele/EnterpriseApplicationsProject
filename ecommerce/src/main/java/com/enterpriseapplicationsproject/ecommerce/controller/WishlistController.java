@@ -74,17 +74,6 @@ public class WishlistController {
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
-    @RateLimit(type = "USER")
-    @GetMapping(path = "/share")
-    @PreAuthorize("#wDto.getUser().id == authentication.principal.getId() or hasRole('ADMIN')") //GetId() o id??
-    public ResponseEntity<Map <String,String> > shareWishlist(@RequestBody WishlistDto wDto) {
-        // Estrarre i dettagli dell'utente loggato
-        if (wDto == null)
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        String wishlistToken = wDto.getWishlistToken();
-        return ResponseEntity.ok(Map.of("token", wishlistToken));
-    }
-
 
     //TO DOO
     @RateLimit(type = "USER")

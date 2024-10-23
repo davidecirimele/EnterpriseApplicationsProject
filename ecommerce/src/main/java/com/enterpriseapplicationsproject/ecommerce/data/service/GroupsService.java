@@ -19,7 +19,7 @@ public interface GroupsService {
 
     boolean addUserToGroup(UUID idUser, String token);
 
-    boolean removeUserFromGroup(UUID idUsrToRemove, Long groupId, UUID userId);
+    boolean removeUserFromGroup(Long groupId, UUID userId);
 
     Group getGroupById(Long id);
 

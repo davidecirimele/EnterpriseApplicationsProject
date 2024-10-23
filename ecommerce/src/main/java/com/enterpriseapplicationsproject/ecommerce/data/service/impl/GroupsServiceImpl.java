@@ -122,6 +122,10 @@ public class GroupsServiceImpl implements GroupsService {
     public boolean addUserToGroup(UUID idUser, String wToken) {
         Wishlist wishlistToJoin = wishlistDao.findWishlistByWishlistToken(wToken);
 
+        if (wishlistToJoin == null) {
+            throw new IllegalArgumentException("Wishlist not found");
+        }
+
         if(wishlistToJoin.getUserId() .equals (idUser)){
             throw new IllegalArgumentException("User is the owner of the wishlist");
         }
@@ -153,7 +157,8 @@ public class GroupsServiceImpl implements GroupsService {
     }
 
     @Override
-    public boolean removeUserFromGroup(UUID idUsrToRemove, Long groupId, UUID idUser) {
+    @Transactional
+    public boolean removeUserFromGroup(Long groupId, UUID idUser) {
 
         Wishlist wishlist = wishlistDao.findWishlistByGroup_Id(groupId);
 
@@ -177,28 +182,21 @@ public class GroupsServiceImpl implements GroupsService {
             throw new IllegalArgumentException("Group has no members");
         }
 
-        if (!members.stream().anyMatch(usr -> usr.getId().equals(idUsrToRemove))) {
+        if (!members.stream().anyMatch(usr -> usr.getId().equals(idUser))) {
             throw new IllegalArgumentException("User is not in the group");
         }
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        // Verifica se l'utente ha il ruolo ADMIN, da vedere se ha senso
-        boolean isAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN"));
-
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//
+//        // Verifica se l'utente ha il ruolo ADMIN, da vedere se ha senso
+//        boolean isAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN"));
 
         if (wishlist.getUserId().equals(idUser) ) {
-            if (idUsrToRemove.equals(idUser)) {
-                throw new IllegalArgumentException("User is the owner of the wishlist");
-            }
-        }
+            throw new IllegalArgumentException("User is the owner of the wishlist");
 
-        else if (!idUsrToRemove.equals(idUser) && !isAdmin) {
-            throw new IllegalArgumentException("Only the wishlist owner or the user themselves can perform the removal");
         }
-
-        members.remove(userDao.findById(idUsrToRemove)
-                .orElseThrow(() -> new RuntimeException(String.format("User not found with id [%s]", idUsrToRemove))));
+        members.remove(userDao.findById(idUser)
+                .orElseThrow(() -> new RuntimeException(String.format("User not found with id [%s]", idUser))));
         groupDao.save(group);
 
         return true;

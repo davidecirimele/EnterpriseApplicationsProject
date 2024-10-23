@@ -64,6 +64,7 @@ public class SecurityConfig {
                                 auth.requestMatchers("/api/v1/books/get/*").permitAll();
                     auth.requestMatchers("/api/v1/wishlists/**").permitAll();
                     auth.requestMatchers("/api/v1/wishlist-items/**").permitAll();
+                    auth.requestMatchers("/api/v1/groups/**").permitAll();
                     }
                     )
                     .sessionManagement(session -> session
