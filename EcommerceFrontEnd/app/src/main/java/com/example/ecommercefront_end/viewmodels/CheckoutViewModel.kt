@@ -5,13 +5,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.model.CardProvider
+import com.example.ecommercefront_end.model.CheckoutRequest
 import com.example.ecommercefront_end.model.PaymentMethod
+import com.example.ecommercefront_end.model.PaymentMethodId
 import com.example.ecommercefront_end.model.PaymentMethodType
 import com.example.ecommercefront_end.model.SaveAddress
+import com.example.ecommercefront_end.model.SaveOrder
 import com.example.ecommercefront_end.model.SavePaymentMethod
+import com.example.ecommercefront_end.model.UserId
 import com.example.ecommercefront_end.repository.AddressRepository
 import com.example.ecommercefront_end.repository.CheckoutRepository
 import com.example.ecommercefront_end.viewmodels.CartViewModel
@@ -22,7 +27,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 
-class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, private val cartViewModel: CartViewModel) : ViewModel() {
+class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, private val cartViewModel: CartViewModel, private val navController: NavController) : ViewModel() {
 
     private val _street = MutableStateFlow("")
     val street: StateFlow<String> = _street
@@ -87,6 +92,10 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
 
     private val _selectedPaymentMethodType = MutableStateFlow<PaymentMethodType?>(null)
     val selectedPaymentMethodType: StateFlow<PaymentMethodType?> = _selectedPaymentMethodType
+
+    private val _order = MutableStateFlow<SaveOrder?>(null)
+    val order: StateFlow<SaveOrder?> = _order
+
 
     val isCheckoutEnabled: StateFlow<Boolean> = combine(
         _selectedAddress,
@@ -304,9 +313,25 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
 
         // Funzione per confermare l'ordine (placeholder)
         fun confirmOrder() {
-            
+            if (isCheckoutEnabled.value) {
+                viewModelScope.launch {
+                    val user = SessionManager.getUser()
+                        val pMId = _selectedPaymentMethod.value?.id
+                        val add = _selectedAddress.value
+                        if (pMId != null && add != null) {
+                            val checkoutRequest = CheckoutRequest(
+                                userId = user,
+                                paymentMethodId = PaymentMethodId(pMId),
+                                address = add
+                            )
+                            println("checkoutRequest: $checkoutRequest")
+                            val order = checkoutRepository.confirmOrder(checkoutRequest)
+                            _order.value = order.body()
+                            navController.navigate("order-confirmation")
 
-
+                        }
+                    }
+            }
         }
 
         fun loadCheckoutData() {
