@@ -78,7 +78,7 @@ public class AuthServiceImpl implements  AuthService{
     }
 
     @Override
-    public UserDetailsDto registerAdmin(SaveUserDto userDto) {
+    public UserDetailsDto registerAdmin(@Valid SaveUserDto userDto) {
         System.out.println("Admin UserDto: " + userDto);
 
         userDao.findByCredentialEmail(userDto.getCredential().getEmail()).ifPresent(u -> {
