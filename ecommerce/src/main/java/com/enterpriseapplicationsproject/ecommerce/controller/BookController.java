@@ -111,8 +111,7 @@ public class BookController {
     }
 
     // da testare se consumes va bene, dato che ha un corpo nella richiesta
-    @GetMapping(consumes = "application/json", path = "/get/{idBook}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(path = "/get/{idBook}")
     public ResponseEntity<BookDto> getById(@PathVariable("idBook") Long id) {
         BookDto b = booksService.getBookDtoById(id);
         if(b == null)

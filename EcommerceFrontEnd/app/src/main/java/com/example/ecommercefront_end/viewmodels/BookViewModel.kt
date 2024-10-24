@@ -1,39 +1,25 @@
 package com.example.ecommercefront_end.viewmodels
 
-import android.se.omapi.Session
 import android.util.Log
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import com.example.ecommercefront_end.SessionManager
-import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.model.BookFormat
 import com.example.ecommercefront_end.model.BookGenre
 import com.example.ecommercefront_end.model.BookLanguage
 import com.example.ecommercefront_end.model.Price
-import com.example.ecommercefront_end.model.SaveAddress
 import com.example.ecommercefront_end.model.SaveBook
 import com.example.ecommercefront_end.model.Stock
 
-import com.example.ecommercefront_end.model.UserId
-
 import com.example.ecommercefront_end.repository.BookRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.newCoroutineContext
-import retrofit2.Response
 import java.time.LocalDate
 
 class BookViewModel(private val repository: BookRepository): ViewModel() {
@@ -88,6 +74,12 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
     private val _isLoadingAllBooks = MutableStateFlow(true)
     val isLoadingAllBooks: StateFlow<Boolean> = _isLoadingAllBooks.asStateFlow()
+
+    private val _isLoadingBook = MutableStateFlow(true)
+    val isLoadingBook: StateFlow<Boolean> = _isLoadingBook.asStateFlow()
+
+    private val _isLoadingCatalogue = MutableStateFlow(true)
+    val isLoadingCatalogue: StateFlow<Boolean> = _isLoadingCatalogue.asStateFlow()
 
     private val _isLoadingData = MutableStateFlow(true)
     val isLoadingData: StateFlow<Boolean> = _isLoadingData.asStateFlow()
@@ -263,7 +255,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         } catch (e: Exception) {
             _error.value = "Errore durante il caricamento dei libri: ${e.message}" // Imposta il messaggio di errore
         } finally {
-            _isLoadingAllBooks.value = false
+            _isLoadingCatalogue.value = false
         }
     }
 
@@ -398,16 +390,21 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     }
 
 
-    fun loadBook(id: Long) {
-        viewModelScope.launch {
-            if(_allProducts.value.isEmpty())
-                fetchAllProducts()
-            val book = _allProducts.value.find { it.id == id }
-            if (book != null) {
-                _bookFlow.value = book
+    suspend fun loadBook(id: Long) {
+        try {
+            val response = repository.getBook(id)
+
+            if (response.isSuccessful && response.body() != null) {
+                _bookFlow.value = response.body()
             } else {
                 _bookFlow.value = null
+                throw Exception("Error fetching book with id $id")
             }
+
+        } catch (e: Exception) {
+            _error.value = "Errore durante il caricamento del libro: ${e.message}" // Imposta il messaggio di errore
+        } finally {
+            _isLoadingBook.value = false
         }
     }
 
@@ -433,9 +430,6 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                 if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
                     Log.d("UserDebug", "NewPrice ${Price(newPrice)}")
                     repository.updatePrice(bookId, Price(newPrice))
-
-                    fetchAllAvailableProducts()
-                    loadBook(bookId)
                 }
                 else
                     Log.d("UserDebug", "User is null")
@@ -451,9 +445,6 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                 if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
                     Log.d("UserDebug", "NewStock $newStock")
                     repository.updateStock(bookId, Stock(newStock))
-
-                    fetchAllAvailableProducts()
-                    loadBook(bookId)
                 }
                 else
                     Log.d("UserDebug", "User is null")

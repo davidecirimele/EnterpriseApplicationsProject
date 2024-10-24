@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +20,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -28,6 +30,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +46,7 @@ import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.ui.books.BookInfoCard
 import com.example.ecommercefront_end.ui.home.testImgs
 import com.example.ecommercefront_end.viewmodels.BookViewModel
+import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -52,9 +56,15 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navHostController: NavH
     var showEditPriceField by remember { mutableStateOf(false) }
     var showRestockField by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
+    val isLoading by bookViewModel.isLoadingBook.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
-    if (book != null)
-    {
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+    }
+    else {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -141,6 +151,10 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navHostController: NavH
                                             newPrice.toDouble(),
                                             bookId = book!!.id
                                         );
+                                        coroutineScope.launch {
+                                            bookViewModel.fetchAllAvailableProducts()
+                                            bookViewModel.loadBook(book!!.id)
+                                        }
                                         showEditPriceField = false;
                                     }, book!!.id)
                                 }
@@ -173,6 +187,10 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navHostController: NavH
                                 Row {
                                     TextFieldWithSubmitButton({ newStock ->
                                         bookViewModel.restock(newStock.toInt(), bookId = book!!.id);
+                                        coroutineScope.launch {
+                                            bookViewModel.fetchAllAvailableProducts()
+                                            bookViewModel.loadBook(book!!.id)
+                                        }
                                         showRestockField = false
                                     }, book!!.id)
                                 }

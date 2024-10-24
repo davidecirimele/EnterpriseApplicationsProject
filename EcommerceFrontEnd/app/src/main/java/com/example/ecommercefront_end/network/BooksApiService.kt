@@ -28,7 +28,7 @@ interface BooksApiService {
     suspend fun insertBook(@Body book: SaveBook) : Response<Book>
 
     @GET("books/get/{idBook}")
-    suspend fun getBook(@Path("idBook") idBook: Long) : Book
+    suspend fun getBook(@Path("idBook") idBook: Long) : Response<Book>
 
     @GET("books/getAll")
     @RequiresAuth
