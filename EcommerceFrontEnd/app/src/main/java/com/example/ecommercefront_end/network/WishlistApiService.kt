@@ -18,9 +18,9 @@ interface WishlistApiService {
     @RequiresAuth
     suspend fun addWishlist(@Body w: Wishlist)
 
-    @GET("wishlists/get/{idW}")
+    @GET("wishlists/get/{idWishlist}/{idUser}")
     @RequiresAuth
-    suspend fun getWishlistById(@Path("idW") idW: UUID)
+    suspend fun getById(@Path("idW") idW: UUID)
 
     @GET("wishlists/getByUser/{idUser}")
     @RequiresAuth
