@@ -31,6 +31,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -41,7 +42,6 @@ public class SecurityConfig {
         private final JwtAuthenticationFilter jwtAuthFilter;
         private final LoggedUserDetailsService userDetailsService;
         private final ExceptionHandlerFilter ExceptionHandlerFilter;
-
 
 
         @Bean
@@ -55,22 +55,26 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/v1/paymentMethods/get/{userId}").authenticated();
                     auth.requestMatchers("/api/v1/paymentMethods/delete/{paymentMethodId}/{userId}").authenticated();
                     auth.requestMatchers("/api/v1/paymentMethods/get/{userId}/{paymentMethodId}").authenticated();
+
                     auth.requestMatchers("/api/v1/users/**").authenticated();
                     auth.requestMatchers("/api/v1/addresses/**").authenticated();
                     auth.requestMatchers("/api/v1/shopping-cart/**").authenticated();
-                    auth.requestMatchers("/api/v1/shopping-cart/cart/**").authenticated();;
+                    auth.requestMatchers("/api/v1/shopping-cart/cart/**").authenticated();
+
                     auth.requestMatchers("api/v1/admin/all-tokens").authenticated();
                     auth.requestMatchers("api/v1/admin/all-users").authenticated();
                     auth.requestMatchers("api/v1/admin/register").permitAll();
                     auth.requestMatchers("/error").permitAll();
+
                     auth.requestMatchers("/api/v1/books/add").authenticated();
                                 auth.requestMatchers("/api/v1/books/edit*/**").authenticated();
                     auth.requestMatchers("/api/v1/books/getAll").permitAll(); //testing home front end
                                 auth.requestMatchers("/api/v1/books/get/*").permitAll();
+
                     auth.requestMatchers("/api/v1/wishlists/**").permitAll();
-                    auth.requestMatchers("/api/v1/wishlist-items/**").permitAll();
+                    auth.requestMatchers("/api/v1/wishlist-items/**").authenticated();
                     auth.requestMatchers("/api/v1/shopping-cart/get/total/**").authenticated();
-                    auth.requestMatchers("/api/v1/groups/**").permitAll();
+                    auth.requestMatchers("/api/v1/groups/**").authenticated();
                     }
                     )
                     .sessionManagement(session -> session
@@ -79,8 +83,6 @@ public class SecurityConfig {
                     .authenticationProvider(authenticationProvider())
                     .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                     .addFilterBefore(ExceptionHandlerFilter, JwtAuthenticationFilter.class);
-
-
 
             return http.build();
         }
@@ -110,7 +112,7 @@ public class SecurityConfig {
             //configuration.setAllowedOrigins(Arrays.asList("https://localhost:8081","https://192.168.1.54:8081", "https://93.44.97.32")); // Modifica secondo le tue esigenze
 
             configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-            configuration.setAllowedHeaders(Arrays.asList("*"));
+            configuration.setAllowedHeaders(List.of("*"));
             configuration.setAllowCredentials(true);
 
             UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

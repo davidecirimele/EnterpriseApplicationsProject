@@ -6,9 +6,11 @@ import com.enterpriseapplicationsproject.ecommerce.config.security.JwtService;
 import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetails;
 import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetailsService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistsService;
+import com.enterpriseapplicationsproject.ecommerce.dto.SaveWishlistDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserIdDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.SharedWishlistRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,7 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(value = "api/v1/wishlists")// produces indica che
+@RequestMapping(value = "/api/v1/wishlists")// produces indica che
 @CrossOrigin(origins = "*", allowedHeaders = "*") // indica
 @RequiredArgsConstructor
 @Slf4j // indica che il logger è di tipo log4j
@@ -70,15 +72,18 @@ public class WishlistController {
 
 
     @RateLimit(type = "USER")
-    @PostMapping(consumes = "application/json", path = "/add")
-    @PreAuthorize("#wDto.getUser().getId()  == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<WishlistDto> add(@RequestBody WishlistDto wDto) {
+    @PostMapping(consumes = "application/json", path = "/add/new")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<Boolean> addWishlist(@RequestBody SaveWishlistDto wDto) {
+        System.out.println("Add wishlist per utente " + wDto.getUser().getId());
+        System.out.println("Nome wishlist: " + wDto.getName());
         WishlistDto w = wishlistService.save(wDto);
         if (w == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        return new ResponseEntity<>(w, HttpStatus.OK);
+        return new ResponseEntity<>(true, HttpStatus.OK);
     }
+
 
     //TO DOO
     @RateLimit(type = "USER")

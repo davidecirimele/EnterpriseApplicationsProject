@@ -1,6 +1,7 @@
 package com.example.ecommercefront_end.network
 
 import com.example.ecommercefront_end.model.RequiresAuth
+import com.example.ecommercefront_end.model.SaveWishlist
 import com.example.ecommercefront_end.model.Wishlist
 import retrofit2.Response
 import retrofit2.http.Body
@@ -14,9 +15,9 @@ import java.util.UUID
 
 interface WishlistApiService {
 
-    @POST("wishlists/add")
+    @POST("wishlists/add/new")
     @RequiresAuth
-    suspend fun addWishlist(@Body w: Wishlist)
+    suspend fun addWishlist(@Body w: SaveWishlist): Response<Boolean>
 
     @GET("wishlists/get/{idWishlist}/{idUser}")
     @RequiresAuth

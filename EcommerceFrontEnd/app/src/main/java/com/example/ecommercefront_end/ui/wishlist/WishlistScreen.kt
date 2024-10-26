@@ -4,6 +4,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
@@ -129,95 +131,88 @@ fun AddWishlistDialog(
 ) {
     var showCreateWishlist by remember { mutableStateOf(false) }
     var wishlistName by remember { mutableStateOf("") }
-
     var tokenShared by remember { mutableStateOf("") }
     var showJoinWishlist by remember { mutableStateOf(false) }
-
     var expanded by remember { mutableStateOf(false) }
-    var selectedPrivacy by remember {
-        mutableStateOf(WishlistPrivacy.PUBLIC)
-    }
+    var selectedPrivacy by remember { mutableStateOf(WishlistPrivacy.PUBLIC) }
     val privacyOptions = listOf(WishlistPrivacy.PUBLIC, WishlistPrivacy.SHARED, WishlistPrivacy.PRIVATE)
 
     if (showCreateWishlist) {
-        // Dialogo per creare una nuova wishlist
         AlertDialog(
-            onDismissRequest = { showCreateWishlist = false },
-            title = { Text("Crea una nuova lista" ,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentWidth(Alignment.CenterHorizontally))
+            onDismissRequest = onDismissRequest,
+            title = {
+                Text(
+                    text = "Crea una nuova lista",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentWidth(Alignment.CenterHorizontally)
+                )
             },
             text = {
                 Column {
+                    // Campo per il nome della wishlist
                     TextField(
                         value = wishlistName,
                         onValueChange = { wishlistName = it },
-                        label = { Text("Nome della lista") }
+                        label = { Text("Nome della lista") },
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    ExposedDropdownMenuBox(
-                        expanded = expanded ,
-                        onExpandedChange = {
-                            expanded = !expanded
-                        }) {
-                        TextField(
-                            readOnly = true,
-                            value = selectedPrivacy.name,
-                            onValueChange = {},
-                            label = { Text("Privacy") },
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(
-                                    expanded = expanded
-                                )
-                            },
-                            colors = ExposedDropdownMenuDefaults
-                                .textFieldColors()
-                        )
-                        ExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            privacyOptions.forEach { privacy ->
-                                DropdownMenuItem(
-                                    text = { Text(privacy.name) },
-                                    onClick = {
-                                        selectedPrivacy = privacy
-                                        expanded = false
-                                    }
-                                )
-                            }
-                        }
 
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Selettore per la privacy
+                    Button(
+                        onClick = { expanded = !expanded },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Privacy: ${selectedPrivacy.name}")
+                    }
+
+                    // DropdownMenu per le opzioni di privacy
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        privacyOptions.forEach { privacy ->
+                            DropdownMenuItem(
+                                text = { Text(privacy.name) },
+                                onClick = {
+                                    selectedPrivacy = privacy
+                                    expanded = false
+                                }
+                            )
+                        }
                     }
                 }
             },
             confirmButton = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    Button(onClick = {
+                Button(
+                    onClick = {
                         onAddWishlist(wishlistName, selectedPrivacy)
-                        showCreateWishlist = false
-                    }) {
-                        Text("Crea")
+                        onDismissRequest()
                     }
-                    Button(onClick = { showCreateWishlist = false }) {
-                        Text("Annulla")
-                    }
+                ) {
+                    Text("Crea")
                 }
             },
-            dismissButton = null
+            dismissButton = {
+                Button(onClick = onDismissRequest) {
+                    Text("Annulla")
+                }
+            }
+
         )
-    }else if(showJoinWishlist){
-        // Dialogo per unirsi alla wishlist di un amico
+    } else if (showJoinWishlist) {
         AlertDialog(
             onDismissRequest = { showJoinWishlist = false },
-            title = { Text("Unisciti alla lista di un amico",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentWidth(Alignment.CenterHorizontally)
-            ) },
+            title = {
+                Text(
+                    "Unisciti alla lista di un amico",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentWidth(Alignment.CenterHorizontally)
+                )
+            },
             text = {
                 Column {
                     TextField(
@@ -245,8 +240,7 @@ fun AddWishlistDialog(
             },
             dismissButton = null
         )
-    }else {
-        // Dialogo con le opzioni
+    } else {
         AlertDialog(
             onDismissRequest = onDismissRequest,
             title = { Text("Scegli un'opzione") },
@@ -255,9 +249,7 @@ fun AddWishlistDialog(
                     Button(onClick = { showCreateWishlist = true }) {
                         Text("Crea una nuova lista")
                     }
-
                     Spacer(modifier = Modifier.height(8.dp))
-
                     Button(onClick = { showJoinWishlist = true }) {
                         Text("Unisciti alla lista di un amico")
                     }
@@ -277,6 +269,8 @@ fun AddWishlistDialog(
         )
     }
 }
+
+
 
 @Composable
 fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWishlistSelected: (Wishlist) -> Unit) {
@@ -301,8 +295,8 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
     if (showAddWishlistMain) {
         AddWishlistDialog(
             onDismissRequest = { showAddWishlistMain = false },
-            onAddWishlist = { wishlistName, PrivacySettings -> // wishlistName e isPrivate sono i parametri passati dal dialogo
-                viewModel.addWishlist(wishlistName, PrivacySettings)
+            onAddWishlist = { wishlistName, privacySetting -> // wishlistName e isPrivate sono i parametri passati dal dialogo
+                viewModel.addWishlist(wishlistName, privacySetting)
                 showAddWishlistMain = false
             },
             onJoinWishlist = { token -> // token è il parametro passato dal dialogo

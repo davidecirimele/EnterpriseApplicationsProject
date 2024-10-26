@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end.repository
 
+import com.example.ecommercefront_end.model.SaveWishlist
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.network.WishlistApiService
@@ -74,7 +75,7 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
 
     suspend fun getWishlistItems(wishlistId: Long, userId: UUID): List<WishlistItem>{
         return try {
-            val wishlistItems = WIApiService.getItemsByWId(wishlistId, userId)
+            val wishlistItems = WIApiService.getByWishlist(wishlistId, userId)
 
             if (wishlistItems.isEmpty()) {
                 println("Nessun elemento della lista dei desideri trovato")
@@ -89,15 +90,15 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
         }
     }
 
-    suspend fun addWishlist(wishlist: Wishlist) {
+    suspend fun addWishlist(wishlist: SaveWishlist) {
         wApiService.addWishlist(wishlist)
     }
     suspend fun updatePrivacySettings(wishlist: Wishlist) {
         wApiService.updateWishlist(wishlist)
     }
 
-    suspend fun removeWishlistItem(id: Long): Response<Unit> {
-        return WIApiService.deleteWishlistItem(id)
+    suspend fun removeWishlistItem(id: Long, idUser : UUID): Response<Unit> {
+        return WIApiService.removeItem(id, idUser)
     }
     suspend fun shareWishlist(wishlist: Wishlist): Map<String, String> {
         return wApiService.shareWishlist(wishlist)

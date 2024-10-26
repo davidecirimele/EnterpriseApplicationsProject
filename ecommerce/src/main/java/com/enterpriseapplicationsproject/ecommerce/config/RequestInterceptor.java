@@ -18,7 +18,9 @@ public class RequestInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         log.info("Received request: {} {} from {}", request.getMethod(), request.getRequestURI(), request.getRemoteAddr());
+        log.info("Authorization header: {}", request.getHeader("Authorization"));
         return true;
     }
+
 
 }

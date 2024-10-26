@@ -13,22 +13,19 @@ import java.util.UUID
 interface WishlistItemApiService {
 
     @POST("wishlist-items/add")
-    suspend fun insertWishlistItem(w: WishlistItem)
+    @RequiresAuth
+    suspend fun addItem(w: WishlistItem)
 
     @GET("wishlist-items/getByIdWishlist/{idWishlist}/{idUser}")
     @RequiresAuth
-    suspend fun getItemsByWId(@Path("idWishlist") idW: Long, @Path ("idUser") idUser: UUID) : List<WishlistItem>
+    suspend fun getByWishlist(@Path("idWishlist") idW: Long, @Path ("idUser") idUser: UUID) : List<WishlistItem>
 
     @GET("wishlist-items/getAll")
     @RequiresAuth
     suspend fun getAllWishlistItem()
 
-    @GET("wishlist-items/getByWishlist/{idWishlist}")
-    @RequiresAuth
-    suspend fun getWishlistItemByWishlist(@Path("idUser") idUser: Long)
 
-
-    @DELETE("wishlist-items/delete/{idWishlistItem}")
+    @DELETE("wishlist-items/delete/{idItem}/{idUser}")
     @RequiresAuth
-    suspend fun deleteWishlistItem(@Path("idWishlistItem") idWi: Long): Response<Unit>
+    suspend fun removeItem(@Path("idItem") idItem: Long, @Path("idUser") idUser: UUID): Response<Unit>
 }

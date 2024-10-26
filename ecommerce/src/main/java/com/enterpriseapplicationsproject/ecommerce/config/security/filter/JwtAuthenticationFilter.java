@@ -29,7 +29,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final RateLimitingService rateLimitingService;
     private static final int TOO_MANY_REQUESTS = 429;
 
-
     // fa il parsing del token e controlla se l'utente è autenticato
 
     @Override
@@ -91,7 +90,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UUID userId = jwtService.extractUserId(jwt);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
 
                 LoggedUserDetails userDetails = (LoggedUserDetails) this.userDetailsService.loadUserByUsername(username);
                 System.out.println("UserDetails: " + userDetails);

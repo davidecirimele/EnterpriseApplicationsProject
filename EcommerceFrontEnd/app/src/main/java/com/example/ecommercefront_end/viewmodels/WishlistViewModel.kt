@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Group
+import com.example.ecommercefront_end.model.SaveWishlist
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.model.WishlistPrivacy
@@ -120,31 +121,30 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
     }
 
 
-    fun addWishlist(name: String, PrivacySettings: WishlistPrivacy) {
+    fun addWishlist(name: String, privacySettings: WishlistPrivacy) {
         viewModelScope.launch {
             try {
                 // Crea una lista vuota di elementi per la nuova wishlist
                 val wItemsList = mutableListOf<WishlistItem>()
+                val group = Group(0, "default", emptyList())
 
                 // Crea un gruppo predefinito con un nome e ID fittizio, dato che non hai informazioni su gruppi esistenti
                 // Imposta la privacy della wishlist
 
                 // Crea un nuovo oggetto Wishlist con i parametri forniti
-                val newWishlist = Wishlist(
-                    id = null, // ID sarà generato dal database
+                val newWishlist = SaveWishlist(
                     name = name,
-                    items = wItemsList, // Lista vuota di elementi
+                    items = wItemsList,
                     user = SessionManager.user, // Nessun utente associato dato che non è loggato
-                    group = null, // Gruppo predefinito
-                    privacySetting = PrivacySettings,
-                    wishlistToken = "" // Nessun token per ora
+                    group = null,
+                    privacySetting = privacySettings,
+                    wishlistToken = "a"
                 )
 
                 // Salva la nuova wishlist nel database tramite il repository
                 Log.e("addWishlist", newWishlist.toString())
                 wRepository.addWishlist(newWishlist)
 
-                _wishlists.value += newWishlist
                 // Potresti aggiornare la lista delle wishlist nel ViewModel qui, se necessario
             } catch (e: Exception) {
                 // Gestisci l'errore
@@ -196,15 +196,18 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
     fun deleteWishlistItem(id: Long) {
        viewModelScope.launch {
            try {
-               val response = wRepository.removeWishlistItem(id)
-                if (response.isSuccessful) {
-                    Log.d("rimosso WI con id", id.toString())
-                    _wishlistItems.value = _wishlistItems.value.filter{ it.id != id }
-                     Log.d("removeWishlistItem", "Elemento della wishlist rimosso con successo")
-                } else {
-                    Log.e("removeWishlistItem", "Non rimosso WI con id: $id")
-                     Log.e("removeWishlistItem", "Errore durante la rimozione dell'elemento della wishlist: ${response.errorBody()}")
-                }
+               val currentUser = SessionManager.user
+               val response = currentUser?.let { wRepository.removeWishlistItem(id, it.id) }
+               if (response != null) {
+                   if (response.isSuccessful) {
+                       Log.d("rimosso WI con id", id.toString())
+                       _wishlistItems.value = _wishlistItems.value.filter{ it.id != id }
+                       Log.d("removeWishlistItem", "Elemento della wishlist rimosso con successo")
+                   } else {
+                       Log.e("removeWishlistItem", "Non rimosso WI con id: $id")
+                       Log.e("removeWishlistItem", "Errore durante la rimozione dell'elemento della wishlist: ${response.errorBody()}")
+                   }
+               }
            } catch (e: Exception) {
                Log.e("removeWishlistItem", "Errore durante la rimozione dell'elemento della wishlist: ${e.message}")
            }

@@ -7,12 +7,15 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.GroupDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.SaveWishlistDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class WishlistsServiceImpl implements WishlistsService {
 
+    private static final Logger log = LoggerFactory.getLogger(WishlistsServiceImpl.class);
     private final WishlistsDao wishlistsDao;
     private final WishlistItemsDao WIDao;
     private final ModelMapper modelMapper; // serve per fare il mapping tra due oggetti
@@ -60,80 +64,102 @@ public class WishlistsServiceImpl implements WishlistsService {
     }
 
     @Override
-    public void save(Wishlist wishlist) {
-        wishlistsDao.save(wishlist);
+    public WishlistDto save(SaveWishlistDto wishlistDto) {
+        Wishlist wishlist = modelMapper.map(wishlistDto, Wishlist.class);
+
+        Group group = new Group();
+        group.setGroupName("Group " + wishlistDto.getName());
+
+        List<User> members = new ArrayList<>();
+
+        group.setMembers(members);
+        group = groupsDao.save(group);  // Salva il gruppo nel database
+
+        wishlist.setWishlistToken(generateWToken());
+        wishlist.setGroup(group);
+
+        Wishlist w = wishlistsDao.save(wishlist);
+
+        return modelMapper.map(w, WishlistDto.class);
+
     }
 
     @Override
     public WishlistDto save(WishlistDto wishlistDto) {
         // Verifica se la wishlistDto è null
-        if (wishlistDto == null) {
-            throw new IllegalArgumentException("WishlistDto is null");
-        }
-
-        // Controlla il campo 'name'
-        if (wishlistDto.getName() == null || wishlistDto.getName().isBlank()) {
-            throw new IllegalArgumentException("Wishlist name is null or empty");
-        }
-
-        // Controlla il campo 'privacySetting'
-        if (wishlistDto.getPrivacySetting() == null) {
-            throw new IllegalArgumentException("Wishlist privacy setting is null");
-        }
-
-        // Controlla il campo 'user'
-        if (wishlistDto.getUser() == null) {
-            throw new IllegalArgumentException("Wishlist user is null");
-        }
-
-        // Gestione del gruppo associato alla wishlist
-        GroupDto groupDto = wishlistDto.getGroup();
-        Group group;
-
-        if (groupDto == null) {
-            // Se non viene passato un gruppo, creane uno di default
-            group = new Group();
-            group.setGroupName("Group " + wishlistDto.getName());
-            group = groupsDao.save(group);  // Salva il gruppo nel database
-            groupDto = modelMapper.map(group, GroupDto.class);
-        } else {
-            // Se viene passato un gruppo, lo mappiamo
-            group = modelMapper.map(groupDto, Group.class);
-
-            // Verifica se il gruppo ha membri, se mancano aggiungi l'utente come unico membro
-            if (groupDto.getMembers() == null) {
-                group.setMembers(Collections.emptyList());
+        try {
+            if (wishlistDto == null) {
+                throw new IllegalArgumentException("WishlistDto is null");
             }
-            else {
-                // Mappatura dei membri del gruppo
-                List<User> members = groupDto.getMembers().stream()
-                        .map(userDto -> modelMapper.map(userDto, User.class))
-                        .toList();
-                group.setMembers(members);
+
+
+            // Controlla il campo 'name'
+            if (wishlistDto.getName() == null || wishlistDto.getName().isBlank()) {
+                throw new IllegalArgumentException("Wishlist name is null or empty");
             }
-            // Salva o aggiorna il gruppo con i membri
-            group = groupsDao.save(group);
+
+            // Controlla il campo 'privacySetting'
+            if (wishlistDto.getPrivacySetting() == null) {
+                throw new IllegalArgumentException("Wishlist privacy setting is null");
+            }
+
+            // Controlla il campo 'user'
+            if (wishlistDto.getUser() == null) {
+                throw new IllegalArgumentException("Wishlist user is null");
+            }
+
+            // Gestione del gruppo associato alla wishlist
+            GroupDto groupDto = wishlistDto.getGroup();
+            Group group;
+
+            if (groupDto == null) {
+                // Se non viene passato un gruppo, creane uno di default
+                group = new Group();
+                group.setGroupName("Group " + wishlistDto.getName());
+                group = groupsDao.save(group);  // Salva il gruppo nel database
+                groupDto = modelMapper.map(group, GroupDto.class);
+            } else {
+                // Se viene passato un gruppo, lo mappiamo
+                group = modelMapper.map(groupDto, Group.class);
+
+                // Verifica se il gruppo ha membri, se mancano aggiungi l'utente come unico membro
+                if (groupDto.getMembers() == null) {
+                    group.setMembers(Collections.emptyList());
+                } else {
+                    // Mappatura dei membri del gruppo
+                    List<User> members = groupDto.getMembers().stream()
+                            .map(userDto -> modelMapper.map(userDto, User.class))
+                            .toList();
+                    group.setMembers(members);
+                }
+                // Salva o aggiorna il gruppo con i membri
+                group = groupsDao.save(group);
+            }
+
+            // Imposta o genera il token per la wishlist
+            String wToken = wishlistDto.getWishlistToken();
+            if (wToken == null || wToken.isBlank()) {
+                wToken = generateWToken();  // Genera un token se non è presente
+            }
+
+            // Mappatura e creazione della wishlist
+            Wishlist wishlist = modelMapper.map(wishlistDto, Wishlist.class);
+            wishlist.setName(wishlistDto.getName());
+            wishlist.setPrivacySetting(wishlistDto.getPrivacySetting());
+            wishlist.setGroup(group);  // Assegna il gruppo alla wishlist
+            wishlist.setWishlistToken(wToken);
+
+            // Salva la wishlist nel database
+            Wishlist savedWishlist = wishlistsDao.save(wishlist);
+
+            // Log e ritorno della wishlist salvata
+            System.out.println("Dati nuova Wishlist: " + savedWishlist.toString());
+            return modelMapper.map(savedWishlist, WishlistDto.class);
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("Errore: " + e.getMessage());
+            return null;
         }
-
-        // Imposta o genera il token per la wishlist
-        String wToken = wishlistDto.getWishlistToken();
-        if (wToken == null || wToken.isBlank()) {
-            wToken = generateWToken();  // Genera un token se non è presente
-        }
-
-        // Mappatura e creazione della wishlist
-        Wishlist wishlist = modelMapper.map(wishlistDto, Wishlist.class);
-        wishlist.setName(wishlistDto.getName());
-        wishlist.setPrivacySetting(wishlistDto.getPrivacySetting());
-        wishlist.setGroup(group);  // Assegna il gruppo alla wishlist
-        wishlist.setWishlistToken(wToken);
-
-        // Salva la wishlist nel database
-        Wishlist savedWishlist = wishlistsDao.save(wishlist);
-
-        // Log e ritorno della wishlist salvata
-        System.out.println("Dati nuova Wishlist: " + savedWishlist.toString());
-        return modelMapper.map(savedWishlist, WishlistDto.class);
     }
 
 
@@ -261,6 +287,11 @@ public class WishlistsServiceImpl implements WishlistsService {
     public WishlistDto getWishlistByToken(String token) {
         Wishlist w = wishlistsDao.findWishlistByWishlistToken(token);
         return modelMapper.map(w,WishlistDto.class);
+    }
+
+    @Override
+    public void save(Wishlist wishlist) {
+        wishlistsDao.save(wishlist);
     }
 
 
