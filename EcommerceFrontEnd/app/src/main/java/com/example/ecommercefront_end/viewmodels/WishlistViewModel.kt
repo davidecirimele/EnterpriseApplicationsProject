@@ -8,6 +8,7 @@ import com.example.ecommercefront_end.model.Group
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.model.WishlistPrivacy
+import com.example.ecommercefront_end.repository.GroupRepository
 import com.example.ecommercefront_end.repository.WishlistRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel() {
+class WishlistViewModel(private val wRepository: WishlistRepository, private val groupRepository: GroupRepository) : ViewModel() {
 
     private val _wishlists = MutableStateFlow<List<Wishlist>>(emptyList())
     val wishlists: StateFlow<List<Wishlist>> = _wishlists.asStateFlow()
@@ -67,7 +68,10 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
     fun loadWishlistItemsFromDB(wishlistId: Long){
         viewModelScope.launch {
             try{
-                _wishlistItems.value = wRepository.getWishlistItems(wishlistId)
+                val currentUser = SessionManager.user
+                    currentUser?.let {
+                        _wishlistItems.value = wRepository.getWishlistItems(wishlistId, it.id)
+                }
                 if(_wishlistItems.value.isEmpty()){
                     _error.value = "WishlistItems vuota"
                 }
@@ -77,36 +81,12 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
         }
     }
 
-    fun loadWishlists(id : Long){
-        viewModelScope.launch {
-            val wishlist = _wishlists.value.find { it.id == id }
-
-        }
-    }
-
-    fun shareWishlist(wishlist: Wishlist){
-        viewModelScope.launch {
-            try {
-                val response = wRepository.shareWishlist(wishlist)
-                if (response.contains("token")) {
-                    _tokenToShare.value =
-                        response.get("token").toString() // Estrai il token dalla risposta JSON
-                    Log.d("shareWishlist", "Wishlist condivisa con successo")
-                } else {
-                    Log.e("shareWishlist", "Errore durante la condivisione della wishlist: ${response.get("error")}")
-                }
-            } catch (e: Exception) {
-                Log.e("shareWishlist", "Errore durante la condivisione della wishlist: ${e.message}")
-            }
-        }
-    }
-
-
     fun joinWishlist(token : String){
         viewModelScope.launch {
             try {
                 val currentUser = SessionManager.user
-                val response = currentUser?.let { wRepository.joinWishlist(it.id, token) }
+                val response = currentUser?.let { groupRepository.addUser(it.id, token) }
+
                 if (response != null && response.isSuccessful) {
                     Log.d("joinWishlist", "Utente aggiunto con successo alla wishlist")
                 } else {
@@ -114,6 +94,27 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
                 }
             } catch (e: Exception) {
                 Log.e("joinWishlist", "Errore durante l'aggiunta dell'utente alla wishlist: ${e.message}")
+            }
+        }
+    }
+
+    fun unshareWishlist(wishlist: Wishlist){
+        viewModelScope.launch {
+            try {
+                val currentUser = SessionManager.user
+                val response = currentUser?.let { wishlist.group?.let { it1 ->
+                    groupRepository.removeUser(
+                        it1.id, it.id)
+                } }
+                if (response != null && response.isSuccessful) {
+                    Log.d("unshareWishlist", "Wishlist non più condivisa con successo")
+                } else {
+                    if (response != null) {
+                        Log.e("unshareWishlist", "Errore durante l'eliminazione della condivisione della wishlist: ${response.errorBody()}")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("unshareWishlist", "Errore durante l'eliminazione della condivisione della wishlist: ${e.message}")
             }
         }
     }
@@ -126,28 +127,23 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
                 val wItemsList = mutableListOf<WishlistItem>()
 
                 // Crea un gruppo predefinito con un nome e ID fittizio, dato che non hai informazioni su gruppi esistenti
-                val defaultGroup = Group(
-                    id = 5L, // ID fittizio, da aggiornare se necessario
-                    groupName = "Famiglia_Test", // Nome del gruppo fittizio
-                    members = emptyList() // Nessun membro per ora
-                )
                 // Imposta la privacy della wishlist
-                val privacySetting = WishlistPrivacy.entries.toTypedArray()
 
                 // Crea un nuovo oggetto Wishlist con i parametri forniti
                 val newWishlist = Wishlist(
-                    id = 50, // ID sarà generato dal database
+                    id = null, // ID sarà generato dal database
                     name = name,
                     items = wItemsList, // Lista vuota di elementi
                     user = SessionManager.user, // Nessun utente associato dato che non è loggato
-                    group = defaultGroup, // Gruppo predefinito
+                    group = null, // Gruppo predefinito
                     privacySetting = PrivacySettings,
                     wishlistToken = "" // Nessun token per ora
                 )
 
                 // Salva la nuova wishlist nel database tramite il repository
+                Log.e("addWishlist", newWishlist.toString())
                 wRepository.addWishlist(newWishlist)
-                Log.e("addWishlist", "Nuova lista messa")
+
                 _wishlists.value += newWishlist
                 // Potresti aggiornare la lista delle wishlist nel ViewModel qui, se necessario
             } catch (e: Exception) {
@@ -174,7 +170,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
                     }
                     if (group != null) {
                         updatedWishlist.group = group
-                        Log.d("updateWishlistPrivacy", "Nuovo gruppo ${updatedWishlist.group.groupName} aggiornato con successo")
+                        Log.d("updateWishlistPrivacy", "Nuovo gruppo ${updatedWishlist.group?.groupName} aggiornato con successo")
                     }
 
 
@@ -194,23 +190,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository) : ViewModel
         }
     }
 
-    fun unshareWishlist(wishlist: Wishlist){
-        viewModelScope.launch {
-            try {
-                val currentUser = SessionManager.user
-                val response = currentUser?.let { wRepository.unshareWishlist(it.id, wishlist) }
-                if (response != null && response.isSuccessful) {
-                    Log.d("unshareWishlist", "Wishlist non più condivisa con successo")
-                } else {
-                    if (response != null) {
-                        Log.e("unshareWishlist", "Errore durante l'eliminazione della condivisione della wishlist: ${response.errorBody()}")
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("unshareWishlist", "Errore durante l'eliminazione della condivisione della wishlist: ${e.message}")
-            }
-        }
-    }
+
 
 
     fun deleteWishlistItem(id: Long) {

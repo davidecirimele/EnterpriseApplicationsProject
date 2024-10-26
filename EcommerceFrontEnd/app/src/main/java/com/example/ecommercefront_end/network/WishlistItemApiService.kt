@@ -7,6 +7,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import java.util.UUID
 
 
 interface WishlistItemApiService {
@@ -14,9 +15,9 @@ interface WishlistItemApiService {
     @POST("wishlist-items/add")
     suspend fun insertWishlistItem(w: WishlistItem)
 
-    @GET("wishlist-items/getByWishlistId/{idWi}")
+    @GET("wishlist-items/getByIdWishlist/{idWishlist}/{idUser}")
     @RequiresAuth
-    suspend fun getWishlistItems(@Path("idWi") idW: Long) : List<WishlistItem>
+    suspend fun getItemsByWId(@Path("idWishlist") idW: Long, @Path ("idUser") idUser: UUID) : List<WishlistItem>
 
     @GET("wishlist-items/getAll")
     @RequiresAuth

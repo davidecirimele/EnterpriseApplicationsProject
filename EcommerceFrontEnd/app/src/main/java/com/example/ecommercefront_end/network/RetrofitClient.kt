@@ -18,6 +18,7 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
 object RetrofitClient {
+
     private const val BASE_URL = "https://192.168.1.7:8081/api/v1/"
 
     private const val BASE2_URL = "https://10.0.2.2:8081/api/v1/"
@@ -91,6 +92,10 @@ object RetrofitClient {
 
     val wishlistItemApiService: WishlistItemApiService by lazy {
         retrofit.create(WishlistItemApiService::class.java)
+    }
+
+    val groupApiService: GroupApiService by lazy {
+        retrofit.create(GroupApiService::class.java)
     }
 
     val cartApiService: CartApiService by lazy {

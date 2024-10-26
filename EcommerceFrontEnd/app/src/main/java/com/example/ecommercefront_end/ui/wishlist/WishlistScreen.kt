@@ -99,7 +99,7 @@ fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) 
                     viewModel = viewModel,
                     onWishlistSelected = { wishlist ->
                         selectedWishlist.value = wishlist
-                        viewModel.loadWishlistItemsFromDB(wishlist.id)
+                        wishlist.id?.let { viewModel.loadWishlistItemsFromDB(it) }
                     }
                 )
             }
@@ -318,7 +318,7 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
     ) {
         items(
             items = wishlists,
-            key = { item -> item.id } // Chiave a livello di items
+            key = { item -> item.id?.toString() ?: "" } // Chiave a livello di items
         ) { wishlist ->
             WishlistThumbnail( // Rimuovi il secondo key qui
                 wishlist = wishlist,
@@ -390,7 +390,7 @@ fun WishlistDetails(
 
     // Ricarica gli elementi della wishlist selezionata
     LaunchedEffect(key1 = wishlist.id) {
-        viewModel.loadWishlistItemsFromDB(wishlist.id)
+        wishlist.id?.let { viewModel.loadWishlistItemsFromDB(it) }
     }
 
     if (isLoading) {
@@ -485,7 +485,7 @@ fun WishlistDetails(
                             Button(onClick = {
                                 //onDeleteWishlist(wishlist) // Chiama il callback per eliminare la wishlist
                                 if(userIsOwner){
-                                    viewModel.deleteWishlist(wishlist.id)
+                                    wishlist.id?.let { viewModel.deleteWishlist(it) }
                                 }
                                 else{
                                     viewModel.unshareWishlist(wishlist)
@@ -517,7 +517,7 @@ fun WishlistDetails(
                         },
                         confirmButton = {
                             Button(onClick = {
-                                viewModel.updateWishlist(wishlist.id, newWishlistName, privacyOptions, null) // Chiama il callback per rinominare la wishlist
+                                wishlist.id?.let { viewModel.updateWishlist(it, newWishlistName, privacyOptions, null) } // Chiama il callback per rinominare la wishlist
                                 showRenameDialog = false
                             }) {
                                 Text("Rinomina")
@@ -577,7 +577,7 @@ fun WishlistDetails(
                             else if (wishlist.privacySetting == WishlistPrivacy.PUBLIC)
                                 privacySetting = WishlistPrivacy.PRIVATE
 
-                            viewModel.updateWishlist(wishlist.id, "", privacySetting, null)
+                            wishlist.id?.let { viewModel.updateWishlist(it, "", privacySetting, null) }
                         },
                         modifier = Modifier.height(36.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp)

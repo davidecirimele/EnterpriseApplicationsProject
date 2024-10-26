@@ -72,9 +72,9 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
         }
     }
 
-    suspend fun getWishlistItems(wishlistId: Long): List<WishlistItem>{
+    suspend fun getWishlistItems(wishlistId: Long, userId: UUID): List<WishlistItem>{
         return try {
-            val wishlistItems = WIApiService.getWishlistItems(wishlistId)
+            val wishlistItems = WIApiService.getItemsByWId(wishlistId, userId)
 
             if (wishlistItems.isEmpty()) {
                 println("Nessun elemento della lista dei desideri trovato")

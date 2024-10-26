@@ -98,6 +98,7 @@ import com.example.ecommercefront_end.repository.AuthRepository
 import com.example.ecommercefront_end.repository.BookRepository
 import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.repository.CheckoutRepository
+import com.example.ecommercefront_end.repository.GroupRepository
 
 import com.example.ecommercefront_end.repository.WishlistRepository
 import com.example.ecommercefront_end.ui.admin.AdminCatalogueScreen
@@ -270,8 +271,11 @@ fun NavigationView(navController: NavHostController) {
                 selectedIndex.value = 3
                 val _wishlistApiService = RetrofitClient.wishlistApiService
                 val _wishlistItemApiService = RetrofitClient.wishlistItemApiService
-                val repository = WishlistRepository(_wishlistApiService, _wishlistItemApiService)
-                WishlistsScreen(viewModel = WishlistViewModel(repository), navController = navController)
+                val _groupApiService = RetrofitClient.groupApiService
+
+                val wRepository = WishlistRepository(_wishlistApiService, _wishlistItemApiService)
+                val groupRepository = GroupRepository(_groupApiService)
+                WishlistsScreen(viewModel = WishlistViewModel(wRepository, groupRepository),  navController = navController)
 
             }
             composable("userAuth") {
