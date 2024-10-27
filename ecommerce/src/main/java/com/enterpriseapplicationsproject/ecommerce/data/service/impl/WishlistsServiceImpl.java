@@ -85,6 +85,35 @@ public class WishlistsServiceImpl implements WishlistsService {
     }
 
     @Override
+    public WishlistDto save(UUID idUser, String wName, WishlistPrivacy wPrivacySetting) {
+        User user = usersDao.findById(idUser)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Owner email user"));
+
+        Wishlist wishlist = new Wishlist();
+
+        wishlist.setName(wName);
+        wishlist.setPrivacySetting(wPrivacySetting);
+        wishlist.setUserId(user);
+
+        usersDao.save(user);
+        wishlist.setWishlistToken(generateWToken());
+
+        Group group = new Group();
+        group.setGroupName("Group " + wName);
+        List<User> members = new ArrayList<>();
+        group.setMembers(members);
+
+        groupsDao.save(group);
+
+        wishlist.setGroup(group);
+
+        wishlistsDao.save(wishlist);
+
+        return modelMapper.map(wishlist, WishlistDto.class);
+    }
+
+
+    @Override
     public WishlistDto save(WishlistDto wishlistDto) {
         // Verifica se la wishlistDto è null
         try {
@@ -293,6 +322,8 @@ public class WishlistsServiceImpl implements WishlistsService {
     public void save(Wishlist wishlist) {
         wishlistsDao.save(wishlist);
     }
+
+
 
 
     @Transactional

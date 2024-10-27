@@ -3,6 +3,7 @@ package com.example.ecommercefront_end.network
 import com.example.ecommercefront_end.model.RequiresAuth
 import com.example.ecommercefront_end.model.SaveWishlist
 import com.example.ecommercefront_end.model.Wishlist
+import com.example.ecommercefront_end.model.WishlistPrivacy
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -15,9 +16,9 @@ import java.util.UUID
 
 interface WishlistApiService {
 
-    @POST("wishlists/add")
+    @POST("wishlists/add/{idUser}/{wName}/{wPrivacySetting}")
     @RequiresAuth
-    suspend fun addWishlist(@Body w: SaveWishlist): Response<Boolean>
+    suspend fun addWishlist(@Path("idUser") idUser: UUID, @Path("wName") wName: String, @Path("wPrivacySetting") wPrivacySetting: WishlistPrivacy): Response<Boolean>
 
     @GET("wishlists/get/{idWishlist}/{idUser}")
     @RequiresAuth

@@ -5,6 +5,7 @@ import com.enterpriseapplicationsproject.ecommerce.config.security.*;
 import com.enterpriseapplicationsproject.ecommerce.config.security.JwtService;
 import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetails;
 import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetailsService;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistPrivacy;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveWishlistDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserIdDto;
@@ -72,12 +73,13 @@ public class WishlistController {
 
 
     @RateLimit(type = "USER")
-    @PostMapping(consumes = "application/json", path = "/add")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Boolean> addWishlist(@RequestBody SaveWishlistDto wDto) {
-        System.out.println("Add wishlist per utente " + wDto.getUser().getId());
-        System.out.println("Nome wishlist: " + wDto.getName());
-        WishlistDto w = wishlistService.save(wDto);
+    @PostMapping( path = "/add/{idUser}/{wName}/{wPrivacySetting}")
+    @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<Boolean> addWishlist(@PathVariable UUID idUser, @PathVariable String wName, @PathVariable WishlistPrivacy wPrivacySetting) {
+        System.out.println("Add wishlist per utente " + idUser);
+        System.out.println("Nome wishlist: " + wName);
+
+        WishlistDto w = wishlistService.save(idUser, wName, wPrivacySetting);
         if (w == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 

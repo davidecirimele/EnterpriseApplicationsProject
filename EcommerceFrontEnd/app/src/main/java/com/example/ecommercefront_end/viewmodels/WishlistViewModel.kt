@@ -130,6 +130,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
         viewModelScope.launch {
             try {
                 // Crea una lista vuota di elementi per la nuova wishlist
+
                 val wItemsList = mutableListOf<WishlistItem>()
                 val group = Group(0, "default", emptyList())
 
@@ -143,12 +144,12 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                     user = SessionManager.user, // Nessun utente associato dato che non è loggato
                     group = null,
                     privacySetting = privacySettings,
-                    wishlistToken = "a"
+                    wishlistToken = ""
                 )
 
                 // Salva la nuova wishlist nel database tramite il repository
                 Log.e("addWishlist", newWishlist.toString())
-                wRepository.addWishlist(newWishlist)
+                SessionManager.user?.id?.let { wRepository.addWishlist(newWishlist, it) }
 
                 // Potresti aggiornare la lista delle wishlist nel ViewModel qui, se necessario
             } catch (e: Exception) {

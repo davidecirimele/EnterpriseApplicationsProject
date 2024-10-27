@@ -2,6 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.data.service;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistPrivacy;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveWishlistDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
@@ -49,4 +50,6 @@ public interface WishlistsService {
     WishlistDto getWishlistByToken(String token);
 
     void save(Wishlist wishlist);
+
+    WishlistDto save(UUID idUser, String wName, WishlistPrivacy wPrivacySetting);
 }

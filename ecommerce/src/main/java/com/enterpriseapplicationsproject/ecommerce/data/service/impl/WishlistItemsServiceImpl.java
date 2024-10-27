@@ -39,6 +39,7 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
     @Override
     public WishlistItemDto addItem(Long idBook, Long idWishlist, UUID idUser) {
 
+        System.out.println("idw:(" + idWishlist + " ) idb:(" + idBook + ")idu:(" + idUser);
         Wishlist wishlist = wishlistsDao.findById(idWishlist) //ESCE QUELLA ROBA STRANA
                 .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID: " + idWishlist));
 
