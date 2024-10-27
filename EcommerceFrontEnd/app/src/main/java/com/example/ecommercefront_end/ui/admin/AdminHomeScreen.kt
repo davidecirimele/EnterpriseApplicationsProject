@@ -55,7 +55,7 @@ fun AdminHomeScreen(navHostController: NavHostController){
             Spacer(modifier = Modifier.padding(10.dp))
 
             optionButton(onButtonClicked = {
-                navHostController.navigate("admin-catalogue") {
+                navHostController.navigate("admin-orders") {
                     popUpTo("admin-home") { saveState = true }
                 } }, icon = Icons.Default.Payments, contentDescription = "Orders")
 
