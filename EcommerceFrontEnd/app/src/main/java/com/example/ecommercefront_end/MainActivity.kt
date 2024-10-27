@@ -172,6 +172,10 @@ fun NavigationView(navController: NavHostController) {
     val adminViewModel = remember { AdminViewModel(repository = AdminRepository(RetrofitClient.adminApiService)) }
     val checkoutViewModel = remember { CheckoutViewModel(checkoutRepository = CheckoutRepository(RetrofitClient.checkoutApiService), cartViewModel = cartViewModel) }
 
+    val wRepository = WishlistRepository( RetrofitClient.wishlistApiService, RetrofitClient.wishlistItemApiService)
+    val groupRepository = GroupRepository(RetrofitClient.groupApiService)
+    val wishlistViewModel = remember { WishlistViewModel(wRepository, groupRepository) }
+
     val startDestination = if (SessionManager.user?.role == "ROLE_ADMIN") {
         "admin-home"
     } else {
@@ -217,7 +221,7 @@ fun NavigationView(navController: NavHostController) {
                 val book by bookViewModel.bookFlow.collectAsState()
 
                 book?.let {
-                    BookDetailsScreen(book = it, cartRepository = CartRepository(RetrofitClient.cartApiService), navController)
+                    BookDetailsScreen(book = it, cartRepository = CartRepository(RetrofitClient.cartApiService),wishlistViewModel, navController)
                 } ?: Text("Libro non trovato")
             }
 
@@ -269,13 +273,8 @@ fun NavigationView(navController: NavHostController) {
             }
             composable("wishlist") {
                 selectedIndex.value = 3
-                val _wishlistApiService = RetrofitClient.wishlistApiService
-                val _wishlistItemApiService = RetrofitClient.wishlistItemApiService
-                val _groupApiService = RetrofitClient.groupApiService
 
-                val wRepository = WishlistRepository(_wishlistApiService, _wishlistItemApiService)
-                val groupRepository = GroupRepository(_groupApiService)
-                WishlistsScreen(viewModel = WishlistViewModel(wRepository, groupRepository),  navController = navController)
+                WishlistsScreen(viewModel = wishlistViewModel,  navController = navController)
 
             }
             composable("userAuth") {

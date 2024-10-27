@@ -2,12 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 
 
 import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
-import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimitType;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistItem;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistItemsService;
-import com.enterpriseapplicationsproject.ecommerce.dto.UserIdDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistItemDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(value = "/api/v1/wishlist-items") //indica che la classe risponde a richieste REST sulla base path "/api/v1/wishlist-items" e che produce risposte in formato JSON
+@RequestMapping(value = "/api/v1/wishlist-items") //indica che la classe risponde a richieste REST sulla base path "/api/v1/wishlist-items"
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor //indica che il costruttore è generato automaticamente
 @Slf4j
@@ -39,10 +34,10 @@ public class WishlistItemsController {
     }
 
     @RateLimit(type = "USER")
-    @PostMapping(consumes = "application/json", path = "/add")
-    @PreAuthorize("#wishlistItem.getWishlist().getUserId() == authentication.principal.getId()")
-    public ResponseEntity<WishlistItemDto> addItem(@RequestBody  WishlistItem wishlistItem) {
-        WishlistItemDto wi = wishlistItemsService.addItemToWishlist(wishlistItem);
+    @PostMapping(path = "/add/{idBook}/{idWishlist}/{idUser}")
+    @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<WishlistItemDto> addItem(@PathVariable  Long idBook, @PathVariable Long idWishlist, @PathVariable UUID idUser) {
+        WishlistItemDto wi = wishlistItemsService.addItem(idBook, idWishlist, idUser);
         if (wi == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(wi, HttpStatus.OK);

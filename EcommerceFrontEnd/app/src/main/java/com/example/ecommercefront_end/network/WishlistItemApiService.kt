@@ -12,9 +12,9 @@ import java.util.UUID
 
 interface WishlistItemApiService {
 
-    @POST("wishlist-items/add")
+    @POST("wishlist-items/add/{idBook}/{idWishlist}/{idUser}")
     @RequiresAuth
-    suspend fun addItem(w: WishlistItem)
+    suspend fun addItem(@Path("idBook") idBook: Long, @Path("idWishlist")idWishlist: Long, @Path("idUser") idUser: UUID): Response<Unit>
 
     @GET("wishlist-items/getByIdWishlist/{idWishlist}/{idUser}")
     @RequiresAuth

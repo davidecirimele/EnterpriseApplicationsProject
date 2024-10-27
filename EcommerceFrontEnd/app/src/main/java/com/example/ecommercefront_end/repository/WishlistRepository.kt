@@ -97,23 +97,19 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
         wApiService.updateWishlist(wishlist)
     }
 
-    suspend fun removeWishlistItem(id: Long, idUser : UUID): Response<Unit> {
-        return WIApiService.removeItem(id, idUser)
-    }
-    suspend fun shareWishlist(wishlist: Wishlist): Map<String, String> {
-        return wApiService.shareWishlist(wishlist)
+    suspend fun addWishlistItem(bookId: Long, wishlistId: Long, idUser: UUID) {
+        WIApiService.addItem(bookId, wishlistId, idUser)
     }
 
-    suspend fun joinWishlist(userId: UUID , token: String ): Response<Boolean> {
-        return  wApiService.joinWishlist(userId, token)
+    suspend fun removeWishlistItem(id: Long, idUser : UUID): Response<Unit> {
+        return WIApiService.removeItem(id, idUser)
     }
 
     suspend fun getWishlistsByFriends(id: UUID): List<Wishlist> {
         return wApiService.getFriendWishlists(id)
     }
 
-    suspend fun unshareWishlist(id: UUID, wishlist: Wishlist): Response<Boolean> {
-        return wApiService.unshareWishlist(id, wishlist)
-    }
+
+
 
 }

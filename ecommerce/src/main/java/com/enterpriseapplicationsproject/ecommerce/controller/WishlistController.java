@@ -72,8 +72,8 @@ public class WishlistController {
 
 
     @RateLimit(type = "USER")
-    @PostMapping(consumes = "application/json", path = "/add/new")
-    @PreAuthorize("permitAll()")
+    @PostMapping(consumes = "application/json", path = "/add")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Boolean> addWishlist(@RequestBody SaveWishlistDto wDto) {
         System.out.println("Add wishlist per utente " + wDto.getUser().getId());
         System.out.println("Nome wishlist: " + wDto.getName());

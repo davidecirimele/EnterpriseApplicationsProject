@@ -1,7 +1,9 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 
+import com.enterpriseapplicationsproject.ecommerce.data.dao.BooksDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistItemsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistsDao;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistItem;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistItemsService;
@@ -20,12 +22,13 @@ import java.util.stream.Collectors;
 public class WishlistItemsServiceImpl implements WishlistItemsService {
 
     private final WishlistItemsDao wishlistItemsDao;
+    private final BooksDao booksDao;
     private final WishlistsDao wishlistsDao;
     private final ModelMapper modelMapper;
 
 
     @Override
-    public WishlistItemDto addItemToWishlist(WishlistItem wishlistItem) {
+    public WishlistItemDto addItem(WishlistItem wishlistItem) {
         Wishlist wishlist = wishlistsDao.findById(wishlistItem.getWishlist().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID"));
         wishlistItem.setWishlist(wishlist);
@@ -33,6 +36,31 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
         return modelMapper.map(wi, WishlistItemDto.class);
 
     }
+    @Override
+    public WishlistItemDto addItem(Long idBook, Long idWishlist, UUID idUser) {
+
+        Wishlist wishlist = wishlistsDao.findById(idWishlist) //ESCE QUELLA ROBA STRANA
+                .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID: " + idWishlist));
+
+        Book book = booksDao.findById(idBook)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
+
+        WishlistItem wishlistItem = new WishlistItem();
+
+        System.out.println("Setting book and wishlist");
+        wishlistItem.setBook(book);
+        wishlistItem.setWishlist(wishlist);
+
+        System.out.println("Saving wishlist item");
+        wishlistItemsDao.save(wishlistItem);
+        wishlist.getItems().add(wishlistItem);
+
+        System.out.println("Saving wishlist");
+        wishlistsDao.save(wishlist);
+        return modelMapper.map(wishlistItem, WishlistItemDto.class);
+    }
+
+
 
 
     @Override
@@ -106,7 +134,6 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
     public void save(WishlistItem wishlistItem) {
         wishlistItemsDao.save(wishlistItem);
     }
-
 
 
 

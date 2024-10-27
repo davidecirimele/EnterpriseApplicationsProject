@@ -15,7 +15,7 @@ import java.util.UUID
 
 interface WishlistApiService {
 
-    @POST("wishlists/add/new")
+    @POST("wishlists/add")
     @RequiresAuth
     suspend fun addWishlist(@Body w: SaveWishlist): Response<Boolean>
 

@@ -8,7 +8,10 @@ import java.util.UUID;
 
 public interface WishlistItemsService {
 
-    WishlistItemDto addItemToWishlist(WishlistItem wishlistItem);
+    WishlistItemDto addItem(WishlistItem wishlistItem);
+
+    WishlistItemDto addItem(Long idBook, Long idWishlist, UUID idUser);
+
 
     WishlistItemDto deleteItemById(Long idWishlistItem, UUID userId);
 
@@ -20,4 +23,5 @@ public interface WishlistItemsService {
     WishlistItemDto getById(Long id);
 
     void save(WishlistItem wishlistItem);
+
 }

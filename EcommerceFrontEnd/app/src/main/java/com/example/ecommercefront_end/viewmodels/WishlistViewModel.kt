@@ -22,6 +22,9 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
     private val _wishlists = MutableStateFlow<List<Wishlist>>(emptyList())
     val wishlists: StateFlow<List<Wishlist>> = _wishlists.asStateFlow()
 
+    private val _onlyMyWishlists = MutableStateFlow<List<Wishlist>>(emptyList())
+    val onlyMyWishlists: StateFlow<List<Wishlist>> = _onlyMyWishlists.asStateFlow()
+
     private val _friendWishlists = MutableStateFlow<List<Wishlist>>(emptyList())
     val friendWishlists: StateFlow<List<Wishlist>> = _friendWishlists.asStateFlow()
 
@@ -47,8 +50,10 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
             try {
                 val currentUser = SessionManager.user
                 currentUser?.let {
-                    val friendWishlists = wRepository.getFriendWishlist(it.id)
-                    _wishlists.value = wRepository.getWishlistsByUser(it.id) + friendWishlists
+                    _friendWishlists.value = wRepository.getFriendWishlist(it.id)
+                    _onlyMyWishlists.value = wRepository.getWishlistsByUser(it.id)
+
+                    _wishlists.value = _onlyMyWishlists.value + _friendWishlists.value
                     if (_wishlists.value.isEmpty()) {
                         _error.value = "Nessuna wishlist trovata"
                     }
@@ -186,6 +191,24 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                     "updateWishlistPrivacy",
                     "Errore durante l'aggiornamento della privacy della wishlist: ${e.message}"
                 )
+            }
+        }
+    }
+
+    fun addWishlistItem(BookId: Long, wishlistId: Long){
+        viewModelScope.launch {
+            try {
+                val currentUser = SessionManager.user
+                val response = currentUser?.let { wRepository.addWishlistItem(BookId, wishlistId, it.id) }
+                if (response != null) {
+                    if (response.equals(Unit)) {
+                        Log.d("addWishlistItem", "Elemento della wishlist aggiunto con successo")
+                    } else {
+                        Log.e("addWishlistItem", "Errore durante l'aggiunta dell'elemento della wishlist:")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("addWishlistItem", "Errore durante l'aggiunta dell'elemento della wishlist: ${e.message}")
             }
         }
     }
