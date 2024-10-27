@@ -17,7 +17,7 @@ import java.util.UUID
 
 class AdminViewModel(private val repository: AdminRepository): ViewModel()  {
 
-    private val _users = MutableStateFlow<List<UserDetails>?>(emptyList())
+    private val _users = MutableStateFlow<List<UserDetails>?>(emptyList())//user si riferisce a UserDetails
     val users: StateFlow<List<UserDetails>?> = _users
 
     private val _filteredUsers = MutableStateFlow<List<UserDetails>?>(emptyList())

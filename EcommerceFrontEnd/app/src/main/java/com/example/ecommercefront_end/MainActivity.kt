@@ -205,7 +205,7 @@ fun NavigationView(navController: NavHostController) {
                 val book by bookViewModel.bookFlow.collectAsState()
 
                 book?.let {
-                    BookDetailsScreen(book = it, cartRepository = CartRepository(RetrofitClient.cartApiService),wishlistViewModel, navController)
+                    BookDetailsScreen(book = it, cartRepository = CartRepository(RetrofitClient.cartApiService), wishlistViewModel, navController)
                 } ?: Text("Libro non trovato")
             }
 
@@ -254,11 +254,33 @@ fun NavigationView(navController: NavHostController) {
                 CartScreen(viewModel = cartViewModel, navController = navController, onCheckoutClick = { navController.navigate("checkout") })
 
             }
-            composable("wishlist") {
-                selectedIndex.value = 3
+            composable("wishlist/{userId}", arguments = listOf(navArgument("userId") { type = NavType.StringType })) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId")?.let {
+                    try {
+                        UUID.fromString(it)
+                    } catch (e: IllegalArgumentException) {
+                        null  // oppure gestisci l'errore in un altro modo
+                    }
+                }
+                LaunchedEffect(userId) {
+                    if(userId != null)
+                        adminViewModel.loadUser(userId)
+                }
+                val user by adminViewModel.userFlow.collectAsState()
+
+
                 WishlistsScreen(viewModel = wishlistViewModel,  navController = navController)
 
             }
+            composable("wishlist") {
+                selectedIndex.value = 3
+
+                LaunchedEffect(Unit) {
+                    wishlistViewModel.fetchWishlists(null)
+                }
+                WishlistsScreen(viewModel = wishlistViewModel,  navController = navController)
+            }
+
             composable("userAuth") {
                 selectedIndex.value = 1
                 val _authApiService = RetrofitClient.authApiService

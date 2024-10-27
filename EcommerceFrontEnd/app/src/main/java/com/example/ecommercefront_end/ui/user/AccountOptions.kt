@@ -23,6 +23,13 @@ fun AccountOptions(userId: UUID?=null, currentRoute: String, navHostController: 
             }
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
+            Button(onClick = { navHostController.navigate("wishlist/${userId}"){
+                popUpTo(currentRoute) { inclusive = true }
+            }}){
+                Text(text = "Wishlists")
+            }
+        }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
             Button(onClick = { /*TODO*/ }) {
                 Text(text = "Payment Methods")
             }
