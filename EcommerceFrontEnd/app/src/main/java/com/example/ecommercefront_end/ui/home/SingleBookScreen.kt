@@ -228,7 +228,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, wishlistViewMo
                                     selectedWishlist = w
                                     wExpanded = false
 
-                                    w.id?.let { wishlistViewModel.addWishlistItem(it, book.id) }
+                                    w.id?.let { wishlistViewModel.addWishlistItem(book.id, w.id) }
                                 },
                                 text = { Text(w.name) }
                             )
