@@ -11,12 +11,6 @@ import java.util.UUID
 class WishlistRepository (private val wApiService : WishlistApiService, private val WIApiService: WishlistItemApiService) {
 
 
-
-    suspend fun updateWishlist(w: Wishlist) {
-        wApiService.updateWishlist(w)
-
-    }
-
     suspend fun removeWishlist(id: Long): Response<Unit>{
         return wApiService.deleteWishlist(id)
     }
@@ -93,7 +87,7 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
     suspend fun addWishlist(wishlist: SaveWishlist, idUser: UUID) {
         wApiService.addWishlist(idUser, wishlist.name, wishlist.privacySetting)
     }
-    suspend fun updatePrivacySettings(wishlist: Wishlist) {
+    suspend fun updateWishlist(wishlist: Wishlist) {
         wApiService.updateWishlist(wishlist)
     }
 

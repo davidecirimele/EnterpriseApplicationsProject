@@ -4,16 +4,11 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.BookSpecification;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.BooksDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
 import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
-import com.enterpriseapplicationsproject.ecommerce.dto.BookDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.PriceDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.StockDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import com.enterpriseapplicationsproject.ecommerce.exception.BookNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -64,7 +59,7 @@ public class BooksServiceImpl implements BooksService {
 
     @Override
     public List<BookDto> getBookDto() {
-        List <Book> books = booksDao.findAll();
+        List<Book> books = booksDao.findAll();
         return books.stream()
                 .map(book -> modelMapper.map(book, BookDto.class))
                 .toList();
@@ -76,17 +71,50 @@ public class BooksServiceImpl implements BooksService {
     }
 
     @Override
+    public List<BookDto> getAllAvailable() {
+
+        Optional<List<Book>> optionalBooks = booksDao.findAllAvailable();
+
+        if(optionalBooks.isPresent()){
+            List<Book> books = optionalBooks.get();
+
+            return books.stream().map(book -> modelMapper.map(book , BookDto.class)).toList();
+        }
+        return null;
+    }
+
+    @Override
     public BookDto deleteBook(Long id) {
-        try {
-            booksDao.deleteById(id);
-            return getBookDtoById(id);
+        Optional<Book> optionalBook = booksDao.findByBookId(id);
+
+        if(optionalBook.isPresent())
+        {
+            Book book = optionalBook.get();
+
+            book.setAvailable(false);
+            booksDao.save(book);
+
+            return modelMapper.map(book, BookDto.class);
         }
-        catch (EmptyResultDataAccessException e) {
-            return null;
+        return null;
+    }
+
+    @Override
+    public BookDto restoreBook(Long id) {
+        Optional<Book> optionalBook = booksDao.findById(id);
+
+        if(optionalBook.isPresent())
+        {
+            Book book = optionalBook.get();
+
+            if(!book.isAvailable()) {
+                book.setAvailable(true);
+                booksDao.save(book);
+            }
+
+            return modelMapper.map(book, BookDto.class);
         }
-        catch (DataAccessException e) {
-            return null;
-        }
+        return null;
     }
 
     @Override
@@ -104,7 +132,7 @@ public class BooksServiceImpl implements BooksService {
     @Override
     @Transactional
     public void downBookStock(Long id, int quantity) {
-        Book book = booksDao.findById(id)
+        Book book = booksDao.findByBookId(id)
                 .orElseThrow(() -> new BookNotFoundException("Book not found"));
         book.setStock(book.getStock() - quantity);
         booksDao.save(book);
@@ -137,7 +165,7 @@ public class BooksServiceImpl implements BooksService {
     @Override
     public void updateBookCover(Long bookId, MultipartFile coverImage) throws IOException, BookNotFoundException {
         // Cerca il libro nel database
-        Optional<Book> optionalBook = booksDao.findById(bookId);
+        Optional<Book> optionalBook = booksDao.findByBookId(bookId);
         if (optionalBook.isEmpty()) {
             throw new BookNotFoundException("Libro non trovato");
         }
@@ -162,7 +190,7 @@ public class BooksServiceImpl implements BooksService {
 
     @Override
     public BookDto updatePrice(Long bookId, PriceDto newPrice) throws IOException, BookNotFoundException {
-        Optional<Book> optionalBook = booksDao.findById(bookId);
+        Optional<Book> optionalBook = booksDao.findByBookId(bookId);
         if (optionalBook.isEmpty()) {
             throw new BookNotFoundException("Libro non trovato");
         }
@@ -179,7 +207,7 @@ public class BooksServiceImpl implements BooksService {
 
     @Override
     public BookDto updateStock(Long bookId, StockDto newStock) throws IOException, BookNotFoundException {
-        Optional<Book> optionalBook = booksDao.findById(bookId);
+        Optional<Book> optionalBook = booksDao.findByBookId(bookId);
         if (optionalBook.isEmpty()) {
             throw new BookNotFoundException("Libro non trovato");
         }

@@ -44,45 +44,57 @@ public class SecurityConfig {
         private final ExceptionHandlerFilter ExceptionHandlerFilter;
 
 
+
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             http
                     .csrf(AbstractHttpConfigurer::disable).exceptionHandling(AbstractHttpConfigurer::disable)
                     .exceptionHandling(AbstractHttpConfigurer::disable)
-                    .authorizeHttpRequests(auth -> {auth
-                            .requestMatchers("/api/v1/auth/**").permitAll();
-                    auth.requestMatchers("/api/v1/paymentMethods/add").authenticated();
-                    auth.requestMatchers("/api/v1/paymentMethods/get/{userId}").authenticated();
-                    auth.requestMatchers("/api/v1/paymentMethods/delete/{paymentMethodId}/{userId}").authenticated();
-                    auth.requestMatchers("/api/v1/paymentMethods/get/{userId}/{paymentMethodId}").authenticated();
+                    .authorizeHttpRequests(auth -> {
+                        auth
+                                .requestMatchers("/api/v1/auth/**").permitAll();
+                        auth.requestMatchers("/api/v1/paymentMethods/add").authenticated();
+                        auth.requestMatchers("/api/v1/paymentMethods/get/{userId}").authenticated();
+                        auth.requestMatchers("/api/v1/paymentMethods/delete/{paymentMethodId}/{userId}").authenticated();
+                        auth.requestMatchers("/api/v1/paymentMethods/get/{userId}/{paymentMethodId}").authenticated();
 
-                    auth.requestMatchers("/api/v1/users/**").authenticated();
-                    auth.requestMatchers("/api/v1/addresses/**").authenticated();
-                    auth.requestMatchers("/api/v1/shopping-cart/**").authenticated();
-                    auth.requestMatchers("/api/v1/shopping-cart/cart/**").authenticated();
+                        auth.requestMatchers("/api/v1/users/**").authenticated();
+                        auth.requestMatchers("/api/v1/addresses/**").authenticated();
 
-                    auth.requestMatchers("api/v1/admin/all-tokens").authenticated();
-                    auth.requestMatchers("api/v1/admin/all-users").authenticated();
-                    auth.requestMatchers("api/v1/admin/register").permitAll();
-                    auth.requestMatchers("/error").permitAll();
+                        auth.requestMatchers("/api/v1/shopping-cart/**").authenticated();
+                        auth.requestMatchers("/api/v1/shopping-cart/cart/**").authenticated();;
 
-auth.requestMatchers("/api/v1/books/add").authenticated();
-            auth.requestMatchers("/api/v1/books/edit*/**").authenticated();
-auth.requestMatchers("/api/v1/books/getAll").permitAll(); //testing home front end
-            auth.requestMatchers("/api/v1/books/get/*").permitAll();
+                        auth.requestMatchers("api/v1/admin/all-tokens").authenticated();
+                        auth.requestMatchers("api/v1/admin/all-users").authenticated();
+                        auth.requestMatchers("api/v1/admin/register").permitAll();
+                        auth.requestMatchers("/error").permitAll();
 
-auth.requestMatchers("/api/v1/wishlists/**").authenticated();
-auth.requestMatchers("/api/v1/wishlist-items/**").authenticated();
-auth.requestMatchers("/api/v1/shopping-cart/get/total/**").authenticated();
-auth.requestMatchers("/api/v1/groups/**").authenticated();
-}
+                        auth.requestMatchers("/api/v1/books/add").authenticated();
+                        auth.requestMatchers("/api/v1/books/delete/{bookId}").authenticated();
+                        auth.requestMatchers("/api/v1/books/restore/{bookId}").authenticated();
+                        auth.requestMatchers("/api/v1/books/edit*/**").authenticated();
+                        auth.requestMatchers("/api/v1/books/getAll").authenticated();
+
+                        auth.requestMatchers("/api/v1/books/get-catalogue").permitAll(); //testing home front end
+                        auth.requestMatchers("/api/v1/books/get/*").permitAll();
+
+                        auth.requestMatchers("/api/v1/wishlists/**").authenticated();
+                        auth.requestMatchers("/api/v1/wishlist-items/**").authenticated();
+                        auth.requestMatchers("/api/v1/groups/**").authenticated();
+
+                        auth.requestMatchers("/api/v1/shopping-cart/get/total/**").authenticated();
+                        auth.requestMatchers("/api/v1/orders/add").authenticated();
+                    }
                     )
+
                     .sessionManagement(session -> session
                             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                     )
                     .authenticationProvider(authenticationProvider())
                     .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                     .addFilterBefore(ExceptionHandlerFilter, JwtAuthenticationFilter.class);
+
+
 
             return http.build();
         }
@@ -112,7 +124,7 @@ auth.requestMatchers("/api/v1/groups/**").authenticated();
             //configuration.setAllowedOrigins(Arrays.asList("https://localhost:8081","https://192.168.1.54:8081", "https://93.44.97.32")); // Modifica secondo le tue esigenze
 
             configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-            configuration.setAllowedHeaders(List.of("*"));
+            configuration.setAllowedHeaders(Arrays.asList("*"));
             configuration.setAllowCredentials(true);
 
             UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -120,4 +132,5 @@ auth.requestMatchers("/api/v1/groups/**").authenticated();
 
             return source;
         }
-    }
+}
+

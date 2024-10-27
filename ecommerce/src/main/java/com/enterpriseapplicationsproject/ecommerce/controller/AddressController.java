@@ -96,7 +96,7 @@ public class AddressController {
 
     @RateLimit(type ="USER")
     @PostMapping(consumes = "application/json", path = "/{userId}/insert-address")
-    @PreAuthorize("#userId == authentication.principal.getId()")
+    @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<AddressDto> insertAddress(@PathVariable UUID userId, @RequestBody SaveAddressDto addressDto){
         log.info("Received request for addresses/{userId}/insert-address");
 
@@ -127,7 +127,7 @@ public class AddressController {
 
     @RateLimit(type ="USER")
     @PutMapping("/{userId}/{addressId}/edit-address")
-    @PreAuthorize("#userId == authentication.principal.getId()")
+    @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<AddressDto> updateAddress(@PathVariable UUID userId, @PathVariable Long addressId, @RequestBody SaveAddressDto addressDto) {
         log.info("Received request for addresses/{userId}/{addressId}/edit-address");
 

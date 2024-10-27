@@ -95,7 +95,6 @@ public class WishlistsServiceImpl implements WishlistsService {
         wishlist.setPrivacySetting(wPrivacySetting);
         wishlist.setUserId(user);
 
-        usersDao.save(user);
         wishlist.setWishlistToken(generateWToken());
 
         Group group = new Group();

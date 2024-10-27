@@ -31,9 +31,9 @@ public class BookController {
 
     private final BooksService booksService;
 
-    @RateLimit(type ="USER")
+    @RateLimit
     @GetMapping(path = "/getAll")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<BookDto>> getAll() {
         log.info("Received request for books/getAll");
         List<BookDto> books = booksService.getAllSorted();
@@ -42,7 +42,16 @@ public class BookController {
         return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
-    @RateLimit(type ="USER")
+    @GetMapping(path = "/get-catalogue")
+    public ResponseEntity<List<BookDto>> getAllAvailable() {
+        log.info("Received request for books/get-catalogue");
+        List<BookDto> books = booksService.getAllAvailable();
+        if (books.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(books, HttpStatus.OK);
+    }
+
+    @RateLimit
     @PostMapping("/get/filter")
     public ResponseEntity<List<Book>> filterBooks(@RequestBody BookSpecification.Filter filter) {
         log.info("Received request for books/get/filter -> "+filter);
@@ -50,63 +59,63 @@ public class BookController {
         return ResponseEntity.ok(filteredBooks);
     }
 
-    @RateLimit(type ="USER")
+    @RateLimit
     @GetMapping("/get/max-price")
     public ResponseEntity<Double> getMaxPrice() {
         Double maxPrice = booksService.getMaxBookPrice();
         return ResponseEntity.ok(maxPrice);
     }
 
-    @RateLimit(type ="USER")
+    @RateLimit
     @GetMapping("/get/min-price")
     public ResponseEntity<Double> getMinPrice() {
         Double minPrice = booksService.getMinBookPrice();
         return ResponseEntity.ok(minPrice);
     }
 
-    @RateLimit(type ="USER")
+    @RateLimit
     @GetMapping("/get/max-age")
     public ResponseEntity<Integer> getMaxAge() {
         Integer maxAge = booksService.getMaxBookAge();
         return ResponseEntity.ok(maxAge);
     }
 
-    @RateLimit(type ="USER")
+    @RateLimit
     @GetMapping("/get/min-age")
     public ResponseEntity<Integer> getMinAge() {
         Integer minAge = booksService.getMinBookAge();
         return ResponseEntity.ok(minAge);
     }
 
-    @RateLimit(type ="USER")
+    @RateLimit
     @GetMapping("/get/max-pages")
     public ResponseEntity<Integer> getMaxPages() {
         Integer maxPages = booksService.getMaxBookPages();
         return ResponseEntity.ok(maxPages);
     }
 
-    @RateLimit(type ="USER")
+    @RateLimit
     @GetMapping("/get/min-pages")
     public ResponseEntity<Integer> getMinPages() {
         Integer minPages = booksService.getMinBookPages();
         return ResponseEntity.ok(minPages);
     }
 
-    @RateLimit(type ="USER")
+    @RateLimit
     @GetMapping("/get/max-weight")
     public ResponseEntity<Double> getMaxWeight() {
         Double maxWeight = booksService.getMaxBookWeight();
         return ResponseEntity.ok(maxWeight);
     }
 
-    @RateLimit(type ="USER")
+    @RateLimit
     @GetMapping("/get/min-weight")
     public ResponseEntity<Double> getMinWeight() {
         Double minWeight = booksService.getMinBookWeight();
         return ResponseEntity.ok(minWeight);
     }
 
-    @RateLimit(type ="USER")
+    @RateLimit
     @GetMapping("/get/min-publication-date")
     public ResponseEntity<LocalDate> getMinPublicationDate() {
         LocalDate minPublicationDate = booksService.getMinPublicationYear();
@@ -114,9 +123,8 @@ public class BookController {
     }
 
     // da testare se consumes va bene, dato che ha un corpo nella richiesta
-    @RateLimit(type ="USER")
-    @GetMapping(consumes = "application/json", path = "/get/{idBook}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @RateLimit
+    @GetMapping(path = "/get/{idBook}")
     public ResponseEntity<BookDto> getById(@PathVariable("idBook") Long id) {
         BookDto b = booksService.getBookDtoById(id);
         if(b == null)
@@ -126,16 +134,16 @@ public class BookController {
 
     @RateLimit(type ="USER")
     @PostMapping(consumes = "application/json", path = "/add")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<BookDto> addBook(@Valid @RequestBody SaveBookDto book){
-        BookDto savedBook = booksService.save(book);
-        if(savedBook == null)
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
+    @PreAuthorize("hasRole('ADMIN') and isAuthenticated()")
+    public ResponseEntity<BookDto> add(@RequestBody SaveBookDto bDto) {
+        BookDto b = booksService.save(bDto);
+        if (b == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(b, HttpStatus.OK);
     }
 
-    @RateLimit(type ="USER")
-    @DeleteMapping(consumes = "application/json", path = "/delete/{idBook}")
+    @RateLimit(type="USER")
+    @PutMapping(path = "/delete/{idBook}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BookDto> delete(@PathVariable("idBook") Long id) {
         BookDto b = booksService.deleteBook(id);
@@ -144,10 +152,18 @@ public class BookController {
         return new ResponseEntity<>(b, HttpStatus.OK);
     }
 
+    @RateLimit(type ="USER")
+    @PutMapping(path = "/restore/{idBook}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BookDto> restore(@PathVariable("idBook") Long id) {
+        BookDto b = booksService.restoreBook(id);
+        if (b == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(b, HttpStatus.OK);
+    }
 
     @RateLimit(type ="USER")
     @PostMapping("/{id}/update-cover")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> updateBookCover(@PathVariable Long id, @RequestParam("cover") MultipartFile coverImage) {
         try {
             booksService.updateBookCover(id, coverImage);

@@ -52,10 +52,11 @@ import com.example.ecommercefront_end.repository.AddressRepository
 import com.example.ecommercefront_end.ui.books.BookCover
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
+import java.util.UUID
 
 
 @Composable
-fun AddressesScreen(viewModel: AddressViewModel, navHostController: NavHostController) {
+fun AddressesScreen(userId: UUID?=null, viewModel: AddressViewModel, navHostController: NavHostController) {
 
     val addresses by viewModel.addresses.collectAsState()
 
@@ -70,13 +71,13 @@ fun AddressesScreen(viewModel: AddressViewModel, navHostController: NavHostContr
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        addNewAddressCard(navHostController)
+        addNewAddressCard(userId, navHostController)
         Spacer(modifier = Modifier.height(8.dp))
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             if(addresses != null && !addresses!!.isEmpty())
                 for (address in addresses!!)
                     item {
-                        AddressView(address = address, viewModel, navHostController, true)
+                        AddressView(address = address, userId, viewModel, navHostController, true)
                     }
         }
 
@@ -85,12 +86,12 @@ fun AddressesScreen(viewModel: AddressViewModel, navHostController: NavHostContr
 }
 
 @Composable
-fun addNewAddressCard(navHostController: NavHostController){
+fun addNewAddressCard(userId:UUID?=null, navHostController: NavHostController){
     Card(modifier = Modifier
         .fillMaxWidth()
         .clickable(onClick = {
-            navHostController.navigate("insert-address") {
-                popUpTo("addresses") {
+            navHostController.navigate("insert-address/$userId") {
+                popUpTo("addresses/$userId") {
                     saveState = true
                 }
             }

@@ -11,6 +11,7 @@ import com.enterpriseapplicationsproject.ecommerce.dto.SaveWishlistDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserIdDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.SharedWishlistRequest;
+import com.enterpriseapplicationsproject.ecommerce.dto.security.SharedWishlistRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

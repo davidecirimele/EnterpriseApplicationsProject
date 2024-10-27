@@ -8,6 +8,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.RefreshTokenDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserRegistrationException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,13 +28,12 @@ import java.util.UUID;
 public class AdminController {
 
     private final AuthService authService;
-    private final UserService userService;
     private final RefreshTokenService refreshTokenService;
 
 
     @RateLimit
     @PostMapping(consumes = "application/json", path = "/register")
-    public ResponseEntity<SaveUserDto> registerUser(@RequestBody  SaveUserDto userDto) {
+    public ResponseEntity<UserDetailsDto> registerAdmin(@Valid @RequestBody  SaveUserDto userDto) {
         return ResponseEntity.ok(authService.registerAdmin(userDto));
     }
 

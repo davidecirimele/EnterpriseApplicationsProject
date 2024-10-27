@@ -1,7 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
 
-import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.service.OrderItemsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.OrderItemDto;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -23,11 +23,10 @@ public class OrderItemController {
 
     private final OrderItemsService orderItemsService;
 
-    @RateLimit(type ="USER")
-    @GetMapping(consumes = "application/json", path = "/get/{orderId}")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<OrderItemDto>> getOrderItemsByOrderId(@PathVariable Long orderId) {
-        List<OrderItemDto> orderItems = orderItemsService.getOrderItemsByOrderId(orderId);
+    @GetMapping(consumes = "application/json", path = "/get/{orderId}/{userId}")
+    @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<List<OrderItemDto>> getOrderItemsByOrderId(@PathVariable Long orderId, @PathVariable UUID userId) {
+        List<OrderItemDto> orderItems = orderItemsService.getOrderItemsByOrderId(orderId, userId);
         return new ResponseEntity<>(orderItems, HttpStatus.OK);
     }
 }

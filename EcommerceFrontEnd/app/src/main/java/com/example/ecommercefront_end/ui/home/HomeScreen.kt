@@ -64,8 +64,8 @@ fun Modifier.productCardModifier(height: Dp, width: Dp, navController: NavContro
 }
 @Composable
 fun HomeScreen(bookViewModel: BookViewModel, navController: NavController) {
-    val products by bookViewModel.allProducts.collectAsState()
-    val isLoading by bookViewModel.isLoadingAllBooks.collectAsState()
+    val products by bookViewModel.allAvailableProducts.collectAsState()
+    val isLoading by bookViewModel.isLoadingCatalogue.collectAsState()
     val error by bookViewModel.error.collectAsState()
     val topProducts = remember(products) { products.take(5) }
     val gridProducts = remember(products) { products.drop(5) } // Libri per la griglia

@@ -46,6 +46,7 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+
     @RateLimit(type ="USER")
     @PutMapping(value = "{userId}/change-password", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("#userId == authentication.principal.getId()")

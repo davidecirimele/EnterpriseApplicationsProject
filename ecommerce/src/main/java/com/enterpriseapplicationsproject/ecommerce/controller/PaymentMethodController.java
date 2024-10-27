@@ -1,7 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
 
-import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.service.PaymentMethodsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.PaymentMethodDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SavePaymentMethodDto;
@@ -28,7 +27,6 @@ public class PaymentMethodController {
 
     private final PaymentMethodsService paymentMethodService;
 
-    @RateLimit(type ="USER")
     @PostMapping(consumes = "application/json", path = "/add")
     @PreAuthorize("#paymentMethodDto.user.userId == authentication.principal.getId()")
     public ResponseEntity<PaymentMethodDto> addPaymentMethod( @Valid @RequestBody SavePaymentMethodDto paymentMethodDto) {
@@ -38,7 +36,6 @@ public class PaymentMethodController {
         return new ResponseEntity<>(paymentMethod, HttpStatus.CREATED);
     }
 
-    @RateLimit(type ="USER")
     @GetMapping(path = "/get/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<List<PaymentMethodDto>> getAllPaymentMethodByUserId(@PathVariable UUID userId) {
@@ -46,7 +43,6 @@ public class PaymentMethodController {
         return new ResponseEntity<>(paymentMethod, HttpStatus.OK);
     }
 
-    @RateLimit(type ="USER")
     @GetMapping(path = "/get/{userId}/{paymentMethodId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<PaymentMethodDto> getPaymentMethodByUserId(@PathVariable UUID userId, @PathVariable Long paymentMethodId) {
@@ -54,7 +50,6 @@ public class PaymentMethodController {
         return new ResponseEntity<>(paymentMethod, HttpStatus.OK);
     }
 
-    @RateLimit(type ="USER")
     @DeleteMapping(path = "/delete/{paymentMethodId}/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<Void> deletePaymentMethodByUserId(@PathVariable UUID userId, @PathVariable Long paymentMethodId) {

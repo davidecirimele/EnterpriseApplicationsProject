@@ -41,4 +41,12 @@ class BookRepository(private val apiService : BooksApiService)  {
     suspend fun getFilteredBooks(filter: BookFilter) = apiService.getFilteredBooks(filter)
 
     suspend fun getAllBooks() = apiService.getAllBooks()
+
+    suspend fun getBook(bookId: Long) = apiService.getBook(bookId)
+
+    suspend fun getCatalogue() = apiService.getCatalogue()
+
+    suspend fun removeBook(bookId: Long) = apiService.deleteBook(bookId)
+
+    suspend fun restoreBook(bookId: Long) = apiService.restoreBook(bookId)
 }

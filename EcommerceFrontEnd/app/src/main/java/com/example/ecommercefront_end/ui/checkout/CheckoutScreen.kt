@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun CheckoutScreen(viewModel: CheckoutViewModel, onConfirmOrder: () -> Unit, navController: NavController) {
+fun CheckoutScreen(viewModel: CheckoutViewModel, navController: NavController) {
     Column(modifier = Modifier.padding(16.dp)) {
 
         val isBuyNowEnabled by viewModel.isCheckoutEnabled.collectAsState()
@@ -81,7 +81,7 @@ fun CheckoutScreen(viewModel: CheckoutViewModel, onConfirmOrder: () -> Unit, nav
         // Pulsante per confermare l'ordine
         Button(
             onClick = {
-                if (isBuyNowEnabled) onConfirmOrder()
+                if (isBuyNowEnabled) viewModel.confirmOrder()
             },
             modifier = Modifier.fillMaxWidth().background(
                 if (isBuyNowEnabled) MaterialTheme.colorScheme.primary else Color.Gray,  // Cambia il colore di sfondo se disabilitato

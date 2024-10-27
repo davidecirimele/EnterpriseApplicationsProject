@@ -149,8 +149,11 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
 
                 // Salva la nuova wishlist nel database tramite il repository
                 Log.e("addWishlist", newWishlist.toString())
-                SessionManager.user?.id?.let { wRepository.addWishlist(newWishlist, it) }
-
+                val response = SessionManager.user?.id?.let { wRepository.addWishlist(newWishlist, it) }
+                if (response != null) {
+                        Log.d("addWishlist", "Wishlist creata con successo")
+                        loadWishlistsFromBD()
+                }
                 // Potresti aggiornare la lista delle wishlist nel ViewModel qui, se necessario
             } catch (e: Exception) {
                 // Gestisci l'errore
@@ -180,7 +183,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                     }
 
 
-                    wRepository.updatePrivacySettings(updatedWishlist)
+                    val response = wRepository.updateWishlist(updatedWishlist)
                     _wishlists.value =
                         _wishlists.value.map { if (it.id == id) updatedWishlist else it }
                     Log.d("updateWishlistPrivacy", "Wishlist aggiornata con successo")
@@ -202,7 +205,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                 val currentUser = SessionManager.user
                 val response = currentUser?.let { wRepository.addWishlistItem(BookId, wishlistId, it.id) }
                 if (response != null) {
-                    if (response.equals(Unit)) {
+                    if (response == Unit) {
                         Log.d("addWishlistItem", "Elemento della wishlist aggiunto con successo")
                     } else {
                         Log.e("addWishlistItem", "Errore durante l'aggiunta dell'elemento della wishlist:")
