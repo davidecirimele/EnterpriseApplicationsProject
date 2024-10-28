@@ -90,7 +90,7 @@ fun FilteredBooksScreen(bookViewModel: BookViewModel,navController: NavControlle
                             modifier = Modifier.padding(horizontal = 8.dp)
                         ) {
                             for (book in rowBooks) {
-                                ProductCard(navController, book, height = 230.dp, width = 170.dp)
+                                ProductCard(navController, book, bookViewModel, height = 230.dp, width = 170.dp)
                             }
                         }
                     }

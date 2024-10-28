@@ -45,11 +45,11 @@ fun AccountManagerScreen(viewModel: AccountViewModel, navHostController: NavHost
 
     Column(modifier = Modifier
         .fillMaxSize()
-        .padding(8.dp), verticalArrangement = Arrangement.SpaceEvenly){
+        .padding(8.dp), verticalArrangement = Arrangement.SpaceAround){
         userDetails?.let { UserCard(it) }
         OptionsSection(navHostController)
         if(SessionManager.user != null && SessionManager.user!!.role!="ROLE_ADMIN")
-        HistorySection()
+            HistorySection()
         Buttons(navHostController)
     }
 }
@@ -119,10 +119,6 @@ fun PurchasedHistoryCard(history: List<Pair<String,String>>){
                 .fillMaxWidth()
                 .horizontalScroll(state = ScrollState(1))
         ) {
-            history.forEach { (title, author) ->
-                BookCover(title = title, author = author)
-            }
-
         }
     }
 }

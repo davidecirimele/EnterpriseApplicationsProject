@@ -1,9 +1,12 @@
 package com.example.ecommercefront_end.viewmodels
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.bumptech.glide.util.LruCache
 import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.BookFilter
@@ -13,6 +16,7 @@ import com.example.ecommercefront_end.model.BookLanguage
 import com.example.ecommercefront_end.model.Price
 import com.example.ecommercefront_end.model.SaveBook
 import com.example.ecommercefront_end.model.Stock
+import com.example.ecommercefront_end.network.RetrofitClient
 
 import com.example.ecommercefront_end.repository.BookRepository
 import kotlinx.coroutines.async
@@ -20,15 +24,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.InputStream
 import java.time.LocalDate
 
 class BookViewModel(private val repository: BookRepository): ViewModel() {
 
     private val _filteredProducts = MutableStateFlow<List<Book>>(emptyList())
     val filteredProducts: StateFlow<List<Book>> = _filteredProducts.asStateFlow()
-
-    private val _cachedProducts = MutableStateFlow<List<Book>>(emptyList())
-    val cachedProducts: StateFlow<List<Book>> = _cachedProducts.asStateFlow()
 
     private val _allProducts = MutableStateFlow<List<Book>>(emptyList())
     val allProducts: StateFlow<List<Book>> = _allProducts.asStateFlow()
@@ -89,6 +94,13 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+
+    private val maxMemory = (Runtime.getRuntime().maxMemory() / 1024).toInt()
+    private val cacheSize = maxMemory / 8
+
+    private val imageCache = LruCache<String, Bitmap>(cacheSize.toLong())
+
+    private val bookCache = LruCache<Long, Book>(cacheSize.toLong())
 
     init {
         resetFilter()
@@ -260,13 +272,11 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     }
 
     suspend fun fetchFilteredBooks() {
-
             try {
                 val response = repository.getFilteredBooks(filter.value)
 
                 if (response.isSuccessful && response.body() != null) {
                     _filteredProducts.value = response.body()!!
-                    _cachedProducts.value = filteredProducts.value
                 } else {
                     throw Exception("Error fetching products")
                 }
@@ -309,7 +319,6 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
     fun resetFilter(){
         _filter.value = BookFilter()
-        clearCache()
     }
 
     fun setOrderOption(option: String){
@@ -329,13 +338,6 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         viewModelScope.launch {
             fetchFilteredBooks()
         }
-
-
-        /*
-        if(!searchInCachedBooks()) {
-            Log.d("BookDebug", "Too few cached products found, fetching from backend...")
-            fetchFilteredBooks()
-        }*/
     }
 
     fun sortProducts(){
@@ -356,46 +358,19 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         }
     }
 
-    private fun searchInCachedBooks(): Boolean {
-        if(cachedProducts.value.isNotEmpty()){
-            Log.d("BookDebug", "Cached products found, applying filters...")
-            _filteredProducts.value = cachedProducts.value.filter { book ->
-                (filter.value.weight == null || book.weight == filter.value.weight) &&
-                        (filter.value.minPrice == null || book.price >= filter.value.minPrice!!) &&
-                        (filter.value.maxPrice == null || book.price <= filter.value.maxPrice!!) &&
-                        (filter.value.stock == null || book.stock >= filter.value.stock!!) &&
-                        ((filter.value.title == null || book.title.contains(filter.value.title!!, ignoreCase = true)) ||
-                        (filter.value.author == null || book.author.contains(filter.value.author!!, ignoreCase = true)) ||
-                                (filter.value.publisher == null || book.publisher.contains(filter.value.publisher!!, ignoreCase = true))) &&
-                        (filter.value.ISBN == null || book.ISBN.contains(filter.value.ISBN!!, ignoreCase = true)) &&
-                        (filter.value.minPages == null || book.pages >= filter.value.minPages!!) &&
-                        (filter.value.maxPages == null || book.pages <= filter.value.maxPages!!) &&
-                        (filter.value.edition == null || book.edition.equals(filter.value.edition, ignoreCase = true)) &&
-                        (filter.value.format == null || book.format == filter.value.format) &&
-                        (filter.value.genre == null || book.genre == filter.value.genre) &&
-                        (filter.value.language == null || book.language == filter.value.language) &&
-                        (filter.value.minAge == null || book.age >= filter.value.minAge!!) &&
-                        (filter.value.maxAge == null || book.age <= filter.value.maxAge!!) &&
-                        (filter.value.minPublishDate == null || !book.publishDate.isBefore(filter.value.minPublishDate)) &&
-                        (filter.value.maxPublishDate == null || !book.publishDate.isAfter(filter.value.maxPublishDate))
-            }
-            Log.d("BookDebug", "Filter values: ${filter.value}")
-            Log.d("BookDebug", "Filtered products: ${_filteredProducts.value.size}")
-        }
-        return _filteredProducts.value.isNotEmpty()
-    }
-
-    fun clearCache(){
-        _cachedProducts.value = emptyList<Book>()
-    }
-
-
     suspend fun loadBook(id: Long) {
         try {
+            bookCache.get(id)?.let {
+                _bookFlow.value = it
+                return
+            }
+            Log.d("BookCover", "Carico il libro dal database")
+
             val response = repository.getBook(id)
 
             if (response.isSuccessful && response.body() != null) {
                 _bookFlow.value = response.body()
+                _bookFlow.value?.let { bookCache.put(it.id,_bookFlow.value) }
             } else {
                 _bookFlow.value = null
                 throw Exception("Error fetching book with id $id")
@@ -409,6 +384,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     }
 
     fun insertBook(book: SaveBook){
+
         viewModelScope.launch {
             try {
                 if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
@@ -489,5 +465,36 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                 Log.d("UserDebug", "Error deleting Book with id $bookId")
             }
         }
+    }
+
+    suspend fun fetchImage(url: String?): Bitmap? {
+        if(url == null)
+            return null
+        try {
+            imageCache.get(url)?.let {
+                return it
+            }
+
+            val response = repository.getCoverImage(url)
+
+            Log.d("IMAGE DEBUG", "response: ${response.message()}")
+
+            if (response.isSuccessful && response.body() != null) {
+                Log.d("IMAGE DEBUG", "response is not null")
+                val inputStream = response.body()!!.byteStream()
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+
+                if(bitmap != null)
+                    imageCache.put(url, bitmap)
+
+                return bitmap
+            }else{
+                Log.d("IMAGE DEBUG", "response is null")
+                throw Exception("Error fetching Image")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return null
     }
 }

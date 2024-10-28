@@ -1,5 +1,12 @@
 package com.example.ecommercefront_end.ui.admin
 
+import android.net.Uri
+import android.os.Build
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts.*
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 
@@ -31,6 +38,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.ecommercefront_end.model.BookFormat
@@ -38,29 +46,34 @@ import com.example.ecommercefront_end.model.BookGenre
 import com.example.ecommercefront_end.model.BookLanguage
 import com.example.ecommercefront_end.model.SaveBook
 import com.example.ecommercefront_end.ui.books.ChoiceSelector
+import com.example.ecommercefront_end.utils.ImageFileLoader
+import com.example.ecommercefront_end.utils.RequestStoragePermission
 import com.example.ecommercefront_end.viewmodels.BookViewModel
+import java.io.File
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostController){
 
-    var title by remember { mutableStateOf("") }
-    var author by remember { mutableStateOf("") }
-    var publisher by remember { mutableStateOf("") }
-    var price by remember { mutableStateOf("") }
-    var stock by remember { mutableStateOf("") }
-    var isbn by remember { mutableStateOf("") }
-    var pages by remember { mutableStateOf("") }
-    var edition by remember { mutableStateOf("") }
-    var format by remember { mutableStateOf("") }
-    var genre by remember { mutableStateOf("") }
-    var language by remember { mutableStateOf("") }
-    var age by remember { mutableStateOf("") }
+    var title by remember { mutableStateOf("Harry Potter and the Philosopher's Stone") }
+    var author by remember { mutableStateOf("J.K. Rowling") }
+    var publisher by remember { mutableStateOf("Bloomsbury") }
+    var price by remember { mutableStateOf("19.90") }
+    var stock by remember { mutableStateOf("40") }
+    var isbn by remember { mutableStateOf("9780747532699") }
+    var pages by remember { mutableStateOf("223") }
+    var edition by remember { mutableStateOf("5th") }
+    var format by remember { mutableStateOf("HARDCOVER") }
+    var genre by remember { mutableStateOf("FANTASY") }
+    var language by remember { mutableStateOf("ENGLISH") }
+    var age by remember { mutableStateOf("8") }
     var publishDate by remember { mutableStateOf(LocalDate.now()) }
-    var weight by remember { mutableStateOf("") }
+    var weight by remember { mutableStateOf("0.4") }
+    var image by remember { mutableStateOf<File?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
@@ -273,6 +286,16 @@ fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostControll
 
                     Spacer(modifier = Modifier.height(10.dp))
                 }
+                item {
+                    RequestStoragePermission {
+                        FileUploadButton { cover ->
+                            if (cover != null) {
+                                image = cover
+                                Log.d("InsertProductScreen", "Image selected: ${cover.name}")
+                            }
+                        }
+                    }
+                }
             }
         Button(
             modifier = Modifier.fillMaxWidth(),
@@ -292,21 +315,18 @@ fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostControll
                         language = BookLanguage.valueOf(language),
                         age = age.toInt(),
                         publishDate = publishDate,
-                        weight = weight.toDouble()
+                        weight = weight.toDouble(),
+                        image = image
                     )
                 )
                 viewModel.fetchBooksData()
-                navController.navigate("admin-home") {
-                    popUpTo("admin-home") {
-                        saveState = true
-                    }
-                }
+                navController.popBackStack()
             },
             enabled = title.isNotEmpty() && author.isNotEmpty() && publisher.isNotEmpty() &&
                     price.isNotEmpty() && stock.isNotEmpty() && isbn.isNotEmpty() &&
                     pages.isNotEmpty() && edition.isNotEmpty() && format.isNotEmpty() &&
                     genre.isNotEmpty() && language.isNotEmpty() && age.isNotEmpty()
-                    && weight.isNotEmpty()
+                    && weight.isNotEmpty() && image != null
         ) {
             Text("Save Product", style = MaterialTheme.typography.bodyLarge)
         }
@@ -379,5 +399,34 @@ fun insertDate(onDateSelected: (LocalDate) -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
             )
         }
+    }
+}
+
+@Composable
+fun FileUploadButton(onFileSelected: (File?) -> Unit) {
+    val context = LocalContext.current
+    var fileUri by remember { mutableStateOf<Uri?>(null) }
+
+    val filePickerLauncher =  rememberLauncherForActivityResult(
+        contract = PickVisualMedia()
+    ) { uri: Uri? ->
+        fileUri = uri
+        Log.d("FileUploadButton", "URI $fileUri")
+
+        if (uri != null) {
+            ImageFileLoader.loadImage(context, uri) { file ->
+                file?.let {
+                    onFileSelected(file)
+                }
+            }
+        }
+    }
+
+    Button(onClick = {
+        filePickerLauncher.launch(
+            PickVisualMediaRequest(PickVisualMedia.ImageOnly)
+        )
+    }) {
+        Text("Upload Cover Image")
     }
 }

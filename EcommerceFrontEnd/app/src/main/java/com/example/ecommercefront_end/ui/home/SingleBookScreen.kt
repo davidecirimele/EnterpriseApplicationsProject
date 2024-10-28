@@ -16,7 +16,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
 //import com.example.ecommercefront_end.viewmodels.HomeViewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,11 +43,13 @@ import com.example.ecommercefront_end.SessionManager
 import java.time.format.DateTimeFormatter
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.repository.CartRepository
+import com.example.ecommercefront_end.ui.books.BookCover
 import com.example.ecommercefront_end.ui.books.BookInfoCard
+import com.example.ecommercefront_end.viewmodels.BookViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController: NavHostController) {
+fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: CartRepository, navController: NavHostController) {
     var selectedQuantity by remember { mutableStateOf(1) }
     var shippingAddress by remember { mutableStateOf("Via Roma 1") }
 
@@ -84,22 +85,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
 
         // Immagine del libro
         item {
-            val imageUrl = remember(book.id) {
-                testImgs[book.id.hashCode() % testImgs.size]
-            }
-            val imagePainter = rememberAsyncImagePainter(
-                model = imageUrl,
-                error = rememberAsyncImagePainter("https://mockuptree.com/wp-content/uploads/edd/2019/10/free-Book-mockup-150x150.jpg")
-            )
-            Image(
-                painter = imagePainter,
-                contentDescription = book.title,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp)
-                    .padding(bottom = 16.dp),
-                contentScale = ContentScale.Crop
-            )
+            BookCover(book, bookViewModel)
         }
 
 

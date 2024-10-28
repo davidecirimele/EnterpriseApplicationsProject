@@ -2,11 +2,16 @@ package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 
 import com.enterpriseapplicationsproject.ecommerce.data.dao.BookSpecification;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.BooksDao;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.Address;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.BooksService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import com.enterpriseapplicationsproject.ecommerce.exception.BookNotFoundException;
+import com.enterpriseapplicationsproject.ecommerce.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
@@ -15,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,6 +31,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BooksServiceImpl implements BooksService {
@@ -147,24 +154,37 @@ public class BooksServiceImpl implements BooksService {
 
 
     @Override
-    public void saveBook(BookDto bookDto) throws IOException {
-        Book book = new Book();
+    public BookDto insertBook(SaveBookDto bookDto) throws IOException {
+        log.info("BOOK -> "+bookDto);
+        Book book = modelMapper.map(bookDto, Book.class);
 
         MultipartFile imageFile = bookDto.getImage();
-        if (imageFile != null && !imageFile.isEmpty()) {
-            String fileName = imageFile.getOriginalFilename();
-            Path filePath = Paths.get(uploadDir, fileName);
-            Files.write(filePath, imageFile.getBytes());
 
-            book.setImagePath(filePath.toString());
+        String fileName = imageFile.getOriginalFilename();
+        Path filePath = Paths.get(uploadDir, fileName);
+
+        File directory = new File(uploadDir);
+        if (!directory.exists()) {
+            directory.mkdirs();
         }
 
-        booksDao.save(book);
+
+        try {
+            log.info("Saving image to: " + filePath);
+            Files.write(filePath, imageFile.getBytes());
+            book.setImagePath(fileName);
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.error("Error saving image: " + e.getMessage());
+            throw new IOException("Error saving image: " + e.getMessage());
+        }
+
+        Book savedBook = booksDao.save(book);
+        return modelMapper.map(savedBook, BookDto.class);
     }
 
     @Override
     public void updateBookCover(Long bookId, MultipartFile coverImage) throws IOException, BookNotFoundException {
-        // Cerca il libro nel database
         Optional<Book> optionalBook = booksDao.findByBookId(bookId);
         if (optionalBook.isEmpty()) {
             throw new BookNotFoundException("Libro non trovato");
@@ -172,19 +192,16 @@ public class BooksServiceImpl implements BooksService {
 
         Book book = optionalBook.get();
 
-        // Salva la nuova immagine
         String fileName = coverImage.getOriginalFilename();
         Path filePath = Paths.get(uploadDir, fileName);
         Files.write(filePath, coverImage.getBytes());
 
-        // Rimuovi l'immagine precedente dal filesystem
         if (book.getImagePath() != null) {
             Path oldImagePath = Paths.get(book.getImagePath());
             Files.deleteIfExists(oldImagePath);
         }
 
-        // Aggiorna il percorso dell'immagine nel database
-        book.setImagePath(filePath.toString());
+        book.setImagePath(fileName);
         booksDao.save(book);
     }
 

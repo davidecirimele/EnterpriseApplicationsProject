@@ -64,11 +64,13 @@ public class SecurityConfig {
                     auth.requestMatchers("api/v1/admin/register").permitAll();
                     auth.requestMatchers("/error").permitAll();
                     auth.requestMatchers("/api/v1/books/add").authenticated();
+                                auth.requestMatchers("/api/v1/books/{id}/update-cover").authenticated();
                                 auth.requestMatchers("/api/v1/books/delete/{bookId}").authenticated();
                                 auth.requestMatchers("/api/v1/books/restore/{bookId}").authenticated();
                                 auth.requestMatchers("/api/v1/books/edit*/**").authenticated();
                                 auth.requestMatchers("/api/v1/books/getAll").authenticated();
-                    auth.requestMatchers("/api/v1/books/get-catalogue").permitAll(); //testing home front end
+                    auth.requestMatchers("/api/v1/books/get-catalogue").permitAll();
+                                auth.requestMatchers("/api/v1/books/get-cover/**").permitAll();
                                 auth.requestMatchers("/api/v1/books/get/*").permitAll();
                     auth.requestMatchers("/api/v1/wishlists/**").permitAll();
                     auth.requestMatchers("/api/v1/wishlist-items/**").permitAll();

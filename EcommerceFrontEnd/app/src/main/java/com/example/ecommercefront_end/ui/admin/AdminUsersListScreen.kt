@@ -42,8 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.model.UserDetails

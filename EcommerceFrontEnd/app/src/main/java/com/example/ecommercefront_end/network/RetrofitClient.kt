@@ -1,5 +1,8 @@
 package com.example.ecommercefront_end.network
 
+import android.content.Context
+import coil3.ImageLoader
+import coil3.request.CachePolicy
 import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.CardProvider
 import com.example.ecommercefront_end.model.CardProviderAdapter
@@ -22,9 +25,9 @@ object RetrofitClient {
 
     private const val SAMUELES_URL = "https://192.168.1.54:8081/api/v1/" //URL di Samuele S
 
-    private const val DAVIDES_URL = "https://10.0.2.2:8080/api/v1/"
+    const val DAVIDES_URL = "https://10.0.2.2:8080/api/v1/"
 
-    private val client: OkHttpClient by lazy {
+    val client: OkHttpClient by lazy {
         val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
             override fun checkClientTrusted(
                 chain: Array<java.security.cert.X509Certificate>,

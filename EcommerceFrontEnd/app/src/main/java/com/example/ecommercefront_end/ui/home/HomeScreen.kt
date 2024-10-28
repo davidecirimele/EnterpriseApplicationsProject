@@ -42,11 +42,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
-import coil.request.CachePolicy
 import com.android.volley.toolbox.ImageRequest
 import com.example.ecommercefront_end.model.Book
+import com.example.ecommercefront_end.ui.books.BookCover
 import com.example.ecommercefront_end.viewmodels.BookViewModel
 
 var testImgs : List<String> = listOf("https://mockuptree.com/wp-content/uploads/edd/2019/10/free-Book-mockup-150x150.jpg",
@@ -70,10 +68,6 @@ fun HomeScreen(bookViewModel: BookViewModel, navController: NavController) {
     val topProducts = remember(products) { products.take(5) }
     val gridProducts = remember(products) { products.drop(5) } // Libri per la griglia
 
-    LaunchedEffect(Unit) {
-        bookViewModel.clearCache()
-    }
-
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -95,6 +89,7 @@ fun HomeScreen(bookViewModel: BookViewModel, navController: NavController) {
                         navController,
                         title = "Libri Popolari",
                         books = topProducts,
+                        bookViewModel = bookViewModel
                     )
                 }
                 item {
@@ -112,7 +107,7 @@ fun HomeScreen(bookViewModel: BookViewModel, navController: NavController) {
                         modifier = Modifier.padding(horizontal = 8.dp)
                     ) {
                         for (book in rowBooks) {
-                            ProductCard(navController, book, height = 280.dp, width = 190.dp)
+                            ProductCard(navController, book, bookViewModel = bookViewModel, height = 280.dp, width = 190.dp)
                         }
                     }
                 }
@@ -123,56 +118,27 @@ fun HomeScreen(bookViewModel: BookViewModel, navController: NavController) {
 }
 
 @Composable
-fun ProductCard(navController: NavController, book: Book, height: Dp, width: Dp) {
-    val imageUrl = remember(book.id) {
-        testImgs[book.id.hashCode() % testImgs.size]
-    }
-    val imagePainter = rememberAsyncImagePainter(
-        model = imageUrl,
-        error = rememberAsyncImagePainter("https://mockuptree.com/wp-content/uploads/edd/2019/10/free-Book-mockup-150x150.jpg")
-    )
-    val isLoading = imagePainter.state is AsyncImagePainter.State.Loading
-
-    Card(
-        modifier = Modifier.productCardModifier(height, width, navController, book.id),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(height * 0.6f)
-                    .clip(RoundedCornerShape(8.dp))
-            ) {
-                Image(
-                    painter = imagePainter,
-                    contentDescription = book.title,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+fun ProductCard(navController: NavController, book: Book, bookViewModel: BookViewModel, height: Dp, width: Dp) {
+    Card(modifier = Modifier.productCardModifier(bookId = book.id, height = 200.dp, width = 170.dp, navController = navController)) {
+        Row(modifier = Modifier.fillMaxWidth().height(100.dp)){
+            BookCover(book, bookViewModel)
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = book.title, fontWeight = FontWeight.Bold, maxLines = 1)
+                Text(text = "di " + book.author, maxLines = 1)
+                Text(text = "${"%,.2f".format(book.price)} €")
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = book.title, fontWeight = FontWeight.Bold, fontSize = 14.sp, maxLines = 1)
-            Text(text = "di " + book.author, fontSize = 12.sp, maxLines = 1)
-            Text(text = "${"%,.2f".format(book.price)} €", fontSize = 15.sp)
         }
     }
 }
 
 
+
+
 @Composable
-fun ProductSection(navController: NavController, title: String, books: List<Book>, height: Dp = 180.dp, width: Dp = 140.dp) {
+fun ProductSection(navController: NavController, title: String, books: List<Book>, bookViewModel: BookViewModel, height: Dp = 180.dp, width: Dp = 140.dp) {
     Column(
         modifier = Modifier
             .padding(16.dp)
@@ -183,7 +149,7 @@ fun ProductSection(navController: NavController, title: String, books: List<Book
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(books, key = {it.id}) { book ->
-                ProductCard(navController,book, height, width) // Aumentiamo la larghezza delle card (150 dp invece di 100 dp)
+                ProductCard(navController,book, bookViewModel, height, width) // Aumentiamo la larghezza delle card (150 dp invece di 100 dp)
             }
         }
     }

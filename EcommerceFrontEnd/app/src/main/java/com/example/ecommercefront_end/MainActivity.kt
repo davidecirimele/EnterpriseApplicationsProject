@@ -191,7 +191,7 @@ fun NavigationView(navController: NavHostController) {
                 val book by bookViewModel.bookFlow.collectAsState()
 
                 book?.let {
-                    BookDetailsScreen(book = it, cartRepository = CartRepository(RetrofitClient.cartApiService), navController)
+                    BookDetailsScreen(book = it, bookViewModel = bookViewModel, cartRepository = CartRepository(RetrofitClient.cartApiService), navController)
                 } ?: Text("Libro non trovato")
             }
 
