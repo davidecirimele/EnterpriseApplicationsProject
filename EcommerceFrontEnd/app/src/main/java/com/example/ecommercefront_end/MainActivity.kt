@@ -235,7 +235,7 @@ fun NavigationView(navController: NavHostController) {
 
                 LaunchedEffect(userId) {
                     if(userId != null)
-                        adminViewModel.loadUser(userId)
+                        adminViewModel.loadUser(userId) // carica
                 }
 
                 val user by adminViewModel.userFlow.collectAsState()
@@ -254,7 +254,7 @@ fun NavigationView(navController: NavHostController) {
                 CartScreen(viewModel = cartViewModel, navController = navController, onCheckoutClick = { navController.navigate("checkout") })
 
             }
-            composable("wishlist/{userId}", arguments = listOf(navArgument("userId") { type = NavType.StringType })) { backStackEntry ->
+            composable("/admin/wishlist/{userId}", arguments = listOf(navArgument("userId") { type = NavType.StringType })) { backStackEntry ->
                 val userId = backStackEntry.arguments?.getString("userId")?.let {
                     try {
                         UUID.fromString(it)
@@ -264,9 +264,11 @@ fun NavigationView(navController: NavHostController) {
                 }
                 LaunchedEffect(userId) {
                     if(userId != null)
-                        adminViewModel.loadUser(userId)
+                        wishlistViewModel.fetchWishlists(idUser = userId)
+                        //wishlistViewModel.fetchWishlistItems()
+
                 }
-                val user by adminViewModel.userFlow.collectAsState()
+                //val user by adminViewModel.userFlow.collectAsState()
 
 
                 WishlistsScreen(viewModel = wishlistViewModel,  navController = navController)

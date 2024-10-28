@@ -23,7 +23,7 @@ fun AccountOptions(userId: UUID?=null, currentRoute: String, navHostController: 
             }
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-            Button(onClick = { navHostController.navigate("wishlist/${userId}"){
+            Button(onClick = { navHostController.navigate("/admin/wishlist/${userId}"){
                 popUpTo(currentRoute) { inclusive = true }
             }}){
                 Text(text = "Wishlists")

@@ -132,7 +132,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                     if (response != null) {
                         Log.e(
                             "unshareWishlist",
-                            "Errore durante l'eliminazione della condivisione della wishlist: ${response.errorBody()}"
+                            "Errore durante l'uscita della condivisione della wishlist: ${response.errorBody()}"
                         )
                     }
                 }
