@@ -11,7 +11,6 @@ import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.model.WishlistPrivacy
 import com.example.ecommercefront_end.repository.GroupRepository
 import com.example.ecommercefront_end.repository.WishlistRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,8 +38,18 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
     private val _tokenToShare = MutableStateFlow<String>("")
     val tokenToShare: StateFlow<String> = _tokenToShare.asStateFlow()
 
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    private val _isLoadingWishlist = MutableStateFlow(true)
+    val isLoadingWishlist : StateFlow<Boolean> = _isLoadingWishlist.asStateFlow()
+
+    private val _isLoadingItems = MutableStateFlow(true)
+    val isLoadingItems : StateFlow<Boolean> = _isLoadingItems.asStateFlow()
+
+    private val _showSnackbar = MutableStateFlow(false)
+    val showSnackbar: StateFlow<Boolean> get() = _showSnackbar
+
+    private val _snackbarMessage = MutableStateFlow("")
+    val snackbarMessage: StateFlow<String> get() = _snackbarMessage
+
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
@@ -49,7 +58,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
 
     suspend fun fetchWishlists(idUser: UUID? = null) {
         viewModelScope.launch {
-            _isLoading.value = true // Imposta il caricamento a vero all'inizio del processo
+            _isLoadingWishlist.value = true // Imposta il caricamento a vero all'inizio del processo
             val currentUser = SessionManager.user
 
             try {
@@ -69,7 +78,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                 else {
                     Log.d("UserDebug", "User is null")
                 }
-                _isLoading.value = false
+                _isLoadingWishlist.value = false
 
             } catch (e: Exception) {
                 _error.value = "Errore durante il caricamento delle wishlist: ${e.message}"
@@ -80,6 +89,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
 
     fun fetchWishlistItems(wishlistId: Long, userId: UUID) {
         viewModelScope.launch {
+            _isLoadingItems.value = true
             val currentUser = SessionManager.user
             try {
                 if (currentUser != null && SessionManager.user!!.role != "ROLE_ADMIN") {
@@ -92,6 +102,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                 else{
                     Log.d("UserDebug", "User is null")
                 }
+                _isLoadingItems.value = false
             } catch (e: Exception) {
                 Log.e(
                     "fetchWishlistItems",
@@ -105,6 +116,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
 
      fun joinWishlist(token: String) {
         viewModelScope.launch {
+            var message = ""
             try {
                 val currentUser = SessionManager.user
                 var response : Response<Boolean>? = null
@@ -119,21 +131,30 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                     } }
                 }
 
+
                 if (response != null && response.isSuccessful) {
                     Log.d("joinWishlist", "Utente aggiunto con successo alla wishlist")
+                    message = "Ti sei unito alla wishlist con successo"
                 } else {
                     //Log.e("joinWishlist", "Errore durante l'aggiunta dell'utente alla wishlist: ${response.errorBody()}")
+                    message = "Errore durante l'aggiunta dell'utente alla wishlist"
                 }
+                triggerSnackbar(message)
+
             } catch (e: Exception) {
                 Log.e(
                     "joinWishlist",
                     "Errore durante l'aggiunta dell'utente alla wishlist: ${e.message}"
                 )
+                message = "Errore durante l'aggiunta dell'utente alla wishlist"
+                triggerSnackbar(message)
+
             }
         }
     }
 
     fun unshareWishlist(wishlist: Wishlist) {
+        var message = ""
         viewModelScope.launch {
             try {
                 val currentUser = SessionManager.user
@@ -160,24 +181,30 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
 
                 if (response != null && response.isSuccessful) {
                     Log.d("unshareWishlist", "Wishlist non più condivisa con successo")
+                    message = "Wishlist non più condivisa con successo"
                 } else {
                     if (response != null) {
                         Log.e(
                             "unshareWishlist",
                             "Errore durante l'uscita della condivisione della wishlist: ${response.errorBody()}"
                         )
+                        message = "Errore durante l'uscita della condivisione della wishlist"
                     }
                 }
+                triggerSnackbar(message)
             } catch (e: Exception) {
                 Log.e(
                     "unshareWishlist",
                     "Errore durante l'eliminazione della condivisione della wishlist: ${e.message}"
                 )
+                message = "Errore durante l'eliminazione della condivisione della wishlist"
+                triggerSnackbar(message)
             }
         }
     }
 
     fun addWishlist(wishlistName: String, privacySetting: WishlistPrivacy)  {
+        var message = ""
         viewModelScope.launch { // Avvia un nuovo processo in background
             try {
                 // Crea una lista vuota di elementi per la nuova wishlist
@@ -216,12 +243,16 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                 if (response != null) {
                     Log.d("addWishlist", "Wishlist creata con successo")
                     fetchWishlists()
+                    message = "Wishlist creata con successo"
+                    triggerSnackbar(message)
                 }
                 // Potresti aggiornare la lista delle wishlist nel ViewModel qui, se necessario
             } catch (e: Exception) {
                 // Gestisci l'errore
                 // Puoi aggiungere un log o mostrare un messaggio di errore all'utente
                 Log.e("addWishlist", "Errore durante la creazione della wishlist: ${e.message}")
+                message = "Errore durante la creazione della wishlist"
+                triggerSnackbar(message)
             }
         }
 
@@ -233,6 +264,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
         privacySettings: WishlistPrivacy,
         group: Group?
     ) {
+        var message = ""
         viewModelScope.launch {
             try {
                 val wishlist = _wishlists.value.find { it.id == id }
@@ -263,20 +295,27 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                     val response = wRepository.updateWishlist(updatedWishlist)
                     _wishlists.value =
                         _wishlists.value.map { if (it.id == id) updatedWishlist else it }
+
                     Log.d("updateWishlistPrivacy", "Wishlist aggiornata con successo")
+                    triggerSnackbar("Wishlist aggiornata con successo")
+
                 } else {
                     Log.e("updateWishlistPrivacy", "Wishlist non trovata con id: $id")
+                    triggerSnackbar("Errore durante l'aggiornamento della wishlist")
+
                 }
             } catch (e: Exception) {
                 Log.e(
                     "updateWishlistPrivacy",
                     "Errore durante l'aggiornamento della privacy della wishlist: ${e.message}"
                 )
+                triggerSnackbar("Errore durante l'aggiornamento della wishlist")
             }
         }
     }
 
     fun addWishlistItem(BookId: Long, wishlistId: Long) {
+        var message = ""
         viewModelScope.launch {
             try {
                 val currentUser = SessionManager.user
@@ -289,11 +328,13 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                             "addWishlistItem",
                             "Elemento della wishlist aggiunto con successo"
                         )
+                        triggerSnackbar("Elemento della wishlist aggiunto con successo")
                     } else {
                         Log.e(
                             "addWishlistItem",
                             "Errore durante l'aggiunta dell'elemento della wishlist:"
                         )
+                        triggerSnackbar("Errore durante l'aggiunta dell'elemento della wishlist")
                     }
                 }
             } catch (e: Exception) {
@@ -301,12 +342,16 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                     "addWishlistItem",
                     "Errore durante l'aggiunta dell'elemento della wishlist: ${e.message}"
                 )
+
+                triggerSnackbar("Errore durante l'aggiunta dell'elemento della wishlist")
+
             }
         }
     }
 
 
     fun deleteWishlistItem(id: Long) {
+        var message = ""
         viewModelScope.launch {
             try {
                 val currentUser = SessionManager.user
@@ -319,12 +364,14 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                             "removeWishlistItem",
                             "Elemento della wishlist rimosso con successo"
                         )
+                        triggerSnackbar("Elemento della wishlist rimosso con successo")
                     } else {
                         Log.e("removeWishlistItem", "Non rimosso WI con id: $id")
                         Log.e(
                             "removeWishlistItem",
                             "Errore durante la rimozione dell'elemento della wishlist: ${response.errorBody()}"
                         )
+                        triggerSnackbar("Errore durante la rimozione dell'elemento della wishlist")
                     }
                 }
             } catch (e: Exception) {
@@ -332,12 +379,14 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                     "removeWishlistItem",
                     "Errore durante la rimozione dell'elemento della wishlist: ${e.message}"
                 )
+                triggerSnackbar("Errore durante la rimozione dell'elemento della wishlist")
             }
         }
 
     }
 
     fun deleteWishlist(wishlistId: Long) {
+        var message = ""
         viewModelScope.launch {
             try {
                 // Elimina la wishlist
@@ -345,19 +394,35 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                 if (wResponse.isSuccessful) {
                     _wishlists.value = _wishlists.value.filter { it.id != wishlistId }
                     Log.d("removeWishlist", "Wishlist rimossa con successo")
+                    message = "Wishlist rimossa con successo"
                 } else {
                     Log.e(
                         "removeWishlist",
                         "Errore durante la rimozione della wishlist: ${wResponse.errorBody()}"
                     )
+                    message = "Errore durante la rimozione della wishlist"
                 }
+                triggerSnackbar(message)
             } catch (e: Exception) {
                 Log.e(
                     "removeWishlist",
                     "Errore durante la rimozione della wishlist: ${e.message}"
                 )
+                message = "Errore durante la rimozione della wishlist"
+                triggerSnackbar(message)
+
             }
         }
+    }
+
+    fun setShowSnackbar(b: Boolean) {
+        _showSnackbar.value = b
+
+    }
+
+    fun triggerSnackbar(message: String) {
+        _snackbarMessage.value = message
+        _showSnackbar.value = true
     }
 
 

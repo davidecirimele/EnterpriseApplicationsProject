@@ -88,7 +88,7 @@ public class WishlistController {
     }
 
 
-    //TO DOO
+
     @RateLimit(type = "USER")
     @GetMapping(path = "/getOfFriend/{idUser}")
     @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
@@ -100,9 +100,8 @@ public class WishlistController {
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
 
-    //To test
 
-    //TO test
+
     @RateLimit(type = "USER")
     @PutMapping(consumes = "application/json", path = "/update")
     @PreAuthorize("#wDto.getUser().getId() == authentication.principal.getId() or hasRole('ADMIN')")

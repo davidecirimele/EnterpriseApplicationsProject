@@ -44,6 +44,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -76,43 +80,66 @@ import com.example.ecommercefront_end.viewmodels.WishlistViewModel
 fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) {
     val wLists by viewModel.wishlists.collectAsState()
     val wListItems by viewModel.wishlistItems.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
+    val isWishlistLoading by viewModel.isLoadingWishlist.collectAsState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val showSnackbar by viewModel.showSnackbar.collectAsState()
+    val snackbarMessage by viewModel.snackbarMessage.collectAsState()
+
 
     // Gestione della selezione della wishlist
     val selectedWishlist = remember(wLists) {
         mutableStateOf(wLists.firstOrNull())
     }
 
-    if (isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-    } else {
-        // Ricarica gli elementi della wishlist selezionata
-             LazyColumn(modifier = Modifier.fillMaxSize()) {
-            item {
-                WishlistsList(
-                    wishlists = wLists,
-                    viewModel = viewModel,
-                    onWishlistSelected = { wishlist ->
-                        selectedWishlist.value = wishlist
-                        wishlist.id?.let { viewModel.fetchWishlistItems(it, user!!.id) }
-                    }
-                )
-            }
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) {
+        paddingValues ->
 
-            // Mostra i dettagli solo se c'è una wishlist selezionata e ha degli elementi
-            selectedWishlist.value?.let { wishlist ->
+        if (isWishlistLoading) {
+            Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else {
+            // Ricarica gli elementi della wishlist selezionata
+            LazyColumn(modifier = Modifier.fillMaxSize()
+                            .padding(paddingValues))
+            {
                 item {
-                    WishlistDetails(
-                        wishlist = wishlist,
-                        items = wListItems,  // Usa wListItems osservato, non selectedWishlist.items
-                        navController = navController,
-                        viewModel = viewModel
+                    WishlistsList(
+                        wishlists = wLists,
+                        viewModel = viewModel,
+                        onWishlistSelected = { wishlist ->
+                            selectedWishlist.value = wishlist
+                            wishlist.id?.let { viewModel.fetchWishlistItems(it, user!!.id) }
+                        }
                     )
+                }
+
+                // Mostra i dettagli solo se c'è una wishlist selezionata e ha degli elementi
+                selectedWishlist.value?.let { wishlist ->
+                    item {
+                        WishlistDetails(
+                            wishlist = wishlist,
+                            items = wListItems,  // Usa wListItems osservato, non selectedWishlist.items
+                            navController = navController,
+                            viewModel = viewModel
+                        )
+                    }
                 }
             }
         }
+        LaunchedEffect(showSnackbar) {
+            if (showSnackbar) {
+                snackbarHostState.showSnackbar(
+                    message = snackbarMessage,
+                    duration = SnackbarDuration.Short
+                )
+                viewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
+            }
+        }
+
     }
 }
 
@@ -282,7 +309,9 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Le tue liste desideri",
+            text = if (isAdmin && (wishlists.get(0).user?.id == idUserSelectedByAdmin) )
+                "Liste di ${wishlists.get(0).user?.firstName} ${wishlists.get(0).user?.lastName}" else "Le tue liste dei desideri",
+
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
@@ -378,7 +407,8 @@ fun WishlistDetails(
 
     val isAdmin = user?.role == "ROLE_ADMIN"
     val wishlistUpdatable = user?.id?.compareTo(wishlist.user?.id) == 0 || isAdmin
-    val isFriendWishlist = user?.id?.compareTo(wishlist.user?.id) != 0
+    val idUserSelectedByAdmin by viewModel.userSelectedByAdmin.collectAsState()
+    val isFriendWishlist = idUserSelectedByAdmin?.compareTo(wishlist.user?.id) != 0
 
 
     var showDeleteConfirmation by remember { mutableStateOf(false) }
@@ -386,7 +416,8 @@ fun WishlistDetails(
     var showRenameDialog by remember { mutableStateOf(false) }
     var newWishlistName by remember { mutableStateOf(wishlist.name) }
 
-    val isLoading by viewModel.isLoading.collectAsState()
+    val isLoadingWishlist by viewModel.isLoadingWishlist.collectAsState()
+    val isLoadingItems by viewModel.isLoadingItems.collectAsState()
     val error by viewModel.error.collectAsState()
 
     val tokenToShare by viewModel.tokenToShare.collectAsState()
@@ -398,7 +429,7 @@ fun WishlistDetails(
         wishlist.id?.let { user?.let { it1 -> viewModel.fetchWishlistItems(it, it1.id) } }
     }
 
-    if (isLoading) {
+    if (isLoadingWishlist) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
@@ -414,7 +445,7 @@ fun WishlistDetails(
                 verticalAlignment = Alignment.CenterVertically,
             ){
                 Text(
-                    text = "Lista: ${wishlist.name}",
+                    text = "${wishlist.name}",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -539,7 +570,7 @@ fun WishlistDetails(
             }
 
             //Proprietario
-            if (isAdmin || isFriendWishlist){
+            if (isFriendWishlist){
                 Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -549,7 +580,7 @@ fun WishlistDetails(
             ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "Di: ${wishlist.user?.firstName} ${wishlist.user?.lastName}",
+                            text = "Condivisa da: ${wishlist.user?.firstName} ${wishlist.user?.lastName}",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -610,16 +641,23 @@ fun WishlistDetails(
             }
             Spacer(modifier = Modifier.height(16.dp))
             if (!items.isNullOrEmpty()) {
+                if (isLoadingItems) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+                else {
                 Column {
-                    items.forEach { item ->
+                        items.forEach { item ->
 
-                        WishlistItemCard(wishlistItem = item,
-                            navController = navController, onRemoveClick = {
-                                viewModel.deleteWishlistItem(item.id)
-                            },
-                            wishlistUpdateable = wishlistUpdatable,
-                            isFriendWishlist = isFriendWishlist
-                            )
+                            WishlistItemCard(wishlistItem = item,
+                                navController = navController, onRemoveClick = {
+                                    viewModel.deleteWishlistItem(item.id)
+                                },
+                                wishlistUpdateable = wishlistUpdatable,
+                                isFriendWishlist = isFriendWishlist
+                                )
+                        }
                     }
                 }
             }

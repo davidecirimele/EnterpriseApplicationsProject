@@ -72,9 +72,6 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
         Wishlist wishlist = wishlistsDao.findById(wishlistItem.getWishlist().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID"));
 
-        if (!wishlist.getUserId().getId() .equals  (idUser))
-            throw new IllegalArgumentException("User not authorized to delete item from wishlist");
-
 
         wishlist.getItems().remove(wishlistItem);
         try {
@@ -95,9 +92,6 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
         if (wishlist == null) {
             throw new IllegalArgumentException("Wishlist not found");
         }
-
-        if (!wishlist.getUserId().getId().equals(idUser))
-            throw new IllegalArgumentException("User not authorized to view items in wishlist");
 
         List<WishlistItem> wishlistItems = wishlistItemsDao.findByWishlistId(id);
 
