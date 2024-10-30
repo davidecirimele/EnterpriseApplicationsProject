@@ -367,7 +367,7 @@ fun TopBar(navHostController: NavHostController, bookViewModel: BookViewModel) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
-    val isSearchVisible = currentRoute == "home" || currentRoute == "filtered-books" || currentRoute == "admin-home"
+    val isSearchVisible = currentRoute == "home" || currentRoute == "filtered-books"
     var filterOptions by remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
 
