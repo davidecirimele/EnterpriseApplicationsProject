@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.Text
@@ -74,7 +75,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
                         .padding(bottom = 8.dp)
                 )
                 Text(
-                    text = "di " + book.author,
+                    text = book.author,
                     fontSize = 20.sp,
                     modifier = Modifier
                         .align(Alignment.Start)
@@ -110,7 +111,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
                     OutlinedButton(onClick = { qExpanded = true }) {
-                        Text("Quantità: $selectedQuantity")
+                        Text("Quantity: $selectedQuantity")
                     }
                     DropdownMenu(
                         expanded = qExpanded,
@@ -132,7 +133,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
         // Indirizzo di spedizione
         item {
             Text(
-                text = "Invia a $shippingAddress",
+                text = "Send to $shippingAddress",
                 fontSize = 14.sp,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -157,7 +158,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
                             SessionManager.user?.let { user ->
                                 cartRepository.addCartItem(user.id, selectedQuantity, book.id)
                             } ?: run {
-                                navController.navigate(route = "login") {
+                                navController.navigate(route = "userAuth") {
                                     popUpTo(route = "cart") {
                                         inclusive = true
                                     }
@@ -174,7 +175,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
                         .height(60.dp)
                         .padding(bottom = 18.dp)
                 ) {
-                    Text("Aggiungi al carrello")
+                    Text("Add to cart")
                 }
             }
         }
@@ -195,7 +196,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
                     OutlinedButton(onClick = { wExpanded = true }) {
-                        Text("Aggiungi a una wishlist $selectedQuantity")
+                        Text("Add to a wishlist $selectedQuantity")
                     }
                     DropdownMenu(
                         expanded = wExpanded,

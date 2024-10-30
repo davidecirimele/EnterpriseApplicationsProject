@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -44,17 +45,17 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.ecommercefront_end.model.Book
+import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.ui.books.BookCover
 import com.example.ecommercefront_end.ui.books.BooksFilterScreen
-import com.example.ecommercefront_end.ui.home.testImgs
 import com.example.ecommercefront_end.viewmodels.BookViewModel
 import okhttp3.OkHttpClient
 
 fun Modifier.bookEntryModifier(navController: NavController, bookId: Long) = composed {
     this
         .fillMaxWidth()
-        .height(200.dp)
+        .fillMaxHeight(0.35f)
         .clickable { navController.navigate("/admin/book_details/${bookId}") }
 }
 @Composable
@@ -85,8 +86,7 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navHostController: NavHos
             TextField(
                 value = searchValue,
                 onValueChange = { searchValue = it;
-                    bookViewModel.updateFilter(title = it, author = it, publisher = it);
-                    bookViewModel.searchBooks(navController = navHostController,"admin-catalogue")
+                    bookViewModel.searchBooks(filter = BookFilter(title = it, author = it, publisher = it), navController = navHostController,"admin-catalogue")
                 },
                 label = { Text("Search by Title, Author, Publisher or ISBN") },
                 shape = RoundedCornerShape(16.dp),
@@ -110,13 +110,14 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navHostController: NavHos
             if(products.isNotEmpty()) {
                 for ((index,product) in products.withIndex())
                     item {
-                        Row(){
+                        Row(modifier = Modifier.fillMaxWidth()){
                             Text(text = (index + 1).toString(),
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 20.sp,
                                 modifier = Modifier
                                     .align(Alignment.CenterVertically)
-                                    .padding(4.dp))
+                                    .padding(2.dp).fillMaxWidth(0.08f),
+                                maxLines = 1
+                            )
                             Spacer(modifier = Modifier.padding(2.dp))
                             BookEntry(book = product, bookViewModel, navHostController)
                         }

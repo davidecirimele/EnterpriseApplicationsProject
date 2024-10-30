@@ -1,6 +1,8 @@
 package com.example.ecommercefront_end.ui.admin
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,7 +33,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,12 +48,14 @@ import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.ui.books.BookCover
 import com.example.ecommercefront_end.ui.books.BookInfoCard
-import com.example.ecommercefront_end.ui.home.testImgs
+import com.example.ecommercefront_end.utils.FileUploadButton
+import com.example.ecommercefront_end.utils.RequestStoragePermission
 import com.example.ecommercefront_end.viewmodels.BookViewModel
-import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
+import java.io.File
 import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun AdminSingleBookScreen( bookViewModel: BookViewModel, navHostController: NavHostController) {
 
@@ -61,7 +64,6 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navHostController: NavH
     var showRestockField by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
     val isLoading by bookViewModel.isLoadingBook.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
 
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -142,10 +144,6 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navHostController: NavH
                                             newPrice.toDouble(),
                                             bookId = book!!.id
                                         );
-                                        coroutineScope.launch {
-                                            bookViewModel.fetchAllAvailableProducts()
-                                            bookViewModel.loadBook(book!!.id)
-                                        }
                                         showEditPriceField = false;
                                     }, book!!.id)
                                 }
@@ -180,10 +178,6 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navHostController: NavH
                                 Row {
                                     TextFieldWithSubmitButton({ newStock ->
                                         bookViewModel.restock(newStock.toInt(), bookId = book!!.id);
-                                        coroutineScope.launch {
-                                            bookViewModel.fetchAllAvailableProducts()
-                                            bookViewModel.loadBook(book!!.id)
-                                        }
                                         showRestockField = false
                                     }, book!!.id)
                                 }
@@ -200,6 +194,13 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navHostController: NavH
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        RequestStoragePermission {
+                            FileUploadButton { cover ->
+                                if (cover != null) {
+                                    bookViewModel.updateBookCover(book!!.id, cover)
+                                }
+                            }
+                        }
 
                         Button(
                             onClick = { showDialog = true },

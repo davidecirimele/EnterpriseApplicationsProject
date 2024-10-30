@@ -46,6 +46,7 @@ import com.example.ecommercefront_end.model.BookGenre
 import com.example.ecommercefront_end.model.BookLanguage
 import com.example.ecommercefront_end.model.SaveBook
 import com.example.ecommercefront_end.ui.books.ChoiceSelector
+import com.example.ecommercefront_end.utils.FileUploadButton
 import com.example.ecommercefront_end.utils.ImageFileLoader
 import com.example.ecommercefront_end.utils.RequestStoragePermission
 import com.example.ecommercefront_end.viewmodels.BookViewModel
@@ -59,20 +60,20 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostController){
 
-    var title by remember { mutableStateOf("Harry Potter and the Philosopher's Stone") }
-    var author by remember { mutableStateOf("J.K. Rowling") }
-    var publisher by remember { mutableStateOf("Bloomsbury") }
-    var price by remember { mutableStateOf("19.90") }
-    var stock by remember { mutableStateOf("40") }
-    var isbn by remember { mutableStateOf("9780747532699") }
-    var pages by remember { mutableStateOf("223") }
-    var edition by remember { mutableStateOf("5th") }
-    var format by remember { mutableStateOf("HARDCOVER") }
-    var genre by remember { mutableStateOf("FANTASY") }
-    var language by remember { mutableStateOf("ENGLISH") }
-    var age by remember { mutableStateOf("8") }
+    var title by remember { mutableStateOf("") }
+    var author by remember { mutableStateOf("") }
+    var publisher by remember { mutableStateOf("") }
+    var price by remember { mutableStateOf("") }
+    var stock by remember { mutableStateOf("") }
+    var isbn by remember { mutableStateOf("") }
+    var pages by remember { mutableStateOf("") }
+    var edition by remember { mutableStateOf("") }
+    var format by remember { mutableStateOf("") }
+    var genre by remember { mutableStateOf("") }
+    var language by remember { mutableStateOf("") }
+    var age by remember { mutableStateOf("") }
     var publishDate by remember { mutableStateOf(LocalDate.now()) }
-    var weight by remember { mutableStateOf("0.4") }
+    var weight by remember { mutableStateOf("") }
     var image by remember { mutableStateOf<File?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -291,7 +292,6 @@ fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostControll
                         FileUploadButton { cover ->
                             if (cover != null) {
                                 image = cover
-                                Log.d("InsertProductScreen", "Image selected: ${cover.name}")
                             }
                         }
                     }
@@ -399,34 +399,5 @@ fun insertDate(onDateSelected: (LocalDate) -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
             )
         }
-    }
-}
-
-@Composable
-fun FileUploadButton(onFileSelected: (File?) -> Unit) {
-    val context = LocalContext.current
-    var fileUri by remember { mutableStateOf<Uri?>(null) }
-
-    val filePickerLauncher =  rememberLauncherForActivityResult(
-        contract = PickVisualMedia()
-    ) { uri: Uri? ->
-        fileUri = uri
-        Log.d("FileUploadButton", "URI $fileUri")
-
-        if (uri != null) {
-            ImageFileLoader.loadImage(context, uri) { file ->
-                file?.let {
-                    onFileSelected(file)
-                }
-            }
-        }
-    }
-
-    Button(onClick = {
-        filePickerLauncher.launch(
-            PickVisualMediaRequest(PickVisualMedia.ImageOnly)
-        )
-    }) {
-        Text("Upload Cover Image")
     }
 }

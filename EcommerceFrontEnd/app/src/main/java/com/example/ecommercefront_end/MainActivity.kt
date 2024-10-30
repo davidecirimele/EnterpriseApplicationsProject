@@ -1,10 +1,12 @@
 package com.example.ecommercefront_end
 
 import CheckoutViewModel
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -64,6 +66,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.repository.AddressRepository
@@ -110,6 +113,7 @@ import java.util.UUID
 
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -133,6 +137,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun NavigationView(navController: NavHostController) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
@@ -192,7 +197,7 @@ fun NavigationView(navController: NavHostController) {
 
                 book?.let {
                     BookDetailsScreen(book = it, bookViewModel = bookViewModel, cartRepository = CartRepository(RetrofitClient.cartApiService), navController)
-                } ?: Text("Libro non trovato")
+                } ?: Text("Book not found")
             }
 
             composable("/admin/book_details/{idBook}", arguments = listOf(navArgument("idBook") { type = NavType.LongType })) { backStackEntry ->
@@ -411,8 +416,7 @@ fun SearchBar(navHostController: NavHostController, filterOptions: Boolean, onFi
                 if(searchValue == "" && currentRoute == "filtered-books"){
                     navHostController.popBackStack()
                 }
-                bookViewModel.updateFilter(title = it, author = it, publisher = it);
-                bookViewModel.searchBooks(navHostController, currentRoute)},
+                bookViewModel.searchBooks(BookFilter(title = it, author = it, publisher = it),navHostController, currentRoute)},
             label = { Text("Search by Title, Author or Publisher") },
             shape = RoundedCornerShape(16.dp),
             singleLine = true,

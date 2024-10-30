@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 import java.io.InputStream
 import java.time.LocalDate
 
@@ -68,9 +69,6 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     private val _startingPublicationYear = MutableStateFlow<LocalDate?>(null)
     val startingPublicationYear: StateFlow<LocalDate?> = _startingPublicationYear
 
-    private val _filter = MutableStateFlow<BookFilter>(BookFilter())
-    val filter: StateFlow<BookFilter> = _filter
-
     private val _sortOption = MutableStateFlow("Newest")
     val sortOption: StateFlow<String> = _sortOption
 
@@ -103,7 +101,6 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     private val bookCache = LruCache<Long, Book>(cacheSize.toLong())
 
     init {
-        resetFilter()
         viewModelScope.launch {
             fetchAllAvailableProducts()
         }
@@ -271,54 +268,22 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         }
     }
 
-    suspend fun fetchFilteredBooks() {
-            try {
-                val response = repository.getFilteredBooks(filter.value)
+    suspend fun fetchBooksByFilter(filter: BookFilter): List<Book> {
+        try {
+            val response = repository.getFilteredBooks(filter)
 
-                if (response.isSuccessful && response.body() != null) {
-                    _filteredProducts.value = response.body()!!
-                } else {
-                    throw Exception("Error fetching products")
-                }
-
-            } catch (e: Exception) {
-                _error.value = "Errore durante il caricamento dei libri: ${e.message}" // Imposta il messaggio di errore
-            } finally {
-                _isLoadingFilteredBooks.value = false
+            if (response.isSuccessful && response.body() != null) {
+                return response.body()!!
+            } else {
+                throw Exception("Error fetching products")
             }
 
-    }
-
-    fun updateFilter(weight : Double? = null, minPrice : Double? = null, maxPrice : Double? = null, stock : Int? = null, title : String? = null, author : String? = null,
-                             ISBN : String? = null, minPages : Int? = null, maxPages : Int? = null, edition : String? = null, format : BookFormat? = null, genre : BookGenre? = null,
-                             language : BookLanguage? = null, publisher : String? = null, minAge : Int? = null, maxAge : Int? = null, minPublishDate : LocalDate? = null,
-                             maxPublishDate : LocalDate? = null, available: Boolean? = true){
-
-        val currentFilter = _filter.value ?: BookFilter()
-        _filter.value = currentFilter.copy(
-            weight = weight ?: currentFilter.weight,
-            minPrice = minPrice ?: currentFilter.minPrice,
-            maxPrice = maxPrice ?: currentFilter.maxPrice,
-            stock = stock ?: currentFilter.stock,
-            title = title ?: currentFilter.title,
-            author = author ?: currentFilter.author,
-            ISBN = ISBN ?: currentFilter.ISBN,
-            edition = edition ?: currentFilter.edition,
-            minPages = minPages ?: currentFilter.minPages,
-            maxPages = maxPages ?: currentFilter.minPages,
-            genre = genre ?: currentFilter.genre,
-            format = format ?: currentFilter.format,
-            language = language ?: currentFilter.language,
-            publisher = publisher ?: currentFilter.publisher,
-            minAge = minAge ?: currentFilter.minAge,
-            maxAge = maxAge ?: currentFilter.maxAge,
-            minPublishDate = minPublishDate ?: currentFilter.minPublishDate,
-            maxPublishDate = maxPublishDate ?: currentFilter.maxPublishDate,
-            available = available ?: currentFilter.available)
-    }
-
-    fun resetFilter(){
-        _filter.value = BookFilter()
+        } catch (e: Exception) {
+            _error.value = "Errore durante il caricamento dei libri: ${e.message}" // Imposta il messaggio di errore
+        }finally {
+            _isLoadingFilteredBooks.value = false
+        }
+        return emptyList()
     }
 
     fun setOrderOption(option: String){
@@ -326,7 +291,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         sortProducts()
     }
 
-    fun searchBooks(navController: NavController, currentRoute: String?){
+    fun searchBooks(filter: BookFilter, navController: NavController, currentRoute: String?){
         if(currentRoute != null && (currentRoute != "filtered-books" && currentRoute != "admin-catalogue")) {
             navController.navigate("filtered-books") {
                 popUpTo("home") {
@@ -336,7 +301,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         }
 
         viewModelScope.launch {
-            fetchFilteredBooks()
+            _filteredProducts.value = fetchBooksByFilter(filter)
         }
     }
 
@@ -389,6 +354,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
             try {
                 if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
                     repository.insertBook(book)
+                    clearCache()
                     fetchAllAvailableProducts()
                     Log.d("BookViewModel", "Book added: ${_allAvailableProducts.value}")
                 }
@@ -406,6 +372,10 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                 if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
                     Log.d("UserDebug", "NewPrice ${Price(newPrice)}")
                     repository.updatePrice(bookId, Price(newPrice))
+
+                    clearCache()
+
+                    loadBook(bookId)
                 }
                 else
                     Log.d("UserDebug", "User is null")
@@ -421,6 +391,9 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                 if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
                     Log.d("UserDebug", "NewStock $newStock")
                     repository.updateStock(bookId, Stock(newStock))
+
+                    clearCache()
+                    loadBook(bookId)
                 }
                 else
                     Log.d("UserDebug", "User is null")
@@ -439,6 +412,9 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
                     _allProducts.value = emptyList()
                     fetchAllAvailableProducts()
+
+                    clearCache()
+                    loadBook(bookId)
                 }
                 else{
                     throw Exception("Access Denied")
@@ -457,6 +433,10 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
                     _allProducts.value = emptyList()
                     fetchAllAvailableProducts()
+
+                    clearCache()
+
+                    loadBook(bookId)
                 }
                 else{
                     throw Exception("Access Denied")
@@ -465,6 +445,30 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                 Log.d("UserDebug", "Error deleting Book with id $bookId")
             }
         }
+    }
+
+    fun updateBookCover(bookId: Long, cover: File){
+        viewModelScope.launch {
+            try{
+                if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
+                    repository.updateCover(bookId, cover)
+
+                    fetchAllAvailableProducts()
+                    clearCache()
+                    loadBook(bookId)
+                }
+                else{
+                    throw Exception("Access Denied")
+                }
+            } catch (e: Exception) {
+                Log.d("UserDebug", "Error deleting Book with id $bookId")
+            }
+        }
+    }
+
+    private fun clearCache(){
+        imageCache.clearMemory()
+        bookCache.clearMemory()
     }
 
     suspend fun fetchImage(url: String?): Bitmap? {

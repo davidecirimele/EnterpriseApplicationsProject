@@ -52,7 +52,12 @@ class BookRepository(private val apiService : BooksApiService)  {
 
     suspend fun updateCover(bookId: Long, file: File){
         val filePart = prepareFilePart(file)
-        booksApiService.updateCover(bookId, filePart)
+
+        try {
+            booksApiService.updateCover(bookId, filePart)
+        }catch (e: Exception){
+            Log.d("UPDATING_BOOK_DEBUG", "Exception: ${e.message}");
+        }
     }
 
     suspend fun updatePrice(bookId: Long, newPrice: Price) = apiService.updatePrice(bookId, newPrice)
