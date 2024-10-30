@@ -10,4 +10,5 @@ class AdminRepository(private val apiService : AdminApiService) {
 
     suspend fun getAllUsers() = apiService.getAllUsers()
 
+    suspend fun getAllOrders(page: Int, size: Int) = apiService.getAllOrders(page, size)
 }

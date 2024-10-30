@@ -88,6 +88,7 @@ import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.ui.user.AccountManagerScreen
 import com.example.ecommercefront_end.ui.user.AddressesScreen
 import com.example.ecommercefront_end.ui.admin.AdminHomeScreen
+import com.example.ecommercefront_end.ui.admin.AdminOrdersScreen
 import com.example.ecommercefront_end.ui.admin.AdminSingleBookScreen
 import com.example.ecommercefront_end.ui.admin.AdminUserDetailsScreen
 import com.example.ecommercefront_end.ui.admin.AdminUsersListScreen
@@ -348,6 +349,11 @@ fun NavigationView(navController: NavHostController) {
 
             composable("order-confirmation"){
                 OrderConfirmationScreen( navController = navController, checkoutViewModel = checkoutViewModel)
+            }
+
+            composable("admin-orders") {
+                AdminOrdersScreen(viewModel = adminViewModel, onOrderClick = {
+                })
             }
 
         }

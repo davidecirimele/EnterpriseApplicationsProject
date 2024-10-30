@@ -1,5 +1,7 @@
 package com.example.ecommercefront_end.model
 
-class OrderStatus {
-
+enum class OrderStatus {
+    CONFIRMED,
+    CANCELLED,
+    PENDING
 }

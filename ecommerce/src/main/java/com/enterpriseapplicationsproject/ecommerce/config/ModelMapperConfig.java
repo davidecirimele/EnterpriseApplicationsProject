@@ -136,6 +136,14 @@ public class ModelMapperConfig {
             }
         });
 
+        modelMapper.typeMap(Order.class, OrderSummaryDto.class).addMappings(mapper -> {
+            mapper.map(src -> src.getUser().getCredential().getEmail(), OrderSummaryDto::setEmail);
+            mapper.map(Order::getOrderId, OrderSummaryDto::setOrderId);
+            mapper.map(Order::getOrderDate, OrderSummaryDto::setOrderDate);
+            mapper.map(Order::getTotalAmount, OrderSummaryDto::setTotalAmount);
+            mapper.map(Order::getOrderStatus, OrderSummaryDto::setOrderStatus);
+        });
+
 
         return modelMapper;
     }

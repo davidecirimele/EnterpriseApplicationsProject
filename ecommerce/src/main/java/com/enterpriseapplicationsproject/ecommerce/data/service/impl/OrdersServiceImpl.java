@@ -11,6 +11,8 @@ import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import com.enterpriseapplicationsproject.ecommerce.exception.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,19 +69,27 @@ public class OrdersServiceImpl implements OrdersService {
         }
         Order order = setOrder(shoppingCart, user, paymentMethod, add);
         //System.out.println(order);
-        Order savedOr = ordersDao.save(order);
-        //System.out.println("ordine salvato" + savedOr);
-        List<OrderItem> orderItems = getOrderItems(shoppingCart, savedOr);
-        savedOr.setOrderItems(orderItems);
-        System.out.println("order items" + orderItems.size());
-        System.out.println("ordine con gli order items" + savedOr.getOrderItems().size());
-        Order fullOrder = ordersDao.save(savedOr);
+        try {
+            Order savedOr = ordersDao.save(order);
+            //System.out.println("ordine salvato" + savedOr);
+            List<OrderItem> orderItems = getOrderItems(shoppingCart, savedOr);
+            savedOr.setOrderItems(orderItems);
+            System.out.println("order items" + orderItems.size());
+            System.out.println("ordine con gli order items" + savedOr.getOrderItems().size());
+            Order fullOrder = ordersDao.save(savedOr);
 
 
-        downProductStock(shoppingCart);
-        Transaction transaction = transactionsService.addTransaction(user, savedOr, paymentMethod, savedOr.getTotalAmount(), PaymentStatus.APPROVED, LocalDate.now());
-        transactionsDao.save(transaction);
-        return modelMapper.map(fullOrder, SaveOrderDto.class);
+            downProductStock(shoppingCart);
+            Transaction transaction = transactionsService.addTransaction(user, savedOr, paymentMethod, savedOr.getTotalAmount(), PaymentStatus.APPROVED, LocalDate.now());
+            transactionsDao.save(transaction);
+            shoppingCart.getCartItems().clear();
+            shoppingCartDao.save(shoppingCart);
+
+
+            return modelMapper.map(fullOrder, SaveOrderDto.class);
+        } catch (Exception e) {
+            throw new OrderCreationException("Error creating order");
+        }
     }
 
     @Override
@@ -115,6 +125,12 @@ public class OrdersServiceImpl implements OrdersService {
     public List<OrderDto> getAllCancelledOrdersByUserId(UUID userId) {
         List<Order> orders = ordersDao.findAllCancelledOrdersByUserId(userId, Sort.by(Sort.Order.desc("orderDate")));
         return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
+    }
+
+    @Override
+    public Page<OrderSummaryDto> getAll(Pageable pageable) {
+        Page<Order> orders = ordersDao.findAll(pageable);
+        return orders.map(o -> modelMapper.map(o, OrderSummaryDto.class));
     }
 
     private Order setOrder( ShoppingCart shoppingCart, User user, PaymentMethod paymentMethod, Address address) {

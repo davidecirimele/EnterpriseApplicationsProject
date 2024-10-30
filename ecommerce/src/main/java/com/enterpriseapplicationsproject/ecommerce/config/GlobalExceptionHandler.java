@@ -128,6 +128,12 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.valueOf(HttpStatus.FORBIDDEN.value()), req, ex.getMessage());
     }
 
+    @ExceptionHandler(OrderCreationException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ServiceError onOrderCreationException(WebRequest req, OrderCreationException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()), req, ex.getMessage());
+    }
+
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.BAD_GATEWAY)
     public String onResourceNotFoundException(WebRequest req, NullPointerException ex){
