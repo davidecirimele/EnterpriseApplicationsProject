@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import retrofit2.Response
 import java.util.UUID
 
 class WishlistViewModel(private val wRepository: WishlistRepository, private val groupRepository: GroupRepository) : ViewModel() {
@@ -32,6 +33,9 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
     private val _wishlistItems = MutableStateFlow<List<WishlistItem>>(emptyList())
     val wishlistItems: StateFlow<List<WishlistItem>> = _wishlistItems.asStateFlow()
 
+    private val _userSelectedByAdmin = MutableStateFlow<UUID?>(null)
+    val userSelectedByAdmin: StateFlow<UUID?> = _userSelectedByAdmin.asStateFlow()
+
     private val _tokenToShare = MutableStateFlow<String>("")
     val tokenToShare: StateFlow<String> = _tokenToShare.asStateFlow()
 
@@ -40,6 +44,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+
 
 
     suspend fun fetchWishlists(idUser: UUID? = null) {
@@ -59,6 +64,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                     _onlyMyWishlists.value = wRepository.getWishlistsByUser(idUser)
 
                     _wishlists.value = _onlyMyWishlists.value + _friendWishlists.value
+                    _userSelectedByAdmin.value = idUser
                 }
                 else {
                     Log.d("UserDebug", "User is null")
@@ -95,11 +101,23 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
         }
     }
 
+
+
      fun joinWishlist(token: String) {
         viewModelScope.launch {
             try {
                 val currentUser = SessionManager.user
-                val response = currentUser?.let { groupRepository.addUser(it.id, token) }
+                var response : Response<Boolean>? = null
+
+                if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
+                    response = currentUser?.let { groupRepository.addUser(it.id, token) }
+
+                } else if (currentUser != null && currentUser.role == "ROLE_ADMIN") {
+                    response = userSelectedByAdmin?.let { it.value?.let { it1 ->
+                        groupRepository.addUser(
+                            it1, token)
+                    } }
+                }
 
                 if (response != null && response.isSuccessful) {
                     Log.d("joinWishlist", "Utente aggiunto con successo alla wishlist")
@@ -119,13 +137,27 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
         viewModelScope.launch {
             try {
                 val currentUser = SessionManager.user
-                val response = currentUser?.let {
-                    wishlist.group?.let { it1 ->
-                        groupRepository.removeUser(
-                            it1.id, it.id
-                        )
+                var response : Response<Boolean>? = null
+
+                if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
+                    response = currentUser?.let {
+                        wishlist.group?.let { it1 ->
+                            groupRepository.removeUser(
+                                it1.id, it.id
+                            )
+                        }
                     }
+                } else if (currentUser != null && currentUser.role == "ROLE_ADMIN") {
+
+                    response  = userSelectedByAdmin?.let { it.value?.let { it1 ->
+                        wishlist.group?.let { it2 ->
+                            groupRepository.removeUser(
+                                it2.id, it1
+                            )
+                        }
+                    } }
                 }
+
                 if (response != null && response.isSuccessful) {
                     Log.d("unshareWishlist", "Wishlist non più condivisa con successo")
                 } else {
@@ -168,8 +200,19 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
 
                 // Salva la nuova wishlist nel database tramite il repository
                 Log.e("addWishlist", newWishlist.toString())
-                val response =
-                    SessionManager.user?.id?.let { wRepository.addWishlist(newWishlist, it) }
+
+                val currentUser = SessionManager.user
+                var response : Unit ? = null
+
+                if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
+                    response  = currentUser?.let { wRepository.addWishlist(newWishlist, it.id) }
+
+                } else if (currentUser != null && currentUser.role == "ROLE_ADMIN") {
+                    response  = userSelectedByAdmin?.let { it.value?.let { it1 ->
+                        wRepository.addWishlist(newWishlist, it1)
+                    } }
+                }
+
                 if (response != null) {
                     Log.d("addWishlist", "Wishlist creata con successo")
                     fetchWishlists()
@@ -217,8 +260,6 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                             "Nuovo gruppo ${updatedWishlist.group?.groupName} aggiornato con successo"
                         )
                     }
-
-
                     val response = wRepository.updateWishlist(updatedWishlist)
                     _wishlists.value =
                         _wishlists.value.map { if (it.id == id) updatedWishlist else it }
@@ -241,6 +282,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                 val currentUser = SessionManager.user
                 val response =
                     currentUser?.let { wRepository.addWishlistItem(BookId, wishlistId, it.id) }
+
                 if (response != null) {
                     if (response == Unit) {
                         Log.d(

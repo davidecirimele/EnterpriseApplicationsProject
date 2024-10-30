@@ -270,6 +270,9 @@ fun AddWishlistDialog(
 @Composable
 fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWishlistSelected: (Wishlist) -> Unit) {
     var showAddWishlistMain by remember { mutableStateOf(false) }
+    val isAdmin = user?.role == "ROLE_ADMIN"
+    val idUserSelectedByAdmin by viewModel.userSelectedByAdmin.collectAsState()
+
 
     Row(
         modifier = Modifier
@@ -312,14 +315,17 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
             WishlistThumbnail( // Rimuovi il secondo key qui
                 wishlist = wishlist,
                 onClick = { onWishlistSelected(wishlist) },
-                userIsOwner = user?.id?.compareTo(wishlist.user?.id) == 0
+                wishlistUpdatable = user?.id?.compareTo(wishlist.user?.id) == 0 || isAdmin,
+                isFriendWishlist = idUserSelectedByAdmin?.compareTo(wishlist.user?.id) != 0
+
             )
         }
     }
 }
 
 @Composable
-fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit, userIsOwner: Boolean) {
+fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit, wishlistUpdatable: Boolean, isFriendWishlist: Boolean) {
+    Log.d("WishlistThumbnail", "userId: ${user?.id}, wishlist.userId: ${wishlist.user?.id}")
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -328,8 +334,14 @@ fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit, userIsOwner: Bool
             .clickable { onClick() },
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor =
-            if (userIsOwner) Color.LightGray else Color.Cyan
+        colors = CardDefaults.cardColors(
+            containerColor =
+            if (isFriendWishlist){
+                Color.Cyan
+            }
+            else{
+                Color.LightGray
+            }
         ) // Colore di riempimento condizionale
     ) {
         Column(
@@ -363,7 +375,11 @@ fun WishlistDetails(
 
     var privacyOptions by remember { mutableStateOf(wishlist.privacySetting) }
     var showMenu by remember { mutableStateOf(false) } // Per gestire la visibilità del menu a comparsa
-    val userIsOwner = user?.id?.compareTo(wishlist.user?.id) == 0
+
+    val isAdmin = user?.role == "ROLE_ADMIN"
+    val wishlistUpdatable = user?.id?.compareTo(wishlist.user?.id) == 0 || isAdmin
+    val isFriendWishlist = user?.id?.compareTo(wishlist.user?.id) != 0
+
 
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var itemToRemove by remember { mutableStateOf<WishlistItem?>(null) }
@@ -412,7 +428,8 @@ fun WishlistDetails(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }
                     ) {
-                    if(userIsOwner){DropdownMenuItem(
+                    if(wishlistUpdatable){
+                        DropdownMenuItem(
                             text = { Text("Condividi") },
                             onClick = {
                                 showMenu = false
@@ -448,7 +465,7 @@ fun WishlistDetails(
                         )
 
                         DropdownMenuItem(
-                            text = { Text(if (userIsOwner) "Elimina" else "Esci") },
+                            text = { Text(if (wishlistUpdatable) "Elimina" else "Esci") },
                             onClick = {
                                 showMenu = false
                                 // Azione per eliminare la wishlist
@@ -468,12 +485,12 @@ fun WishlistDetails(
                 if (showDeleteConfirmation) {
                     AlertDialog(
                         onDismissRequest = { showDeleteConfirmation = false },
-                        title = { Text(if (userIsOwner) "Elimina Wishlist" else "Esci") },
-                        text = { Text("Vuoi davvero uscire dalla wishlist '${wishlist.name} ${if (!userIsOwner) "di" else "da"} ${wishlist.user?.firstName}'?") },
+                        title = { Text(if (wishlistUpdatable) "Elimina Wishlist" else "Esci") },
+                        text = { Text("Vuoi davvero uscire dalla wishlist '${wishlist.name} ${if (!wishlistUpdatable) "di" else "da"} ${wishlist.user?.firstName}'?") },
                         confirmButton = {
                             Button(onClick = {
                                 //onDeleteWishlist(wishlist) // Chiama il callback per eliminare la wishlist
-                                if(userIsOwner){
+                                if(wishlistUpdatable){
                                     wishlist.id?.let { viewModel.deleteWishlist(it) }
                                 }
                                 else{
@@ -522,7 +539,7 @@ fun WishlistDetails(
             }
 
             //Proprietario
-            if (!userIsOwner){
+            if (isAdmin || isFriendWishlist){
                 Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -554,7 +571,7 @@ fun WishlistDetails(
                         fontSize = 18.sp
                     )
                     Button(
-                        enabled = userIsOwner,
+                        enabled = wishlistUpdatable,
                         onClick = {
                             var privacySetting = wishlist.privacySetting
                             if (wishlist.privacySetting == WishlistPrivacy.PRIVATE)
@@ -585,15 +602,8 @@ fun WishlistDetails(
                             modifier = Modifier.size(ButtonDefaults.IconSize)
                         )
                         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                        Text(
-                            if (wishlist.privacySetting == WishlistPrivacy.PRIVATE)
-                                "Private"
 
-                            else if (wishlist.privacySetting == WishlistPrivacy.SHARED)
-                                "Shared"
-
-                            else "Public"
-                        )
+                        Text("${wishlist.privacySetting.name}",)
                     }
                 }
 
@@ -607,7 +617,9 @@ fun WishlistDetails(
                             navController = navController, onRemoveClick = {
                                 viewModel.deleteWishlistItem(item.id)
                             },
-                            userIsOwner = userIsOwner)
+                            wishlistUpdateable = wishlistUpdatable,
+                            isFriendWishlist = isFriendWishlist
+                            )
                     }
                 }
             }
@@ -628,7 +640,13 @@ fun WishlistDetails(
 }
 
 @Composable
-fun WishlistItemCard(wishlistItem: WishlistItem, navController: NavController,onRemoveClick: () -> Unit, userIsOwner: Boolean) {
+fun WishlistItemCard(
+    wishlistItem: WishlistItem,
+    navController: NavController,
+    onRemoveClick: () -> Unit,
+    wishlistUpdateable: Boolean,
+    isFriendWishlist: Boolean
+) {
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -668,8 +686,8 @@ fun WishlistItemCard(wishlistItem: WishlistItem, navController: NavController,on
                 )
             }
 
-            IconButton(onClick = onRemoveClick, enabled = userIsOwner) {
-                Icon(imageVector = Icons.Rounded.Delete, contentDescription = "Rimuovi elemento",tint = if (userIsOwner) Color.Red  else Color.Gray)
+            IconButton(onClick = onRemoveClick, enabled = wishlistUpdateable) {
+                Icon(imageVector = Icons.Rounded.Delete, contentDescription = "Rimuovi elemento",tint = if (wishlistUpdateable) Color.Red  else Color.Gray)
             }
         }
     }
