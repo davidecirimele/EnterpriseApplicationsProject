@@ -301,6 +301,7 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
     val idUserSelectedByAdmin by viewModel.userSelectedByAdmin.collectAsState()
 
 
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -341,11 +342,18 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
             items = wishlists,
             key = { item -> item.id?.toString() ?: "" } // Chiave a livello di items
         ) { wishlist ->
+            var isFriendWishlist: Boolean? = null
+            if (isAdmin){
+                isFriendWishlist = idUserSelectedByAdmin?.compareTo(wishlist.user?.id) != 0
+            }
+            else{
+                isFriendWishlist = user?.id?.compareTo(wishlist.user?.id) != 0
+            }
             WishlistThumbnail( // Rimuovi il secondo key qui
                 wishlist = wishlist,
                 onClick = { onWishlistSelected(wishlist) },
                 wishlistUpdatable = user?.id?.compareTo(wishlist.user?.id) == 0 || isAdmin,
-                isFriendWishlist = idUserSelectedByAdmin?.compareTo(wishlist.user?.id) != 0
+                isFriendWishlist = isFriendWishlist
 
             )
         }

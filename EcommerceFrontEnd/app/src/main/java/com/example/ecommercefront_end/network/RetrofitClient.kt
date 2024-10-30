@@ -24,7 +24,7 @@ object RetrofitClient {
 
     private const val BASE3_URL = "https://10.0.2.2:8081/api/v1/"
 
-    private const val SAMUELES_URL = "https://192.168.1.54:8081/api/v1/" //URL di Samuele S
+    private const val SAMUELES_URL = "https://192.168.143.117:8081/api/v1/" //URL di Samuele S
 
     private const val DAVIDES_URL = "https://10.0.2.2:8080/api/v1/"
 
@@ -64,7 +64,7 @@ object RetrofitClient {
 
     val retrofit: Retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl(BASE3_URL)
+            .baseUrl(SAMUELES_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create(
                 GsonBuilder()

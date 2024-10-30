@@ -64,9 +64,12 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
             try {
                 if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
                     _friendWishlists.value = wRepository.getFriendWishlist(currentUser.id)
+                    Log.d("Wishlist", "friendwishlist ${_friendWishlists.value}")
                     _onlyMyWishlists.value = wRepository.getWishlistsByUser(currentUser.id)
+                    Log.d("Wishlist", "mywishlist ${_onlyMyWishlists.value}")
 
                     _wishlists.value = _onlyMyWishlists.value + _friendWishlists.value
+
 
                 } else if (currentUser != null && currentUser.role == "ROLE_ADMIN" && idUser != null) {
                     _friendWishlists.value = wRepository.getFriendWishlist(idUser)
@@ -122,14 +125,16 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                 var response : Response<Boolean>? = null
 
                 if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
+                    Log.d("joinWishlist", "primo if, idUser = ${currentUser.id}")
                     response = currentUser?.let { groupRepository.addUser(it.id, token) }
 
                 } else if (currentUser != null && currentUser.role == "ROLE_ADMIN") {
-                    response = userSelectedByAdmin?.let { it.value?.let { it1 ->
-                        groupRepository.addUser(
-                            it1, token)
-                    } }
+                    Log.d("joinWishlist", "secondo if, idUser = ${currentUser.id} ${_userSelectedByAdmin}")
+
+                    response = _userSelectedByAdmin.value?.let { groupRepository.addUser(it, token) }
+
                 }
+                fetchWishlists(null)// DA SISTEMARE
 
 
                 if (response != null && response.isSuccessful) {

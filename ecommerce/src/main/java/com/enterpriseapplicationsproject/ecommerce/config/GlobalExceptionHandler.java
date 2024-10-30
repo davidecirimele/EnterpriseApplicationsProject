@@ -2,6 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.config;
 
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.ShoppingCart;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.dto.ServiceError;
 import com.enterpriseapplicationsproject.ecommerce.exception.*;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -77,6 +78,25 @@ public class GlobalExceptionHandler {
     public ServiceError onResourceNotFoundException(WebRequest req, WishlistNotFoundException ex){
         return errorResponse(HttpStatus.valueOf(HttpStatus.NOT_FOUND.value()), req, ex.getMessage());
     }
+
+    @ExceptionHandler(WishlistNotJoinedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ServiceError onResourceNotFoundException(WebRequest req, WishlistNotJoinedException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.CONFLICT.value()), req, ex.getMessage());
+    }
+
+    @ExceptionHandler(WishlistNotCreatedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ServiceError onResourceNotFoundException(WebRequest req, WishlistNotCreatedException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.UNAUTHORIZED.value()), req, ex.getMessage());
+    }
+
+    @ExceptionHandler(WishlistCantBeDeletedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ServiceError onResourceNotFoundException(WebRequest req, WishlistCantBeDeletedException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.CONFLICT.value()), req, ex.getMessage());
+    }
+
 
     @ExceptionHandler(WishlistItemNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
