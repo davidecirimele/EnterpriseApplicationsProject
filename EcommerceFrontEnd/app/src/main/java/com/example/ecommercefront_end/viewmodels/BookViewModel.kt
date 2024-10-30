@@ -3,6 +3,7 @@ package com.example.ecommercefront_end.viewmodels
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -10,25 +11,20 @@ import com.bumptech.glide.util.LruCache
 import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.BookFilter
-import com.example.ecommercefront_end.model.BookFormat
 import com.example.ecommercefront_end.model.BookGenre
-import com.example.ecommercefront_end.model.BookLanguage
 import com.example.ecommercefront_end.model.Price
 import com.example.ecommercefront_end.model.SaveBook
 import com.example.ecommercefront_end.model.Stock
-import com.example.ecommercefront_end.network.RetrofitClient
 
 import com.example.ecommercefront_end.repository.BookRepository
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.Response
 import java.io.File
-import java.io.InputStream
 import java.time.LocalDate
 
 class BookViewModel(private val repository: BookRepository): ViewModel() {
@@ -100,6 +96,12 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
     private val bookCache = LruCache<Long, Book>(cacheSize.toLong())
 
+    private val _halloweenBooks = MutableStateFlow<List<Book>>(emptyList())
+    val halloweenBooks: StateFlow<List<Book>> = _halloweenBooks
+
+    private val _recentBooks = MutableStateFlow<List<Book>>(emptyList())
+    val recentBooks: StateFlow<List<Book>> = _recentBooks
+
     init {
         viewModelScope.launch {
             fetchAllAvailableProducts()
@@ -108,15 +110,16 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     }
 
     fun fetchBooksData(){
+        _isLoadingData.value = true
         viewModelScope.launch {
             try {
 
                 // Usa async per le chiamate parallele
-                val priceJob = async { fetchPrice() }
-                val ageJob = async { fetchAge() }
-                val pagesJob = async { fetchPages() }
-                val weightJob = async { fetchWeight() }
-                val startingYearJob = async { fetchStartingYear() }
+                val priceJob = async { fetchValues(repository.getMinPrice(), repository.getMaxPrice(), _minPrice,_maxPrice) }
+                val ageJob = async { fetchValues(repository.getMinAge(), repository.getMaxAge(), _minAge,_maxAge) }
+                val pagesJob = async { fetchValues(repository.getMinPages(), repository.getMaxPages(), _minPages,_maxPages) }
+                val weightJob = async { fetchValues(repository.getMinWeight(), repository.getMaxWeight(), _minWeight,_maxWeight) }
+                val startingYearJob = async { fetchValues(fetchMin = repository.getMinPublicationYear(), minState = _startingPublicationYear) }
 
                 priceJob.await()
                 ageJob.await()
@@ -132,107 +135,33 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         }
     }
 
-    private suspend fun fetchPrice(){
-
-            try {
-                val response1 = repository.getMinPrice()
-                val response2 = repository.getMaxPrice()
-
-                if (response1.isSuccessful && response1.body() != null) {
-                    _minPrice.value = response1.body()
-                }else {
-                    throw Exception("Failed to fetch min price")
-                }
-                if (response2.isSuccessful && response2.body() != null){
-                    _maxPrice.value = response2.body()
-                    Log.d("BookDebug", "minPrice: ${_minPrice.value}, maxPrice: ${_maxPrice.value}")
-                } else {
-                    throw Exception("Failed to fetch max price")
-                }
-            } catch (e: Exception) {
-                Log.d("BookDebug", "minPrice: ${_minPrice.value}, maxPrice: ${_maxPrice.value}")
-            }
-    }
-
-    private suspend fun fetchAge(){
-
-            try {
-                val response1 = repository.getMinAge()
-                val response2 = repository.getMaxAge()
-
-                if (response1.isSuccessful && response1.body() != null) {
-                    _minAge.value = response1.body()
-                }else {
-                    throw Exception("Failed to fetch min age")
-                }
-                if (response2.isSuccessful && response2.body() != null){
-                    _maxAge.value = response2.body()
-                } else {
-                    throw Exception("Failed to fetch max age")
-                }
-            } catch (e: Exception) {
-                Log.d("BookDebug", "minAge: ${_minAge.value}, maxAge: ${_maxAge.value}")
-            }
-    }
-
-    private suspend fun fetchPages(){
-            try {
-                val response1 = repository.getMinPages()
-                val response2 = repository.getMaxPages()
-
-                if (response1.isSuccessful && response1.body() != null) {
-                    _minPages.value = response1.body()
-                }else {
-                    throw Exception("Failed to fetch min pages")
-                }
-                if (response2.isSuccessful && response2.body() != null){
-                    _maxPages.value = response2.body()
-                } else {
-                    throw Exception("Failed to fetch max pages")
-                }
-            } catch (e: Exception) {
-                Log.d("BookDebug", "minPages: ${_minPages.value}, maxPages: ${_maxPages.value}")
-            }
-    }
-
-    private suspend fun fetchWeight(){
-
+    private suspend fun <T> fetchValues(
+        fetchMin: Response<T>,
+        fetchMax: Response<T>? =  null,
+        minState: MutableStateFlow<T?>,
+        maxState: MutableStateFlow<T?>? = null
+    ) {
         try {
-            val response1 = repository.getMinWeight()
-            val response2 = repository.getMaxWeight()
-
-            if (response1.isSuccessful && response1.body() != null) {
-                _minWeight.value = response1.body()
-            }else {
-                throw Exception("Failed to fetch min weight")
-            }
-            if (response2.isSuccessful && response2.body() != null){
-                _maxWeight.value = response2.body()
-                Log.d("BookDebug", "minWeight: ${_minWeight.value}, maxWeight: ${_maxWeight.value}")
+            if (fetchMin.isSuccessful && fetchMin.body() != null) {
+                minState.value = fetchMin.body()
             } else {
-                throw Exception("Failed to fetch max weight")
+                throw Exception("Failed to fetch min value")
+            }
+
+            if(fetchMax != null && maxState != null) {
+                if (fetchMax.isSuccessful && fetchMax.body() != null) {
+                    maxState.value = fetchMax.body()
+                } else {
+                    throw Exception("Failed to fetch max value")
+                }
             }
         } catch (e: Exception) {
-            Log.d("BookDebug", "minWeight: ${_minWeight.value}, maxWeight: ${_maxWeight.value}")
-        }
-    }
-
-    private suspend fun fetchStartingYear(){
-
-        try {
-            val response = repository.getMinPublicationYear()
-
-            if (response.isSuccessful && response.body() != null) {
-                _startingPublicationYear.value = response.body()
-            }else {
-                throw Exception("Failed to fetch startingPublicationYear")
-            }
-        } catch (e: Exception) {
-            Log.d("BookDebug", "startingPublicationYear: ${_startingPublicationYear.value}")
+            Log.d("BookDebug", "Error fetching values: ${e.message}")
         }
     }
 
     private suspend fun fetchAllProducts() {
+        _isLoadingAllBooks.value = true
         try {
             val response = repository.getAllBooks()
 
@@ -251,6 +180,8 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     }
 
     suspend fun fetchAllAvailableProducts() {
+        _isLoadingCatalogue.value = true
+        Log.d("Books", "Sto fetchando i libri dal db")
         try {
             val response = repository.getCatalogue()
 
@@ -264,11 +195,14 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         } catch (e: Exception) {
             _error.value = "Errore durante il caricamento dei libri: ${e.message}" // Imposta il messaggio di errore
         } finally {
+            fetchHalloweenBooks()
+            fetchRecentBooks()
             _isLoadingCatalogue.value = false
         }
     }
 
-    suspend fun fetchBooksByFilter(filter: BookFilter): List<Book> {
+    private suspend fun fetchBooksByFilter(filter: BookFilter): List<Book> {
+        _isLoadingFilteredBooks.value = true
         try {
             val response = repository.getFilteredBooks(filter)
 
@@ -324,6 +258,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     }
 
     suspend fun loadBook(id: Long) {
+        _isLoadingBook.value = true
         try {
             bookCache.get(id)?.let {
                 _bookFlow.value = it
@@ -354,6 +289,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
             try {
                 if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
                     repository.insertBook(book)
+
                     clearCache()
                     fetchAllAvailableProducts()
                     Log.d("BookViewModel", "Book added: ${_allAvailableProducts.value}")
@@ -411,7 +347,6 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                     repository.removeBook(bookId)
 
                     _allProducts.value = emptyList()
-                    fetchAllAvailableProducts()
 
                     clearCache()
                     loadBook(bookId)
@@ -432,10 +367,8 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                     repository.restoreBook(bookId)
 
                     _allProducts.value = emptyList()
-                    fetchAllAvailableProducts()
 
                     clearCache()
-
                     loadBook(bookId)
                 }
                 else{
@@ -453,7 +386,6 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                 if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
                     repository.updateCover(bookId, cover)
 
-                    fetchAllAvailableProducts()
                     clearCache()
                     loadBook(bookId)
                 }
@@ -500,5 +432,30 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
             e.printStackTrace()
         }
         return null
+    }
+
+    fun onLogout() {
+        viewModelScope.cancel() // Annulla tutte le coroutine al logout
+    }
+
+    suspend fun fetchHalloweenBooks() {
+        try {
+            _halloweenBooks.value = fetchBooksByFilter(BookFilter(genre = BookGenre.HORROR))
+        }catch (e : Exception){
+            Log.d("Books", "fetchRecentBooks: ${e.message}")
+        }
+    }
+
+    suspend fun fetchRecentBooks() {
+        try {
+            _recentBooks.value = fetchBooksByFilter(
+                BookFilter(
+                    maxPublishDate = LocalDate.now(),
+                    minPublishDate = LocalDate.now().minusYears(4)
+                )
+            )
+        }catch (e : Exception){
+            Log.d("Books", "fetchRecentBooks: ${e.message}")
+        }
     }
 }

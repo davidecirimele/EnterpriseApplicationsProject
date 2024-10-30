@@ -51,9 +51,6 @@ import com.example.ecommercefront_end.ui.books.BookInfoCard
 import com.example.ecommercefront_end.utils.FileUploadButton
 import com.example.ecommercefront_end.utils.RequestStoragePermission
 import com.example.ecommercefront_end.viewmodels.BookViewModel
-import okhttp3.OkHttpClient
-import java.io.File
-import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
@@ -126,7 +123,6 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navHostController: NavH
                                 var isClicked by remember { mutableStateOf(false) }
                                 Text(text = "Edit Price",
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isClicked) Color.Blue else Color.Black,
                                     modifier = Modifier
                                         .align(Alignment.CenterVertically)
                                         .clickable {
@@ -140,10 +136,8 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navHostController: NavH
                                 Spacer(modifier = Modifier.padding(8.dp))
                                 Row {
                                     TextFieldWithSubmitButton({ newPrice ->
-                                        bookViewModel.updatePrice(
-                                            newPrice.toDouble(),
-                                            bookId = book!!.id
-                                        );
+                                        if(newPrice.toDoubleOrNull() != null)
+                                            bookViewModel.updatePrice(newPrice.toDouble(), bookId = book!!.id);
                                         showEditPriceField = false;
                                     }, book!!.id)
                                 }
@@ -163,7 +157,6 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navHostController: NavH
                                 var isClicked by remember { mutableStateOf(false) }
                                 Text("Restock",
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isClicked) Color.Blue else Color.Black,
                                     modifier = Modifier
                                         .align(Alignment.CenterVertically)
                                         .clickable {
@@ -177,7 +170,8 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navHostController: NavH
                                 Spacer(modifier = Modifier.padding(8.dp))
                                 Row {
                                     TextFieldWithSubmitButton({ newStock ->
-                                        bookViewModel.restock(newStock.toInt(), bookId = book!!.id);
+                                        if(newStock.toIntOrNull() != null)
+                                            bookViewModel.restock(newStock.toInt(), bookId = book!!.id);
                                         showRestockField = false
                                     }, book!!.id)
                                 }
@@ -259,8 +253,9 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navHostController: NavH
                         else
                             book?.let { bookViewModel.restoreBook(it.id) }
 
-                        navHostController.popBackStack()
+
                         showDialog = false
+                        navHostController.popBackStack()
 
                     }
                 ) {

@@ -37,13 +37,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.ecommercefront_end.model.BookFormat
 import com.example.ecommercefront_end.model.BookGenre
 import com.example.ecommercefront_end.model.BookLanguage
+import com.example.ecommercefront_end.model.Price
 import com.example.ecommercefront_end.model.SaveBook
 import com.example.ecommercefront_end.ui.books.ChoiceSelector
 import com.example.ecommercefront_end.utils.FileUploadButton
@@ -77,6 +81,9 @@ fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostControll
     var image by remember { mutableStateOf<File?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
+        Text(text = "Home", fontSize = 40.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(16.dp).align(
+            Alignment.CenterHorizontally))
+        Spacer(modifier = Modifier.height(8.dp))
             LazyColumn(
                 modifier = Modifier
                     .padding(top = 32.dp)

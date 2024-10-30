@@ -159,9 +159,9 @@ public class BookController {
         return new ResponseEntity<>(b, HttpStatus.OK);
     }
 
-    @PostMapping("/{id}/update-cover")
+    @PutMapping("/{id}/update-cover")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> updateBookCover(@PathVariable Long id, @RequestParam("cover") MultipartFile coverImage) {
+    public ResponseEntity<?> updateBookCover(@PathVariable Long id, @RequestParam("image") MultipartFile coverImage) {
         try {
             booksService.updateBookCover(id, coverImage);
             return ResponseEntity.ok("Cover aggiornata con successo!");

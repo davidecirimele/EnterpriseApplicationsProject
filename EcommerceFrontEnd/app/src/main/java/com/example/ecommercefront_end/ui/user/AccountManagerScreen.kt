@@ -37,6 +37,7 @@ import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.ui.books.BookCover
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
+import com.example.ecommercefront_end.viewmodels.BookViewModel
 
 @Composable
 fun AccountManagerScreen(viewModel: AccountViewModel, navHostController: NavHostController) {
@@ -146,7 +147,8 @@ fun Buttons(navHostController: NavHostController){
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            Button(onClick = { SessionManager.clearSession()}) {
+            Button(onClick = {
+                SessionManager.clearSession()}) {
                 Text(text = "Logout")
             }
         }

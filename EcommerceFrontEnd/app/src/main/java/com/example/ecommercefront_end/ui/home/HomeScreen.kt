@@ -60,8 +60,8 @@ fun HomeScreen(bookViewModel: BookViewModel, navController: NavController) {
     val isLoading by bookViewModel.isLoadingCatalogue.collectAsState()
     val error by bookViewModel.error.collectAsState()
 
-    val recentsSelection = remember { mutableStateOf(emptyList<Book>()) }
-    val halloweenSelection = remember { mutableStateOf(emptyList<Book>()) }
+    val halloweenSelection by bookViewModel.halloweenBooks.collectAsState()
+    val recentsSelection by bookViewModel.recentBooks.collectAsState()
 
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -82,26 +82,20 @@ fun HomeScreen(bookViewModel: BookViewModel, navController: NavController) {
 
                 item {
 
-                    LaunchedEffect(Unit) {
-                        halloweenSelection.value = bookViewModel.fetchBooksByFilter(BookFilter(genre = BookGenre.HORROR))
-                    }
                     ProductSectionView(
                         navController,
                         title = "Spooky Halloween",
-                        books = halloweenSelection.value,
+                        books = halloweenSelection,
                         bookViewModel = bookViewModel
                     )
                 }
 
                 item {
 
-                    LaunchedEffect(Unit) {
-                        recentsSelection.value = bookViewModel.fetchBooksByFilter(BookFilter(maxPublishDate = LocalDate.now(), minPublishDate = LocalDate.now().minusYears(4)))
-                    }
                     ProductSectionView(
                         navController,
                         title = "From 2020 to the present",
-                        books = recentsSelection.value,
+                        books = recentsSelection,
                         bookViewModel = bookViewModel
                     )
                 }

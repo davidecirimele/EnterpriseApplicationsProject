@@ -52,7 +52,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: CartRepository, navController: NavHostController) {
     var selectedQuantity by remember { mutableStateOf(1) }
-    var shippingAddress by remember { mutableStateOf("Via Roma 1") }
+    var shippingAddress by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
 
     LazyColumn(
         modifier = Modifier
@@ -150,7 +151,6 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                val coroutineScope = rememberCoroutineScope()
                 Button(
                     onClick = {
                         coroutineScope.launch {
