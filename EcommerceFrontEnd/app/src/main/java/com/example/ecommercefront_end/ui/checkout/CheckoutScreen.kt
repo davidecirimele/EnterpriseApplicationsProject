@@ -43,10 +43,9 @@ fun CheckoutScreen(viewModel: CheckoutViewModel, navController: NavController) {
 
         LaunchedEffect(Unit) {
             println("sto caricando i dati")
-            if (selectedAddress == null || selectedPaymentMethod == null) {
             viewModel.loadCheckoutData()
         }
-        }
+
 
         // Sezione Indirizzo di Spedizione (con freccia per modificare)
         CheckoutSectionWithArrow(

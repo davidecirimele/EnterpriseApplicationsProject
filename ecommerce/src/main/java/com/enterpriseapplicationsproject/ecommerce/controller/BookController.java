@@ -12,13 +12,23 @@ import com.enterpriseapplicationsproject.ecommerce.exception.BookNotFoundExcepti
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -30,6 +40,10 @@ import java.util.List;
 public class BookController {
 
     private final BooksService booksService;
+
+
+    @Value("${app.upload.dir}")
+    private String uploadDir;
 
     @RateLimit
     @GetMapping(path = "/getAll")
@@ -133,13 +147,13 @@ public class BookController {
     }
 
     @RateLimit(type ="USER")
-    @PostMapping(consumes = "application/json", path = "/add")
-    @PreAuthorize("hasRole('ADMIN') and isAuthenticated()")
-    public ResponseEntity<BookDto> add(@RequestBody SaveBookDto bDto) {
-        BookDto b = booksService.save(bDto);
-        if (b == null)
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(b, HttpStatus.OK);
+    @PostMapping(consumes = "multipart/form-data", path = "/add")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<BookDto> addBook(@ModelAttribute  SaveBookDto book) throws IOException {
+        BookDto savedBook = booksService.insertBook(book);
+        if(savedBook == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
     }
 
     @RateLimit(type="USER")
@@ -163,8 +177,9 @@ public class BookController {
     }
 
     @RateLimit(type ="USER")
-    @PostMapping("/{id}/update-cover")
-    public ResponseEntity<?> updateBookCover(@PathVariable Long id, @RequestParam("cover") MultipartFile coverImage) {
+    @PutMapping("/{id}/update-cover")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateBookCover(@PathVariable Long id, @RequestParam("image") MultipartFile coverImage) {
         try {
             booksService.updateBookCover(id, coverImage);
             return ResponseEntity.ok("Cover aggiornata con successo!");
@@ -201,5 +216,20 @@ public class BookController {
         } catch (BookNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/get-cover/{filename}")
+    public ResponseEntity<Resource> getCover(@PathVariable String filename) throws IOException {
+        log.info("Received request for books/get-cover/"+filename);
+        Path filePath = Paths.get(uploadDir, filename);
+        Resource resource = new UrlResource(filePath.toUri());
+
+        if (!resource.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .body(resource);
     }
 }

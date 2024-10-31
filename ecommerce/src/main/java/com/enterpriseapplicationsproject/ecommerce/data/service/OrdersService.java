@@ -1,9 +1,8 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service;
 
-import com.enterpriseapplicationsproject.ecommerce.dto.AddressDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.CheckoutRequestDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.OrderDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.SaveOrderDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,5 +19,5 @@ public interface OrdersService {
 
     List<OrderDto> getAllCancelledOrdersByUserId(UUID userId);
 
-
+    Page<OrderSummaryDto> getAll(Pageable pageable);
 }

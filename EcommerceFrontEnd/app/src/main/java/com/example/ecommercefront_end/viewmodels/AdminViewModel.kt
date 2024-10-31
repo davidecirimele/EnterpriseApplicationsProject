@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.model.Book
+import com.example.ecommercefront_end.model.OrderSummary
 import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.model.UserDetails
 import com.example.ecommercefront_end.repository.AdminRepository
@@ -25,6 +26,15 @@ class AdminViewModel(private val repository: AdminRepository): ViewModel()  {
 
     private val _userFlow = MutableStateFlow<UserDetails?>(null)
     val userFlow: StateFlow<UserDetails?> = _userFlow.asStateFlow()
+
+    private val _orders = MutableStateFlow<List<OrderSummary>>(emptyList())
+    val orders: StateFlow<List<OrderSummary>> get() = _orders
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> get() = _isLoading
+
+    var currentPage = 0
+    var totalPages = 1
 
     suspend fun fetchUsers(forceReload: Boolean = false){
         try {
@@ -68,6 +78,43 @@ class AdminViewModel(private val repository: AdminRepository): ViewModel()  {
                     Log.e("AdminError", "Error filtering users", e)
                 }
             }
+        }
+    }
+
+    fun fetchOrders(page: Int = 0) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = repository.getAllOrders(page, 10)
+                if (response != null && response.isSuccessful) {
+                    response.body()?.let { responseBody ->
+                        _orders.value = responseBody.content
+                        currentPage = page
+                        totalPages = responseBody.totalPages
+                    } ?: run {
+                        Log.e("AdminError", "Il corpo della risposta è nullo")
+                    }
+                } else {
+                    Log.e("AdminError", "Errore nella risposta: ${response?.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("AdminError", "Errore durante il caricamento degli ordini", e)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+
+    fun loadNextPage() {
+        if (currentPage + 1 < totalPages) {
+            fetchOrders(currentPage + 1)
+        }
+    }
+
+    fun loadPreviousPage() {
+        if (currentPage > 0) {
+            fetchOrders(currentPage - 1)
         }
     }
 

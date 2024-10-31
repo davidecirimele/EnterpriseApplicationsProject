@@ -1,11 +1,15 @@
 [versions]
+accompanistPermissions = "0.28.0"
 agp = "8.5.1"
 androidxMaterial = "1.7.2"
 androidxMaterialVersion = "1.4.3"
+coil = "2.2.2"
 coilCompose = "2.4.0"
 coilComposeVersion = "2.7.0"
 coilKtCoilCompose = "2.4.0"
+coilKtCoilComposeVersion = "2.2.2"
 converterGson = "2.9.0"
+glide = "4.15.1"
 googleGson = "2.10.1"
 googleMaterial = "1.12.0"
 gson = "2.10.1"
@@ -45,16 +49,21 @@ volley = "1.2.1"
 
 
 [libraries]
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "androidxMaterial" }
 androidx-material-v143 = { module = "androidx.compose.material:material", version.ref = "androidxMaterialVersion" }
 androidx-material3-v111 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
+coil-compose-v222 = { module = "io.coil-kt:coil-compose", version.ref = "coilKtCoilComposeVersion" }
 coil-compose-v240 = { module = "io.coil-kt:coil-compose", version.ref = "coilKtCoilCompose" }
 coil-kt-coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilComposeVersion" }
 coil = { module = "io.coil-kt:coil", version.ref = "coilComposeVersion" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilComposeVersion" }
+coil-v222 = { module = "io.coil-kt:coil", version.ref = "coil" }
+compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gson-v2101 = { module = "com.google.code.gson:gson", version.ref = "googleGson" }
 gson-v282 = { module = "com.google.code.gson:gson", version.ref = "gsonVersion" }
 jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jacksonAnnotations" }

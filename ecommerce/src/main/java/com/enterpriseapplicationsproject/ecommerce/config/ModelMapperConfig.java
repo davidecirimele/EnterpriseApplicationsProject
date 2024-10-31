@@ -60,6 +60,17 @@ public class ModelMapperConfig {
             }
         });
 
+        modelMapper.addMappings(new PropertyMap<Admin, UserDetailsDto>() {
+            @Override
+            protected void configure() {
+                map(source.getId(), destination.getId());
+                map(source.getFirstName(), destination.getFirstName());
+                map(source.getLastName(), destination.getLastName());
+                map(source.getCredential().getEmail(), destination.getEmail());
+                map(source.getPhoneNumber(), destination.getPhoneNumber());
+            }
+        });
+
         modelMapper.addMappings(new PropertyMap<UserDto, User>() {
             @Override
             protected void configure() {
@@ -124,6 +135,15 @@ public class ModelMapperConfig {
                 map(source.getName(), destination.getName());
             }
         });
+
+        modelMapper.typeMap(Order.class, OrderSummaryDto.class).addMappings(mapper -> {
+            mapper.map(src -> src.getUser().getCredential().getEmail(), OrderSummaryDto::setEmail);
+            mapper.map(Order::getOrderId, OrderSummaryDto::setOrderId);
+            mapper.map(Order::getOrderDate, OrderSummaryDto::setOrderDate);
+            mapper.map(Order::getTotalAmount, OrderSummaryDto::setTotalAmount);
+            mapper.map(Order::getOrderStatus, OrderSummaryDto::setOrderStatus);
+        });
+
 
         return modelMapper;
     }

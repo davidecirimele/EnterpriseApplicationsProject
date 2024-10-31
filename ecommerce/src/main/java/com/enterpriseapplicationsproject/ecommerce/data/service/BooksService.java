@@ -39,7 +39,7 @@ public interface BooksService {
 
     List<Book> getFilteredBooks(BookSpecification.Filter filter);
 
-    void saveBook(BookDto bookDto) throws IOException, IOException;
+    BookDto insertBook(SaveBookDto bookDto) throws IOException, IOException;
 
     void updateBookCover(Long bookId, MultipartFile coverImage) throws IOException, BookNotFoundException;
 

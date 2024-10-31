@@ -59,6 +59,12 @@ dependencies {
     implementation(libs.gson.v2101)
     implementation(libs.coil.compose.v240)
 
+    implementation(libs.coil.v222)
+    implementation(libs.coil.compose.v222)
+
+    implementation(libs.glide)
+    annotationProcessor(libs.compiler)
+
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.serialization)
@@ -97,6 +103,8 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.compose.material)
+
+    implementation(libs.accompanist.permissions)
 
     implementation(libs.androidx.activity)
     ksp(libs.androidx.room.compiler)

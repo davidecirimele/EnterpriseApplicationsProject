@@ -45,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.model.BookFormat
 import com.example.ecommercefront_end.model.BookGenre
 import com.example.ecommercefront_end.model.BookLanguage
@@ -53,7 +54,6 @@ import java.time.LocalDate
 import java.util.Locale
 
 
-@Preview
 @Composable
 fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, currentRoute: String?, onDismiss: () -> Unit){
 
@@ -69,7 +69,7 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
     val minWeight by viewModel.minWeight.collectAsState()
     val maxWeight by viewModel.maxWeight.collectAsState()
 
-    val filter by viewModel.filter.collectAsState()
+    var filterOptions by remember{mutableStateOf(BookFilter())}
 
     val startingPublicationYear by viewModel.startingPublicationYear.collectAsState()
 
@@ -127,7 +127,7 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                                     selectedChoice = choices.first().toString(),
                                     onChoiceSelected = { selectedChoice ->
                                         val booleanChoice = selectedChoice.toBoolean()
-                                        viewModel.updateFilter(available = booleanChoice)
+                                        filterOptions = filterOptions.copy(available = booleanChoice)
                                     }
                                 )
 
@@ -147,8 +147,9 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                                     val formattedEnd =
                                         String.format(Locale.ITALY, "%.2f", end).replace(",", ".")
                                             .toFloat();
-                                    viewModel.updateFilter(minPrice = formattedStart.toDouble(), maxPrice = formattedEnd.toDouble())
-                                }, oldValue1 = filter.minPrice, oldValue2 = filter.maxPrice)
+                                    filterOptions = filterOptions.copy(minPrice = formattedStart.toDouble())
+                                    filterOptions = filterOptions.copy(maxPrice = formattedEnd.toDouble())
+                                }, oldValue1 = filterOptions.minPrice, oldValue2 = filterOptions.maxPrice)
                             Spacer(modifier = Modifier.height(10.dp))
                         }
 
@@ -166,8 +167,9 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                                         String.format(Locale.ITALY, "%.0f", end).replace(",", ".")
                                             .toFloat();
 
-                                    viewModel.updateFilter(minAge = formattedStart.toInt(), maxAge = formattedEnd.toInt())
-                                }, oldValue1 = filter.minAge, oldValue2 = filter.maxAge)
+                                    filterOptions = filterOptions.copy(minAge = formattedStart.toInt())
+                                    filterOptions = filterOptions.copy(maxAge = formattedEnd.toInt())
+                                }, oldValue1 = filterOptions.minAge, oldValue2 = filterOptions.maxAge)
                             Spacer(modifier = Modifier.height(10.dp))
                         }
 
@@ -181,9 +183,9 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                             ChoiceSelector(
                                 parameter = "Genre",
                                 choiches = genres,
-                                selectedChoice = filter.genre.toString(),
+                                selectedChoice = filterOptions.genre.toString(),
                                 onChoiceSelected = { selectedChoice ->
-                                    viewModel.updateFilter(genre = BookGenre.valueOf(selectedChoice))
+                                    filterOptions = filterOptions.copy(genre = BookGenre.valueOf(selectedChoice))
                                 })
 
                             Spacer(modifier = Modifier.height(10.dp))
@@ -202,8 +204,9 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                                         String.format(Locale.ITALY, "%.0f", end).replace(",", ".")
                                             .toFloat();
 
-                                    viewModel.updateFilter(minPages = formattedStart.toInt(), maxPages = formattedEnd.toInt())
-                                }, oldValue1 = filter.minPages, oldValue2 = filter.maxPages)
+                                    filterOptions = filterOptions.copy(minPages = formattedStart.toInt())
+                                    filterOptions = filterOptions.copy(maxPages = formattedEnd.toInt())
+                                }, oldValue1 = filterOptions.minPages, oldValue2 = filterOptions.maxPages)
 
                             Spacer(modifier = Modifier.height(10.dp))
                         }
@@ -213,7 +216,7 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                                 "Weight (Kg)",
                                 minWeight!!.toFloat(),
                                 maxWeight!!.toFloat(),
-                                filter.weight
+                                filterOptions.weight
                             );
 
                             Spacer(modifier = Modifier.height(10.dp))
@@ -227,9 +230,9 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                             ChoiceSelector(
                                 parameter = "Format",
                                 choiches = formats,
-                                selectedChoice = filter.format.toString(),
+                                selectedChoice = filterOptions.format.toString(),
                                 onChoiceSelected = { selectedChoice ->
-                                    viewModel.updateFilter(format = BookFormat.valueOf(selectedChoice))
+                                    filterOptions = filterOptions.copy(format = BookFormat.valueOf(selectedChoice))
                                 })
 
                             Spacer(modifier = Modifier.height(10.dp))
@@ -243,9 +246,9 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                             ChoiceSelector(
                                 parameter = "Language",
                                 choiches = languages,
-                                selectedChoice = filter.language.toString(),
+                                selectedChoice = filterOptions.language.toString(),
                                 onChoiceSelected = { selectedChoice ->
-                                    viewModel.updateFilter(language = BookLanguage.valueOf(selectedChoice))
+                                    filterOptions = filterOptions.copy(language = BookLanguage.valueOf(selectedChoice))
                                 })
 
                             Spacer(modifier = Modifier.height(10.dp))
@@ -265,8 +268,9 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
                                         String.format(Locale.ITALY, "%.0f", end).replace(",", ".")
                                             .toFloat();
 
-                                    viewModel.updateFilter(minPublishDate = LocalDate.parse("${formattedStart.toInt()}-01-01"), maxPublishDate = LocalDate.parse("${formattedEnd.toInt()}-12-31"))
-                                }, oldValue1 = filter.minPublishDate?.year, oldValue2 = filter.maxPublishDate?.year
+                                    filterOptions = filterOptions.copy(minPublishDate = LocalDate.parse("${formattedStart.toInt()}-01-01"))
+                                    filterOptions = filterOptions.copy(maxPublishDate = LocalDate.parse("${formattedEnd.toInt()}-12-31"))
+                                }, oldValue1 = filterOptions.minPublishDate?.year, oldValue2 = filterOptions.maxPublishDate?.year
                             )
                             Spacer(modifier = Modifier.height(10.dp))
 
@@ -274,11 +278,7 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
 
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-                        Button(onClick = { viewModel.resetFilter() }) {
-                            Text(text = "Clear Filter")
-                        }
-                        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-                        Button(onClick = { viewModel.searchBooks(navController, currentRoute)
+                        Button(onClick = { viewModel.searchBooks(filterOptions , navController, currentRoute)
                             onDismiss()}) {
                             Text(text = "Filter Books")
                         }

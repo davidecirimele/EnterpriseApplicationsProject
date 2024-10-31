@@ -2,10 +2,12 @@ package com.example.ecommercefront_end
 
 import CheckoutViewModel
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -65,6 +67,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.repository.AddressRepository
@@ -94,6 +97,7 @@ import com.example.ecommercefront_end.ui.admin.InsertProductScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutAddressScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutPaymentScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
+import com.example.ecommercefront_end.ui.admin.AdminOrdersScreen
 import com.example.ecommercefront_end.ui.admin.AdminSingleBookScreen
 import com.example.ecommercefront_end.ui.admin.AdminUserDetailsScreen
 import com.example.ecommercefront_end.ui.admin.AdminUsersListScreen
@@ -119,6 +123,7 @@ import java.util.UUID
 
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -142,6 +147,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun NavigationView(navController: NavHostController) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
@@ -205,8 +211,8 @@ fun NavigationView(navController: NavHostController) {
                 val book by bookViewModel.bookFlow.collectAsState()
 
                 book?.let {
-                    BookDetailsScreen(book = it, cartRepository = CartRepository(RetrofitClient.cartApiService), wishlistViewModel, navController)
-                } ?: Text("Libro non trovato")
+                    BookDetailsScreen(book = it, bookViewModel = bookViewModel, cartRepository = CartRepository(RetrofitClient.cartApiService), wishlistViewModel,navController)
+                } ?: Text("Book not found")
             }
 
             composable("/admin/book_details/{idBook}", arguments = listOf(navArgument("idBook") { type = NavType.LongType })) { backStackEntry ->
@@ -276,6 +282,11 @@ fun NavigationView(navController: NavHostController) {
             }
             composable("wishlist") {
                 selectedIndex.value = 3
+                val _wishlistApiService = RetrofitClient.wishlistApiService
+                val _wishlistItemApiService = RetrofitClient.wishlistItemApiService
+                val wRepository = WishlistRepository( RetrofitClient.wishlistApiService, RetrofitClient.wishlistItemApiService)
+                val groupRepository = GroupRepository(RetrofitClient.groupApiService)
+                val wishlistViewModel = remember { WishlistViewModel(wRepository, groupRepository) }
 
                 LaunchedEffect(Unit) {
                     wishlistViewModel.fetchWishlists(null)
@@ -380,6 +391,11 @@ fun NavigationView(navController: NavHostController) {
                 OrderConfirmationScreen( navController = navController, checkoutViewModel = checkoutViewModel)
             }
 
+            composable("admin-orders") {
+                AdminOrdersScreen(viewModel = adminViewModel, onOrderClick = {
+                })
+            }
+
         }
 
     }
@@ -391,7 +407,7 @@ fun TopBar(navHostController: NavHostController, bookViewModel: BookViewModel) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
-    val isSearchVisible = currentRoute == "home" || currentRoute == "filtered-books" || currentRoute == "admin-home"
+    val isSearchVisible = currentRoute == "home" || currentRoute == "filtered-books"
     var filterOptions by remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
 
@@ -446,8 +462,7 @@ fun SearchBar(navHostController: NavHostController, filterOptions: Boolean, onFi
                 if(searchValue == "" && currentRoute == "filtered-books"){
                     navHostController.popBackStack()
                 }
-                bookViewModel.updateFilter(title = it, author = it, publisher = it);
-                bookViewModel.searchBooks(navHostController, currentRoute)},
+                bookViewModel.searchBooks(BookFilter(title = it, author = it, publisher = it),navHostController, currentRoute)},
             label = { Text("Search by Title, Author or Publisher") },
             shape = RoundedCornerShape(16.dp),
             singleLine = true,

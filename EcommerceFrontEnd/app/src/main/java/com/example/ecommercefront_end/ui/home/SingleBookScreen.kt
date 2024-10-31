@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.Text
@@ -16,7 +17,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
 //import com.example.ecommercefront_end.viewmodels.HomeViewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -48,17 +48,20 @@ import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.repository.WishlistRepository
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
+import com.example.ecommercefront_end.ui.books.BookCover
 import com.example.ecommercefront_end.ui.books.BookInfoCard
+import com.example.ecommercefront_end.viewmodels.BookViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun BookDetailsScreen(book: Book, cartRepository: CartRepository, wishlistViewModel: WishlistViewModel, navController: NavHostController) {
+fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: CartRepository, wishlistViewModel: WishlistViewModel, navController: NavHostController) {
     var selectedQuantity by remember { mutableStateOf(1) }
-    var shippingAddress by remember { mutableStateOf("Via Roma 1") }
+    var shippingAddress by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
 
-    var wExpanded by remember { mutableStateOf(false) }
     var selectedWishlist by remember { mutableStateOf<Wishlist?>(null)}
     val userWishlist by wishlistViewModel.onlyMyWishlists.collectAsState()
+
 
     LazyColumn(
         modifier = Modifier
@@ -81,7 +84,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, wishlistViewMo
                         .padding(bottom = 8.dp)
                 )
                 Text(
-                    text = "di " + book.author,
+                    text = book.author,
                     fontSize = 20.sp,
                     modifier = Modifier
                         .align(Alignment.Start)
@@ -92,22 +95,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, wishlistViewMo
 
         // Immagine del libro
         item {
-            val imageUrl = remember(book.id) {
-                testImgs[book.id.hashCode() % testImgs.size]
-            }
-            val imagePainter = rememberAsyncImagePainter(
-                model = imageUrl,
-                error = rememberAsyncImagePainter("https://mockuptree.com/wp-content/uploads/edd/2019/10/free-Book-mockup-150x150.jpg")
-            )
-            Image(
-                painter = imagePainter,
-                contentDescription = book.title,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp)
-                    .padding(bottom = 16.dp),
-                contentScale = ContentScale.Crop
-            )
+            BookCover(book, bookViewModel)
         }
 
 
@@ -132,7 +120,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, wishlistViewMo
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
                     OutlinedButton(onClick = { qExpanded = true }) {
-                        Text("Quantità: $selectedQuantity")
+                        Text("Quantity: $selectedQuantity")
                     }
                     DropdownMenu(
                         expanded = qExpanded,
@@ -154,7 +142,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, wishlistViewMo
         // Indirizzo di spedizione
         item {
             Text(
-                text = "Invia a $shippingAddress",
+                text = "Send to $shippingAddress",
                 fontSize = 14.sp,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -171,7 +159,6 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, wishlistViewMo
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                val coroutineScope = rememberCoroutineScope()
                 Button(
                     onClick = {
                         coroutineScope.launch {
@@ -179,7 +166,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, wishlistViewMo
                             SessionManager.user?.let { user ->
                                 cartRepository.addCartItem(user.id, selectedQuantity, book.id)
                             } ?: run {
-                                navController.navigate(route = "login") {
+                                navController.navigate(route = "userAuth") {
                                     popUpTo(route = "cart") {
                                         inclusive = true
                                     }
@@ -196,7 +183,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, wishlistViewMo
                         .height(60.dp)
                         .padding(bottom = 18.dp)
                 ) {
-                    Text("Aggiungi al carrello")
+                    Text("Add to cart")
                 }
             }
         }

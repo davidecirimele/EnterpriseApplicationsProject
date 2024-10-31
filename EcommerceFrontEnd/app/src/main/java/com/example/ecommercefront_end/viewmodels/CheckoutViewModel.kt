@@ -311,7 +311,7 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
         }
 
 
-        // Funzione per confermare l'ordine (placeholder)
+
         fun confirmOrder() {
             if (isCheckoutEnabled.value) {
                 viewModelScope.launch {
@@ -362,13 +362,11 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
                                 if (paymentMethods != null) {
                                     _paymentMethods.value = paymentMethods
                                     _selectedPaymentMethod.value = paymentMethods.firstOrNull()
-                                    println("")
                                 }
                             }
                         }
-
-
                         _totalAmount.value = cartViewModel.totalAmount.value
+                        println("totale ordine: ${_totalAmount.value}")
                     }
                 } catch (e: Exception) {
                     // Gestire l'errore

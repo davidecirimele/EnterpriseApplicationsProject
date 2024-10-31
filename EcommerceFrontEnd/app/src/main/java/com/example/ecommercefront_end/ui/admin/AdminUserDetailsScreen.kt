@@ -28,10 +28,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import coil.compose.rememberAsyncImagePainter
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.UserDetails
-import com.example.ecommercefront_end.ui.home.testImgs
 import com.example.ecommercefront_end.ui.user.AccountOptions
 import com.example.ecommercefront_end.ui.user.AddressView
 import com.example.ecommercefront_end.viewmodels.AddressViewModel

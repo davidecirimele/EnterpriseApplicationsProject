@@ -1,6 +1,7 @@
 package com.example.ecommercefront_end.model
 
 import com.google.gson.annotations.SerializedName
+import java.io.File
 import java.time.LocalDate
 
 data class SaveBook(
@@ -21,4 +22,5 @@ data class SaveBook(
     val weight: Double,
     val price: Double,
     val stock: Int,
+    val image: File?
 )
