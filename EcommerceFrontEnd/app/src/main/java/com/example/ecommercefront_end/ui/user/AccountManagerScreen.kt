@@ -37,21 +37,24 @@ import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.ui.books.BookCover
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
+import com.example.ecommercefront_end.viewmodels.BookViewModel
 
 @Composable
 fun AccountManagerScreen(viewModel: AccountViewModel, navHostController: NavHostController) {
 
     val userDetails by viewModel.userDetails.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.SpaceEvenly){
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(8.dp), verticalArrangement = Arrangement.SpaceAround){
         userDetails?.let { UserCard(it) }
         OptionsSection(navHostController)
-        HistorySection()
+        if(SessionManager.user != null && SessionManager.user!!.role!="ROLE_ADMIN")
+            HistorySection()
         Buttons(navHostController)
     }
 }
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun UserCard(userDetails: UserDetails){
     Row(modifier = Modifier.fillMaxWidth()) {
@@ -80,19 +83,23 @@ fun OptionsSection(navHostController: NavHostController){
                 }}) {
                     Text(text = "My Account")
                 }
-                Spacer(modifier = Modifier.width(20.dp))
-                Button(onClick = { /*TODO*/ }) {
-                    Text(text = "My Orders")
+                if(SessionManager.user != null && SessionManager.user!!.role!="ROLE_ADMIN") {
+                    Spacer(modifier = Modifier.width(20.dp))
+                    Button(onClick = { /*TODO*/ }) {
+                        Text(text = "My Orders")
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(20.dp))
-            Row {
-                Button(onClick = { /*TODO*/ }) {
-                    Text(text = "My Groups")
-                }
-                Spacer(modifier = Modifier.width(20.dp))
-                Button(onClick = { /*TODO*/ }) {
-                    Text(text = "My Reviews")
+            if(SessionManager.user != null && SessionManager.user!!.role!="ROLE_ADMIN") {
+                Spacer(modifier = Modifier.height(20.dp))
+                Row {
+                    Button(onClick = { /*TODO*/ }) {
+                        Text(text = "My Groups")
+                    }
+                    Spacer(modifier = Modifier.width(20.dp))
+                    Button(onClick = { /*TODO*/ }) {
+                        Text(text = "My Reviews")
+                    }
                 }
             }
         }
@@ -113,10 +120,6 @@ fun PurchasedHistoryCard(history: List<Pair<String,String>>){
                 .fillMaxWidth()
                 .horizontalScroll(state = ScrollState(1))
         ) {
-            history.forEach { (title, author) ->
-                BookCover(title = title, author = author)
-            }
-
         }
     }
 }
@@ -144,7 +147,8 @@ fun Buttons(navHostController: NavHostController){
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            Button(onClick = { SessionManager.clearSession()}) {
+            Button(onClick = {
+                SessionManager.clearSession()}) {
                 Text(text = "Logout")
             }
         }

@@ -47,6 +47,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.model.UserDetails
 import com.example.ecommercefront_end.network.RetrofitClient
@@ -64,7 +65,7 @@ fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: Addres
 
     LazyColumn(modifier = Modifier
         .fillMaxSize()
-        .padding(8.dp), verticalArrangement = Arrangement.Top){
+        .padding(8.dp), verticalArrangement = Arrangement.SpaceAround){
         item {
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -80,11 +81,13 @@ fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: Addres
         item{
         UserInfo(userDetails, defaultAddress,  accountViewModel = accountViewModel, addressViewModel, navHostController)
         }
-        item {
-            Spacer(modifier = Modifier.height(20.dp))
-        }
-        item {
-            Options(navHostController)
+        if(SessionManager.user != null && SessionManager.user!!.role!="ROLE_ADMIN") {
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+            item {
+                AccountOptions(userDetails?.id,"my-account",navHostController)
+            }
         }
     }
 }
@@ -176,30 +179,37 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
             Row(modifier = Modifier.fillMaxWidth()){
                 EditScreen("Phone Number", isEditingPhoneNumber, isErrorPhoneNumberTriggered, accountViewModel = accountViewModel, onSuccess = {
                     isEditingPhoneNumber = false
-                    navController.navigate("my-account") {
-                    popUpTo("my-account") { inclusive = true }
-                }
+                    navController.popBackStack()
             }, onError = {isErrorPhoneNumberTriggered = true})
             }
         }
-        Spacer(modifier = Modifier.height(30.dp))
-        Row {
-            Column() {
-                if(defaultAddress != null) {
-                    Text(
-                        text = "Default Address:",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    AddressView(address = defaultAddress, addressViewModel, navController, false)
+        if(SessionManager.user != null && SessionManager.user!!.role!="ROLE_ADMIN") {
+            Spacer(modifier = Modifier.height(30.dp))
+            Row {
+                Column() {
+                    if (defaultAddress != null) {
+                        Text(
+                            text = "Default Address:",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        if (userDetails != null) {
+                            AddressView(
+                                address = defaultAddress,
+                                userDetails.id,
+                                addressViewModel,
+                                navController,
+                                false
+                            )
+                        }
+                    } else
+                        Text(
+                            text = "No Default Address",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
                 }
-                else
-                    Text(
-                        text = "No Default Address",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
             }
         }
             /*user?.phoneNumber?.let {
@@ -210,28 +220,6 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
                     fontSize = 20.sp
                 )
             }*/
-    }
-
-}
-
-@Composable
-fun Options(navHostController: NavHostController){
-    Column {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-            Button(onClick = { navHostController.navigate("addresses") }) {
-                Text(text = "Addresses")
-            }
-        }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-            Button(onClick = { /*TODO*/ }) {
-                Text(text = "Payment Methods")
-            }
-        }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-            Button(onClick = { /*TODO*/ }) {
-                Text(text = "Transactions")
-            }
-        }
     }
 
 }

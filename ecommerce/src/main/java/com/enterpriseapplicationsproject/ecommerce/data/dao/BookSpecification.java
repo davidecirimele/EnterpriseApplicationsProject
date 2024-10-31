@@ -39,6 +39,7 @@ public class BookSpecification {
         private LocalDate publishDate;
         private LocalDate minPublishDate;
         private LocalDate maxPublishDate;
+        private Boolean available;
     }
 
     public static Specification<Book> bookFilter(BookSpecification.Filter filter) {
@@ -70,9 +71,6 @@ public class BookSpecification {
                 if (filter.getMaxPrice() != null) {
                     predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("price"), filter.getMaxPrice()));
                 }
-                if (filter.getISBN() != null) {
-                    predicates.add(criteriaBuilder.equal(root.get("ISBN"), filter.getISBN()));
-                }
                 if (filter.getFormat() != null) {
                     predicates.add(criteriaBuilder.equal(root.get("format"), filter.getFormat()));
                 }
@@ -92,6 +90,9 @@ public class BookSpecification {
                 }
                 if (filter.getPublisher() != null) {
                     orPredicates.add(criteriaBuilder.like(root.get("publisher"), "%" + filter.getPublisher() + "%"));
+                }
+                if (filter.getISBN() != null) {
+                    orPredicates.add(criteriaBuilder.equal(root.get("ISBN"), filter.getISBN()));
                 }
 
                 if (!orPredicates.isEmpty()) {
@@ -131,6 +132,9 @@ public class BookSpecification {
                 }
                 if (filter.getMaxPages() != null) {
                     predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("pages"), filter.getMaxPages()));
+                }
+                if (filter.getAvailable() != null) {
+                    predicates.add(criteriaBuilder.equal(root.get("available"), filter.getAvailable()));
                 }
 
                 return query.where(predicates.toArray(new Predicate[0])).getRestriction();

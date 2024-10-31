@@ -37,7 +37,6 @@ import java.util.UUID;
 public class AuthServiceImpl implements  AuthService{
 
     private final UsersDao userDao;
-
     private final ShoppingCartsDao shoppingCartsDao;
     private final ModelMapper modelMapper;
     private final JwtService jwtService;
@@ -79,7 +78,7 @@ public class AuthServiceImpl implements  AuthService{
     }
 
     @Override
-    public SaveUserDto registerAdmin(SaveUserDto userDto) {
+    public UserDetailsDto registerAdmin(@Valid SaveUserDto userDto) {
         System.out.println("Admin UserDto: " + userDto);
 
         userDao.findByCredentialEmail(userDto.getCredential().getEmail()).ifPresent(u -> {
@@ -98,7 +97,7 @@ public class AuthServiceImpl implements  AuthService{
 
         userDao.save(admin);
 
-        return modelMapper.map(admin, SaveUserDto.class);
+        return modelMapper.map(admin, UserDetailsDto.class);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.example.ecommercefront_end.ui.checkout
 
 import CheckoutViewModel
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowForward
@@ -20,8 +22,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -30,18 +34,23 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun CheckoutScreen(viewModel: CheckoutViewModel, onConfirmOrder: () -> Unit, navController: NavController) {
+fun CheckoutScreen(viewModel: CheckoutViewModel, navController: NavController) {
     Column(modifier = Modifier.padding(16.dp)) {
+
+        val isBuyNowEnabled by viewModel.isCheckoutEnabled.collectAsState()
+        val selectedAddress = viewModel.selectedAddress.collectAsState().value
+        val selectedPaymentMethod = viewModel.selectedPaymentMethod.collectAsState().value
 
         LaunchedEffect(Unit) {
             println("sto caricando i dati")
             viewModel.loadCheckoutData()
         }
 
+
         // Sezione Indirizzo di Spedizione (con freccia per modificare)
         CheckoutSectionWithArrow(
             title = "Delivery Address",
-            content = viewModel.selectedAddress.collectAsState().value?.let {
+            content = selectedAddress?.let {
                 "${SessionManager.user?.firstName} ${SessionManager.user?.lastName}\n" +
                 "${it.street}, ${it.city}, ${it.postalCode}"
             } ?: "Select a delivery address",
@@ -53,10 +62,10 @@ fun CheckoutScreen(viewModel: CheckoutViewModel, onConfirmOrder: () -> Unit, nav
         // Sezione Metodo di Pagamento (con freccia per modificare)
         CheckoutSectionWithArrow(
             title = "Payment Method",
-            content = viewModel.selectedPaymentMethod.collectAsState().value?.let {
-                "${it.cardHolderName} - **** ${it.cardNumber.takeLast(4)}"
+            content = selectedPaymentMethod?.let {
+                "${it.cardHolderName} - ${it.cardNumber}"
             } ?: "Select a payment method",
-            onClick = { /* Naviga alla schermata di selezione del metodo di pagamento */ }
+            onClick = { navController.navigate("checkout-payment") }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -71,11 +80,15 @@ fun CheckoutScreen(viewModel: CheckoutViewModel, onConfirmOrder: () -> Unit, nav
         // Pulsante per confermare l'ordine
         Button(
             onClick = {
-                if (viewModel.confirmOrder()) onConfirmOrder()
+                if (isBuyNowEnabled) viewModel.confirmOrder()
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().background(
+                if (isBuyNowEnabled) MaterialTheme.colorScheme.primary else Color.Gray,  // Cambia il colore di sfondo se disabilitato
+            ),
+            enabled = isBuyNowEnabled
+
         ) {
-            Text("Buy Now")
+            Text(text = "Buy Now", color = if (isBuyNowEnabled) Color.White else Color.LightGray)
         }
     }
 }

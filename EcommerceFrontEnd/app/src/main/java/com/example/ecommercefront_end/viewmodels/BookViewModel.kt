@@ -1,34 +1,30 @@
 package com.example.ecommercefront_end.viewmodels
 
-import android.se.omapi.Session
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
+import com.bumptech.glide.util.LruCache
 import com.example.ecommercefront_end.SessionManager
-import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.BookFilter
-import com.example.ecommercefront_end.model.BookFormat
 import com.example.ecommercefront_end.model.BookGenre
-import com.example.ecommercefront_end.model.BookLanguage
-import com.example.ecommercefront_end.model.SaveAddress
-
-import com.example.ecommercefront_end.model.UserId
+import com.example.ecommercefront_end.model.Price
+import com.example.ecommercefront_end.model.SaveBook
+import com.example.ecommercefront_end.model.Stock
 
 import com.example.ecommercefront_end.repository.BookRepository
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.newCoroutineContext
 import retrofit2.Response
+import java.io.File
 import java.time.LocalDate
 
 class BookViewModel(private val repository: BookRepository): ViewModel() {
@@ -36,11 +32,11 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     private val _filteredProducts = MutableStateFlow<List<Book>>(emptyList())
     val filteredProducts: StateFlow<List<Book>> = _filteredProducts.asStateFlow()
 
-    private val _cachedProducts = MutableStateFlow<List<Book>>(emptyList())
-    val cachedProducts: StateFlow<List<Book>> = _cachedProducts.asStateFlow()
-
     private val _allProducts = MutableStateFlow<List<Book>>(emptyList())
     val allProducts: StateFlow<List<Book>> = _allProducts.asStateFlow()
+
+    private val _allAvailableProducts = MutableStateFlow<List<Book>>(emptyList())
+    val allAvailableProducts: StateFlow<List<Book>> = _allAvailableProducts.asStateFlow()
 
     private val _minPrice = MutableStateFlow<Double?>(null)
     val minPrice: StateFlow<Double?> = _minPrice
@@ -69,9 +65,6 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     private val _startingPublicationYear = MutableStateFlow<LocalDate?>(null)
     val startingPublicationYear: StateFlow<LocalDate?> = _startingPublicationYear
 
-    private val _filter = MutableStateFlow<BookFilter>(BookFilter())
-    val filter: StateFlow<BookFilter> = _filter
-
     private val _sortOption = MutableStateFlow("Newest")
     val sortOption: StateFlow<String> = _sortOption
 
@@ -80,6 +73,12 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
     private val _isLoadingAllBooks = MutableStateFlow(true)
     val isLoadingAllBooks: StateFlow<Boolean> = _isLoadingAllBooks.asStateFlow()
+
+    private val _isLoadingBook = MutableStateFlow(true)
+    val isLoadingBook: StateFlow<Boolean> = _isLoadingBook.asStateFlow()
+
+    private val _isLoadingCatalogue = MutableStateFlow(true)
+    val isLoadingCatalogue: StateFlow<Boolean> = _isLoadingCatalogue.asStateFlow()
 
     private val _isLoadingData = MutableStateFlow(true)
     val isLoadingData: StateFlow<Boolean> = _isLoadingData.asStateFlow()
@@ -90,21 +89,37 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    private val maxMemory = (Runtime.getRuntime().maxMemory() / 1024).toInt()
+    private val cacheSize = maxMemory / 8
+
+    private val imageCache = LruCache<String, Bitmap>(cacheSize.toLong())
+
+    private val bookCache = LruCache<Long, Book>(cacheSize.toLong())
+
+    private val _halloweenBooks = MutableStateFlow<List<Book>>(emptyList())
+    val halloweenBooks: StateFlow<List<Book>> = _halloweenBooks
+
+    private val _recentBooks = MutableStateFlow<List<Book>>(emptyList())
+    val recentBooks: StateFlow<List<Book>> = _recentBooks
+
     init {
-        fetchAllProducts()
+        viewModelScope.launch {
+            fetchAllAvailableProducts()
+        }
         fetchBooksData()
     }
 
     fun fetchBooksData(){
+        _isLoadingData.value = true
         viewModelScope.launch {
             try {
 
                 // Usa async per le chiamate parallele
-                val priceJob = async { fetchPrice() }
-                val ageJob = async { fetchAge() }
-                val pagesJob = async { fetchPages() }
-                val weightJob = async { fetchWeight() }
-                val startingYearJob = async { fetchStartingYear() }
+                val priceJob = async { fetchValues(repository.getMinPrice(), repository.getMaxPrice(), _minPrice,_maxPrice) }
+                val ageJob = async { fetchValues(repository.getMinAge(), repository.getMaxAge(), _minAge,_maxAge) }
+                val pagesJob = async { fetchValues(repository.getMinPages(), repository.getMaxPages(), _minPages,_maxPages) }
+                val weightJob = async { fetchValues(repository.getMinWeight(), repository.getMaxWeight(), _minWeight,_maxWeight) }
+                val startingYearJob = async { fetchValues(fetchMin = repository.getMinPublicationYear(), minState = _startingPublicationYear) }
 
                 priceJob.await()
                 ageJob.await()
@@ -120,175 +135,89 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         }
     }
 
-    private suspend fun fetchPrice(){
-
-            try {
-                val response1 = repository.getMinPrice()
-                val response2 = repository.getMaxPrice()
-
-                if (response1.isSuccessful && response1.body() != null) {
-                    _minPrice.value = response1.body()
-                }else {
-                    throw Exception("Failed to fetch min price")
-                }
-                if (response2.isSuccessful && response2.body() != null){
-                    _maxPrice.value = response2.body()
-                    Log.d("BookDebug", "minPrice: ${_minPrice.value}, maxPrice: ${_maxPrice.value}")
-                } else {
-                    throw Exception("Failed to fetch max price")
-                }
-            } catch (e: Exception) {
-                Log.d("BookDebug", "minPrice: ${_minPrice.value}, maxPrice: ${_maxPrice.value}")
-            }
-    }
-
-    private suspend fun fetchAge(){
-
-            try {
-                val response1 = repository.getMinAge()
-                val response2 = repository.getMaxAge()
-
-                if (response1.isSuccessful && response1.body() != null) {
-                    _minAge.value = response1.body()
-                }else {
-                    throw Exception("Failed to fetch min age")
-                }
-                if (response2.isSuccessful && response2.body() != null){
-                    _maxAge.value = response2.body()
-                } else {
-                    throw Exception("Failed to fetch max age")
-                }
-            } catch (e: Exception) {
-                Log.d("BookDebug", "minAge: ${_minAge.value}, maxAge: ${_maxAge.value}")
-            }
-    }
-
-    private suspend fun fetchPages(){
-            try {
-                val response1 = repository.getMinPages()
-                val response2 = repository.getMaxPages()
-
-                if (response1.isSuccessful && response1.body() != null) {
-                    _minPages.value = response1.body()
-                }else {
-                    throw Exception("Failed to fetch min pages")
-                }
-                if (response2.isSuccessful && response2.body() != null){
-                    _maxPages.value = response2.body()
-                } else {
-                    throw Exception("Failed to fetch max pages")
-                }
-            } catch (e: Exception) {
-                Log.d("BookDebug", "minPages: ${_minPages.value}, maxPages: ${_maxPages.value}")
-            }
-    }
-
-    private suspend fun fetchWeight(){
-
+    private suspend fun <T> fetchValues(
+        fetchMin: Response<T>,
+        fetchMax: Response<T>? =  null,
+        minState: MutableStateFlow<T?>,
+        maxState: MutableStateFlow<T?>? = null
+    ) {
         try {
-            val response1 = repository.getMinWeight()
-            val response2 = repository.getMaxWeight()
-
-            if (response1.isSuccessful && response1.body() != null) {
-                _minWeight.value = response1.body()
-            }else {
-                throw Exception("Failed to fetch min weight")
-            }
-            if (response2.isSuccessful && response2.body() != null){
-                _maxWeight.value = response2.body()
-                Log.d("BookDebug", "minWeight: ${_minWeight.value}, maxWeight: ${_maxWeight.value}")
+            if (fetchMin.isSuccessful && fetchMin.body() != null) {
+                minState.value = fetchMin.body()
             } else {
-                throw Exception("Failed to fetch max weight")
+                throw Exception("Failed to fetch min value")
+            }
+
+            if(fetchMax != null && maxState != null) {
+                if (fetchMax.isSuccessful && fetchMax.body() != null) {
+                    maxState.value = fetchMax.body()
+                } else {
+                    throw Exception("Failed to fetch max value")
+                }
             }
         } catch (e: Exception) {
-            Log.d("BookDebug", "minWeight: ${_minWeight.value}, maxWeight: ${_maxWeight.value}")
+            Log.d("BookDebug", "Error fetching values: ${e.message}")
         }
     }
 
-    private suspend fun fetchStartingYear(){
-
+    private suspend fun fetchAllProducts() {
+        _isLoadingAllBooks.value = true
         try {
-            val response = repository.getMinPublicationYear()
+            val response = repository.getAllBooks()
 
             if (response.isSuccessful && response.body() != null) {
-                _startingPublicationYear.value = response.body()
-            }else {
-                throw Exception("Failed to fetch startingPublicationYear")
+                _allProducts.value = response.body()!!
+                _filteredProducts.value = _allProducts.value
+            } else {
+                throw Exception("Error fetching products")
             }
+
         } catch (e: Exception) {
-            Log.d("BookDebug", "startingPublicationYear: ${_startingPublicationYear.value}")
+            _error.value = "Errore durante il caricamento dei libri: ${e.message}" // Imposta il messaggio di errore
+        } finally {
+            _isLoadingAllBooks.value = false
         }
     }
 
-    private fun fetchAllProducts(){
-        viewModelScope.launch {
-            try {
-                val response = repository.getAllBooks()
+    suspend fun fetchAllAvailableProducts() {
+        _isLoadingCatalogue.value = true
+        Log.d("Books", "Sto fetchando i libri dal db")
+        try {
+            val response = repository.getCatalogue()
 
-                if (response.isSuccessful && response.body() != null) {
-                    _allProducts.value = response.body()!!
-                } else {
-                    throw Exception("Error fetching products")
-                }
-
-            } catch (e: Exception) {
-                _error.value = "Errore durante il caricamento dei libri: ${e.message}" // Imposta il messaggio di errore
-            } finally {
-                _isLoadingAllBooks.value = false
+            if (response.isSuccessful && response.body() != null) {
+                _allAvailableProducts.value = response.body()!!
+                _filteredProducts.value = _allAvailableProducts.value
+            } else {
+                throw Exception("Error fetching products")
             }
+
+        } catch (e: Exception) {
+            _error.value = "Errore durante il caricamento dei libri: ${e.message}" // Imposta il messaggio di errore
+        } finally {
+            fetchHalloweenBooks()
+            fetchRecentBooks()
+            _isLoadingCatalogue.value = false
         }
     }
 
-    private fun fetchFilteredBooks() {
-        viewModelScope.launch {
-            try {
-                val response = repository.getFilteredBooks(filter.value)
+    private suspend fun fetchBooksByFilter(filter: BookFilter): List<Book> {
+        _isLoadingFilteredBooks.value = true
+        try {
+            val response = repository.getFilteredBooks(filter)
 
-                if (response.isSuccessful && response.body() != null) {
-                    _filteredProducts.value = response.body()!!
-                    _cachedProducts.value = filteredProducts.value
-                } else {
-                    throw Exception("Error fetching products")
-                }
-
-            } catch (e: Exception) {
-                _error.value = "Errore durante il caricamento dei libri: ${e.message}" // Imposta il messaggio di errore
-            } finally {
-                _isLoadingFilteredBooks.value = false
+            if (response.isSuccessful && response.body() != null) {
+                return response.body()!!
+            } else {
+                throw Exception("Error fetching products")
             }
+
+        } catch (e: Exception) {
+            _error.value = "Errore durante il caricamento dei libri: ${e.message}" // Imposta il messaggio di errore
+        }finally {
+            _isLoadingFilteredBooks.value = false
         }
-    }
-
-    fun updateFilter(weight : Double? = null, minPrice : Double? = null, maxPrice : Double? = null, stock : Int? = null, title : String? = null, author : String? = null,
-                             ISBN : String? = null, minPages : Int? = null, maxPages : Int? = null, edition : String? = null, format : BookFormat? = null, genre : BookGenre? = null,
-                             language : BookLanguage? = null, publisher : String? = null, minAge : Int? = null, maxAge : Int? = null, minPublishDate : LocalDate? = null,
-                             maxPublishDate : LocalDate? = null){
-
-        val currentFilter = _filter.value ?: BookFilter()
-        _filter.value = currentFilter.copy(
-            weight = weight ?: currentFilter.weight,
-            minPrice = minPrice ?: currentFilter.minPrice,
-            maxPrice = maxPrice ?: currentFilter.maxPrice,
-            stock = stock ?: currentFilter.stock,
-            title = title ?: currentFilter.title,
-            author = author ?: currentFilter.author,
-            ISBN = ISBN ?: currentFilter.ISBN,
-            edition = edition ?: currentFilter.edition,
-            minPages = minPages ?: currentFilter.minPages,
-            maxPages = maxPages ?: currentFilter.minPages,
-            genre = genre ?: currentFilter.genre,
-            format = format ?: currentFilter.format,
-            language = language ?: currentFilter.language,
-            publisher = publisher ?: currentFilter.publisher,
-            minAge = minAge ?: currentFilter.minAge,
-            maxAge = maxAge ?: currentFilter.maxAge,
-            minPublishDate = minPublishDate ?: currentFilter.minPublishDate,
-            maxPublishDate = maxPublishDate ?: currentFilter.maxPublishDate)
-    }
-
-    fun resetFilter(){
-        _filter.value = BookFilter()
-        clearCache()
+        return emptyList()
     }
 
     fun setOrderOption(option: String){
@@ -296,17 +225,17 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         sortProducts()
     }
 
-    fun searchBooks(navController: NavController, currentRoute: String?){
-        if(currentRoute != null && currentRoute != "filtered-books") {
+    fun searchBooks(filter: BookFilter, navController: NavController, currentRoute: String?){
+        if(currentRoute != null && (currentRoute != "filtered-books" && currentRoute != "admin-catalogue")) {
             navController.navigate("filtered-books") {
                 popUpTo("home") {
                     saveState = true
                 }
             }
         }
-        if(!searchInCachedBooks()) {
-            Log.d("BookDebug", "No cached products found or matching filters, fetching from backend...")
-            fetchFilteredBooks()
+
+        viewModelScope.launch {
+            _filteredProducts.value = fetchBooksByFilter(filter)
         }
     }
 
@@ -328,45 +257,205 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         }
     }
 
-    private fun searchInCachedBooks(): Boolean {
-        if(cachedProducts.value.isNotEmpty()){
-            Log.d("BookDebug", "Cached products found, applying filters...")
-            _filteredProducts.value = cachedProducts.value.filter { book ->
-                (filter.value.weight == null || book.weight == filter.value.weight) &&
-                        (filter.value.minPrice == null || book.price >= filter.value.minPrice!!) &&
-                        (filter.value.maxPrice == null || book.price <= filter.value.maxPrice!!) &&
-                        (filter.value.stock == null || book.stock >= filter.value.stock!!) &&
-                        ((filter.value.title == null || book.title.contains(filter.value.title!!, ignoreCase = true)) ||
-                        (filter.value.author == null || book.author.contains(filter.value.author!!, ignoreCase = true)) ||
-                                (filter.value.publisher == null || book.publisher.contains(filter.value.publisher!!, ignoreCase = true))) &&
-                        (filter.value.ISBN == null || book.ISBN.contains(filter.value.ISBN!!, ignoreCase = true)) &&
-                        (filter.value.minPages == null || book.pages >= filter.value.minPages!!) &&
-                        (filter.value.maxPages == null || book.pages <= filter.value.maxPages!!) &&
-                        (filter.value.edition == null || book.edition.equals(filter.value.edition, ignoreCase = true)) &&
-                        (filter.value.format == null || book.format == filter.value.format) &&
-                        (filter.value.genre == null || book.genre == filter.value.genre) &&
-                        (filter.value.language == null || book.language == filter.value.language) &&
-                        (filter.value.minAge == null || book.age >= filter.value.minAge!!) &&
-                        (filter.value.maxAge == null || book.age <= filter.value.maxAge!!) &&
-                        (filter.value.minPublishDate == null || !book.publishDate.isBefore(filter.value.minPublishDate)) &&
-                        (filter.value.maxPublishDate == null || !book.publishDate.isAfter(filter.value.maxPublishDate))
+    suspend fun loadBook(id: Long) {
+        _isLoadingBook.value = true
+        try {
+            bookCache.get(id)?.let {
+                _bookFlow.value = it
+                return
             }
-            Log.d("BookDebug", "Filter values: ${filter.value}")
-            Log.d("BookDebug", "Filtered products: ${_filteredProducts.value.size}")
-            return _filteredProducts.value.isNotEmpty()
+            Log.d("BookCover", "Carico il libro dal database")
+
+            val response = repository.getBook(id)
+
+            if (response.isSuccessful && response.body() != null) {
+                _bookFlow.value = response.body()
+                _bookFlow.value?.let { bookCache.put(it.id,_bookFlow.value) }
+            } else {
+                _bookFlow.value = null
+                throw Exception("Error fetching book with id $id")
+            }
+
+        } catch (e: Exception) {
+            _error.value = "Errore durante il caricamento del libro: ${e.message}" // Imposta il messaggio di errore
+        } finally {
+            _isLoadingBook.value = false
         }
-        return false
     }
 
-    fun clearCache(){
-        _cachedProducts.value = emptyList<Book>()
-    }
+    fun insertBook(book: SaveBook){
 
-
-    fun loadBook(id: Long) {
         viewModelScope.launch {
-            val book = _allProducts.value.find { it.id == id }
-            _bookFlow.value = book
+            try {
+                if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
+                    repository.insertBook(book)
+
+                    clearCache()
+                    fetchAllAvailableProducts()
+                    Log.d("BookViewModel", "Book added: ${_allAvailableProducts.value}")
+                }
+                else
+                    Log.d("UserDebug", "User is null")
+            } catch (e: Exception) {
+                Log.d("UserDebug", "Error adding Book: $book")
+            }
+        }
+    }
+
+    fun updatePrice(newPrice: Double, bookId: Long){
+        viewModelScope.launch {
+            try {
+                if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
+                    Log.d("UserDebug", "NewPrice ${Price(newPrice)}")
+                    repository.updatePrice(bookId, Price(newPrice))
+
+                    clearCache()
+
+                    loadBook(bookId)
+                }
+                else
+                    Log.d("UserDebug", "User is null")
+            } catch (e: Exception) {
+                e.message?.let { Log.d("UserDebug", it) }
+            }
+        }
+    }
+
+    fun restock(newStock: Int, bookId: Long){
+        viewModelScope.launch {
+            try {
+                if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
+                    Log.d("UserDebug", "NewStock $newStock")
+                    repository.updateStock(bookId, Stock(newStock))
+
+                    clearCache()
+                    loadBook(bookId)
+                }
+                else
+                    Log.d("UserDebug", "User is null")
+            } catch (e: Exception) {
+                Log.d("UserDebug", "Error updating Book stock")
+            }
+        }
+    }
+
+
+    fun removeBook(bookId: Long){
+        viewModelScope.launch {
+            try{
+                if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
+                    repository.removeBook(bookId)
+
+                    _allProducts.value = emptyList()
+
+                    clearCache()
+                    loadBook(bookId)
+                }
+                else{
+                    throw Exception("Access Denied")
+                }
+            } catch (e: Exception) {
+                Log.d("UserDebug", "Error deleting Book with id $bookId")
+            }
+        }
+    }
+
+    fun restoreBook(bookId: Long){
+        viewModelScope.launch {
+            try{
+                if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
+                    repository.restoreBook(bookId)
+
+                    _allProducts.value = emptyList()
+
+                    clearCache()
+                    loadBook(bookId)
+                }
+                else{
+                    throw Exception("Access Denied")
+                }
+            } catch (e: Exception) {
+                Log.d("UserDebug", "Error deleting Book with id $bookId")
+            }
+        }
+    }
+
+    fun updateBookCover(bookId: Long, cover: File){
+        viewModelScope.launch {
+            try{
+                if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
+                    repository.updateCover(bookId, cover)
+
+                    clearCache()
+                    loadBook(bookId)
+                }
+                else{
+                    throw Exception("Access Denied")
+                }
+            } catch (e: Exception) {
+                Log.d("UserDebug", "Error deleting Book with id $bookId")
+            }
+        }
+    }
+
+    private fun clearCache(){
+        imageCache.clearMemory()
+        bookCache.clearMemory()
+    }
+
+    suspend fun fetchImage(url: String?): Bitmap? {
+        if(url == null)
+            return null
+        try {
+            imageCache.get(url)?.let {
+                return it
+            }
+
+            val response = repository.getCoverImage(url)
+
+            Log.d("IMAGE DEBUG", "response: ${response.message()}")
+
+            if (response.isSuccessful && response.body() != null) {
+                Log.d("IMAGE DEBUG", "response is not null")
+                val inputStream = response.body()!!.byteStream()
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+
+                if(bitmap != null)
+                    imageCache.put(url, bitmap)
+
+                return bitmap
+            }else{
+                Log.d("IMAGE DEBUG", "response is null")
+                throw Exception("Error fetching Image")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return null
+    }
+
+    fun onLogout() {
+        viewModelScope.cancel() // Annulla tutte le coroutine al logout
+    }
+
+    suspend fun fetchHalloweenBooks() {
+        try {
+            _halloweenBooks.value = fetchBooksByFilter(BookFilter(genre = BookGenre.HORROR))
+        }catch (e : Exception){
+            Log.d("Books", "fetchRecentBooks: ${e.message}")
+        }
+    }
+
+    suspend fun fetchRecentBooks() {
+        try {
+            _recentBooks.value = fetchBooksByFilter(
+                BookFilter(
+                    maxPublishDate = LocalDate.now(),
+                    minPublishDate = LocalDate.now().minusYears(4)
+                )
+            )
+        }catch (e : Exception){
+            Log.d("Books", "fetchRecentBooks: ${e.message}")
         }
     }
 }

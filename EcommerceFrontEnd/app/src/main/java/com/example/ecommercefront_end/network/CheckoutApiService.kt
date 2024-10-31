@@ -1,12 +1,16 @@
 package com.example.ecommercefront_end.network
 
 import com.example.ecommercefront_end.model.Address
+import com.example.ecommercefront_end.model.CheckoutRequest
+import com.example.ecommercefront_end.model.PaymentMethod
 import com.example.ecommercefront_end.model.RequiresAuth
 import com.example.ecommercefront_end.model.SaveAddress
+import com.example.ecommercefront_end.model.SaveOrder
 import com.example.ecommercefront_end.model.SavePaymentMethod
 import com.example.ecommercefront_end.model.UserId
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -27,7 +31,7 @@ interface CheckoutApiService {
         @Body userId: UserId
     ) : Address
 
-    @PUT("addresses/{userId}{addressId}/edit-address")
+    @PUT("addresses/{userId}/{addressId}/edit-address")
     @RequiresAuth
     suspend fun updateShippingAddress(
         @Path("userId") userId: UUID,
@@ -48,17 +52,34 @@ interface CheckoutApiService {
 
     // Recupera la lista dei metodi di pagamento dell'utente
     @GET("paymentMethods/get/{userId}")
-    suspend fun getPaymentMethods(@Path("userId") userId: Long)
+    @RequiresAuth
+    suspend fun getPaymentMethods(@Path("userId") userId: UUID) : Response<List<PaymentMethod>?>
+
+    @GET("paymentMethods/get/{userId}/{paymentMethodId}")
+    @RequiresAuth
+    suspend fun getPaymentMethod(
+        @Path("userId") userId: UUID,
+        @Path("paymentMethodId") paymentMethodId: Long
+    ) : Response<PaymentMethod?>
+
+    @DELETE("paymentMethods/delete/{paymentMethodId}/{userId}")
+    @RequiresAuth
+    suspend fun deletePaymentMethod(
+        @Path("userId") userId: UUID,
+        @Path("paymentMethodId") paymentMethodId: Long
+    )
 
     // Aggiunge un nuovo metodo di pagamento
     @POST("paymentMethods/add")
-    suspend fun addPaymentMethod(
-        @Path("userId") userId: Long,
-        @Body paymentMethod: SavePaymentMethod
-    )
-
-    // Recupera il totale dell'ordine
-    @GET("shopping-cart/get/total/{userId}")
     @RequiresAuth
-    suspend fun getOrderTotal(@Path("userId") userId: UUID): Double
+    suspend fun addPaymentMethod(
+        @Body paymentMethod: SavePaymentMethod
+    ) : Response<PaymentMethod>
+
+    @POST("orders/add")
+    @RequiresAuth
+    suspend fun addOrder(
+        @Body checkoutRequest: CheckoutRequest
+    ) : Response<SaveOrder>
+
 }

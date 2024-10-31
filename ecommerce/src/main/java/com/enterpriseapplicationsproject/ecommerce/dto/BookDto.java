@@ -42,5 +42,7 @@ public class BookDto {
 
     private Integer stock;
 
-    private MultipartFile image;
+    private String imagePath;
+
+    private boolean available;
 }

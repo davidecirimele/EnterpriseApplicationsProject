@@ -10,4 +10,5 @@ data class User(
     val lastName: String,
     val birthdate: LocalDate,
     val phoneNumber : String,
+    val role: String,
 )

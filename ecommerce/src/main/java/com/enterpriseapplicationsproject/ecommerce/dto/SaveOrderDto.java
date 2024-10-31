@@ -15,6 +15,8 @@ import java.util.List;
     @Data
     public class SaveOrderDto {
 
+        private Long id;
+
         private UserIdDto user;
 
         private AddressDto address;

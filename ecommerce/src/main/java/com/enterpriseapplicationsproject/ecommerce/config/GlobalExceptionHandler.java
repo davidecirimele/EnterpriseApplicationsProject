@@ -2,6 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.config;
 
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.ShoppingCart;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.dto.ServiceError;
 import com.enterpriseapplicationsproject.ecommerce.exception.*;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -12,14 +13,18 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -74,6 +79,25 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.valueOf(HttpStatus.NOT_FOUND.value()), req, ex.getMessage());
     }
 
+    @ExceptionHandler(WishlistNotJoinedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ServiceError onResourceNotFoundException(WebRequest req, WishlistNotJoinedException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.CONFLICT.value()), req, ex.getMessage());
+    }
+
+    @ExceptionHandler(WishlistNotCreatedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ServiceError onResourceNotFoundException(WebRequest req, WishlistNotCreatedException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.UNAUTHORIZED.value()), req, ex.getMessage());
+    }
+
+    @ExceptionHandler(WishlistCantBeDeletedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ServiceError onResourceNotFoundException(WebRequest req, WishlistCantBeDeletedException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.CONFLICT.value()), req, ex.getMessage());
+    }
+
+
     @ExceptionHandler(WishlistItemNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ServiceError onResourceNotFoundException(WebRequest req, WishlistItemNotFoundException ex){
@@ -124,8 +148,11 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.valueOf(HttpStatus.FORBIDDEN.value()), req, ex.getMessage());
     }
 
-
-
+    @ExceptionHandler(OrderCreationException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ServiceError onOrderCreationException(WebRequest req, OrderCreationException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()), req, ex.getMessage());
+    }
 
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.BAD_GATEWAY)
@@ -154,4 +181,5 @@ public class GlobalExceptionHandler {
         return output;
 
     }
+
 }

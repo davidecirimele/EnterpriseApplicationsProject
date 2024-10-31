@@ -35,9 +35,10 @@ import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.model.SaveAddress
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
 import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
+import java.util.UUID
 
 @Composable
-fun InsertAddressScreen(viewModel: AddressViewModel, navController: NavHostController) {
+fun InsertAddressScreen(viewModel: AddressViewModel, navController: NavHostController, userId: UUID? = null) {
     var street by remember { mutableStateOf("") }
     var province by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
@@ -129,12 +130,9 @@ fun InsertAddressScreen(viewModel: AddressViewModel, navController: NavHostContr
 
             Button(
                 onClick = {
-                    viewModel.insertAddress(SaveAddress(street, province, city, state, postalCode, additionalInfo))
-                    navController.navigate("addresses") {
-                        popUpTo("my-account") {
-                            saveState = true
-                        }
-                    }
+                    viewModel.insertAddress(userId, SaveAddress(street, province, city, state, postalCode, additionalInfo))
+
+                    navController.popBackStack()
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = street.isNotBlank() && province.isNotBlank() && city.isNotBlank() && state.isNotBlank() && postalCode.isNotBlank()

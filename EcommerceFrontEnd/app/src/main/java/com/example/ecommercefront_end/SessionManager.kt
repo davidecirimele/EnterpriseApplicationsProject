@@ -139,10 +139,12 @@ object SessionManager {
         val lastName = jwt.getClaim("lastName").asString()
         val birthdate = jwt.getClaim("birthdate").asString()
         val phone_number = jwt.getClaim("phonenumber").asString()
+        val role = jwt.getClaim("role").asString()
+        Log.d(TAG, "decodeJwtToken Role: $role")
 
-        return if (userIdS != null && email != null && firstName != null && lastName != null && birthdate != null && phone_number != null) {
+        return if (userIdS != null && email != null && firstName != null && lastName != null && birthdate != null && phone_number != null && role != null) {
         val userId = UUID.fromString(userIdS)
-        User(userId, firstName, lastName, LocalDate.parse(birthdate), phone_number)
+        User(userId, firstName, lastName, LocalDate.parse(birthdate), phone_number, role)
     } else {
         null
     }

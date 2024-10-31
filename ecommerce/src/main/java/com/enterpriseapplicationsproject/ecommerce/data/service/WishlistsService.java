@@ -2,6 +2,9 @@ package com.enterpriseapplicationsproject.ecommerce.data.service;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistPrivacy;
+import com.enterpriseapplicationsproject.ecommerce.dto.SaveBookDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.SaveWishlistDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistDto;
 import jakarta.transaction.Transactional;
 
@@ -19,7 +22,8 @@ public interface WishlistsService {
 
     List<Wishlist> getAll();
 
-    void save(Wishlist wishlist);
+
+    WishlistDto save(SaveWishlistDto wishlistDto);
 
     WishlistDto save(WishlistDto wishlistDto);
 
@@ -41,7 +45,11 @@ public interface WishlistsService {
     List<WishlistDto> getByLastname(String name);
 
     void deleteWishlist(Long id);
-    WishlistDto deleteWishlistByID(Long id);
+    WishlistDto deleteWishlistByID(Long id, UUID idUser);
 
     WishlistDto getWishlistByToken(String token);
+
+    void save(Wishlist wishlist);
+
+    WishlistDto save(UUID idUser, String wName, WishlistPrivacy wPrivacySetting);
 }

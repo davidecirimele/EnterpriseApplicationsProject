@@ -8,8 +8,8 @@ data class BookFilter (
 
     val weight : Double? = null,
     val price : Double? = null,
-    val minPrice : Double? = null,
-    val maxPrice : Double? = null,
+    var minPrice : Double? = null,
+    var maxPrice : Double? = null,
     val stock : Int? = null,
     val title : String? = null,
     val author : String? = null,
@@ -28,5 +28,5 @@ data class BookFilter (
     val publishDate : LocalDate? = null,
     val minPublishDate : LocalDate? = null,
     val maxPublishDate : LocalDate? = null,
-
+    var available : Boolean? = true
     )

@@ -29,10 +29,4 @@ public class SaveUserDto {
     @ValidPhoneNumber
     private String phoneNumber;
 
-    public CredentialDto getCredential(){
-        if(credential==null)
-            credential = new CredentialDto();
-        return credential;
-    }
-
 }

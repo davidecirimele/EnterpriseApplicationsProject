@@ -8,6 +8,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -83,6 +84,12 @@ public class JwtService {
         String birthDateStr = ((LoggedUserDetails)userDetails).getBirthDate().format(DATE_FORMATTER);
         extraClaims.put("birthdate", birthDateStr);
         extraClaims.put("phonenumber", ((LoggedUserDetails) userDetails).getPhoneNumber());
+
+        String roles = ((LoggedUserDetails) userDetails).getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        extraClaims.put("role", roles);
 
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }

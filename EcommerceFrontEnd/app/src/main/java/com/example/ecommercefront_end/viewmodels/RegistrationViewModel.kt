@@ -18,6 +18,7 @@ import com.example.ecommercefront_end.model.SaveUser
 import com.example.ecommercefront_end.model.UserDetails
 import com.example.ecommercefront_end.repository.AuthRepository
 import kotlinx.coroutines.launch
+import retrofit2.Response
 import java.time.LocalDate
 
 data class RegistrationData(
@@ -27,7 +28,7 @@ data class RegistrationData(
     var password: String = "",
     var birthDate: LocalDate = LocalDate.parse("1980-01-01"),
     var phoneNumber: String = "",
-    var shippingAddress: ShippingAddress = ShippingAddress()
+    var admin: String = ""
 )
 
 data class ShippingAddress(
@@ -59,20 +60,14 @@ class RegistrationViewModel(private val registrationRepository: AuthRepository) 
         )
     }
 
-    fun updateUserDetails(birthDate: LocalDate, phoneNumber: String) {
+    fun updateUserDetails(birthDate: LocalDate, phoneNumber: String, admin: String) {
         registrationData.value = registrationData.value.copy(
             birthDate = birthDate,
-            phoneNumber = phoneNumber
+            phoneNumber = phoneNumber,
+            admin = admin
         )
     }
 
-
-
-    fun updateShippingAddress(street: String, city: String, postalCode: String, country: String) {
-        registrationData.value = registrationData.value.copy(
-            shippingAddress = ShippingAddress(street, city, postalCode, country)
-        )
-    }
 
     fun register(onRegistrationComplete: ()-> Unit){
         viewModelScope.launch {
@@ -87,9 +82,18 @@ class RegistrationViewModel(private val registrationRepository: AuthRepository) 
                     Credential(registrationData.value.email,registrationData.value.password),
                     registrationData.value.phoneNumber)
 
-                Log.d(TAG, "registrazione: tentativo $user")
-                val response = registrationRepository.registerUser(user)
-                Log.d(TAG, "response: $response")
+                var response: Response<UserDetails>
+
+                if(registrationData.value.admin.isNotBlank() && registrationData.value.admin == "0000") {
+                    Log.d(TAG, "registrazione: tentativo admin $user")
+                    response = registrationRepository.registerAdmin(user)
+                    Log.d(TAG, "response: $response")
+                }
+                else {
+                    Log.d(TAG, "registrazione: tentativo user$user")
+                    response = registrationRepository.registerUser(user)
+                    Log.d(TAG, "response: $response")
+                }
 
 
                 if (response.isSuccessful && response.body() != null) {

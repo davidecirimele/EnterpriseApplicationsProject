@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.Text
@@ -16,7 +17,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
+//import com.example.ecommercefront_end.viewmodels.HomeViewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,15 +41,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavHostController
 import com.example.ecommercefront_end.SessionManager
+import com.example.ecommercefront_end.SessionManager.user
 import java.time.format.DateTimeFormatter
 import com.example.ecommercefront_end.model.Book
+import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.repository.CartRepository
+import com.example.ecommercefront_end.repository.WishlistRepository
+import com.example.ecommercefront_end.viewmodels.WishlistViewModel
+import com.example.ecommercefront_end.ui.books.BookCover
+import com.example.ecommercefront_end.ui.books.BookInfoCard
+import com.example.ecommercefront_end.viewmodels.BookViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController: NavHostController) {
+fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: CartRepository, wishlistViewModel: WishlistViewModel, navController: NavHostController) {
     var selectedQuantity by remember { mutableStateOf(1) }
-    var shippingAddress by remember { mutableStateOf("Via Roma 1") }
+    var shippingAddress by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
+
+    var selectedWishlist by remember { mutableStateOf<Wishlist?>(null)}
+    val userWishlist by wishlistViewModel.onlyMyWishlists.collectAsState()
+
 
     LazyColumn(
         modifier = Modifier
@@ -71,7 +84,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
                         .padding(bottom = 8.dp)
                 )
                 Text(
-                    text = "di " + book.author,
+                    text = book.author,
                     fontSize = 20.sp,
                     modifier = Modifier
                         .align(Alignment.Start)
@@ -82,22 +95,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
 
         // Immagine del libro
         item {
-            val imageUrl = remember(book.id) {
-                testImgs[book.id.hashCode() % testImgs.size]
-            }
-            val imagePainter = rememberAsyncImagePainter(
-                model = imageUrl,
-                error = rememberAsyncImagePainter("https://mockuptree.com/wp-content/uploads/edd/2019/10/free-Book-mockup-150x150.jpg")
-            )
-            Image(
-                painter = imagePainter,
-                contentDescription = book.title,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp)
-                    .padding(bottom = 16.dp),
-                contentScale = ContentScale.Crop
-            )
+            BookCover(book, bookViewModel)
         }
 
 
@@ -111,7 +109,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "${"%,.2f".format(book.price)} €",
+                    text = "€ ${"%,.2f".format(book.price)}",
                     fontSize = 31.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.CenterVertically)
@@ -122,7 +120,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
                     OutlinedButton(onClick = { qExpanded = true }) {
-                        Text("Quantità: $selectedQuantity")
+                        Text("Quantity: $selectedQuantity")
                     }
                     DropdownMenu(
                         expanded = qExpanded,
@@ -144,7 +142,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
         // Indirizzo di spedizione
         item {
             Text(
-                text = "Invia a $shippingAddress",
+                text = "Send to $shippingAddress",
                 fontSize = 14.sp,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -161,7 +159,6 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                val coroutineScope = rememberCoroutineScope()
                 Button(
                     onClick = {
                         coroutineScope.launch {
@@ -169,7 +166,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
                             SessionManager.user?.let { user ->
                                 cartRepository.addCartItem(user.id, selectedQuantity, book.id)
                             } ?: run {
-                                navController.navigate(route = "login") {
+                                navController.navigate(route = "userAuth") {
                                     popUpTo(route = "cart") {
                                         inclusive = true
                                     }
@@ -186,7 +183,7 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
                         .height(60.dp)
                         .padding(bottom = 18.dp)
                 ) {
-                    Text("Aggiungi al carrello")
+                    Text("Add to cart")
                 }
             }
         }
@@ -207,19 +204,21 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
                     OutlinedButton(onClick = { wExpanded = true }) {
-                        Text("Aggiungi a una wishlist $selectedQuantity")
+                        Text("Aggiungi a una wishlist ")
                     }
                     DropdownMenu(
                         expanded = wExpanded,
                         onDismissRequest = { wExpanded = false }
                     ) {
-                        for (i in 1..4) {
+                        userWishlist.forEach { w ->
                             DropdownMenuItem(
                                 onClick = {
-                                    selectedQuantity = i
+                                    selectedWishlist = w
                                     wExpanded = false
+
+                                    w.id?.let { wishlistViewModel.addWishlistItem(book.id, w.id) }
                                 },
-                                text = { Text(text = "$i") }
+                                text = { Text(w.name) }
                             )
                         }
                     }
@@ -229,227 +228,8 @@ fun BookDetailsScreen(book: Book, cartRepository: CartRepository, navController:
 
         item { Spacer(modifier = Modifier.height(40.dp)) }
 
-        item { // Informazioni aggiuntive
-            Text(
-                text = "Dettagli del prodotto",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-
-
-                    // Informazioni in due colonne
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                            .background(Color.LightGray.copy(alpha = 0.2f))
-                    ) {
-                        Text(
-                            text = "Autore",
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
-                        )
-                        Text(
-                            text = book.author,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                    ) {
-                        Text(
-                            text = "ISBN",
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
-
-                        )
-                        Text(
-                            text = book.ISBN,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                    ) {
-                        Text(
-                            text = "Pagine",
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
-
-                        )
-                        Text(
-                            text = "${book.pages}",
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                    ) {
-                        Text(
-                            text = "Edizione",
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
-
-                        )
-                        Text(
-                            text = book.edition,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                    ) {
-                        Text(
-                            text = "Formato",
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
-                        )
-                        Text(
-                            text = book.format?.name ?: "",
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                    ) {
-                        Text(
-                            text = "Genere",
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
-
-                        )
-                        Text(
-                            text = book.genre?.name ?: "",
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                    ) {
-                        Text(
-                            text = "Lingua",
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
-
-                        )
-                        Text(
-                            text = book.language?.name ?: "",
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                    ) {
-                        Text(
-                            text = "Editore",
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
-
-                        )
-                        Text(
-                            text = book.publisher,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                    ) {
-                        Text(
-                            text = "Età consigliata",
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
-
-                        )
-                        Text(
-                            text = if (book.age != null) {
-                                "${book.age}"
-                            }else {
-                                "--" // O un altro messaggio di default
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                    ) {
-                        Text(
-                            text = "Data di pubblicazione",
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
-
-                        )
-                        Text(
-                            text = if (book.publishDate != null) {
-                                book.publishDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                            } else {
-                                "--" // O un altro messaggio di default
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 12.dp)
-                    ) {
-                        Text(
-                            text = "Peso",
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
-
-                        )
-                        Text(
-                            if (book.weight != null) {
-                                "${book.weight} kg"
-                            } else {
-                                " --" // O un altro messaggio di default
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
+        item {
+            BookInfoCard(book)
         }
     }
 }

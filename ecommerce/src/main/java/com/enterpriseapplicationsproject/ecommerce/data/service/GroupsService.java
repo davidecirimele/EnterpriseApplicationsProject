@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface GroupsService {
     GroupDto createGroup(GroupDto groupDto);
 
-    GroupDto findGroupById(Long id);
+    GroupDto findGroupById(Long id, UUID idUser);
 
     GroupDto updateGroup(Long id, GroupDto groupDto);
 
@@ -17,9 +17,9 @@ public interface GroupsService {
 
     List<GroupDto> getAllGroups();
 
-    void addUserToGroup(Long groupId, UUID userId);
+    boolean addUserToGroup(UUID idUser, String token);
 
-    void removeUserFromGroup(Long groupId, UUID userId);
+    boolean removeUserFromGroup(Long groupId, UUID userId);
 
     Group getGroupById(Long id);
 

@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,8 +22,9 @@ public class OrderItemServiceImpl  implements OrderItemsService {
 
 
     @Override
-    public List<OrderItemDto> getOrderItemsByOrderId(Long orderId) {
-        List<OrderItem> orderItems = orderItemsDao.findAllByOrderOrderId(orderId);
+    public List<OrderItemDto> getOrderItemsByOrderId(Long orderId, UUID userId) {
+
+        List<OrderItem> orderItems = orderItemsDao.findAllByOrderOrderIdAndUserId(orderId, userId);
         if (orderItems.isEmpty()) {
             throw  new OrderNotFoundException("Order not found");
         }
