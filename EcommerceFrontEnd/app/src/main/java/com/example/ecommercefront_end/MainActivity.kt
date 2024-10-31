@@ -1,7 +1,6 @@
 package com.example.ecommercefront_end
 
 import CheckoutViewModel
-import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -59,7 +58,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -98,13 +96,6 @@ import com.example.ecommercefront_end.ui.checkout.CheckoutAddressScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutPaymentScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
 import com.example.ecommercefront_end.ui.admin.AdminOrdersScreen
-import com.example.ecommercefront_end.ui.admin.AdminSingleBookScreen
-import com.example.ecommercefront_end.ui.admin.AdminUserDetailsScreen
-import com.example.ecommercefront_end.ui.admin.AdminUsersListScreen
-import com.example.ecommercefront_end.ui.admin.InsertProductScreen
-import com.example.ecommercefront_end.ui.checkout.CheckoutAddressScreen
-import com.example.ecommercefront_end.ui.checkout.CheckoutPaymentScreen
-import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
 import com.example.ecommercefront_end.ui.checkout.OrderConfirmationScreen
 import com.example.ecommercefront_end.ui.user.InsertAddressScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
@@ -205,10 +196,12 @@ fun NavigationView(navController: NavHostController) {
                 // Carica il libro corrispondente all'id
                 LaunchedEffect(idBook) {
                     bookViewModel.loadBook(idBook)
+                    wishlistViewModel.fetchWishlists(null)
                 }
 
                 // Osserva i cambiamenti del libro
                 val book by bookViewModel.bookFlow.collectAsState()
+
 
                 book?.let {
                     BookDetailsScreen(book = it, bookViewModel = bookViewModel, cartRepository = CartRepository(RetrofitClient.cartApiService), wishlistViewModel,navController)
@@ -277,7 +270,7 @@ fun NavigationView(navController: NavHostController) {
                 //val user by adminViewModel.userFlow.collectAsState()
 
 
-                WishlistsScreen(viewModel = wishlistViewModel,  navController = navController)
+                WishlistsScreen(wishlistViewModel = wishlistViewModel, bookViewModel= bookViewModel, navController = navController)
 
             }
             composable("wishlist") {
@@ -291,7 +284,7 @@ fun NavigationView(navController: NavHostController) {
                 LaunchedEffect(Unit) {
                     wishlistViewModel.fetchWishlists(null)
                 }
-                WishlistsScreen(viewModel = wishlistViewModel,  navController = navController)
+                WishlistsScreen(wishlistViewModel = wishlistViewModel, bookViewModel= bookViewModel,  navController = navController)
             }
 
             composable("userAuth") {

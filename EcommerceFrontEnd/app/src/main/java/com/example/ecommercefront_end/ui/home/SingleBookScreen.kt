@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end.ui.home
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -61,6 +62,9 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
 
     var selectedWishlist by remember { mutableStateOf<Wishlist?>(null)}
     val userWishlist by wishlistViewModel.onlyMyWishlists.collectAsState()
+
+
+    var wExpanded by remember { mutableStateOf(false) }
 
 
     LazyColumn(
@@ -199,7 +203,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                var wExpanded by remember { mutableStateOf(false) }
+
                 Box(
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
@@ -210,6 +214,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
                         expanded = wExpanded,
                         onDismissRequest = { wExpanded = false }
                     ) {
+                        Log.d("Aggiung item", userWishlist.toString())
                         userWishlist.forEach { w ->
                             DropdownMenuItem(
                                 onClick = {

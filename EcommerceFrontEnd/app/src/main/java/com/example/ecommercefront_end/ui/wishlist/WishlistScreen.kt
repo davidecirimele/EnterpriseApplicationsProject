@@ -73,18 +73,20 @@ import com.example.ecommercefront_end.SessionManager.user
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.model.WishlistPrivacy
+import com.example.ecommercefront_end.ui.books.BookCover
+import com.example.ecommercefront_end.viewmodels.BookViewModel
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
 
 
 @Composable
-fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) {
-    val wLists by viewModel.wishlists.collectAsState()
-    val wListItems by viewModel.wishlistItems.collectAsState()
-    val isWishlistLoading by viewModel.isLoadingWishlist.collectAsState()
+fun WishlistsScreen(wishlistViewModel: WishlistViewModel, bookViewModel : BookViewModel, navController: NavController) {
+    val wLists by wishlistViewModel.wishlists.collectAsState()
+    val wListItems by wishlistViewModel.wishlistItems.collectAsState()
+    val isWishlistLoading by wishlistViewModel.isLoadingWishlist.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val showSnackbar by viewModel.showSnackbar.collectAsState()
-    val snackbarMessage by viewModel.snackbarMessage.collectAsState()
+    val showSnackbar by wishlistViewModel.showSnackbar.collectAsState()
+    val snackbarMessage by wishlistViewModel.snackbarMessage.collectAsState()
 
 
     // Gestione della selezione della wishlist
@@ -109,10 +111,10 @@ fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) 
                 item {
                     WishlistsList(
                         wishlists = wLists,
-                        viewModel = viewModel,
+                        viewModel = wishlistViewModel,
                         onWishlistSelected = { wishlist ->
                             selectedWishlist.value = wishlist
-                            wishlist.id?.let { viewModel.fetchWishlistItems(it, user!!.id) }
+                            wishlist.id?.let { wishlistViewModel.fetchWishlistItems(it, user!!.id) }
                         }
                     )
                 }
@@ -124,7 +126,8 @@ fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) 
                             wishlist = wishlist,
                             items = wListItems,  // Usa wListItems osservato, non selectedWishlist.items
                             navController = navController,
-                            viewModel = viewModel
+                            wishlistViewModel = wishlistViewModel,
+                            bookViewModel = bookViewModel
                         )
                     }
                 }
@@ -136,7 +139,7 @@ fun WishlistsScreen(viewModel: WishlistViewModel, navController: NavController) 
                     message = snackbarMessage,
                     duration = SnackbarDuration.Short
                 )
-                viewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
+                wishlistViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
             }
         }
 
@@ -407,7 +410,8 @@ fun WishlistDetails(
     wishlist: Wishlist,
     items: List<WishlistItem>,
     navController: NavController,
-    viewModel: WishlistViewModel
+    wishlistViewModel: WishlistViewModel,
+    bookViewModel: BookViewModel
 ) {
 
     var privacyOptions by remember { mutableStateOf(wishlist.privacySetting) }
@@ -418,7 +422,7 @@ fun WishlistDetails(
     var isFriendWishlist : Boolean? = null
 
     if (isAdmin){
-        val idUserSelectedByAdmin by viewModel.userSelectedByAdmin.collectAsState()
+        val idUserSelectedByAdmin by wishlistViewModel.userSelectedByAdmin.collectAsState()
         isFriendWishlist = idUserSelectedByAdmin?.compareTo(wishlist.user?.id) != 0
 
     }
@@ -433,17 +437,17 @@ fun WishlistDetails(
     var showRenameDialog by remember { mutableStateOf(false) }
     var newWishlistName by remember { mutableStateOf(wishlist.name) }
 
-    val isLoadingWishlist by viewModel.isLoadingWishlist.collectAsState()
-    val isLoadingItems by viewModel.isLoadingItems.collectAsState()
-    val error by viewModel.error.collectAsState()
+    val isLoadingWishlist by wishlistViewModel.isLoadingWishlist.collectAsState()
+    val isLoadingItems by wishlistViewModel.isLoadingItems.collectAsState()
+    val error by wishlistViewModel.error.collectAsState()
 
-    val tokenToShare by viewModel.tokenToShare.collectAsState()
+    val tokenToShare by wishlistViewModel.tokenToShare.collectAsState()
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
 
     // Ricarica gli elementi della wishlist selezionata
     LaunchedEffect(key1 = wishlist.id) {
-        wishlist.id?.let { user?.let { it1 -> viewModel.fetchWishlistItems(it, it1.id) } }
+        wishlist.id?.let { user?.let { it1 -> wishlistViewModel.fetchWishlistItems(it, it1.id) } }
     }
 
     if (isLoadingWishlist) {
@@ -539,10 +543,10 @@ fun WishlistDetails(
                             Button(onClick = {
                                 //onDeleteWishlist(wishlist) // Chiama il callback per eliminare la wishlist
                                 if(wishlistUpdatable){
-                                    wishlist.id?.let { viewModel.deleteWishlist(it) }
+                                    wishlist.id?.let { wishlistViewModel.deleteWishlist(it) }
                                 }
                                 else{
-                                    viewModel.unshareWishlist(wishlist)
+                                    wishlistViewModel.unshareWishlist(wishlist)
                                 }
                                 showDeleteConfirmation = false
                             }) {
@@ -571,7 +575,7 @@ fun WishlistDetails(
                         },
                         confirmButton = {
                             Button(onClick = {
-                                wishlist.id?.let { viewModel.updateWishlist(it, newWishlistName, privacyOptions, null) } // Chiama il callback per rinominare la wishlist
+                                wishlist.id?.let { wishlistViewModel.updateWishlist(it, newWishlistName, privacyOptions, null) } // Chiama il callback per rinominare la wishlist
                                 showRenameDialog = false
                             }) {
                                 Text("Rinomina")
@@ -631,7 +635,7 @@ fun WishlistDetails(
                             else if (wishlist.privacySetting == WishlistPrivacy.PUBLIC)
                                 privacySetting = WishlistPrivacy.PRIVATE
 
-                            wishlist.id?.let { viewModel.updateWishlist(it, "", privacySetting, null) }
+                            wishlist.id?.let { wishlistViewModel.updateWishlist(it, "", privacySetting, null) }
                         },
                         modifier = Modifier.height(36.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp)
@@ -669,8 +673,9 @@ fun WishlistDetails(
 
                             WishlistItemCard(wishlistItem = item,
                                 navController = navController, onRemoveClick = {
-                                    viewModel.deleteWishlistItem(item.id)
+                                    wishlistViewModel.deleteWishlistItem(item.id)
                                 },
+                                bookViewModel = bookViewModel,
                                 wishlistUpdateable = wishlistUpdatable,
                                 isFriendWishlist = isFriendWishlist
                                 )
@@ -696,11 +701,13 @@ fun WishlistDetails(
 
 @Composable
 fun WishlistItemCard(
+    bookViewModel: BookViewModel,
     wishlistItem: WishlistItem,
     navController: NavController,
     onRemoveClick: () -> Unit,
     wishlistUpdateable: Boolean,
     isFriendWishlist: Boolean
+
 ) {
     Card(
         modifier = Modifier
@@ -714,13 +721,18 @@ fun WishlistItemCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+
             Box(
                 modifier = Modifier
-                    .size(50.dp)
+                    .size(70.dp, 90.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(color = Color.Gray)
+                    .background(color = Color.Transparent),
+                contentAlignment = Alignment.Center
             ) {
-                // Inserisci l'immagine del libro qui
+                BookCover(
+                    book = wishlistItem.book,
+                    viewModel = bookViewModel
+                )
             }
 
             Spacer(modifier = Modifier.width(8.dp))
