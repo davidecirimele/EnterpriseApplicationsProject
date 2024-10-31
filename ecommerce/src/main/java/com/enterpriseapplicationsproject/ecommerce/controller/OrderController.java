@@ -32,7 +32,7 @@ public class OrderController {
         return new ResponseEntity<>(addedOrder, HttpStatus.CREATED);
     }
 
-    @GetMapping(consumes = "application/json", path = "/get/{userId}")
+    @GetMapping(path = "/get/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<OrderDto>> getAllUserOrders(@PathVariable UUID userId) {
         List<OrderDto> orders = ordersService.getAllOrdersByUserId(userId);

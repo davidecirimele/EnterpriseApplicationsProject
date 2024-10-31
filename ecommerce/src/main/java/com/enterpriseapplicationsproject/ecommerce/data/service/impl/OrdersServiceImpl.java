@@ -95,7 +95,7 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     public List<OrderDto> getAllOrdersByUserId(UUID userId) {
 
-        List<Order> orders = ordersDao.findAllByUserId(userId, Sort.by(Sort.Order.desc("ordedDate")));
+        List<Order> orders = ordersDao.findAllByUserId(userId, Sort.by(Sort.Order.desc("orderDate")));
 
 
 
