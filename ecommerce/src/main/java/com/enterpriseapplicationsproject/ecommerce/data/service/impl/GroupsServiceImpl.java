@@ -150,9 +150,12 @@ public class GroupsServiceImpl implements GroupsService {
 
         members.add(user);
         groupDao.save(group);
+        System.out.println("Group saved");
 
         wishlistToJoin.setGroup(group);
+        System.out.println("Group set");
         wishlistDao.save(wishlistToJoin);
+        System.out.println("Wishlist saved");
         return true;
     }
 

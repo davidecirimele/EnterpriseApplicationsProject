@@ -8,6 +8,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistItem;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistItemsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistItemDto;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -36,6 +37,8 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
         return modelMapper.map(wi, WishlistItemDto.class);
 
     }
+
+    //@Transactional
     @Override
     public WishlistItemDto addItem(Long idBook, Long idWishlist, UUID idUser) {
 
@@ -45,6 +48,16 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
 
         Book book = booksDao.findById(idBook)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
+
+        List<WishlistItem> wishlistItems = wishlistItemsDao.findByWishlistId(idWishlist);
+
+        if (wishlistItems != null){
+            for (WishlistItem wi : wishlistItems) {
+                if (wi.getBook().getId().equals(idBook)) {
+                    throw new IllegalArgumentException("Book already in wishlist");
+                }
+            }
+        }
 
         WishlistItem wishlistItem = new WishlistItem();
 

@@ -52,8 +52,9 @@ public class GroupsController {
     public ResponseEntity<Boolean> addUser(@PathVariable("idUser") UUID idUser, @PathVariable("token") String token) {
         boolean resp = groupsService.addUserToGroup(idUser, token);
         if (resp)
-            return new ResponseEntity<>(HttpStatus.OK);
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.ok(true);
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false);
     }
 
 

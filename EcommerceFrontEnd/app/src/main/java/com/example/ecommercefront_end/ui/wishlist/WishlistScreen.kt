@@ -415,9 +415,18 @@ fun WishlistDetails(
 
     val isAdmin = user?.role == "ROLE_ADMIN"
     val wishlistUpdatable = user?.id?.compareTo(wishlist.user?.id) == 0 || isAdmin
-    val idUserSelectedByAdmin by viewModel.userSelectedByAdmin.collectAsState()
-    val isFriendWishlist = idUserSelectedByAdmin?.compareTo(wishlist.user?.id) != 0
+    var isFriendWishlist : Boolean? = null
 
+    if (isAdmin){
+        val idUserSelectedByAdmin by viewModel.userSelectedByAdmin.collectAsState()
+        isFriendWishlist = idUserSelectedByAdmin?.compareTo(wishlist.user?.id) != 0
+
+    }
+    else{
+        isFriendWishlist = user?.id?.compareTo(wishlist.user?.id) != 0
+    }
+
+   // YTk4YzJiYzQtMGQ5NS00YjI0LThjODQtMzE3N2RjNTkyODVl
 
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var itemToRemove by remember { mutableStateOf<WishlistItem?>(null) }
