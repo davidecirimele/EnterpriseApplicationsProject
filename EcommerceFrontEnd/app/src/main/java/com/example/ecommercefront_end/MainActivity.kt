@@ -50,6 +50,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.internal.composableLambda
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -97,6 +98,7 @@ import com.example.ecommercefront_end.ui.checkout.CheckoutPaymentScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
 import com.example.ecommercefront_end.ui.admin.AdminOrdersScreen
 import com.example.ecommercefront_end.ui.checkout.OrderConfirmationScreen
+import com.example.ecommercefront_end.ui.user.GroupScreen
 import com.example.ecommercefront_end.ui.user.InsertAddressScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
 import com.example.ecommercefront_end.ui.user.UserAuthScreen
@@ -106,6 +108,7 @@ import com.example.ecommercefront_end.viewmodels.AddressViewModel
 import com.example.ecommercefront_end.viewmodels.AdminViewModel
 import com.example.ecommercefront_end.viewmodels.BookViewModel
 import com.example.ecommercefront_end.viewmodels.CartViewModel
+import com.example.ecommercefront_end.viewmodels.GroupViewModel
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
 import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
@@ -155,6 +158,8 @@ fun NavigationView(navController: NavHostController) {
 
     val wRepository = WishlistRepository( RetrofitClient.wishlistApiService, RetrofitClient.wishlistItemApiService)
     val groupRepository = GroupRepository(RetrofitClient.groupApiService)
+    val groupViewModel = GroupViewModel(groupRepository)
+
     val wishlistViewModel = remember { WishlistViewModel(wRepository, groupRepository) }
 
     val startDestination = if (SessionManager.user?.role == "ROLE_ADMIN") {
@@ -275,12 +280,6 @@ fun NavigationView(navController: NavHostController) {
             }
             composable("wishlist") {
                 selectedIndex.value = 3
-                val _wishlistApiService = RetrofitClient.wishlistApiService
-                val _wishlistItemApiService = RetrofitClient.wishlistItemApiService
-                val wRepository = WishlistRepository( RetrofitClient.wishlistApiService, RetrofitClient.wishlistItemApiService)
-                val groupRepository = GroupRepository(RetrofitClient.groupApiService)
-                val wishlistViewModel = remember { WishlistViewModel(wRepository, groupRepository) }
-
                 LaunchedEffect(Unit) {
                     wishlistViewModel.fetchWishlists(null)
                 }
@@ -317,6 +316,15 @@ fun NavigationView(navController: NavHostController) {
                 MyAccountScreen(
                     accountViewModel = accountViewModel, addressViewModel = addressViewModel,
                     navHostController = navController)
+            }
+            composable("groups") {
+                LaunchedEffect(Unit) {
+                    val groupoJob = async {groupViewModel.fetchGroups()}
+                    //groupViewModel.fetchGroupMembers()
+
+                    groupoJob.await()
+                }
+                GroupScreen(groupViewModel, navController)
             }
 
             composable("filtered-books") {

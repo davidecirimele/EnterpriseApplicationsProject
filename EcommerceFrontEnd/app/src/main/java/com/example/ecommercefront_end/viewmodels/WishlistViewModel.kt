@@ -99,7 +99,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                     _wishlistItems.value = wRepository.getWishlistItems(wishlistId, currentUser.id)
 
                 }
-                else if(SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN" && userId != null){
+                else if(SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN"){
                     _wishlistItems.value = wRepository.getWishlistItems(wishlistId, userId)
                 }
                 else{
@@ -418,17 +418,21 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
 
             }
         }
-    }
 
+    }
     fun setShowSnackbar(b: Boolean) {
         _showSnackbar.value = b
 
     }
 
+
     fun triggerSnackbar(message: String) {
         _snackbarMessage.value = message
         _showSnackbar.value = true
     }
+
+
+
 
 
 }

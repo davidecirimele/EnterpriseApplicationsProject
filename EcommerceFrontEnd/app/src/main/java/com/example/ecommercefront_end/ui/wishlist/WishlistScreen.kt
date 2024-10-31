@@ -661,7 +661,7 @@ fun WishlistDetails(
 
             }
             Spacer(modifier = Modifier.height(16.dp))
-            if (!items.isNullOrEmpty()) {
+            if (items.isNotEmpty()) {
                 if (isLoadingItems) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
@@ -678,7 +678,7 @@ fun WishlistDetails(
                                 bookViewModel = bookViewModel,
                                 wishlistUpdateable = wishlistUpdatable,
                                 isFriendWishlist = isFriendWishlist
-                                )
+                            )
                         }
                     }
                 }

@@ -2,6 +2,7 @@ package com.example.ecommercefront_end.network
 
 import com.example.ecommercefront_end.model.Group
 import com.example.ecommercefront_end.model.RequiresAuth
+import com.example.ecommercefront_end.model.User
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -13,9 +14,14 @@ import java.util.UUID
 
 interface GroupApiService {
 
-    @GET("groups/getById/{idUser}/{idGroup}")
+    @GET("groups/getById/{idUser}")
     @RequiresAuth
-    suspend fun getGroupById( @Path("idUser") idUser: UUID, @Path("idGroup") idGroup: Long): Group
+    suspend fun getAllGroupsByUser(@Path("idUser") idUser: UUID): Response<List<Group>>
+
+    @GET("groups/getMembers/{idGroup}/{idUser}")
+    @RequiresAuth
+    suspend fun getGroupMembersById(@Path("idGroup") idGroup: Long, @Path("idUser") idUser: UUID):
+            Response<List<User>>
 
     @PUT("groups/{groupId}")
     @RequiresAuth
@@ -36,6 +42,8 @@ interface GroupApiService {
     @DELETE("groups/{groupId}")
     @RequiresAuth
     suspend fun deleteGroup(@Path("groupId") groupId: Long): Response<Unit>
+
+
 }
 
 // create wishlist, remove items
