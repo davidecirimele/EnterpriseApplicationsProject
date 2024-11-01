@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.Button
@@ -27,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -39,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -80,10 +83,14 @@ fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostControll
     var weight by remember { mutableStateOf("") }
     var image by remember { mutableStateOf<File?>(null) }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Text(text = "Home", fontSize = 40.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(16.dp).align(
-            Alignment.CenterHorizontally))
-        Spacer(modifier = Modifier.height(8.dp))
+    Scaffold(topBar = {
+        TopAppBar(
+            title = { androidx.compose.material.Text("Insert Product") },
+            backgroundColor = Color(0xFF1F1F1F),
+            contentColor = Color.White
+        )
+    }) { paddingValues ->
+        Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             LazyColumn(
                 modifier = Modifier
                     .padding(top = 32.dp)
@@ -275,7 +282,7 @@ fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostControll
                 }
 
                 item {
-                    insertDate{selectedDate -> publishDate = selectedDate}
+                    insertDate { selectedDate -> publishDate = selectedDate }
 
                     Spacer(modifier = Modifier.height(10.dp))
                 }
@@ -304,38 +311,39 @@ fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostControll
                     }
                 }
             }
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = {
-                viewModel.insertBook(
-                    SaveBook(
-                        title = title,
-                        author = author,
-                        publisher = publisher,
-                        price = price.toDouble(),
-                        stock = stock.toInt(),
-                        ISBN = isbn,
-                        pages = pages.toInt(),
-                        edition = edition,
-                        format = BookFormat.valueOf(format),
-                        genre = BookGenre.valueOf(genre),
-                        language = BookLanguage.valueOf(language),
-                        age = age.toInt(),
-                        publishDate = publishDate,
-                        weight = weight.toDouble(),
-                        image = image
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    viewModel.insertBook(
+                        SaveBook(
+                            title = title,
+                            author = author,
+                            publisher = publisher,
+                            price = price.toDouble(),
+                            stock = stock.toInt(),
+                            ISBN = isbn,
+                            pages = pages.toInt(),
+                            edition = edition,
+                            format = BookFormat.valueOf(format),
+                            genre = BookGenre.valueOf(genre),
+                            language = BookLanguage.valueOf(language),
+                            age = age.toInt(),
+                            publishDate = publishDate,
+                            weight = weight.toDouble(),
+                            image = image
+                        )
                     )
-                )
-                viewModel.fetchBooksData()
-                navController.popBackStack()
-            },
-            enabled = title.isNotEmpty() && author.isNotEmpty() && publisher.isNotEmpty() &&
-                    price.isNotEmpty() && stock.isNotEmpty() && isbn.isNotEmpty() &&
-                    pages.isNotEmpty() && edition.isNotEmpty() && format.isNotEmpty() &&
-                    genre.isNotEmpty() && language.isNotEmpty() && age.isNotEmpty()
-                    && weight.isNotEmpty() && image != null
-        ) {
-            Text("Save Product", style = MaterialTheme.typography.bodyLarge)
+                    viewModel.fetchBooksData()
+                    navController.popBackStack()
+                },
+                enabled = title.isNotEmpty() && author.isNotEmpty() && publisher.isNotEmpty() &&
+                        price.isNotEmpty() && stock.isNotEmpty() && isbn.isNotEmpty() &&
+                        pages.isNotEmpty() && edition.isNotEmpty() && format.isNotEmpty() &&
+                        genre.isNotEmpty() && language.isNotEmpty() && age.isNotEmpty()
+                        && weight.isNotEmpty() && image != null
+            ) {
+                Text("Save Product", style = MaterialTheme.typography.bodyLarge)
+            }
         }
     }
 

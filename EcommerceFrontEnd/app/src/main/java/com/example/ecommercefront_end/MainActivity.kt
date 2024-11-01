@@ -100,6 +100,7 @@ import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
 import com.example.ecommercefront_end.ui.checkout.OrderConfirmationScreen
 import com.example.ecommercefront_end.ui.user.InsertAddressScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
+import com.example.ecommercefront_end.ui.user.PaymentMethodsScreen
 import com.example.ecommercefront_end.ui.user.UserAuthScreen
 import com.example.ecommercefront_end.ui.user.UserOrdersScreen
 import com.example.ecommercefront_end.ui.wishlist.WishlistsScreen
@@ -356,6 +357,9 @@ fun NavigationView(navController: NavHostController) {
             composable("orders") {
                 UserOrdersScreen(viewModel = accountViewModel, onOrderClick = {
                 })
+            }
+            composable("payment-methods") {
+                PaymentMethodsScreen(viewModel = checkoutViewModel, navController = navController)
             }
 
         }

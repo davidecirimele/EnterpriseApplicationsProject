@@ -79,7 +79,12 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navController: NavControl
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(searchValue) {
-        products = bookViewModel.fetchBooksByFilter(BookFilter())
+        val filter = if (searchValue.isBlank()) {
+            BookFilter(title = null, author = null, publisher = null)
+        } else {
+            BookFilter(title = searchValue, author = searchValue, publisher = searchValue)
+        }
+        products = bookViewModel.fetchBooksByFilter(filter)
     }
 
     Scaffold(topBar = {

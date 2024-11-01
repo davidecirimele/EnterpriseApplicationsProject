@@ -16,11 +16,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -34,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,43 +71,55 @@ fun AdminUsersListScreen(viewModel: AdminViewModel, navHostController: NavHostCo
         viewModel.fetchUsers()
     }
 
-    Column(modifier = Modifier.fillMaxSize()){
+    Scaffold(topBar = {
+        TopAppBar(
+            title = { androidx.compose.material.Text("Users") },
+            backgroundColor = Color(0xFF1F1F1F),
+            contentColor = Color.White
+        )
+    }) { paddingValues ->
+        Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
 
-        Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
-            TextField(
-                value = searchValue,
-                onValueChange = { searchValue = it;
-                    viewModel.filterUser(searchValue)
-                                },
-                label = { Text("Search by Name, Surname, ID or Email") },
-                shape = RoundedCornerShape(16.dp),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        Spacer(modifier = Modifier.padding(2.dp))
-        LazyColumn(modifier = Modifier
-            .fillMaxWidth()
-            .weight(1f)) {
-            if(users != null && users!!.isNotEmpty()) {
-                for ((index,user) in users!!.withIndex())
-                    item {
-                        Row(){
-                            Text(text = (index + 1).toString(),
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 20.sp,
-                                modifier = Modifier
-                                    .align(Alignment.CenterVertically)
-                                    .padding(4.dp))
-                            Spacer(modifier = Modifier.padding(2.dp))
-                            UserCard(user = user, navHostController)
-                        }
-                    }
+            Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
+                TextField(
+                    value = searchValue,
+                    onValueChange = {
+                        searchValue = it;
+                        viewModel.filterUser(searchValue)
+                    },
+                    label = { Text("Search by Name, Surname, ID or Email") },
+                    shape = RoundedCornerShape(16.dp),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
-            else{
-                item{
-                    Text(text = "No users")
+
+            Spacer(modifier = Modifier.padding(2.dp))
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                if (users != null && users!!.isNotEmpty()) {
+                    for ((index, user) in users!!.withIndex())
+                        item {
+                            Row() {
+                                Text(
+                                    text = (index + 1).toString(),
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 20.sp,
+                                    modifier = Modifier
+                                        .align(Alignment.CenterVertically)
+                                        .padding(4.dp)
+                                )
+                                Spacer(modifier = Modifier.padding(2.dp))
+                                UserCard(user = user, navHostController)
+                            }
+                        }
+                } else {
+                    item {
+                        Text(text = "No users")
+                    }
                 }
             }
         }

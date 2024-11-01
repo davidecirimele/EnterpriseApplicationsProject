@@ -23,7 +23,9 @@ fun AccountOptions(userId: UUID?=null, currentRoute: String, navHostController: 
             }
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = { navHostController.navigate("payment-methods"){
+                popUpTo(currentRoute) { inclusive = true }
+            }}) {
                 Text(text = "Payment Methods")
             }
         }
