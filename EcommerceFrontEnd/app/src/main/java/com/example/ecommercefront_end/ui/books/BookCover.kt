@@ -37,13 +37,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
-import coil3.ImageLoader
-import coil3.SingletonImageLoader
-import coil3.compose.AsyncImagePainter
-import coil3.compose.rememberAsyncImagePainter
-import coil3.request.crossfade
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.BookGenre
 import com.example.ecommercefront_end.model.BookGenreColor

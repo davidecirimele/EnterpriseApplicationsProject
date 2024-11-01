@@ -205,6 +205,8 @@ fun CatalogueScreen(products: List<Book>, bookViewModel: BookViewModel, navContr
     val halloweenSelection by bookViewModel.halloweenBooks.collectAsState()
     val recentsSelection by bookViewModel.recentBooks.collectAsState()
 
+
+
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()

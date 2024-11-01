@@ -1,6 +1,7 @@
 package com.example.ecommercefront_end
 
 import CheckoutViewModel
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -77,6 +78,7 @@ import com.example.ecommercefront_end.repository.AuthRepository
 import com.example.ecommercefront_end.repository.BookRepository
 import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.repository.CheckoutRepository
+import com.example.ecommercefront_end.repository.GroupRepository
 
 import com.example.ecommercefront_end.repository.WishlistRepository
 import com.example.ecommercefront_end.ui.admin.AdminCatalogueScreen
@@ -89,6 +91,13 @@ import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.ui.user.AccountManagerScreen
 import com.example.ecommercefront_end.ui.user.AddressesScreen
 import com.example.ecommercefront_end.ui.admin.AdminHomeScreen
+import com.example.ecommercefront_end.ui.admin.AdminSingleBookScreen
+import com.example.ecommercefront_end.ui.admin.AdminUserDetailsScreen
+import com.example.ecommercefront_end.ui.admin.AdminUsersListScreen
+import com.example.ecommercefront_end.ui.admin.InsertProductScreen
+import com.example.ecommercefront_end.ui.checkout.CheckoutAddressScreen
+import com.example.ecommercefront_end.ui.checkout.CheckoutPaymentScreen
+import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
 import com.example.ecommercefront_end.ui.admin.AdminOrdersScreen
 import com.example.ecommercefront_end.ui.admin.AdminSingleBookScreen
 import com.example.ecommercefront_end.ui.admin.AdminUserDetailsScreen
@@ -152,8 +161,13 @@ fun NavigationView(navController: NavHostController) {
     val accountViewModel = remember { AccountViewModel(repository = AccountRepository(RetrofitClient.userApiService)) }
     val addressViewModel = remember { AddressViewModel(repository = AddressRepository(RetrofitClient.addressApiService)) }
     val bookViewModel = remember { BookViewModel(repository = BookRepository(RetrofitClient.booksApiService)) }
+
     val adminViewModel = remember { AdminViewModel(repository = AdminRepository(RetrofitClient.adminApiService)) }
     val checkoutViewModel = remember { CheckoutViewModel(checkoutRepository = CheckoutRepository(RetrofitClient.checkoutApiService), cartViewModel = cartViewModel, navController = navController) }
+
+    val wRepository = WishlistRepository( RetrofitClient.wishlistApiService, RetrofitClient.wishlistItemApiService)
+    val groupRepository = GroupRepository(RetrofitClient.groupApiService)
+    val wishlistViewModel = remember { WishlistViewModel(wRepository, groupRepository) }
 
     val startDestination = if (SessionManager.user?.role == "ROLE_ADMIN") {
         "admin-home"
@@ -200,7 +214,7 @@ fun NavigationView(navController: NavHostController) {
                 val book by bookViewModel.bookFlow.collectAsState()
 
                 book?.let {
-                    BookDetailsScreen(book = it, bookViewModel = bookViewModel, cartRepository = CartRepository(RetrofitClient.cartApiService), navController)
+                    BookDetailsScreen(book = it, bookViewModel = bookViewModel, cartRepository = CartRepository(RetrofitClient.cartApiService), wishlistViewModel,navController)
                 } ?: Text("Book not found")
             }
 
@@ -230,7 +244,7 @@ fun NavigationView(navController: NavHostController) {
 
                 LaunchedEffect(userId) {
                     if(userId != null)
-                        adminViewModel.loadUser(userId)
+                        adminViewModel.loadUser(userId) // carica
                 }
 
                 val user by adminViewModel.userFlow.collectAsState()
@@ -246,17 +260,46 @@ fun NavigationView(navController: NavHostController) {
 
             composable("cart") {
                 selectedIndex.value = 2
-                CartScreen(viewModel = cartViewModel, navController = navController, onCheckoutClick = { navController.navigate("checkout") })
+                CartScreen(viewModel = cartViewModel, navController = navController, onCheckoutClick = {
+                    println("isCheckoutEnabled: ${cartViewModel.isCheckoutEnabled.value}")
+
+                    if (cartViewModel.isCheckoutEnabled.value) navController.navigate("checkout") })
+
+            }
+            composable("/admin/wishlist/{userId}", arguments = listOf(navArgument("userId") { type = NavType.StringType })) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId")?.let {
+                    try {
+                        UUID.fromString(it)
+                    } catch (e: IllegalArgumentException) {
+                        null  // oppure gestisci l'errore in un altro modo
+                    }
+                }
+                LaunchedEffect(userId) {
+                    if(userId != null)
+                        wishlistViewModel.fetchWishlists(idUser = userId)
+                        //wishlistViewModel.fetchWishlistItems()
+
+                }
+                //val user by adminViewModel.userFlow.collectAsState()
+
+
+                WishlistsScreen(viewModel = wishlistViewModel,  navController = navController)
 
             }
             composable("wishlist") {
                 selectedIndex.value = 3
                 val _wishlistApiService = RetrofitClient.wishlistApiService
                 val _wishlistItemApiService = RetrofitClient.wishlistItemApiService
-                val repository = WishlistRepository(_wishlistApiService, _wishlistItemApiService)
-                WishlistsScreen(viewModel = WishlistViewModel(repository), navController = navController)
+                val wRepository = WishlistRepository( RetrofitClient.wishlistApiService, RetrofitClient.wishlistItemApiService)
+                val groupRepository = GroupRepository(RetrofitClient.groupApiService)
+                val wishlistViewModel = remember { WishlistViewModel(wRepository, groupRepository) }
 
+                LaunchedEffect(Unit) {
+                    wishlistViewModel.fetchWishlists(null)
+                }
+                WishlistsScreen(viewModel = wishlistViewModel,  navController = navController)
             }
+
             composable("userAuth") {
                 selectedIndex.value = 1
                 val _authApiService = RetrofitClient.authApiService

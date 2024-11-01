@@ -1,9 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistItem;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +23,7 @@ public class WishlistDto {
 
     private GroupDto group;
 
-    private String privacySetting;
+    private WishlistPrivacy privacySetting;
 
     private String wishlistToken;
 }

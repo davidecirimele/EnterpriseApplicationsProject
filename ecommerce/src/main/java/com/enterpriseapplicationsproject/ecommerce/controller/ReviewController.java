@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.service.ReviewsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.ReviewDto;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class ReviewController {
 
     private final ReviewsService reviewsService;
 
+    @RateLimit(type ="USER")
     @GetMapping("/{reviewId}")
     public ResponseEntity<ReviewDto> getById(@PathVariable("reviewId") Long id) {
         ReviewDto review = reviewsService.findById(id);
@@ -29,30 +31,35 @@ public class ReviewController {
         return ResponseEntity.ok(review);
     }
 
+    @RateLimit(type ="USER")
     @PutMapping("/{reviewId}")
     public ResponseEntity<ReviewDto> update(@PathVariable("reviewId") Long id, @RequestBody ReviewDto reviewDto) {
         ReviewDto updatedReview = reviewsService.update(id, reviewDto);
         return ResponseEntity.ok(updatedReview);
     }
 
+    @RateLimit(type ="USER")
     @PostMapping()
     public ResponseEntity<ReviewDto> add(@RequestBody ReviewDto reviewDto) {
         ReviewDto savedReview = reviewsService.save(reviewDto);
         return ResponseEntity.ok(savedReview);
     }
 
+    @RateLimit(type ="USER")
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<Void> delete(@PathVariable("reviewId") Long id) {
         reviewsService.delete(id);
         return ResponseEntity.ok().build();
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/book/{bookId}")
     public ResponseEntity<List<ReviewDto>> getReviewsByBook(@PathVariable("bookId") Long bookId) {
         List<ReviewDto> reviews = reviewsService.getReviewsByBook(bookId);
         return ResponseEntity.ok(reviews);
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<ReviewDto>> getReviewsByUser(@PathVariable("userId") UUID userId) {
         List<ReviewDto> reviews = reviewsService.getReviewsByUser(userId);

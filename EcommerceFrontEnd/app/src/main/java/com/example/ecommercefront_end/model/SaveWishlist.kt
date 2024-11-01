@@ -1,14 +1,12 @@
 package com.example.ecommercefront_end.model
 
-data class Wishlist(
+data class SaveWishlist(
 
-    val id: Long?,
+    val name: String,
     val items: List<WishlistItem>?,
-    var name: String,
     val user: User?,
-    var group: Group?,
+    val group: Group?,
     var privacySetting: WishlistPrivacy,
     val wishlistToken: String
+
 )
-
-

@@ -118,7 +118,7 @@ public class ModelMapperConfig {
                 map(source.getGroup(), destination.getGroup());
                 map(source.getUser(), destination.getUserId());
                 map(source.getItems(), destination.getItems());
-                map( source.getName(), destination.getName());
+                map(source.getName(), destination.getName());
 
             }
         });

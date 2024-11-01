@@ -121,7 +121,8 @@ fun CheckoutAddressScreen(viewModel: CheckoutViewModel, navController: NavContro
         item {
             // Pulsante per salvare la selezione
             Button(
-                onClick = { viewModel.onSaveClick(selectedAddress) },  // Torna indietro dopo aver selezionato
+                onClick = {
+                    viewModel.onSaveClick(selectedAddress) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Save")

@@ -41,19 +41,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavHostController
 import com.example.ecommercefront_end.SessionManager
+import com.example.ecommercefront_end.SessionManager.user
 import java.time.format.DateTimeFormatter
 import com.example.ecommercefront_end.model.Book
+import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.repository.CartRepository
+import com.example.ecommercefront_end.repository.WishlistRepository
+import com.example.ecommercefront_end.viewmodels.WishlistViewModel
 import com.example.ecommercefront_end.ui.books.BookCover
 import com.example.ecommercefront_end.ui.books.BookInfoCard
 import com.example.ecommercefront_end.viewmodels.BookViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: CartRepository, navController: NavHostController) {
+fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: CartRepository, wishlistViewModel: WishlistViewModel, navController: NavHostController) {
     var selectedQuantity by remember { mutableStateOf(1) }
     var shippingAddress by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
+
+    var selectedWishlist by remember { mutableStateOf<Wishlist?>(null)}
+    val userWishlist by wishlistViewModel.onlyMyWishlists.collectAsState()
+
 
     LazyColumn(
         modifier = Modifier
@@ -196,19 +204,21 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
                     OutlinedButton(onClick = { wExpanded = true }) {
-                        Text("Add to a wishlist $selectedQuantity")
+                        Text("Aggiungi a una wishlist ")
                     }
                     DropdownMenu(
                         expanded = wExpanded,
                         onDismissRequest = { wExpanded = false }
                     ) {
-                        for (i in 1..4) {
+                        userWishlist.forEach { w ->
                             DropdownMenuItem(
                                 onClick = {
-                                    selectedQuantity = i
+                                    selectedWishlist = w
                                     wExpanded = false
+
+                                    w.id?.let { wishlistViewModel.addWishlistItem(book.id, w.id) }
                                 },
-                                text = { Text(text = "$i") }
+                                text = { Text(w.name) }
                             )
                         }
                     }

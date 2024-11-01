@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.AuthService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.OrdersService;
@@ -34,11 +35,14 @@ public class AdminController {
     private final RefreshTokenService refreshTokenService;
     private final OrdersService ordersService;
 
+
+    @RateLimit
     @PostMapping(consumes = "application/json", path = "/register")
     public ResponseEntity<UserDetailsDto> registerAdmin(@Valid @RequestBody  SaveUserDto userDto) {
         return ResponseEntity.ok(authService.registerAdmin(userDto));
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/all-tokens")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<RefreshTokenDto>> allTokens() {

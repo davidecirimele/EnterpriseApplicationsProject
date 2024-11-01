@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.AddressService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
@@ -28,6 +29,7 @@ public class AddressController {
 
     private final UserService userService;
 
+    @RateLimit(type ="USER")
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AddressDto>> getAddresses() {
@@ -36,6 +38,7 @@ public class AddressController {
         return new ResponseEntity<>(addresses, HttpStatus.OK);
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/{id}")
     @PreAuthorize("#id == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<AddressDto>> getValidAddressesByUserId(@PathVariable UUID id) {
@@ -49,6 +52,7 @@ public class AddressController {
         }
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/{id}/default")
     @PreAuthorize("#id == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<AddressDto> getDefaultAddressByUserId(@PathVariable UUID id) {
@@ -62,6 +66,7 @@ public class AddressController {
         }
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/{userId}/{id}")
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<AddressDto> getValidAddressByUserId(@PathVariable UUID userId, @PathVariable Long id) {
@@ -75,6 +80,7 @@ public class AddressController {
         }
     }
 
+    @RateLimit(type ="USER")
     @GetMapping("/all/{id}")
     @PreAuthorize("#id == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<AddressDto>> getAddressByUserId(@PathVariable UUID id) {
@@ -88,6 +94,7 @@ public class AddressController {
         }
     }
 
+    @RateLimit(type ="USER")
     @PostMapping(consumes = "application/json", path = "/{userId}/insert-address")
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<AddressDto> insertAddress(@PathVariable UUID userId, @RequestBody SaveAddressDto addressDto){
@@ -98,6 +105,7 @@ public class AddressController {
     }
 
 
+    @RateLimit(type ="USER")
     @DeleteMapping("/{addressId}/delete")
     @PreAuthorize("#userId.userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<Boolean> deleteAddress(@PathVariable Long addressId, @RequestBody UserIdDto userId) {
@@ -117,6 +125,7 @@ public class AddressController {
         return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
     }
 
+    @RateLimit(type ="USER")
     @PutMapping("/{userId}/{addressId}/edit-address")
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<AddressDto> updateAddress(@PathVariable UUID userId, @PathVariable Long addressId, @RequestBody SaveAddressDto addressDto) {

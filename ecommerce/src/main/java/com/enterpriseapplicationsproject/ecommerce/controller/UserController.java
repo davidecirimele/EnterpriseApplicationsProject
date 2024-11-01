@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RefreshTokenService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RevokedTokenService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
@@ -28,6 +29,7 @@ public class UserController {
     private final RevokedTokenService revokedTokenService;
     private final RefreshTokenService refreshTokenService;
 
+    @RateLimit(type ="USER")
     @GetMapping("/{id}")
     @PreAuthorize("#id == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<UserDetailsDto> getUserById(@PathVariable UUID id) {
@@ -35,6 +37,8 @@ public class UserController {
         UserDetailsDto user = userService.getUserDetailsById(id);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
+
+    @RateLimit(type ="USER")
     @GetMapping("/all-users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserDetailsDto>> allUsers() {
@@ -42,6 +46,8 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+
+    @RateLimit(type ="USER")
     @PutMapping(value = "{userId}/change-password", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<UserDto> updatePassword(@PathVariable UUID userId,@Valid @RequestBody PasswordUserDto userDto){
@@ -55,6 +61,7 @@ public class UserController {
         }
     }
 
+    @RateLimit(type ="USER")
     @PutMapping(value = "{userId}/change-email", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<UserDto> updateEmail(@PathVariable UUID userId, @Valid @RequestBody EmailUserDto userDto){
@@ -68,6 +75,7 @@ public class UserController {
         }
     }
 
+    @RateLimit(type ="USER")
     @PutMapping(value = "{userId}/change-phone-number", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<UserDto> updatePhoneNumber(@PathVariable UUID userId,@Valid @RequestBody PhoneNumberUserDto userDto){
@@ -80,6 +88,8 @@ public class UserController {
         }
     }
 
+
+    @RateLimit(type ="USER")
     @DeleteMapping(value = "{userId}/delete-account", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<UserDto> deleteAccount(@PathVariable UUID userId){
@@ -91,6 +101,7 @@ public class UserController {
         }
     }
 
+    @RateLimit(type ="USER")
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@RequestHeader("Authorization") String accessToken, @RequestBody String refreshToken) {
         accessToken = accessToken.replace("Bearer ", "");
