@@ -191,6 +191,7 @@ fun LoginPage(loginViewModel: LoginViewModel, onLoginSuccess: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .padding(bottom = 8.dp),
+
             shape = RoundedCornerShape(16.dp),
             singleLine = true,
             visualTransformation = if (passwordVisible) VisualTransformation.None
