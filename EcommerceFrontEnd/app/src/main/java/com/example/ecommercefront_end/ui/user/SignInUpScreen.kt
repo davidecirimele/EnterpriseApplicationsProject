@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end.ui.user
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,14 +38,11 @@ import androidx.compose.material3.*
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 import com.example.ecommercefront_end.model.Credential
-import com.example.ecommercefront_end.model.SaveUser
-import com.example.ecommercefront_end.model.User
-import com.example.ecommercefront_end.viewmodels.AddressViewModel
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -53,44 +51,95 @@ import java.time.format.DateTimeFormatter
 
 
 @Composable
-fun UserAuthScreen(loginViewModel: LoginViewModel, registrationViewModel: RegistrationViewModel, navController: NavController) {
+fun SignInUpScreen(
+    loginViewModel: LoginViewModel,
+    registrationViewModel: RegistrationViewModel,
+    navController: NavController
+) {
     var selectedTabIndex by remember { mutableStateOf(0) }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TabRow(selectedTabIndex = selectedTabIndex) {Tab(
-            selected = selectedTabIndex == 0,
-            onClick = { selectedTabIndex = 0 },
-            text = { Text("Accedi") }
-        )
-            Tab(
-                selected = selectedTabIndex == 1,
-                onClick = { selectedTabIndex = 1 },
-                text = { Text("Registrati") }
-            )
+    val snackbarHostState = remember { SnackbarHostState() }
+    val showSnackbarLogin by loginViewModel.showSnackbar.collectAsState()
+    val showSnackbarRegistration by registrationViewModel.showSnackbar.collectAsState()
+
+    val snackbarMessageLogin by loginViewModel.snackbarMessage.collectAsState()
+    val snackbarMessageRegistration by registrationViewModel.snackbarMessage.collectAsState()
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            TabRow(selectedTabIndex = selectedTabIndex) {
+                Tab(
+                    selected = selectedTabIndex == 0,
+                    onClick = { selectedTabIndex = 0 },
+                    text = { Text("Accedi") }
+                )
+                Tab(
+                    selected = selectedTabIndex == 1,
+                    onClick = { selectedTabIndex = 1 },
+                    text = { Text("Registrati") }
+                )
+            }
+
+            when (selectedTabIndex) {
+                0 -> LoginPage(
+                    loginViewModel = loginViewModel,
+                    onLoginSuccess = {
+                        // Trigger the snackbar and wait for it to show, then navigate
+                        CoroutineScope(Dispatchers.Main).launch {
+                            snackbarHostState.showSnackbar(snackbarMessageLogin)
+                            navController.navigate("home") {
+                                popUpTo("userAuth") { inclusive = true }
+                            }
+                        }
+                    }
+                )
+
+                1 -> RegistrationScreen(
+                    registrationViewModel,
+                    onRegistrationComplete = {
+                        // Trigger the snackbar and wait for it to show, then navigate
+                        CoroutineScope(Dispatchers.Main).launch {
+                            snackbarHostState.showSnackbar(snackbarMessageRegistration)
+                            navController.navigate("userAuth") {
+                                popUpTo("userAuth") { inclusive = true }
+                            }
+                        }
+                    },
+                    onSwitchToLogin = { selectedTabIndex = 0 }
+                )
+            }
         }
 
-        // Il resto del codice per visualizzare LoginPage o RegistrationScreen
-        when (selectedTabIndex) {
-            0 -> LoginPage(
-                loginViewModel = loginViewModel,
-                onLoginSuccess = {
-                    navController.navigate("home") {
-                        popUpTo("userAuth") { inclusive = true }
-                    }
-                }
-            )
-            1 -> RegistrationScreen(
-                registrationViewModel,
-                onRegistrationComplete = {
-                    navController.navigate("userAuth") {
-                        popUpTo("userAuth") { inclusive = true }
-                    }
-                },
-                onSwitchToLogin = { selectedTabIndex = 0 }
-            )
+        // LaunchedEffect to show the Snackbar
+        LaunchedEffect(showSnackbarLogin, showSnackbarRegistration) {
+            Log.d("Snackbar", "showSnackbarLogin: $showSnackbarLogin, showSnackbarRegistration: $showSnackbarRegistration")
+            if (showSnackbarLogin) {
+                snackbarHostState.showSnackbar(
+                    message = snackbarMessageLogin,
+                    duration = SnackbarDuration.Short
+                )
+                Log.d("Snackbar", "showSnackbarLogin: $showSnackbarLogin, showSnackbarRegistration: $showSnackbarRegistration")
+
+                loginViewModel.setShowSnackbar(false) // Reset state for next message
+            } else if (showSnackbarRegistration) {
+                snackbarHostState.showSnackbar(
+                    message = snackbarMessageRegistration,
+                    duration = SnackbarDuration.Short
+                )
+                Log.d("Snackbar", "showSnackbarLogin: $showSnackbarLogin, showSnackbarRegistration: $showSnackbarRegistration")
+
+                registrationViewModel.setShowSnackbar(false) // Reset state for next message
+            }
         }
     }
 }
+
 
 @Composable
 fun LoginPage(loginViewModel: LoginViewModel, onLoginSuccess: () -> Unit) {

@@ -17,6 +17,8 @@ import com.example.ecommercefront_end.model.Credential
 import com.example.ecommercefront_end.model.SaveUser
 import com.example.ecommercefront_end.model.UserDetails
 import com.example.ecommercefront_end.repository.AuthRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import java.time.LocalDate
@@ -50,6 +52,12 @@ class RegistrationViewModel(private val registrationRepository: AuthRepository) 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> get() = _isLoading
 
+    private val _showSnackbar = MutableStateFlow(false)
+    val showSnackbar: StateFlow<Boolean> get() = _showSnackbar
+
+    private val _snackbarMessage = MutableStateFlow("")
+    val snackbarMessage: StateFlow<String> get() = _snackbarMessage
+
     // Funzione per aggiornare i dati della registrazione
     fun updateUserDetails(name: String, surname: String, email: String, password: String) {
         registrationData.value = registrationData.value.copy(
@@ -73,6 +81,7 @@ class RegistrationViewModel(private val registrationRepository: AuthRepository) 
         viewModelScope.launch {
             // Imposta lo stato di caricamento
             _isLoading.value = true
+            var message = ""
 
             try {
 
@@ -88,26 +97,47 @@ class RegistrationViewModel(private val registrationRepository: AuthRepository) 
                     Log.d(TAG, "registrazione: tentativo admin $user")
                     response = registrationRepository.registerAdmin(user)
                     Log.d(TAG, "response: $response")
+                    message = "Admin"
                 }
                 else {
                     Log.d(TAG, "registrazione: tentativo user$user")
                     response = registrationRepository.registerUser(user)
                     Log.d(TAG, "response: $response")
+                    message = "User"
                 }
 
 
                 if (response.isSuccessful && response.body() != null) {
                     _registrationResponse.value = response.body()
+                    triggerSnackbar("$message + ${user.firstName} Sign up successful! ")
                     onRegistrationComplete()
+
                 } else {
                     _registrationError.value = "Registration failed: ${response.message()}"
+                    triggerSnackbar("Registration failed: ${response.message()}")
                 }
+
             } catch (e: Exception) {
                 _registrationError.value = "An error occurred: ${e.message}"
                 Log.e(TAG, "An error occurred during registration: ${e.localizedMessage}", e)
+                triggerSnackbar("An error occurred during registration: ${e.localizedMessage}")
+
             } finally {
                 _isLoading.value = false
             }
         }
     }
+    fun setShowSnackbar(b: Boolean) {
+        _showSnackbar.value = b
+
+    }
+
+
+    fun triggerSnackbar(message: String) {
+        _snackbarMessage.value = message
+        _showSnackbar.value = true
+    }
+
+
+
 }

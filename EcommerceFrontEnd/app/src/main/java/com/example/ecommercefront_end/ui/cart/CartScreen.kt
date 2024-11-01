@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end.ui.cart
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 
@@ -23,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -38,6 +40,7 @@ import com.example.ecommercefront_end.viewmodels.CartViewModel
 fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navController: NavController) {
     val cartItems by viewModel.cartItems.collectAsStateWithLifecycle()
     val totalAmount by viewModel.totalAmount.collectAsStateWithLifecycle()
+    val isCheckoutEnabled by viewModel.isCheckoutEnabled.collectAsStateWithLifecycle()
 
 
 
@@ -54,11 +57,6 @@ fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navControl
             }
 
         }
-
-
-
-
-
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -88,14 +86,15 @@ fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navControl
             }
         }
 
-        TotalSection(totalAmount = totalAmount, onCheckoutClick = onCheckoutClick)
+        TotalSection(totalAmount = totalAmount, onCheckoutClick = onCheckoutClick, isCheckoutEnabled = isCheckoutEnabled)
     }
 }
 
 
 
+
 @Composable
-fun TotalSection(totalAmount: Double, onCheckoutClick: () -> Unit) {
+fun TotalSection(totalAmount: Double, onCheckoutClick: () -> Unit, isCheckoutEnabled: Boolean) {
     Column(modifier = Modifier.padding(16.dp)) {
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -108,7 +107,10 @@ fun TotalSection(totalAmount: Double, onCheckoutClick: () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = onCheckoutClick,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().background(
+                if (isCheckoutEnabled) MaterialTheme.colorScheme.primary else Color.Gray,  // Cambia il colore di sfondo se disabilitato
+            ),
+            enabled = isCheckoutEnabled
         ) {
             Text("Checkout")
         }
