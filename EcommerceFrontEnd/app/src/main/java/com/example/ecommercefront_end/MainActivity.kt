@@ -254,7 +254,10 @@ fun NavigationView(navController: NavHostController) {
 
             composable("cart") {
                 selectedIndex.value = 2
-                CartScreen(viewModel = cartViewModel, navController = navController, onCheckoutClick = { navController.navigate("checkout") })
+                CartScreen(viewModel = cartViewModel, navController = navController, onCheckoutClick = {
+                    println("isCheckoutEnabled: ${cartViewModel.isCheckoutEnabled.value}")
+
+                    if (cartViewModel.isCheckoutEnabled.value) navController.navigate("checkout") })
 
             }
             composable("/admin/wishlist/{userId}", arguments = listOf(navArgument("userId") { type = NavType.StringType })) { backStackEntry ->

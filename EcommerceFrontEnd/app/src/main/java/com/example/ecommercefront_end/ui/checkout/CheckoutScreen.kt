@@ -41,6 +41,11 @@ fun CheckoutScreen(viewModel: CheckoutViewModel, navController: NavController) {
         val selectedAddress = viewModel.selectedAddress.collectAsState().value
         val selectedPaymentMethod = viewModel.selectedPaymentMethod.collectAsState().value
 
+        LaunchedEffect(SessionManager.user){
+            println("sto azzerrando i dati")
+            viewModel.clearData()
+        }
+
         LaunchedEffect(Unit) {
             println("sto caricando i dati")
             viewModel.loadCheckoutData()

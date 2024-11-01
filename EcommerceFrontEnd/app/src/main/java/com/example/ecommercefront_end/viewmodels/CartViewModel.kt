@@ -36,6 +36,8 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
 
 
+
+
     fun loadCartItems() {
         viewModelScope.launch {
 
@@ -92,14 +94,14 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
                     println("shpping cart items pre delete: ${_cartItems.value}")
                     shoppingCart.value?.let {
                         repository.removeItem(item.id, it.id, userId)
+
                         println("shpping cart items post delete: ${_cartItems.value}")
+
                         _cartItems.value = _cartItems.value.filterNot { it.id == item.id }.toList()
+
                         println("Lista aggiornata dopo rimozione: ${_cartItems.value}")
                         updateTotalAmount()
-
                     }
-
-
                 }
 
             } catch (e: Exception) {

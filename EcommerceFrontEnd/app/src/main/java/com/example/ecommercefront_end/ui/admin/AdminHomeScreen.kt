@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 
-//samu@gm.com   Ciaobello!10
+//samu@gm.com   Cuscinobellico!99
 
 @Composable
 fun AdminHomeScreen(navHostController: NavHostController){

@@ -118,6 +118,9 @@ public class CartItemsServiceImpl implements CartItemsService {
                 cartItemsDao.delete(optionalCartItem.get());
                 System.out.println("shoppingCart total after delete: " +shoppingCart.getTotal());
                 shoppingCart.getCartItems().remove(cartItem);
+
+                shoppingCartsDao.save(shoppingCart);
+
                 return true;
             }
             else{

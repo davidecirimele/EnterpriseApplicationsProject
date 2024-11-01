@@ -130,7 +130,11 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
                         expanded = qExpanded,
                         onDismissRequest = { qExpanded = false }
                     ) {
-                        for (i in 1..book.stock) {
+                        var quantityToShow = 6
+                        if (book.stock < 6){
+                            quantityToShow = book.stock
+                        }
+                        for (i in 1..quantityToShow) {
                             DropdownMenuItem(
                                 onClick = {
                                     selectedQuantity = i
