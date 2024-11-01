@@ -13,6 +13,10 @@ import com.example.ecommercefront_end.model.CartItem
 import com.example.ecommercefront_end.model.ShoppingCart
 import com.example.ecommercefront_end.model.UserId
 import com.example.ecommercefront_end.repository.CartRepository
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import java.util.UUID
 
 class CartViewModel(private val repository: CartRepository) : ViewModel() {
@@ -24,6 +28,11 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
     private val _totalAmount = MutableStateFlow(0.0)
     val totalAmount: StateFlow<Double> = _totalAmount
+
+    val isCheckoutEnabled: StateFlow<Boolean> = cartItems.map { cartItems ->
+        println("cartItems: $cartItems")
+        cartItems.isNotEmpty()
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
 
 
@@ -100,6 +109,7 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
             }
         }
     }
+
 
     private fun updateTotalAmount() {
         _totalAmount.value = _cartItems.value.sumOf { it.bookId.price * it.quantity }
