@@ -31,6 +31,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,182 +68,205 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
     var selectedWishlist by remember { mutableStateOf<Wishlist?>(null)}
     val userWishlist by wishlistViewModel.onlyMyWishlists.collectAsState()
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val wShowSnackbar by wishlistViewModel.showSnackbar.collectAsState()
+    val wSnackbarMessage by wishlistViewModel.snackbarMessage.collectAsState()
 
     var wExpanded by remember { mutableStateOf(false) }
 
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
-        // Titolo e descrizione allineati a sinistra
-        item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            ) {
-                Text(
-                    text = book.title,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp,
-                    modifier = Modifier
-                        .align(Alignment.Start)
-                        .padding(bottom = 8.dp)
-                )
-                Text(
-                    text = book.author,
-                    fontSize = 20.sp,
-                    modifier = Modifier
-                        .align(Alignment.Start)
-                        .padding(bottom = 8.dp)
-                )
-            }
-        }
-
-        // Immagine del libro
-        item {
-            BookCover(book, bookViewModel)
-        }
-
-
-        // Prezzo e quantità: prezzo allineato a sinistra, quantità a destra
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "€ ${"%,.2f".format(book.price)}",
-                    fontSize = 31.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                )
-
-                var qExpanded by remember { mutableStateOf(false) }
-                Box(
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                ) {
-                    OutlinedButton(onClick = { qExpanded = true }) {
-                        Text("Quantity: $selectedQuantity")
-                    }
-                    DropdownMenu(
-                        expanded = qExpanded,
-                        onDismissRequest = { qExpanded = false }
-                    ) {
-                        var quantityToShow = 6
-                        if (book.stock < 6){
-                            quantityToShow = book.stock
-                        }
-                        for (i in 1..quantityToShow) {
-                            DropdownMenuItem(
-                                onClick = {
-                                    selectedQuantity = i
-                                    qExpanded = false
-                                },
-                                text = { Text(text = "$i") }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        // Indirizzo di spedizione
-        item {
-            Text(
-                text = "Send to $shippingAddress",
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                textAlign = TextAlign.Start
-            )
-        }
-
-
-        item { Spacer(modifier = Modifier.height(8.dp)) }
-
-        // Pulsanti Aggiungi al carrello e Acquista subito
-        item {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Button(
-                    onClick = {
-                        coroutineScope.launch {
-
-                            SessionManager.user?.let { user ->
-                                cartRepository.addCartItem(user.id, selectedQuantity, book.id)
-                            } ?: run {
-                                navController.navigate(route = "userAuth") {
-                                    popUpTo(route = "cart") {
-                                        inclusive = true
-                                    }
-                                }
-                            }
-
-
-                        }
-
-                    },
-
+        paddingValues -> LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .padding(paddingValues)
+        ) {
+            // Titolo e descrizione allineati a sinistra
+            item {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(60.dp)
-                        .padding(bottom = 18.dp)
+                        .padding(bottom = 16.dp)
                 ) {
-                    Text("Add to cart")
+                    Text(
+                        text = book.title,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 24.sp,
+                        modifier = Modifier
+                            .align(Alignment.Start)
+                            .padding(bottom = 8.dp)
+                    )
+                    Text(
+                        text = book.author,
+                        fontSize = 20.sp,
+                        modifier = Modifier
+                            .align(Alignment.Start)
+                            .padding(bottom = 8.dp)
+                    )
                 }
             }
-        }
 
+            // Immagine del libro
+            item {
+                BookCover(book, bookViewModel)
+            }
 
-        item { Spacer(modifier = Modifier.height(25.dp)) }
-        // Wishlist
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Box(
-                    modifier = Modifier.align(Alignment.CenterVertically)
+            // Prezzo e quantità: prezzo allineato a sinistra, quantità a destra
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedButton(onClick = { wExpanded = true }) {
-                        Text("Aggiungi a una wishlist ")
-                    }
-                    DropdownMenu(
-                        expanded = wExpanded,
-                        onDismissRequest = { wExpanded = false }
-                    ) {
-                        Log.d("Aggiung item", userWishlist.toString())
-                        userWishlist.forEach { w ->
-                            DropdownMenuItem(
-                                onClick = {
-                                    selectedWishlist = w
-                                    wExpanded = false
+                    Text(
+                        text = "€ ${"%,.2f".format(book.price)}",
+                        fontSize = 31.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    )
 
-                                    w.id?.let { wishlistViewModel.addWishlistItem(book.id, w.id) }
-                                },
-                                text = { Text(w.name) }
-                            )
+                    var qExpanded by remember { mutableStateOf(false) }
+                    Box(
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
+                        OutlinedButton(onClick = { qExpanded = true }) {
+                            Text("Quantity: $selectedQuantity")
+                        }
+                        DropdownMenu(
+                            expanded = qExpanded,
+                            onDismissRequest = { qExpanded = false }
+                        ) {
+                            var quantityToShow = 6
+                            if (book.stock < 6) {
+                                quantityToShow = book.stock
+                            }
+                            for (i in 1..quantityToShow) {
+                                DropdownMenuItem(
+                                    onClick = {
+                                        selectedQuantity = i
+                                        qExpanded = false
+                                    },
+                                    text = { Text(text = "$i") }
+                                )
+                            }
                         }
                     }
                 }
             }
+            // Indirizzo di spedizione
+            item {
+                Text(
+                    text = "Send to $shippingAddress",
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    textAlign = TextAlign.Start
+                )
+            }
+
+
+            item { Spacer(modifier = Modifier.height(8.dp)) }
+
+            // Pulsanti Aggiungi al carrello e Acquista subito
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(
+                        onClick = {
+                            coroutineScope.launch {
+
+                                SessionManager.user?.let { user ->
+                                    cartRepository.addCartItem(user.id, selectedQuantity, book.id)
+                                } ?: run {
+                                    navController.navigate(route = "userAuth") {
+                                        popUpTo(route = "cart") {
+                                            inclusive = true
+                                        }
+                                    }
+                                }
+
+
+                            }
+
+                        },
+
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp)
+                            .padding(bottom = 18.dp)
+                    ) {
+                        Text("Add to cart")
+                    }
+                }
+            }
+
+
+            item { Spacer(modifier = Modifier.height(25.dp)) }
+            // Wishlist
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Box(
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
+                        OutlinedButton(onClick = { wExpanded = true }) {
+                            Text("Aggiungi a una wishlist ")
+                        }
+                        DropdownMenu(
+                            expanded = wExpanded,
+                            onDismissRequest = { wExpanded = false }
+                        ) {
+                            Log.d("Aggiung item", userWishlist.toString())
+                            userWishlist.forEach { w ->
+                                DropdownMenuItem(
+                                    onClick = {
+                                        selectedWishlist = w
+                                        wExpanded = false
+
+                                        w.id?.let {
+                                            wishlistViewModel.addWishlistItem(
+                                                book.id,
+                                                w.id
+                                            )
+                                        }
+                                    },
+                                    text = { Text(w.name) }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            item { Spacer(modifier = Modifier.height(40.dp)) }
+
+            item {
+                BookInfoCard(book)
+            }
         }
 
-        item { Spacer(modifier = Modifier.height(40.dp)) }
-
-        item {
-            BookInfoCard(book)
+        LaunchedEffect(wShowSnackbar, ) {
+            if (wShowSnackbar) {
+                snackbarHostState.showSnackbar(
+                    message = wSnackbarMessage,
+                    duration = SnackbarDuration.Short
+                )
+                wishlistViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
+            }
         }
     }
 }

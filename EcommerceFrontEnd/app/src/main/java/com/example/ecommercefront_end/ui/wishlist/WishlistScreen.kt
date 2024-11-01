@@ -66,6 +66,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -148,8 +149,6 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, bookViewModel : BookVi
 }
 
 
-
-
 @Composable
 fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWishlistSelected: (Wishlist) -> Unit) {
     var showAddWishlistMain by remember { mutableStateOf(false) }
@@ -175,6 +174,8 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
         IconButton(onClick = { showAddWishlistMain = true }) {
             Icon(imageVector = Icons.Filled.AddCircleOutline, contentDescription = "Aggiungi Lista", tint = Color.Green)
         }
+
+
     }
     if (showAddWishlistMain) {
         AddWishlistDialog(
@@ -189,29 +190,44 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
             }
         )
     }
-    LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp)
-    ) {
-        items(
-            items = wishlists,
-            key = { item -> item.id?.toString() ?: "" } // Chiave a livello di items
-        ) { wishlist ->
-            var isFriendWishlist: Boolean? = null
-            if (isAdmin){
-                isFriendWishlist = idUserSelectedByAdmin?.compareTo(wishlist.user?.id) != 0
-            }
-            else{
-                isFriendWishlist = user?.id?.compareTo(wishlist.user?.id) != 0
-            }
-            WishlistThumbnail( // Rimuovi il secondo key qui
-                wishlist = wishlist,
-                onClick = { onWishlistSelected(wishlist) },
-                wishlistUpdatable = user?.id?.compareTo(wishlist.user?.id) == 0 || isAdmin,
-                isFriendWishlist = isFriendWishlist
 
+    if (wishlists.isEmpty()) { // Controlla se la lista è vuota
+        Spacer(modifier = Modifier.height(40.dp))
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Ancora nessuna lista creata.",
+                fontSize = 18.sp,
+                textAlign = TextAlign.Center
             )
+        }
+    } else{
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+        ) {
+            items(
+                items = wishlists,
+                key = { item -> item.id?.toString() ?: "" } // Chiave a livello di items
+            ) { wishlist ->
+                var isFriendWishlist: Boolean? = null
+                if (isAdmin){
+                    isFriendWishlist = idUserSelectedByAdmin?.compareTo(wishlist.user?.id) != 0
+                }
+                else{
+                    isFriendWishlist = user?.id?.compareTo(wishlist.user?.id) != 0
+                }
+                WishlistThumbnail( // Rimuovi il secondo key qui
+                    wishlist = wishlist,
+                    onClick = { onWishlistSelected(wishlist) },
+                    wishlistUpdatable = user?.id?.compareTo(wishlist.user?.id) == 0 || isAdmin,
+                    isFriendWishlist = isFriendWishlist
+
+                )
+            }
         }
     }
 }
@@ -230,6 +246,7 @@ fun AddWishlistDialog(
     var expanded by remember { mutableStateOf(false) }
     var selectedPrivacy by remember { mutableStateOf(WishlistPrivacy.PUBLIC) }
     val privacyOptions = listOf(WishlistPrivacy.PUBLIC, WishlistPrivacy.SHARED, WishlistPrivacy.PRIVATE)
+
 
     if (showCreateWishlist) {
         AlertDialog(

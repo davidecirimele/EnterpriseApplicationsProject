@@ -383,7 +383,7 @@ fun RegistrationStep1(registrationViewModel: RegistrationViewModel, onNext: () -
                 modifier = Modifier.fillMaxWidth(),
                  enabled = isFormValid
             ) {
-                Text("Verifica Email", style = MaterialTheme.typography.bodyLarge)
+                Text("Continua ->", style = MaterialTheme.typography.bodyLarge)
             }
         }
     }

@@ -29,6 +29,13 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     private val _totalAmount = MutableStateFlow(0.0)
     val totalAmount: StateFlow<Double> = _totalAmount
 
+    private val _showSnackbar = MutableStateFlow(false)
+    val showSnackbar: StateFlow<Boolean> get() = _showSnackbar
+
+    private val _snackbarMessage = MutableStateFlow("")
+    val snackbarMessage: StateFlow<String> get() = _snackbarMessage
+
+
     val isCheckoutEnabled: StateFlow<Boolean> = cartItems.map { cartItems ->
         println("cartItems: $cartItems")
         cartItems.isNotEmpty()
@@ -88,6 +95,7 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
     fun removeItem(item: CartItem) {
         viewModelScope.launch {
+            var message = ""
             try {
                 val userId = SessionManager.user?.id
                 if (userId != null) {
@@ -102,10 +110,17 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
                         println("Lista aggiornata dopo rimozione: ${_cartItems.value}")
                         updateTotalAmount()
                     }
+                    message = "Item removed successfully"
+                } else {
+                    message = "User ID not found"
+
                 }
+                triggerSnackbar(message)
+
 
             } catch (e: Exception) {
                 println()
+                triggerSnackbar("An error occurred: ${e.message}")
             }
         }
     }
@@ -114,4 +129,16 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     private fun updateTotalAmount() {
         _totalAmount.value = _cartItems.value.sumOf { it.bookId.price * it.quantity }
     }
+
+    fun setShowSnackbar(b: Boolean) {
+        _showSnackbar.value = b
+
+    }
+
+    fun triggerSnackbar(message: String) {
+        _snackbarMessage.value = message
+        _showSnackbar.value = true
+    }
+
+
 }

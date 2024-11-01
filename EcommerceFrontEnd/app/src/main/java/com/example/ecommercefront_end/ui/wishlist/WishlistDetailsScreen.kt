@@ -66,6 +66,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -334,7 +335,21 @@ fun WishlistDetails(
 
             }
             Spacer(modifier = Modifier.height(16.dp))
-            if (items.isNotEmpty()) {
+
+            if (items.isEmpty()){
+                Spacer(modifier = Modifier.height(25.dp) )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Ancora nessun libro aggiunto a questa lista.",
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+           else{
                 if (isLoadingItems) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
@@ -354,11 +369,6 @@ fun WishlistDetails(
                             )
                         }
                     }
-                }
-            }
-            else {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "Errore durante il caricamento degli elementi: ${error.toString()}")
                 }
             }
         }

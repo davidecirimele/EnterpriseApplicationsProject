@@ -248,7 +248,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                 if (response != null) {
                     Log.d("addWishlist", "Wishlist creata con successo")
                     fetchWishlists()
-                    message = "Wishlist creata con successo"
+                    message = "Wishlist "  + newWishlist.name +  " creata con successo"
                     triggerSnackbar(message)
                 }
                 // Potresti aggiornare la lista delle wishlist nel ViewModel qui, se necessario
@@ -329,26 +329,29 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
 
                 if (response != null) {
                     if (response == Unit) {
+                        message = "Libro aggiunto con successo alla wishlist"
                         Log.d(
                             "addWishlistItem",
-                            "Elemento della wishlist aggiunto con successo"
+                            message
                         )
-                        triggerSnackbar("Elemento della wishlist aggiunto con successo")
+                        triggerSnackbar(message)
                     } else {
+                        message = "Errore durante l'aggiunta del libro alla wishlist"
                         Log.e(
                             "addWishlistItem",
-                            "Errore durante l'aggiunta dell'elemento della wishlist:"
+                            message
                         )
-                        triggerSnackbar("Errore durante l'aggiunta dell'elemento della wishlist")
+                        triggerSnackbar(message)
                     }
                 }
             } catch (e: Exception) {
+                message = "Errore durante l'aggiunta dell'elemento della wishlist"
                 Log.e(
                     "addWishlistItem",
-                    "Errore durante l'aggiunta dell'elemento della wishlist: ${e.message}"
+                    message + {e.message}
                 )
 
-                triggerSnackbar("Errore durante l'aggiunta dell'elemento della wishlist")
+                triggerSnackbar(message)
 
             }
         }
@@ -365,18 +368,21 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                     if (response.isSuccessful) {
                         Log.d("rimosso WI con id", id.toString())
                         _wishlistItems.value = _wishlistItems.value.filter { it.id != id }
+
+                        message = "Libro rimosso con successo dalla wishlist"
                         Log.d(
                             "removeWishlistItem",
-                            "Elemento della wishlist rimosso con successo"
+                            message
                         )
-                        triggerSnackbar("Elemento della wishlist rimosso con successo")
+                        triggerSnackbar(message)
                     } else {
-                        Log.e("removeWishlistItem", "Non rimosso WI con id: $id")
+
+                        message = "Errore durante la rimozione del libro dalla wishlist"
                         Log.e(
                             "removeWishlistItem",
-                            "Errore durante la rimozione dell'elemento della wishlist: ${response.errorBody()}"
+                            message + {response.errorBody()}
                         )
-                        triggerSnackbar("Errore durante la rimozione dell'elemento della wishlist")
+                        triggerSnackbar(message)
                     }
                 }
             } catch (e: Exception) {
@@ -384,7 +390,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                     "removeWishlistItem",
                     "Errore durante la rimozione dell'elemento della wishlist: ${e.message}"
                 )
-                triggerSnackbar("Errore durante la rimozione dell'elemento della wishlist")
+                triggerSnackbar("Errore durante la rimozione del libro dalla wishlist")
             }
         }
 
