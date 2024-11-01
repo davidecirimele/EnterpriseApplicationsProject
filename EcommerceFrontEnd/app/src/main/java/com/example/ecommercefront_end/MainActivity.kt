@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -57,6 +58,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -82,7 +84,6 @@ import com.example.ecommercefront_end.ui.user.EditAddressScreen
 import com.example.ecommercefront_end.ui.cart.CartScreen
 import com.example.ecommercefront_end.ui.home.BookDetailsScreen
 import com.example.ecommercefront_end.ui.books.BooksFilterScreen
-import com.example.ecommercefront_end.ui.books.FilteredBooksScreen
 import com.example.ecommercefront_end.ui.home.HomeScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.ui.user.AccountManagerScreen
@@ -100,6 +101,7 @@ import com.example.ecommercefront_end.ui.checkout.OrderConfirmationScreen
 import com.example.ecommercefront_end.ui.user.InsertAddressScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
 import com.example.ecommercefront_end.ui.user.UserAuthScreen
+import com.example.ecommercefront_end.ui.user.UserOrdersScreen
 import com.example.ecommercefront_end.ui.wishlist.WishlistsScreen
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
@@ -178,7 +180,7 @@ fun NavigationView(navController: NavHostController) {
             }
 
             composable("admin-catalogue") {
-                AdminCatalogueScreen(bookViewModel = bookViewModel, navHostController = navController)
+                AdminCatalogueScreen(bookViewModel = bookViewModel, navController = navController)
             }
 
             composable("admin-users-list") {
@@ -286,11 +288,6 @@ fun NavigationView(navController: NavHostController) {
                     navHostController = navController)
             }
 
-            composable("filtered-books") {
-                FilteredBooksScreen(
-                    bookViewModel = bookViewModel, navController = navController)
-            }
-
             composable("addresses/{userId}", arguments = listOf(navArgument("userId") { type = NavType.StringType })) { backStackEntry ->
                 val userId = backStackEntry.arguments?.getString("userId")?.let {
                     try {
@@ -356,6 +353,11 @@ fun NavigationView(navController: NavHostController) {
                 })
             }
 
+            composable("orders") {
+                UserOrdersScreen(viewModel = accountViewModel, onOrderClick = {
+                })
+            }
+
         }
 
     }
@@ -367,16 +369,18 @@ fun TopBar(navHostController: NavHostController, bookViewModel: BookViewModel) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
-    val isSearchVisible = currentRoute == "home" || currentRoute == "filtered-books"
-    var filterOptions by remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
 
     TopAppBar(
         title = {
-            if (isSearchVisible) {
-                SearchBar(navHostController, filterOptions,{ newValue -> filterOptions = newValue } , bookViewModel, currentRoute)
-            } else {
-                Text(stringResource(R.string.app_name))
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center // Allinea il contenuto al centro
+            ) {
+                Text(
+                    text = stringResource(R.string.app_name),
+                    textAlign = TextAlign.Center
+                )
             }
         },
         navigationIcon = {
@@ -399,49 +403,6 @@ fun TopBar(navHostController: NavHostController, bookViewModel: BookViewModel) {
             actionIconContentColor = colorScheme.onPrimary // Usa il colore onPrimary del tema
         )
     )
-
-    if(filterOptions) {
-        BooksFilterScreen(
-            viewModel = bookViewModel,
-            navController = navHostController,
-            currentRoute = currentRoute,
-            onDismiss = {
-                filterOptions = false
-            })
-    }
-}
-
-@Composable
-fun SearchBar(navHostController: NavHostController, filterOptions: Boolean, onFilterOptionsChange: (Boolean) -> Unit, bookViewModel: BookViewModel, currentRoute: String?) {
-    var searchValue by remember { mutableStateOf("") }
-
-    Row(modifier = Modifier.fillMaxWidth()) {
-        TextField(
-            value = searchValue,
-            onValueChange = { searchValue = it;
-                if(searchValue == "" && currentRoute == "filtered-books"){
-                    navHostController.popBackStack()
-                }
-                bookViewModel.searchBooks(BookFilter(title = it, author = it, publisher = it),navHostController, currentRoute)},
-            label = { Text("Search by Title, Author or Publisher") },
-            shape = RoundedCornerShape(16.dp),
-            singleLine = true,
-            modifier = Modifier.widthIn(if (currentRoute == "home") 320.dp else 280.dp)
-        )
-
-        IconButton(modifier = Modifier.align(Alignment.CenterVertically),onClick = {
-            if(!filterOptions)
-                onFilterOptionsChange(true)
-            else
-                onFilterOptionsChange(false)
-        }) {
-            Icon(
-                Icons.Filled.FilterAlt,
-                contentDescription = "Filter Books",
-                modifier = Modifier.size(35.dp)
-            )
-        }
-    }
 }
 
 @Composable

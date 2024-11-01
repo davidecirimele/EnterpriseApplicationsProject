@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.TopAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,14 +46,24 @@ fun AccountManagerScreen(viewModel: AccountViewModel, navHostController: NavHost
 
     val userDetails by viewModel.userDetails.collectAsState()
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(8.dp), verticalArrangement = Arrangement.SpaceAround){
-        userDetails?.let { UserCard(it) }
-        OptionsSection(navHostController)
-        if(SessionManager.user != null && SessionManager.user!!.role!="ROLE_ADMIN")
-            HistorySection()
-        Buttons(navHostController)
+    Scaffold(topBar = {
+        TopAppBar(
+            title = { androidx.compose.material.Text("Account Manager") },
+            backgroundColor = Color(0xFF1F1F1F),
+            contentColor = Color.White
+        )
+    }){ paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues), verticalArrangement = Arrangement.SpaceAround
+        ) {
+            userDetails?.let { UserCard(it) }
+            OptionsSection(navHostController)
+            if (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN")
+                HistorySection()
+            Buttons(navHostController)
+        }
     }
 }
 
@@ -85,7 +97,9 @@ fun OptionsSection(navHostController: NavHostController){
                 }
                 if(SessionManager.user != null && SessionManager.user!!.role!="ROLE_ADMIN") {
                     Spacer(modifier = Modifier.width(20.dp))
-                    Button(onClick = { /*TODO*/ }) {
+                    Button(onClick = {navHostController.navigate("orders"){
+                        popUpTo("account-manager") { saveState = true }
+                    }}) {
                         Text(text = "My Orders")
                     }
                 }

@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.SnackbarDefaults.backgroundColor
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.material.icons.filled.FilterAlt
@@ -24,6 +26,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDefaults.contentColor
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -32,10 +37,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -49,7 +56,9 @@ import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.ui.books.BookCover
 import com.example.ecommercefront_end.ui.books.BooksFilterScreen
+import com.example.ecommercefront_end.utils.SearchBar
 import com.example.ecommercefront_end.viewmodels.BookViewModel
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 
 fun Modifier.bookEntryModifier(navController: NavController, bookId: Long) = composed {
@@ -59,97 +68,90 @@ fun Modifier.bookEntryModifier(navController: NavController, bookId: Long) = com
         .clickable { navController.navigate("/admin/book_details/${bookId}") }
 }
 @Composable
-fun AdminCatalogueScreen(bookViewModel: BookViewModel, navHostController: NavHostController){
+fun AdminCatalogueScreen(bookViewModel: BookViewModel, navController: NavController){
 
-    val products by bookViewModel.filteredProducts.collectAsState()
+    var products by remember { mutableStateOf(emptyList<Book>()) }
 
     var searchValue by remember { mutableStateOf("") }
 
     var filterOptions by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        bookViewModel.fetchAllAvailableProducts()
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(searchValue) {
+        products = bookViewModel.fetchBooksByFilter(BookFilter())
     }
 
-    Column(modifier = Modifier.fillMaxSize()){
-
-        Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {
-            Text(
-                text = "Catalogue",
-                fontWeight = FontWeight.Bold,
-                fontSize = 35.sp,
-                modifier = Modifier.padding(8.dp)
-            )
+    Scaffold(topBar = {
+        TopAppBar(
+            backgroundColor = colorScheme.primary,
+            contentColor = colorScheme.secondary,
+            modifier = Modifier.height(70.dp)
+        ){
+            SearchBar(filterOptions,{ newValue -> filterOptions = newValue } , {value -> searchValue = value })
         }
+    }){ paddingValues ->
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)) {
 
-        Row(modifier = Modifier.fillMaxWidth()) {
-            TextField(
-                value = searchValue,
-                onValueChange = { searchValue = it;
-                    bookViewModel.searchBooks(filter = BookFilter(title = it, author = it, publisher = it), navController = navHostController,"admin-catalogue")
-                },
-                label = { Text("Search by Title, Author, Publisher or ISBN") },
-                shape = RoundedCornerShape(16.dp),
-                singleLine = true,
-            )
-            IconButton(modifier = Modifier.weight(1f).align(Alignment.CenterVertically),onClick = {
-                filterOptions = !filterOptions
-            }) {
-                Icon(
-                    Icons.Filled.FilterAlt,
-                    contentDescription = "Filter Catalogue",
-                    modifier = Modifier.size(35.dp)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.padding(2.dp))
-        LazyColumn(modifier = Modifier
-            .fillMaxWidth()
-            .weight(1f)) {
-            if(products.isNotEmpty()) {
-                for ((index,product) in products.withIndex())
-                    item {
-                        Row(modifier = Modifier.fillMaxWidth()){
-                            Text(text = (index + 1).toString(),
-                                fontWeight = FontWeight.ExtraBold,
-                                modifier = Modifier
-                                    .align(Alignment.CenterVertically)
-                                    .padding(2.dp).fillMaxWidth(0.08f),
-                                maxLines = 1
-                            )
-                            Spacer(modifier = Modifier.padding(2.dp))
-                            BookEntry(book = product, bookViewModel, navHostController)
+            if(filterOptions) {
+                BooksFilterScreen(
+                    viewModel = bookViewModel,
+                    onSearchBooks = { filter ->
+                        run {
+                            coroutineScope.launch {
+                                products = bookViewModel.fetchBooksByFilter(filter)
+                            }
                         }
-                    }
+                    },
+                    currentRoute = "admin-catalogue",
+                    onDismiss = {
+                        filterOptions = false
+                    })
             }
-            else{
-                item{
-                    Text(text = "No books")
+
+            Spacer(modifier = Modifier.padding(2.dp))
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                if (products.isNotEmpty()) {
+                    for ((index, product) in products.withIndex())
+                        item {
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                Text(
+                                    text = (index + 1).toString(),
+                                    fontWeight = FontWeight.ExtraBold,
+                                    modifier = Modifier
+                                        .align(Alignment.CenterVertically)
+                                        .padding(2.dp)
+                                        .fillMaxWidth(0.08f),
+                                    maxLines = 1
+                                )
+                                Spacer(modifier = Modifier.padding(2.dp))
+                                BookEntry(book = product, bookViewModel, navController)
+                            }
+                        }
+                } else {
+                    item {
+                        Text(text = "No books")
+                    }
                 }
             }
+            Spacer(modifier = Modifier.padding(2.dp))
+            Row(modifier = Modifier.fillMaxWidth()) {
+                addNewProductCard(navController = navController)
+            }
         }
-        Spacer(modifier = Modifier.padding(2.dp))
-        Row(modifier = Modifier.fillMaxWidth()){
-            addNewProductCard(navHostController = navHostController)
-        }
-    }
-
-    if(filterOptions) {
-        BooksFilterScreen(
-            viewModel = bookViewModel,
-            navController = navHostController,
-            currentRoute = "admin-catalogue",
-            onDismiss = {
-                filterOptions = false
-            })
     }
 }
 
 @Composable
-fun BookEntry(book: Book, bookViewModel: BookViewModel, navHostController: NavHostController){
+fun BookEntry(book: Book, bookViewModel: BookViewModel, navController: NavController){
 
-    Row(modifier = Modifier.bookEntryModifier(navHostController,book.id)) {
+    Row(modifier = Modifier.bookEntryModifier(navController,book.id)) {
         Card(modifier = Modifier
             .fillMaxWidth()
             .padding(4.dp)) {
@@ -218,11 +220,11 @@ fun BookEntry(book: Book, bookViewModel: BookViewModel, navHostController: NavHo
 }
 
 @Composable
-fun addNewProductCard(navHostController: NavHostController){
+fun addNewProductCard(navController: NavController){
     Card(modifier = Modifier
         .fillMaxWidth()
         .clickable(onClick = {
-            navHostController.navigate("insert-product") {
+            navController.navigate("insert-product") {
                 popUpTo("admin-home") {
                     saveState = true
                 }

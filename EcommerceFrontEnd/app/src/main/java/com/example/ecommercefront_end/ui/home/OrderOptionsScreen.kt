@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.ui.books.ChoiceSelector
 import com.example.ecommercefront_end.viewmodels.BookViewModel
 

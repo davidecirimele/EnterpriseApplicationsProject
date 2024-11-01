@@ -15,4 +15,6 @@ class AccountRepository(private val apiService : UserApiService) {
 
     suspend fun editPhoneNumber(userId: UUID, phoneNumber: String) = apiService.changePhoneNumber(userId, PhoneNumber(phoneNumber))
 
+    suspend fun getUserOrders(userId: UUID) = apiService.getUserOrders(userId)
+
 }

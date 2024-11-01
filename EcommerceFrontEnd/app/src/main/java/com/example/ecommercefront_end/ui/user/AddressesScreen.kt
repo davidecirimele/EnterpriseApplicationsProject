@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.material.icons.filled.CalendarToday
@@ -27,6 +28,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -60,29 +62,36 @@ fun AddressesScreen(userId: UUID?=null, viewModel: AddressViewModel, navHostCont
 
     val addresses by viewModel.addresses.collectAsState()
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(8.dp)) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = "Saved Addresses: ",
-                fontWeight = FontWeight.Bold,
-                fontSize = 25.sp
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        addNewAddressCard(userId, navHostController)
-        Spacer(modifier = Modifier.height(8.dp))
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            if(addresses != null && !addresses!!.isEmpty())
-                for (address in addresses!!)
-                    item {
-                        AddressView(address = address, userId, viewModel, navHostController, true)
-                    }
-        }
+    Scaffold(topBar = {
+        TopAppBar(
+            title = { androidx.compose.material.Text("Saved Addresses") },
+            backgroundColor = Color(0xFF1F1F1F),
+            contentColor = Color.White
+        )
+    }) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            addNewAddressCard(userId, navHostController)
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                if (addresses != null && !addresses!!.isEmpty())
+                    for (address in addresses!!)
+                        item {
+                            AddressView(
+                                address = address,
+                                userId,
+                                viewModel,
+                                navHostController,
+                                true
+                            )
+                        }
+            }
 
+        }
     }
-
 }
 
 @Composable

@@ -4,6 +4,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.OrdersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.service.OrdersService;
 import com.enterpriseapplicationsproject.ecommerce.dto.CheckoutRequestDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.OrderDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.OrderSummaryDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveOrderDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +35,8 @@ public class OrderController {
 
     @GetMapping(path = "/get/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<List<OrderDto>> getAllUserOrders(@PathVariable UUID userId) {
-        List<OrderDto> orders = ordersService.getAllOrdersByUserId(userId);
+    public ResponseEntity<List<OrderSummaryDto>> getAllUserOrders(@PathVariable UUID userId) {
+        List<OrderSummaryDto> orders = ordersService.getAllOrdersByUserId(userId);
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 

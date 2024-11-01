@@ -49,6 +49,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.accompanist.permissions.v0320)
+    implementation(libs.glide)
     implementation(libs.jackson.core)
     implementation (libs.jackson.annotations)
     implementation ("com.squareup.okhttp3:logging-interceptor:4.10.0")
@@ -57,7 +59,7 @@ dependencies {
     implementation("io.ktor:ktor-client-serialization:2.3.4")
     implementation("io.ktor:ktor-client-logging:2.3.4")
     implementation("com.google.code.gson:gson:2.8.2")
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation(libs.coil3.coil.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

@@ -45,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.model.BookFormat
 import com.example.ecommercefront_end.model.BookGenre
@@ -55,7 +56,7 @@ import java.util.Locale
 
 
 @Composable
-fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, currentRoute: String?, onDismiss: () -> Unit){
+fun BooksFilterScreen(viewModel: BookViewModel, onSearchBooks: (BookFilter) -> Unit, currentRoute: String?, onDismiss: () -> Unit){
 
     val minBookPrice by viewModel.minPrice.collectAsState()
     val maxBookPrice by viewModel.maxPrice.collectAsState()
@@ -278,7 +279,8 @@ fun BooksFilterScreen(viewModel: BookViewModel, navController: NavController, cu
 
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-                        Button(onClick = { viewModel.searchBooks(filterOptions , navController, currentRoute)
+                        Button(onClick = {
+                            onSearchBooks(filterOptions)
                             onDismiss()}) {
                             Text(text = "Filter Books")
                         }

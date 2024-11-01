@@ -43,7 +43,6 @@ import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
-import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.crossfade
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.BookGenre

@@ -93,13 +93,12 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public List<OrderDto> getAllOrdersByUserId(UUID userId) {
+    public List<OrderSummaryDto> getAllOrdersByUserId(UUID userId) {
 
         List<Order> orders = ordersDao.findAllByUserId(userId, Sort.by(Sort.Order.desc("orderDate")));
 
 
-
-        return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
+        return orders.stream().map(o -> modelMapper.map(o, OrderSummaryDto.class)).toList();
     }
 
     @Override
