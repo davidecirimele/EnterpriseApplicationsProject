@@ -240,6 +240,7 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
     // Funzione per selezionare il metodo di pagamento
     fun selectPaymentMethod(paymentMethod: PaymentMethod) {
         _selectedPaymentMethod.value = paymentMethod
+        println("metodo di pagamento selezionato: ${_selectedPaymentMethod.value}")
     }
 
     fun onAddPaymentMethodClick() {
@@ -266,6 +267,7 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
                             add(pm)
                         }
                         _selectedPaymentMethod.value = pm
+                        println("selected payment method: ${_selectedPaymentMethod.value}")
                     }
                 }
             }
