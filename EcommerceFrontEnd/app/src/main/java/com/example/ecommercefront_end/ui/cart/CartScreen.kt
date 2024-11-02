@@ -43,8 +43,6 @@ fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navControl
     val isCheckoutEnabled by viewModel.isCheckoutEnabled.collectAsStateWithLifecycle()
 
 
-
-
     LaunchedEffect(Unit) {
         if (SessionManager.user != null) {
             viewModel.loadCartItems()

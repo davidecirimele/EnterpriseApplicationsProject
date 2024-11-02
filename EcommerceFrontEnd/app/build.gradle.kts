@@ -72,6 +72,10 @@ dependencies {
     implementation(libs.ktor.client.logging)
 
 
+    implementation(libs.glide) // O
+
+    implementation(libs.accompanist.permissions)
+
     // Material Design e Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.material) // Mantieni Material 2 per BottomNavigation
@@ -92,6 +96,7 @@ dependencies {
     // Room e persistenza dei dati
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.lifecycle.runtime.compose.android)
     ksp(libs.androidx.room.compiler)
 
     // Retrofit per networking
