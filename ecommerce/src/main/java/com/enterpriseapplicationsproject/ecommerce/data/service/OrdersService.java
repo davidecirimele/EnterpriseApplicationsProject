@@ -13,6 +13,8 @@ public interface OrdersService {
 
     List<OrderSummaryDto> getAllOrdersByUserId(UUID userId);
 
+    List<BookDto> getProductsByUserId(UUID userId);
+
     OrderDto setOrderStatusToCancelled(Long orderId, UUID userId);
 
     List<OrderDto> getAllConfirmedOrdersByUserId(UUID userId);

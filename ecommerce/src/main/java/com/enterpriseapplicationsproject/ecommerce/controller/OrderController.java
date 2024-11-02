@@ -2,10 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 
 import com.enterpriseapplicationsproject.ecommerce.data.dao.OrdersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.service.OrdersService;
-import com.enterpriseapplicationsproject.ecommerce.dto.CheckoutRequestDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.OrderDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.OrderSummaryDto;
-import com.enterpriseapplicationsproject.ecommerce.dto.SaveOrderDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +34,13 @@ public class OrderController {
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<OrderSummaryDto>> getAllUserOrders(@PathVariable UUID userId) {
         List<OrderSummaryDto> orders = ordersService.getAllOrdersByUserId(userId);
+        return new ResponseEntity<>(orders, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/purchased-products/{userId}")
+    @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<List<BookDto>> getProductsByUserId(@PathVariable UUID userId) {
+        List<BookDto> orders = ordersService.getProductsByUserId(userId);
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 

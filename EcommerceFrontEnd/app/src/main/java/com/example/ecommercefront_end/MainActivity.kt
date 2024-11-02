@@ -229,7 +229,7 @@ fun NavigationView(navController: NavHostController) {
                 val book by bookViewModel.bookFlow.collectAsState()
 
                 book?.let {
-                    AdminSingleBookScreen(bookViewModel = bookViewModel, navHostController = navController)
+                    AdminSingleBookScreen(bookViewModel = bookViewModel, navController = navController)
                 } ?: Text("Book not found")
             }
 
@@ -316,7 +316,7 @@ fun NavigationView(navController: NavHostController) {
 
                 val _userApiService = RetrofitClient.userApiService
                 val repository = AccountRepository(_userApiService)
-                AccountManagerScreen(viewModel = accountViewModel, navController)
+                AccountManagerScreen(viewModel = accountViewModel, bookViewModel, navController)
             }
             composable("my-account") {
                 LaunchedEffect(Unit) {

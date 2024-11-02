@@ -6,6 +6,7 @@ import android.graphics.ImageDecoder
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,12 +32,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.BookGenre
 import com.example.ecommercefront_end.model.BookGenreColor
@@ -44,9 +47,17 @@ import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.utils.BookCoverPlaceholder
 import com.example.ecommercefront_end.viewmodels.BookViewModel
 
+fun Modifier.bookCoverModifier(navController: NavController, bookId: Long) = composed {
+    this.fillMaxWidth(0.65f)
+        .aspectRatio(2f / 3f)
+        .background(Color.Transparent)
+        .clickable {
+            navController.navigate("/books_details/${bookId}")
+        }
+}
 
 @Composable
-fun BookCover(book: Book, viewModel: BookViewModel) {
+fun BookCover(book: Book, viewModel: BookViewModel, navController: NavController) {
     var loadingImage by remember { mutableStateOf(true) }
     val imageUrl = book.imagePath
 
@@ -89,10 +100,8 @@ fun BookCover(book: Book, viewModel: BookViewModel) {
             CircularProgressIndicator()
         } else {
             Card(
-                modifier = Modifier
-                    .fillMaxWidth(0.65f)
-                    .aspectRatio(2f / 3f)
-                    .background(Color.Transparent),
+                modifier = Modifier.bookCoverModifier(bookId = book.id, navController = navController)
+                    ,
                 shape = RoundedCornerShape(
                     topStart = 0.dp,       // Angolo sinistro superiore ad angolo retto
                     bottomStart = 0.dp,     // Angolo sinistro inferiore ad angolo retto

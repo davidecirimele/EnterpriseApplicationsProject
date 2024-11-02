@@ -74,8 +74,6 @@ fun AddressesScreen(userId: UUID?=null, viewModel: AddressViewModel, navHostCont
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            addNewAddressCard(userId, navHostController)
-            Spacer(modifier = Modifier.height(8.dp))
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 if (addresses != null && !addresses!!.isEmpty())
                     for (address in addresses!!)
@@ -89,7 +87,7 @@ fun AddressesScreen(userId: UUID?=null, viewModel: AddressViewModel, navHostCont
                             )
                         }
             }
-
+            addNewAddressCard(userId, navHostController)
         }
     }
 }

@@ -57,7 +57,8 @@ fun ProductCard(navController: NavController, book: Book, bookViewModel: BookVie
         ) {
             BookCover(
                 book = book,
-                viewModel = bookViewModel
+                viewModel = bookViewModel,
+                navController
             )
 
             Spacer(modifier = Modifier.height(2.dp))

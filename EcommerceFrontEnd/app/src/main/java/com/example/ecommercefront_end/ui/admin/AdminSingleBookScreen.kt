@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.network.RetrofitClient
@@ -54,7 +55,7 @@ import com.example.ecommercefront_end.viewmodels.BookViewModel
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
-fun AdminSingleBookScreen( bookViewModel: BookViewModel, navHostController: NavHostController) {
+fun AdminSingleBookScreen( bookViewModel: BookViewModel, navController: NavController) {
 
     val book by bookViewModel.bookFlow.collectAsState();
     var showEditPriceField by remember { mutableStateOf(false) }
@@ -98,7 +99,7 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navHostController: NavH
             }
 
             item {
-                book?.let { BookCover(it, bookViewModel) }
+                book?.let { BookCover(it, bookViewModel, navController) }
             }
 
 
@@ -255,7 +256,7 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navHostController: NavH
 
 
                         showDialog = false
-                        navHostController.popBackStack()
+                        navController.popBackStack()
 
                     }
                 ) {

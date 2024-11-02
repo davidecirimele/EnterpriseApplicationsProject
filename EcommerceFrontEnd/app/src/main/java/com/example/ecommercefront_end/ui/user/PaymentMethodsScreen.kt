@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -68,6 +70,10 @@ fun PaymentMethodsScreen(userId: UUID?=null, viewModel: CheckoutViewModel, navCo
 
     val selectedPaymentMethod by viewModel.selectedPaymentMethod.collectAsState()
 
+    LaunchedEffect(Unit) {
+        viewModel.loadPaymentMethods()
+    }
+
     Scaffold(topBar = {
         TopAppBar(
             title = { androidx.compose.material.Text("Saved Payment Methods") },
@@ -80,7 +86,30 @@ fun PaymentMethodsScreen(userId: UUID?=null, viewModel: CheckoutViewModel, navCo
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            LazyColumn(modifier = Modifier.fillMaxSize(0.8f)) {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                item{
+                    AddPaymentMethodForm(
+                        isExpanded = viewModel.isAddingNewPaymentMethod.collectAsState().value,
+                        onExpandChange = { viewModel.toggleAddNewPaymentMethod() },
+                        cardHolderName = viewModel.cardHolderName.collectAsState().value,
+                        cardNumber = viewModel.cardNumber.collectAsState().value,
+                        expirationDate = viewModel.expirationDate.collectAsState().value,
+                        selectedCardProvider = viewModel.selectedCardProvider.collectAsState().value,
+                        onCardHolderNameChange = { viewModel.onCardHolderNameChange(it) },
+                        onCardNumberChange = { viewModel.onCardNumberChange(it) },
+                        onExpirationDateChange = { viewModel.onExpirationDateChange(it) },
+                        onCardProviderSelected = { viewModel.selectCardProvider(it) },
+                        onSaveClick = {
+                            viewModel.onAddPaymentMethodClick()
+                            navController.navigateUp() // Torna alla schermata precedente
+                        },
+                        selectedPaymentMethodType = viewModel.selectedPaymentMethodType.collectAsState().value,
+                        onPaymentMethodTypeSelected = { viewModel.selectPaymentMethodType(it) }
+                    )
+                }
+                item{
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
                 item {
                     if (paymentMethods != null && paymentMethods!!.isNotEmpty())
                         paymentMethods.forEach { paymentMethod ->
@@ -93,25 +122,8 @@ fun PaymentMethodsScreen(userId: UUID?=null, viewModel: CheckoutViewModel, navCo
                         }
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            AddPaymentMethodForm(
-                isExpanded = viewModel.isAddingNewPaymentMethod.collectAsState().value,
-                onExpandChange = { viewModel.toggleAddNewPaymentMethod() },
-                cardHolderName = viewModel.cardHolderName.collectAsState().value,
-                cardNumber = viewModel.cardNumber.collectAsState().value,
-                expirationDate = viewModel.expirationDate.collectAsState().value,
-                selectedCardProvider = viewModel.selectedCardProvider.collectAsState().value,
-                onCardHolderNameChange = { viewModel.onCardHolderNameChange(it) },
-                onCardNumberChange = { viewModel.onCardNumberChange(it) },
-                onExpirationDateChange = { viewModel.onExpirationDateChange(it) },
-                onCardProviderSelected = { viewModel.selectCardProvider(it) },
-                onSaveClick = {
-                    viewModel.onAddPaymentMethodClick()
-                    navController.navigateUp() // Torna alla schermata precedente
-                },
-                selectedPaymentMethodType = viewModel.selectedPaymentMethodType.collectAsState().value,
-                onPaymentMethodTypeSelected = { viewModel.selectPaymentMethodType(it) }
-            )
+
+
         }
     }
 }

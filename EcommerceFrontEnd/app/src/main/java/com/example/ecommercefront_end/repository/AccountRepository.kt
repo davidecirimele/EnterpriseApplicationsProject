@@ -17,4 +17,6 @@ class AccountRepository(private val apiService : UserApiService) {
 
     suspend fun getUserOrders(userId: UUID) = apiService.getUserOrders(userId)
 
+    suspend fun getPurchasedProducts(userId: UUID) = apiService.getPurchasedProducts(userId)
+
 }

@@ -167,7 +167,7 @@ fun BookEntry(book: Book, bookViewModel: BookViewModel, navController: NavContro
                             .height((250 * 0.6f).dp)
                             .width((200 * 0.6f).dp)
                     ) {
-                        BookCover(book, bookViewModel)
+                        BookCover(book, bookViewModel, navController)
                     }
                     Spacer(modifier = Modifier.padding(4.dp))
 

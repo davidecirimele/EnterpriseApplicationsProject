@@ -14,12 +14,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.TopAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -29,22 +32,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.SessionManager.user
 import com.example.ecommercefront_end.model.Address
+import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.UserDetails
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.ui.books.BookCover
+import com.example.ecommercefront_end.ui.home.ProductCard
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
 import com.example.ecommercefront_end.viewmodels.BookViewModel
 
 @Composable
-fun AccountManagerScreen(viewModel: AccountViewModel, navHostController: NavHostController) {
+fun AccountManagerScreen(viewModel: AccountViewModel, bookViewModel: BookViewModel, navHostController: NavHostController) {
 
     val userDetails by viewModel.userDetails.collectAsState()
+
+    val purchasedBooks by viewModel.purchasedBooks.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchPurchasedBooks()
+    }
 
     Scaffold(topBar = {
         TopAppBar(
@@ -60,8 +72,8 @@ fun AccountManagerScreen(viewModel: AccountViewModel, navHostController: NavHost
         ) {
             userDetails?.let { UserCard(it) }
             OptionsSection(navHostController)
-            if (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN")
-                HistorySection()
+            if (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN" && purchasedBooks.isNotEmpty())
+                PurchasedHistory(purchasedBooks, bookViewModel = bookViewModel, navController = navHostController)
             Buttons(navHostController)
         }
     }
@@ -122,32 +134,26 @@ fun OptionsSection(navHostController: NavHostController){
 
 
 @Composable
-fun PurchasedHistoryCard(history: List<Pair<String,String>>){
-    Column {
+fun PurchasedHistory(history: List<Book>, bookViewModel: BookViewModel, navController: NavController){
+    Column(
+        modifier = Modifier.fillMaxWidth()
+            .padding(16.dp), Arrangement.SpaceEvenly
+    ) {
         Text(
             text = "Purchased Books",
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp
         )
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .horizontalScroll(state = ScrollState(1))
-        ) {
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        LazyRow(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+            items(history, key = {it.id}) { book ->
+                BookCover(book, bookViewModel, navController)
+            }
         }
     }
-}
 
-@Composable
-fun HistorySection(){
-    val books = listOf(
-        "Book One" to "Author A",
-        "Book Two" to "Author B",
-        "Book Three" to "Author C"
-    )
-    Column(verticalArrangement = Arrangement.SpaceEvenly){
-        PurchasedHistoryCard(books)
-    }
 }
 
 @Composable

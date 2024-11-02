@@ -95,7 +95,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
 
         // Immagine del libro
         item {
-            BookCover(book, bookViewModel)
+            BookCover(book, bookViewModel, navController)
         }
 
 

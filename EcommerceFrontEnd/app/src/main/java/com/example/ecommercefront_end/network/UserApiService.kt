@@ -35,4 +35,8 @@ interface UserApiService {
     @RequiresAuth
     suspend fun getUserOrders(@Path("id") id: UUID) : Response<List<OrderSummary>>
 
+    @GET("orders/purchased-products/{id}")
+    @RequiresAuth
+    suspend fun getPurchasedProducts(@Path("id") id: UUID) : Response<List<Book>>
+
 }
