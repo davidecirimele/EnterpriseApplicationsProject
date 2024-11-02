@@ -49,123 +49,77 @@ android {
 }
 
 dependencies {
+    // JSON e Logging
     implementation(libs.jackson.core)
-    implementation (libs.jackson.annotations)
-    implementation (libs.logging.interceptor)
+    implementation(libs.jackson.annotations)
+    implementation(libs.gson.v2101)
+
+    // Ktor client
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.serialization)
     implementation(libs.ktor.client.logging)
-    implementation(libs.gson.v2101)
+    implementation(libs.logging.interceptor) //
+
+    // UI e immagini
     implementation(libs.coil.compose.v240)
 
-    implementation(libs.coil.v222)
-    implementation(libs.coil.compose.v222)
-
-    implementation(libs.glide)
-    annotationProcessor(libs.compiler)
-
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.cio)
-    implementation(libs.ktor.client.serialization)
-    implementation(libs.ktor.client.logging)
-    implementation(libs.gson.v2101)
-    implementation(libs.coil.compose.v240)
+    // AndroidX Core e Lifecycle
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+
+    implementation(libs.ktor.client.logging)
+
+
+    // Material Design e Compose
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.material) // Mantieni Material 2 per BottomNavigation
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
+
+    // Navigation e sicurezza
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
-    implementation(libs.androidx.browser)
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.jwtdecode)
 
-
-    implementation(libs.androidx.compose.material)
-    implementation(libs.places)
-    implementation (libs.androidx.core.ktx)
+    // Firebase e altre librerie Google
     implementation(libs.firebase.firestore.ktx)
-    implementation(libs.androidx.lifecycle.runtime.compose.android)
+    implementation(libs.places)
+
+    // Room e persistenza dei dati
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    // Retrofit per networking
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    // Altre dipendenze
     implementation(libs.volley)
 
+    // Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
 
+    // Debug
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.compose.material)
-
-    implementation(libs.accompanist.permissions)
-
-    implementation(libs.androidx.activity)
-    ksp(libs.androidx.room.compiler)
-    implementation(kotlin("stdlib-jdk8"))
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
-    implementation (libs.androidx.security.crypto)
-    implementation (libs.jwtdecode)
-
-    implementation(libs.material.v1120)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.navigation.runtime.ktx)
-    implementation(libs.androidx.browser)
-
-
-    implementation(libs.androidx.compose.material)
-    implementation(libs.places)
-    implementation (libs.androidx.core.ktx)
-    implementation(libs.firebase.firestore.ktx)
-    implementation(libs.androidx.lifecycle.runtime.compose.android)
-    implementation(libs.volley)
-
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.compose.material)
-
-    implementation(libs.androidx.activity)
-    ksp(libs.androidx.room.compiler)
-    implementation(kotlin("stdlib-jdk8"))
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
-    implementation (libs.androidx.security.crypto)
-    implementation (libs.jwtdecode)
-
-    implementation(libs.material.v1120)
-
-    // Mantieni Material 2 per BottomNavigation
+    // Material (Material 2)
+    // Material (Material 2)
     implementation(libs.androidx.material.v143)
 
-    // Material 3
-    implementation(libs.androidx.material3.v111)
+// Material3 (Material You)
+    implementation(libs.androidx.material3.v110)
 
 
-    // Material 3
 }
 
 kotlin {
