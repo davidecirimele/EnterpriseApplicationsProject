@@ -16,6 +16,7 @@ import java.util.UUID;
 public interface PaymentMethodsDao extends JpaRepository<PaymentMethod, Long> {
 
 
+    @Query("SELECT pm FROM PaymentMethod pm WHERE pm.user.id = :userId AND pm.valid = true")
     List<PaymentMethod> findAllByUserId(UUID userId);
 
     @Query("SELECT pm FROM PaymentMethod pm WHERE pm.user.id = :userId AND pm.paymentMethodId = :paymentMethodId AND pm.valid = true")
