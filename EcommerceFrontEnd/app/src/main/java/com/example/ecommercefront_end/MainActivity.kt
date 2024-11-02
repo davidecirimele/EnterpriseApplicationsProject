@@ -75,6 +75,7 @@ import com.example.ecommercefront_end.repository.BookRepository
 import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.repository.CheckoutRepository
 import com.example.ecommercefront_end.repository.GroupRepository
+import com.example.ecommercefront_end.repository.TransactionRepository
 
 import com.example.ecommercefront_end.repository.WishlistRepository
 import com.example.ecommercefront_end.ui.admin.AdminCatalogueScreen
@@ -101,6 +102,7 @@ import com.example.ecommercefront_end.ui.user.GroupScreen
 import com.example.ecommercefront_end.ui.user.InsertAddressScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
 import com.example.ecommercefront_end.ui.user.SignInUpScreen
+import com.example.ecommercefront_end.ui.user.TransactionsScreen
 import com.example.ecommercefront_end.ui.wishlist.WishlistsScreen
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
@@ -110,6 +112,7 @@ import com.example.ecommercefront_end.viewmodels.CartViewModel
 import com.example.ecommercefront_end.viewmodels.GroupViewModel
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
 import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
+import com.example.ecommercefront_end.viewmodels.TransactionViewModel
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
 import kotlinx.coroutines.async
 import java.util.UUID
@@ -155,6 +158,7 @@ fun NavigationView(navController: NavHostController) {
 
     val adminViewModel = remember { AdminViewModel(repository = AdminRepository(RetrofitClient.adminApiService)) }
     val checkoutViewModel = remember { CheckoutViewModel(checkoutRepository = CheckoutRepository(RetrofitClient.checkoutApiService), cartViewModel = cartViewModel, navController = navController) }
+    val transactionViewModel = remember { TransactionViewModel(transactionRepository = TransactionRepository(RetrofitClient.transactionApiService)) }
 
     val wRepository = WishlistRepository( RetrofitClient.wishlistApiService, RetrofitClient.wishlistItemApiService)
     val groupRepository = GroupRepository(RetrofitClient.groupApiService)
@@ -397,6 +401,10 @@ fun NavigationView(navController: NavHostController) {
             composable("admin-orders") {
                 AdminOrdersScreen(viewModel = adminViewModel, onOrderClick = {
                 })
+            }
+
+            composable("transactions"){
+                TransactionsScreen( viewModel = transactionViewModel)
             }
 
         }
