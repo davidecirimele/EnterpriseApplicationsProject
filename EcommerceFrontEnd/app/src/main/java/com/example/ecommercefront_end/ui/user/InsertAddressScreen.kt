@@ -42,6 +42,7 @@ import java.util.UUID
 
 @Composable
 fun InsertAddressScreen(viewModel: AddressViewModel, navController: NavHostController, userId: UUID? = null) {
+
     var street by remember { mutableStateOf("") }
     var province by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }

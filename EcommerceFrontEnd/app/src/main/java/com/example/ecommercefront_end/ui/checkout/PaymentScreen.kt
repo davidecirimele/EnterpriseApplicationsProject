@@ -35,7 +35,8 @@ fun CheckoutPaymentScreen(viewModel: CheckoutViewModel, navController: NavContro
 
     LaunchedEffect(Unit) {
         if (paymentMethods.isEmpty())
-            viewModel.loadPaymentMethods() }
+            viewModel.loadPaymentMethods()
+    }
 
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
 

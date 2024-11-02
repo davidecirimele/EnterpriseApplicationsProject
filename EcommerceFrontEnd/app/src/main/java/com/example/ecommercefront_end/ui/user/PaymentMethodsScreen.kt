@@ -58,6 +58,7 @@ import com.example.ecommercefront_end.repository.AddressRepository
 import com.example.ecommercefront_end.ui.books.BookCover
 import com.example.ecommercefront_end.ui.checkout.AddPaymentMethodForm
 import com.example.ecommercefront_end.ui.checkout.PaymentMethodRow
+import com.example.ecommercefront_end.utils.insertButton
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
 import java.util.UUID
@@ -68,7 +69,7 @@ fun PaymentMethodsScreen(userId: UUID?=null, viewModel: CheckoutViewModel, navCo
 
     val paymentMethods by viewModel.paymentMethods.collectAsState()
 
-    val selectedPaymentMethod by viewModel.selectedPaymentMethod.collectAsState()
+    val selectedPaymentMethod = viewModel.selectedPaymentMethod.collectAsState().value
 
     LaunchedEffect(Unit) {
         viewModel.loadPaymentMethods()
@@ -86,32 +87,9 @@ fun PaymentMethodsScreen(userId: UUID?=null, viewModel: CheckoutViewModel, navCo
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                item{
-                    AddPaymentMethodForm(
-                        isExpanded = viewModel.isAddingNewPaymentMethod.collectAsState().value,
-                        onExpandChange = { viewModel.toggleAddNewPaymentMethod() },
-                        cardHolderName = viewModel.cardHolderName.collectAsState().value,
-                        cardNumber = viewModel.cardNumber.collectAsState().value,
-                        expirationDate = viewModel.expirationDate.collectAsState().value,
-                        selectedCardProvider = viewModel.selectedCardProvider.collectAsState().value,
-                        onCardHolderNameChange = { viewModel.onCardHolderNameChange(it) },
-                        onCardNumberChange = { viewModel.onCardNumberChange(it) },
-                        onExpirationDateChange = { viewModel.onExpirationDateChange(it) },
-                        onCardProviderSelected = { viewModel.selectCardProvider(it) },
-                        onSaveClick = {
-                            viewModel.onAddPaymentMethodClick()
-                            navController.navigateUp() // Torna alla schermata precedente
-                        },
-                        selectedPaymentMethodType = viewModel.selectedPaymentMethodType.collectAsState().value,
-                        onPaymentMethodTypeSelected = { viewModel.selectPaymentMethodType(it) }
-                    )
-                }
-                item{
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
+            LazyColumn(modifier = Modifier.fillMaxHeight(0.9f)) {
                 item {
-                    if (paymentMethods != null && paymentMethods!!.isNotEmpty())
+                    if (paymentMethods.isNotEmpty())
                         paymentMethods.forEach { paymentMethod ->
                             PaymentMethodRow(
                                 paymentMethod = paymentMethod,
@@ -121,8 +99,14 @@ fun PaymentMethodsScreen(userId: UUID?=null, viewModel: CheckoutViewModel, navCo
                             )
                         }
                 }
+
             }
 
+            insertButton(userId, navController, onButtonClicked = {navController.navigate("insert-payment-method") {
+                popUpTo("my-account") {
+                    saveState = true
+                }
+            }})
 
         }
     }

@@ -59,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -99,15 +100,9 @@ import com.example.ecommercefront_end.ui.checkout.CheckoutAddressScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutPaymentScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
 import com.example.ecommercefront_end.ui.admin.AdminOrdersScreen
-import com.example.ecommercefront_end.ui.admin.AdminSingleBookScreen
-import com.example.ecommercefront_end.ui.admin.AdminUserDetailsScreen
-import com.example.ecommercefront_end.ui.admin.AdminUsersListScreen
-import com.example.ecommercefront_end.ui.admin.InsertProductScreen
-import com.example.ecommercefront_end.ui.checkout.CheckoutAddressScreen
-import com.example.ecommercefront_end.ui.checkout.CheckoutPaymentScreen
-import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
 import com.example.ecommercefront_end.ui.checkout.OrderConfirmationScreen
 import com.example.ecommercefront_end.ui.user.InsertAddressScreen
+import com.example.ecommercefront_end.ui.user.InsertPaymentMethodScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
 import com.example.ecommercefront_end.ui.user.TransactionsScreen
 import com.example.ecommercefront_end.ui.user.PaymentMethodsScreen
@@ -179,7 +174,7 @@ fun NavigationView(navController: NavHostController) {
     }
 
     Scaffold(
-        topBar = { TopBar(navController, bookViewModel) },
+        topBar = { TopBar(navController) },
         bottomBar = { BottomBar(selectedIndex, navController) }
     ) { innerPadding ->
         NavHost(
@@ -259,6 +254,10 @@ fun NavigationView(navController: NavHostController) {
 
             composable("insert-product") {
                 InsertProductScreen(viewModel = bookViewModel, navController)
+            }
+
+            composable("insert-payment-method") {
+                InsertPaymentMethodScreen(viewModel = checkoutViewModel, navController)
             }
 
             composable("cart") {
@@ -419,12 +418,9 @@ fun NavigationView(navController: NavHostController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navHostController: NavHostController, bookViewModel: BookViewModel) {
+fun TopBar(navHostController: NavHostController) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
-    val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
-    val isSearchVisible = currentRoute == "home" || currentRoute == "filtered-books"
-    var filterOptions by remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
 
     TopAppBar(

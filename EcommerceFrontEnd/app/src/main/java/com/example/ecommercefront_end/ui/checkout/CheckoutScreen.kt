@@ -1,6 +1,7 @@
 package com.example.ecommercefront_end.ui.checkout
 
 import CheckoutViewModel
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +32,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.ecommercefront_end.SessionManager
 import kotlinx.coroutines.launch
+import kotlin.math.log
 
 
 @Composable
@@ -50,7 +52,6 @@ fun CheckoutScreen(viewModel: CheckoutViewModel, navController: NavController) {
             println("sto caricando i dati")
             viewModel.loadCheckoutData()
         }
-
 
         // Sezione Indirizzo di Spedizione (con freccia per modificare)
         CheckoutSectionWithArrow(
@@ -87,9 +88,11 @@ fun CheckoutScreen(viewModel: CheckoutViewModel, navController: NavController) {
             onClick = {
                 if (isBuyNowEnabled) viewModel.confirmOrder()
             },
-            modifier = Modifier.fillMaxWidth().background(
-                if (isBuyNowEnabled) MaterialTheme.colorScheme.primary else Color.Gray,  // Cambia il colore di sfondo se disabilitato
-            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    if (isBuyNowEnabled) MaterialTheme.colorScheme.primary else Color.Gray,  // Cambia il colore di sfondo se disabilitato
+                ),
             enabled = isBuyNowEnabled
 
         ) {

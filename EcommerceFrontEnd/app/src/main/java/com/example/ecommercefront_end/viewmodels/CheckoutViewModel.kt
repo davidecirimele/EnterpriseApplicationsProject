@@ -1,3 +1,4 @@
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
@@ -153,7 +154,7 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
         println("è da salvare un nuovo indirizzo?" + isNewAddressIsSaved.value)
         println("viewModel data: ${_street.value}, ${_province.value}, ${_city.value}, ${_postalCode.value}, ${_state.value}")
         println("textfields data: ${street.value}, ${province.value}, ${city.value}, ${postalCode.value}, ${state.value}")
-       if (address != null && _addressBeingEdited.value == address) {
+        if (address != null && _addressBeingEdited.value == address) {
             onSaveEdit(address)
         } else if (isNewAddressIsSaved.value) {
             onSave()

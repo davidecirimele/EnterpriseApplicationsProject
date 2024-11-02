@@ -41,7 +41,6 @@ fun EditAddressScreen(viewModel: AddressViewModel, navController: NavHostControl
     val address by viewModel.addressToEdit.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()

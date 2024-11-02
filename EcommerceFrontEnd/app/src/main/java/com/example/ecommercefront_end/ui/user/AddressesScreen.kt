@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -52,6 +53,7 @@ import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.repository.AddressRepository
 import com.example.ecommercefront_end.ui.books.BookCover
+import com.example.ecommercefront_end.utils.insertButton
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
 import java.util.UUID
@@ -74,7 +76,7 @@ fun AddressesScreen(userId: UUID?=null, viewModel: AddressViewModel, navHostCont
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9f)) {
                 if (addresses != null && !addresses!!.isEmpty())
                     for (address in addresses!!)
                         item {
@@ -87,27 +89,13 @@ fun AddressesScreen(userId: UUID?=null, viewModel: AddressViewModel, navHostCont
                             )
                         }
             }
-            addNewAddressCard(userId, navHostController)
+            insertButton(userId, navHostController, onButtonClicked = {navHostController.navigate("insert-address/$userId") {
+                popUpTo("addresses/$userId") {
+                    saveState = true
+                }
+            }})
         }
     }
 }
 
-@Composable
-fun addNewAddressCard(userId:UUID?=null, navHostController: NavHostController){
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .clickable(onClick = {
-            navHostController.navigate("insert-address/$userId") {
-                popUpTo("addresses/$userId") {
-                    saveState = true
-                }
-            }
-        })) {
-        Icon(
-                Icons.Filled.AddBox,
-                contentDescription = "Insert address",
-                modifier = Modifier
-                    .size(50.dp).align(Alignment.CenterHorizontally)
-        )
-    }
-}
+
