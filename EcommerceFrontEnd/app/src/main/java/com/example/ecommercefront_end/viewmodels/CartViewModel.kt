@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.ecommercefront_end.SessionManager
+import com.example.ecommercefront_end.model.Book
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,9 +41,6 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
         println("cartItems: $cartItems")
         cartItems.isNotEmpty()
     }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
-
-
 
 
     fun loadCartItems() {
@@ -89,6 +87,31 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
             } catch (e: Exception) {
                 // Gestire l'errore
+            }
+        }
+    }
+
+    fun addItem(book : Book) {
+        viewModelScope.launch {
+            var message = ""
+            try {
+                val userId = SessionManager.user?.id
+                if (userId != null) {
+                    val response = repository.addCartItem(userId, 1, book.id)
+
+                    if (response.isSuccessful) {
+                        updateTotalAmount()
+                        message = "Libro aggiunto al carrello"
+                    }
+                    else {
+                        message = "Errore: ${response.message()}"
+                    }
+                } else {
+                    message = "ID utente non trovato"
+                }
+                triggerSnackbar(message)
+            } catch (e: Exception) {
+                triggerSnackbar("Si è verificato un errore: ${e.message}")
             }
         }
     }

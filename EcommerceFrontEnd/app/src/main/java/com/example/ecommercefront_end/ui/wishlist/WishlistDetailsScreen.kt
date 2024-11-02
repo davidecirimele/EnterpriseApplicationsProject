@@ -3,31 +3,25 @@ package com.example.ecommercefront_end.ui.wishlist
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
@@ -36,26 +30,20 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,9 +62,12 @@ import com.example.ecommercefront_end.SessionManager.user
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.model.WishlistPrivacy
+import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.ui.books.BookCover
 import com.example.ecommercefront_end.viewmodels.BookViewModel
+import com.example.ecommercefront_end.viewmodels.CartViewModel
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -85,7 +76,8 @@ fun WishlistDetails(
     items: List<WishlistItem>,
     navController: NavController,
     wishlistViewModel: WishlistViewModel,
-    bookViewModel: BookViewModel
+    bookViewModel: BookViewModel,
+    cartViewModel: CartViewModel
 ) {
 
     var privacyOptions by remember { mutableStateOf(wishlist.privacySetting) }
@@ -104,7 +96,6 @@ fun WishlistDetails(
         isFriendWishlist = user?.id?.compareTo(wishlist.user?.id) != 0
     }
 
-    // YTk4YzJiYzQtMGQ5NS00YjI0LThjODQtMzE3N2RjNTkyODVl
 
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var itemToRemove by remember { mutableStateOf<WishlistItem?>(null) }
@@ -118,6 +109,8 @@ fun WishlistDetails(
     val tokenToShare by wishlistViewModel.tokenToShare.collectAsState()
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
+
+    val coroutineScope = rememberCoroutineScope()
 
     // Ricarica gli elementi della wishlist selezionata
     LaunchedEffect(key1 = wishlist.id) {
@@ -148,7 +141,7 @@ fun WishlistDetails(
                 // Menu a comparsa
                 Box{
                     IconButton(onClick = { showMenu = !showMenu }) {
-                        Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "Menu", tint = Color.Blue)
+                        Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "Menu", tint = Color.Blue, modifier = Modifier.size(28.dp))
                     }
                     DropdownMenu(
                         expanded = showMenu,
@@ -211,13 +204,20 @@ fun WishlistDetails(
                 if (showDeleteConfirmation) {
                     AlertDialog(
                         onDismissRequest = { showDeleteConfirmation = false },
+
                         title = { Text(if (wishlistUpdatable) "Elimina Wishlist" else "Esci") },
-                        text = { Text("Vuoi davvero uscire dalla wishlist '${wishlist.name} ${if (!wishlistUpdatable) "di" else "da"} ${wishlist.user?.firstName}'?") },
+
+                        text = { Text(if (wishlistUpdatable) "Sei sicuro di voler eliminare la wishlist?" else "Sei sicuro di voler uscire?") },
+
                         confirmButton = {
                             Button(onClick = {
                                 //onDeleteWishlist(wishlist) // Chiama il callback per eliminare la wishlist
                                 if(wishlistUpdatable){
-                                    wishlist.id?.let { wishlistViewModel.deleteWishlist(it) }
+                                    wishlist.id?.let { user?.id?.let { it1 ->
+                                        wishlistViewModel.deleteWishlist(it,
+                                            it1
+                                        )
+                                    } }
                                 }
                                 else{
                                     wishlistViewModel.unshareWishlist(wishlist)
@@ -360,8 +360,14 @@ fun WishlistDetails(
                         items.forEach { item ->
 
                             WishlistItemCard(wishlistItem = item,
-                                navController = navController, onRemoveClick = {
+                                navController = navController,
+                                onRemoveClick = {
                                     wishlistViewModel.deleteWishlistItem(item.id)
+                                },
+                                onAddCartClick = {
+                                    coroutineScope.launch {
+                                       cartViewModel.addItem(item.book)
+                                    }
                                 },
                                 bookViewModel = bookViewModel,
                                 wishlistUpdateable = wishlistUpdatable,
@@ -388,10 +394,12 @@ fun WishlistItemCard(
     wishlistItem: WishlistItem,
     navController: NavController,
     onRemoveClick: () -> Unit,
+    onAddCartClick: () -> Unit,
     wishlistUpdateable: Boolean,
-    isFriendWishlist: Boolean
-
+    isFriendWishlist: Boolean,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -400,7 +408,7 @@ fun WishlistItemCard(
     ) {
         Row(
             modifier = Modifier
-                .padding(8.dp)
+                .padding(6.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -436,9 +444,35 @@ fun WishlistItemCard(
                 )
             }
 
-            IconButton(onClick = onRemoveClick, enabled = wishlistUpdateable) {
-                Icon(imageVector = Icons.Rounded.Delete, contentDescription = "Rimuovi elemento",tint = if (wishlistUpdateable) Color.Red  else Color.Gray)
+            IconButton(onClick = onRemoveClick,
+                enabled = wishlistUpdateable,
+                modifier = Modifier
+
+            ) {
+                Icon(imageVector = Icons.Rounded.Delete,
+                    contentDescription = "Rimuovi elemento",
+                    tint = if (wishlistUpdateable) Color.Red  else Color.Gray,
+                    modifier = Modifier.size(28.dp)
+                )
             }
+
+            IconButton(
+                onClick = {
+                    coroutineScope.launch {
+                        onAddCartClick()
+                    }
+                },
+                modifier = Modifier,
+                enabled = wishlistUpdateable,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ShoppingCart, // Icona del carrello
+                    contentDescription = "Aggiungi al carrello",
+                    tint = Color.Black,// Colore del pulsante,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+
         }
     }
 }

@@ -1,9 +1,11 @@
 package com.example.ecommercefront_end.repository
 
+import com.example.ecommercefront_end.model.CartItem
 import com.example.ecommercefront_end.network.CartApiService
 import com.example.ecommercefront_end.model.QuantityCartItem
 import com.example.ecommercefront_end.model.ShoppingCart
 import com.example.ecommercefront_end.model.UserId
+import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.Response
 import java.util.UUID
 
@@ -45,17 +47,21 @@ class CartRepository(
 
     }
 
-    suspend fun addCartItem (userId: UUID, quantity: Int, bookId: Long){
+    suspend fun addCartItem (userId: UUID, quantity: Int, bookId: Long) : Response<Void> {
         val cartRes = getCart(userId)
+
+        var response: Response<Void> = Response.error(400, "".toResponseBody()) // Inizializza a notSuccessful
+
         cartRes.onSuccess { cart ->
             if (cart != null) {
                 println("cart items: " + cart.cartItems)
                 val cartId = cart.id
                 val quantityCartItem = QuantityCartItem(quantity)
-                apiService.insertItem(userId, cartId, bookId, quantityCartItem)
+                response = apiService.insertItem(userId, cartId, bookId, quantityCartItem)
 
             }
         }
+        return response
 
     }
 }

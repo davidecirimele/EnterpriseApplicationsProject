@@ -109,7 +109,7 @@ class RegistrationViewModel(private val registrationRepository: AuthRepository) 
 
                 if (response.isSuccessful && response.body() != null) {
                     _registrationResponse.value = response.body()
-                    triggerSnackbar("$message + ${user.firstName} Sign up successful! ")
+                    triggerSnackbar("$message ${user.firstName} sign up successful! ")
                     onRegistrationComplete()
 
                 } else {

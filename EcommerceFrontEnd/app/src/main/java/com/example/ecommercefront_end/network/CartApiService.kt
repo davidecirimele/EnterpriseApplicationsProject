@@ -1,6 +1,7 @@
 package com.example.ecommercefront_end.network
 
 
+import com.example.ecommercefront_end.model.CartItem
 import com.example.ecommercefront_end.model.QuantityCartItem
 import com.example.ecommercefront_end.model.RequiresAuth
 import com.example.ecommercefront_end.model.ShoppingCart
@@ -12,7 +13,7 @@ interface CartApiService {
 
     @POST("shopping-cart/cart/{userId}/{cartId}/{bookId}/insert")
     @RequiresAuth
-    suspend fun insertItem(@Path("userId") userId: UUID, @Path("cartId") cartId: Long, @Path("bookId") bookId: Long, @Body quantityCartItem: QuantityCartItem)
+    suspend fun insertItem(@Path("userId") userId: UUID, @Path("cartId") cartId: Long, @Path("bookId") bookId: Long, @Body quantityCartItem: QuantityCartItem) : Response<Void>
 
     @GET("shopping-cart/get/{userId}")
     @RequiresAuth

@@ -21,6 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -73,35 +74,57 @@ fun GroupScreen(groupViewModel: GroupViewModel, navController: NavController) {
         paddingValues ->
 
         if (isGroupLoading) {
-            Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         } else {
             // Ricarica gli elementi della wishlist selezionata
-            LazyColumn(modifier = Modifier.fillMaxSize()
-                .padding(paddingValues))
-            {
-                item {
-                    GroupList(
-                        groups = groups,
-                        viewModel = groupViewModel,
-                        onGroupSelected = { group ->
-                            selectedGroup.value = group
-                            groupViewModel.loadGroupMembers(group.id)
-                        }
+
+            if (groups.isEmpty()){
+                Spacer(modifier = Modifier.height(40.dp))
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Crea una lista desiideri per visionare i gruppi associati",
+                        fontSize = 22.sp,
+                        textAlign = TextAlign.Center
                     )
                 }
-
-                // Mostra i dettagli solo se c'è una wishlist selezionata e ha degli elementi
-                selectedGroup.value?.let { group ->
+            }
+            else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                )
+                {
                     item {
-                        GroupDetails(
-                            group = group,
-                            groupMembers = groupMembers,
-                            groupViewModel = groupViewModel,
-                            navController = navController
+                        GroupList(
+                            groups = groups,
+                            viewModel = groupViewModel,
+                            onGroupSelected = { group ->
+                                selectedGroup.value = group
+                                groupViewModel.loadGroupMembers(group.id)
+                            }
                         )
                     }
+
+                    // Mostra i dettagli solo se c'è una wishlist selezionata e ha degli elementi
+                    selectedGroup.value?.let { group ->
+                        item {
+                            GroupDetails(
+                                group = group,
+                                groupMembers = groupMembers,
+                                groupViewModel = groupViewModel,
+                                navController = navController
+                            )
+                        }
+                    }
+
                 }
             }
         }
@@ -125,6 +148,7 @@ fun GroupDetails(
     groupViewModel: GroupViewModel,
     navController: NavController,
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -137,7 +161,21 @@ fun GroupDetails(
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (groupMembers.isNotEmpty()) {
+        if (groupMembers.isEmpty()) {
+            Spacer(modifier = Modifier.height(40.dp))
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Ancora nessun membro nel gruppo \n " +
+                            "Condividi la tua lista desideri con i tuoi amici",
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+        else {
             Text(
                 text = "Membri del gruppo",
                 fontSize = 18.sp,
@@ -192,7 +230,8 @@ fun GroupMemberCard(
             Spacer(modifier = Modifier.height(4.dp))
             // Mostra dettagli aggiuntivi se disponibili
             Text(
-                text = member.phoneNumber ?: "Numero di telefono non disponibile",
+                text = ("Phonenumber " + member.phoneNumber)
+                    ?: "Numero di telefono non disponibile",
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
             )

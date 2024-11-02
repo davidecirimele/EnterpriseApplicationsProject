@@ -57,10 +57,11 @@ import com.example.ecommercefront_end.viewmodels.WishlistViewModel
 import com.example.ecommercefront_end.ui.books.BookCover
 import com.example.ecommercefront_end.ui.books.BookInfoCard
 import com.example.ecommercefront_end.viewmodels.BookViewModel
+import com.example.ecommercefront_end.viewmodels.CartViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: CartRepository, wishlistViewModel: WishlistViewModel, navController: NavHostController) {
+fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: CartViewModel, wishlistViewModel: WishlistViewModel, navController: NavHostController) {
     var selectedQuantity by remember { mutableStateOf(1) }
     var shippingAddress by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
@@ -73,13 +74,20 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
     val wShowSnackbar by wishlistViewModel.showSnackbar.collectAsState()
     val wSnackbarMessage by wishlistViewModel.snackbarMessage.collectAsState()
 
+
+    val cartShowSnackbar by cartViewModel.showSnackbar.collectAsState()
+    val cartSnackbarMessage by cartViewModel.snackbarMessage.collectAsState()
+
+
     var wExpanded by remember { mutableStateOf(false) }
 
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
-        paddingValues -> LazyColumn(
+        paddingValues ->
+
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
@@ -184,7 +192,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
                             coroutineScope.launch {
 
                                 SessionManager.user?.let { user ->
-                                    cartRepository.addCartItem(user.id, selectedQuantity, book.id)
+                                    cartViewModel.addItem( book)
                                 } ?: run {
                                     navController.navigate(route = "userAuth") {
                                         popUpTo(route = "cart") {
@@ -223,7 +231,25 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
                     Box(
                         modifier = Modifier.align(Alignment.CenterVertically)
                     ) {
-                        OutlinedButton(onClick = { wExpanded = true }) {
+                        OutlinedButton(onClick = {
+                            if (user == null) {
+                                navController.navigate("userAuth"){
+                                    popUpTo("wishlist") {
+                                        inclusive = true
+                                    }
+                                }
+                            }
+                            else{
+                                if (userWishlist.isEmpty()) {
+                                    wishlistViewModel.triggerSnackbar("Non hai ancora creato nessuna wishlist")
+                                    navController.navigate("wishlist")
+                                }
+                                else {
+                                wExpanded = true
+                                }
+                            }
+                        }
+                        ) {
                             Text("Aggiungi a una wishlist ")
                         }
                         DropdownMenu(
@@ -259,13 +285,20 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
             }
         }
 
-        LaunchedEffect(wShowSnackbar, ) {
+        LaunchedEffect(wShowSnackbar, cartShowSnackbar) {
             if (wShowSnackbar) {
                 snackbarHostState.showSnackbar(
                     message = wSnackbarMessage,
                     duration = SnackbarDuration.Short
                 )
                 wishlistViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
+            }
+            if (cartShowSnackbar) {
+                snackbarHostState.showSnackbar(
+                    message = cartSnackbarMessage,
+                    duration = SnackbarDuration.Short
+                )
+                cartViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
             }
         }
     }

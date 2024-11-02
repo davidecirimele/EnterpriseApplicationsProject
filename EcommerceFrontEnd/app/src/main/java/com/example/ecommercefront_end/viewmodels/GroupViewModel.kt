@@ -60,8 +60,6 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
                 if (response != null) {
                     if (response.isSuccessful) {
                         _groups.value = response.body()!!
-                        message = "Gruppi recuperati con successo"
-                        triggerSnackbar(message)
 
                     } else {
                         Log.e("fetchGroups", "Errore durante il recupero dei gruppi: ${response.errorBody()}")
@@ -74,8 +72,6 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
                 Log.e("fetchGroups", "Errore durante il recupero dei gruppi: ${e.message}")
                 message = "Errore durante il recupero dei gruppi"
                 triggerSnackbar(message)
-
-
             }
             _isLoading.value = false
         }
@@ -87,6 +83,8 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
                 fetchGroupMembers(groupId)
             } catch (e: Exception) {
                 // Gestione errori, ad esempio mostrando un messaggio di errore
+                Log.e("loadGroupMembers", "Errore durante il recupero dei membri del gruppo: ${e.message}")
+                triggerSnackbar("Errore durante il recupero dei membri del gruppo")
             }
         }
     }
@@ -98,17 +96,19 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
             try {
                 if (response.isSuccessful) {
                     _groupMembers.value = response.body()!!
-                    message = "Membri del gruppo recuperati con successo"
+
                 } else {
                     Log.e("fetchGroupMembers", "Errore durante il recupero dei membri del gruppo: ${response.errorBody()}")
                     message = "Errore durante il recupero dei membri del gruppo"
+                    triggerSnackbar(message)
                 }
             } catch (e: Exception) {
                 Log.e("fetchGroupMembers", "Errore durante il recupero dei membri del gruppo: ${e.message}")
                 message = "Errore durante il recupero dei membri del gruppo"
+                triggerSnackbar(message)
             }
         }
-        triggerSnackbar(message)
+
     }
 
 

@@ -38,7 +38,6 @@ import androidx.navigation.NavHostController
 fun AdminHomeScreen(navHostController: NavHostController){
     Column(modifier = Modifier.fillMaxSize()){
 
-
         Text(text = "Home", fontSize = 40.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(16.dp).align(Alignment.CenterHorizontally))
 
         Box(modifier = Modifier.fillMaxWidth(),  contentAlignment = Alignment.Center)

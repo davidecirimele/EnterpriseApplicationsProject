@@ -147,7 +147,8 @@ fun NavigationView(navController: NavHostController) {
     val selectedIndex = remember { mutableIntStateOf(0) }
 
     // Usa remember per mantenere i ViewModel
-    val cartViewModel = remember { CartViewModel(repository = CartRepository(RetrofitClient.cartApiService)) }
+    val cartRepository = CartRepository(RetrofitClient.cartApiService)
+    val cartViewModel = remember { CartViewModel(repository = cartRepository) }
     val accountViewModel = remember { AccountViewModel(repository = AccountRepository(RetrofitClient.userApiService)) }
     val addressViewModel = remember { AddressViewModel(repository = AddressRepository(RetrofitClient.addressApiService)) }
     val bookViewModel = remember { BookViewModel(repository = BookRepository(RetrofitClient.booksApiService)) }
@@ -206,9 +207,8 @@ fun NavigationView(navController: NavHostController) {
                 // Osserva i cambiamenti del libro
                 val book by bookViewModel.bookFlow.collectAsState()
 
-
                 book?.let {
-                    BookDetailsScreen(book = it, bookViewModel = bookViewModel, cartRepository = CartRepository(RetrofitClient.cartApiService), wishlistViewModel,navController)
+                    BookDetailsScreen(book = it, bookViewModel = bookViewModel, cartViewModel = cartViewModel, wishlistViewModel,navController)
                 } ?: Text("Book not found")
             }
 
@@ -277,7 +277,7 @@ fun NavigationView(navController: NavHostController) {
                 //val user by adminViewModel.userFlow.collectAsState()
 
 
-                WishlistsScreen(wishlistViewModel = wishlistViewModel, bookViewModel= bookViewModel, navController = navController)
+                WishlistsScreen(wishlistViewModel = wishlistViewModel, bookViewModel= bookViewModel, cartViewModel = cartViewModel, navController = navController)
 
             }
             composable("wishlist") {
@@ -285,7 +285,7 @@ fun NavigationView(navController: NavHostController) {
                 LaunchedEffect(Unit) {
                     wishlistViewModel.fetchWishlists(null)
                 }
-                WishlistsScreen(wishlistViewModel = wishlistViewModel, bookViewModel= bookViewModel,  navController = navController)
+                WishlistsScreen(wishlistViewModel = wishlistViewModel, bookViewModel= bookViewModel, cartViewModel = cartViewModel, navController = navController)
             }
 
             composable("userAuth") {
