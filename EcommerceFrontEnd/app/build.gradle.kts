@@ -52,7 +52,6 @@ dependencies {
     // JSON e Logging
     implementation(libs.jackson.core)
     implementation(libs.jackson.annotations)
-    implementation(libs.logging.interceptor)
     implementation(libs.gson.v2101)
 
     // Ktor client
@@ -60,22 +59,26 @@ dependencies {
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.serialization)
     implementation(libs.ktor.client.logging)
+    implementation(libs.logging.interceptor) //
 
     // UI e immagini
     implementation(libs.coil.compose.v240)
-    implementation(libs.coil.v222)
-    implementation(libs.glide)
-    annotationProcessor(libs.compiler)
 
     // AndroidX Core e Lifecycle
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
 
+    implementation(libs.ktor.client.logging)
+
+
+    implementation(libs.glide) // O
+
+    implementation(libs.accompanist.permissions)
+
     // Material Design e Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.material) // Mantieni Material 2 per BottomNavigation
-    implementation(libs.androidx.material3.v111) // Material 3
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
@@ -93,6 +96,7 @@ dependencies {
     // Room e persistenza dei dati
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.lifecycle.runtime.compose.android)
     ksp(libs.androidx.room.compiler)
 
     // Retrofit per networking
@@ -101,7 +105,6 @@ dependencies {
 
     // Altre dipendenze
     implementation(libs.volley)
-    implementation(libs.accompanist.permissions)
 
     // Test
     testImplementation(libs.junit)
@@ -115,13 +118,14 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // Material (Material 2)
-    implementation(libs.androidx.material.v175)
+    // Material (Material 2)
+    implementation(libs.androidx.material.v143)
 
 // Material3 (Material You)
     implementation(libs.androidx.material3.v110)
 
-}
 
+}
 
 kotlin {
     jvmToolchain(21)

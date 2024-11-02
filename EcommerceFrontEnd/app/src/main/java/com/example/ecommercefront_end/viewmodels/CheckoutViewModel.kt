@@ -424,6 +424,7 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
     fun clearData() {
         _selectedAddress.value = null
         _selectedPaymentMethod.value = null
+        _addresses.value = emptyList()
     }
 
 }

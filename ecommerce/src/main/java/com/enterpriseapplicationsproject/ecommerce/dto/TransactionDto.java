@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.dto;
 
+import com.enterpriseapplicationsproject.ecommerce.data.domain.PaymentStatus;
 import lombok.Data;
 import org.springframework.data.domain.jaxb.SpringDataJaxb;
 
@@ -18,7 +19,7 @@ public class TransactionDto {
 
     private Double amount;
 
-    private String status;
+    private PaymentStatus PaymentStatus;
 
-    private LocalDate date;
+    private LocalDate transactionDate;
 }
