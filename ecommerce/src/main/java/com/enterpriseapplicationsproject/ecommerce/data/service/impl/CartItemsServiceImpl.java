@@ -115,9 +115,10 @@ public class CartItemsServiceImpl implements CartItemsService {
 
             log.info("found shoppingCart: "+shoppingCart.getId()+", passed cartID: "+cartId+", passed itemId: "+itemId+"foundItemCartID: "+cartItem.getCartId());
             if (shoppingCart.getId().equals(cartId) && cartItem.getCartId().getId().equals(cartId)) {
-                cartItemsDao.delete(optionalCartItem.get());
+                //cartItemsDao.delete(optionalCartItem.get());
                 System.out.println("shoppingCart total after delete: " +shoppingCart.getTotal());
                 shoppingCart.getCartItems().remove(cartItem);
+                shoppingCartsDao.save(shoppingCart);
                 return true;
             }
             else{
