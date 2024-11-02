@@ -75,6 +75,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/v1/wishlist-items/**").permitAll();
                     auth.requestMatchers("/api/v1/shopping-cart/get/total/**").authenticated();
                     auth.requestMatchers("/api/v1/orders/add").authenticated();
+                    auth.requestMatchers("/api/v1/transactions/get/{userId}").authenticated();
                     }
                     )
                     .sessionManagement(session -> session
