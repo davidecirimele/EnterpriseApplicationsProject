@@ -8,6 +8,6 @@ data class Transaction(
     val order: Order,
     val paymentMethod: PaymentMethod,
     val amount : Double,
-    val PaymentStatus : PaymentStatus,
+    val paymentStatus : PaymentStatus,
     val transactionDate : LocalDate? = null
 )

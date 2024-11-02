@@ -39,4 +39,7 @@ public class PaymentMethod {
 
     @Column(name = "EXPIRY_DATE", nullable = false)
     private String expirationDate;
+
+    @Column(name = "IS_VALID", nullable = false)
+    private boolean valid;
 }

@@ -42,7 +42,7 @@ fun AccountOptions(userId: UUID?=null, currentRoute: String, navHostController: 
             }
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = { navHostController.navigate("transactions")}) {
                 Text(text = "Transactions")
             }
         }

@@ -5,6 +5,8 @@ package com.enterpriseapplicationsproject.ecommerce.data.dao;
 import com.enterpriseapplicationsproject.ecommerce.data.domain.PaymentStatus;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.PaymentMethod;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,7 +18,10 @@ public interface PaymentMethodsDao extends JpaRepository<PaymentMethod, Long> {
 
     List<PaymentMethod> findAllByUserId(UUID userId);
 
+    @Query("SELECT pm FROM PaymentMethod pm WHERE pm.user.id = :userId AND pm.paymentMethodId = :paymentMethodId AND pm.valid = true")
     PaymentMethod findByUserIdAndPaymentMethodId(UUID userId, Long paymentMethodId);
 
-    Integer deleteByUserIdAndPaymentMethodId(UUID userId, Long paymentMethodId);
+    @Modifying
+    @Query("UPDATE PaymentMethod pm SET pm.valid = false WHERE pm.user.id = :userId AND pm.paymentMethodId = :paymentMethodId")
+    Integer setPaymentMethodToFalse(UUID userId, Long paymentMethodId);
 }

@@ -59,7 +59,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -79,6 +78,7 @@ import com.example.ecommercefront_end.repository.BookRepository
 import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.repository.CheckoutRepository
 import com.example.ecommercefront_end.repository.GroupRepository
+import com.example.ecommercefront_end.repository.TransactionRepository
 
 import com.example.ecommercefront_end.repository.WishlistRepository
 import com.example.ecommercefront_end.ui.admin.AdminCatalogueScreen
@@ -109,6 +109,7 @@ import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
 import com.example.ecommercefront_end.ui.checkout.OrderConfirmationScreen
 import com.example.ecommercefront_end.ui.user.InsertAddressScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
+import com.example.ecommercefront_end.ui.user.TransactionsScreen
 import com.example.ecommercefront_end.ui.user.PaymentMethodsScreen
 import com.example.ecommercefront_end.ui.user.UserAuthScreen
 import com.example.ecommercefront_end.ui.user.UserOrdersScreen
@@ -120,6 +121,7 @@ import com.example.ecommercefront_end.viewmodels.BookViewModel
 import com.example.ecommercefront_end.viewmodels.CartViewModel
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
 import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
+import com.example.ecommercefront_end.viewmodels.TransactionViewModel
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
 import kotlinx.coroutines.async
 import java.util.UUID
@@ -164,6 +166,7 @@ fun NavigationView(navController: NavHostController) {
 
     val adminViewModel = remember { AdminViewModel(repository = AdminRepository(RetrofitClient.adminApiService)) }
     val checkoutViewModel = remember { CheckoutViewModel(checkoutRepository = CheckoutRepository(RetrofitClient.checkoutApiService), cartViewModel = cartViewModel, navController = navController) }
+    val transactionViewModel = remember { TransactionViewModel(transactionRepository = TransactionRepository(RetrofitClient.transactionApiService)) }
 
     val wRepository = WishlistRepository( RetrofitClient.wishlistApiService, RetrofitClient.wishlistItemApiService)
     val groupRepository = GroupRepository(RetrofitClient.groupApiService)
@@ -405,6 +408,10 @@ fun NavigationView(navController: NavHostController) {
                 PaymentMethodsScreen(viewModel = checkoutViewModel, navController = navController)
             }
 
+            composable("transactions"){
+                TransactionsScreen( viewModel = transactionViewModel)
+            }
+
         }
 
     }
@@ -416,6 +423,8 @@ fun TopBar(navHostController: NavHostController, bookViewModel: BookViewModel) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
+    val isSearchVisible = currentRoute == "home" || currentRoute == "filtered-books"
+    var filterOptions by remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
 
     TopAppBar(
