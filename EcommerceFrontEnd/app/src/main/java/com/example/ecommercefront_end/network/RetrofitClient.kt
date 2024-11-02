@@ -106,5 +106,9 @@ object RetrofitClient {
     val checkoutApiService: CheckoutApiService by lazy {
         retrofit.create(CheckoutApiService::class.java)
     }
+
+    val transactionApiService: TransactionApiService by lazy {
+        retrofit.create(TransactionApiService::class.java)
+    }
 }
 
