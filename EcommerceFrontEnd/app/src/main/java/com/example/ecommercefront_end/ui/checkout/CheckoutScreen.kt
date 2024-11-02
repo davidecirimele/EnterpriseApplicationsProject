@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.ecommercefront_end.SessionManager
+import com.example.ecommercefront_end.SessionManager.observableUser
 import com.example.ecommercefront_end.SessionManager.user
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
@@ -51,14 +52,12 @@ fun CheckoutScreen(viewModel: CheckoutViewModel, navController: NavController) {
             viewModel.loadCheckoutData()
         }
 
-        LaunchedEffect(Unit) {
-            snapshotFlow { user }
-                .drop(1)  // Skip the initial emission
-                .collect { newUser ->
+        LaunchedEffect(observableUser) {
+            println("LaunchedEffect triggered with user: $observableUser")
                     println("sto azzerando i dati")
                     viewModel.clearData()
                 }
-        }
+
 
 
             // Sezione Indirizzo di Spedizione (con freccia per modificare)

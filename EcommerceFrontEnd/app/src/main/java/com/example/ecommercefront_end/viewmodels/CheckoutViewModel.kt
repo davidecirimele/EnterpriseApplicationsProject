@@ -16,6 +16,7 @@ import com.example.ecommercefront_end.model.PaymentMethodType
 import com.example.ecommercefront_end.model.SaveAddress
 import com.example.ecommercefront_end.model.SaveOrder
 import com.example.ecommercefront_end.model.SavePaymentMethod
+import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.model.UserId
 import com.example.ecommercefront_end.repository.AddressRepository
 import com.example.ecommercefront_end.repository.CheckoutRepository
@@ -95,6 +96,8 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
 
     private val _order = MutableStateFlow<SaveOrder?>(null)
     val order: StateFlow<SaveOrder?> = _order
+
+
 
 
     val isCheckoutEnabled: StateFlow<Boolean> = combine(
