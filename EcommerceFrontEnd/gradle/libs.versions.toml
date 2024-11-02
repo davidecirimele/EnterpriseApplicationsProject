@@ -1,6 +1,7 @@
 [versions]
 accompanistPermissions = "0.28.0"
 agp = "8.5.1"
+androidxComposeMaterialMaterial = "1.7.5"
 androidxMaterial = "1.7.2"
 androidxMaterialVersion = "1.4.3"
 coil = "2.2.2"
@@ -34,6 +35,7 @@ activityCompose = "1.9.1"
 composeBom = "2024.06.00"
 loggingInterceptor = "4.10.0"
 material3 = "1.1.1"
+material3Version = "1.1.0"
 materialVersion = "1.4.0"
 roomVersion = "2.6.1"
 navigationRuntimeKtx = "2.7.7"
@@ -53,6 +55,8 @@ accompanist-permissions = { module = "com.google.accompanist:accompanist-permiss
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "androidxMaterial" }
 androidx-material-v143 = { module = "androidx.compose.material:material", version.ref = "androidxMaterialVersion" }
+androidx-material-v175 = { module = "androidx.compose.material:material", version.ref = "androidxComposeMaterialMaterial" }
+androidx-material3-v110 = { module = "androidx.compose.material3:material3", version.ref = "material3Version" }
 androidx-material3-v111 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 coil-compose-v222 = { module = "io.coil-kt:coil-compose", version.ref = "coilKtCoilComposeVersion" }
