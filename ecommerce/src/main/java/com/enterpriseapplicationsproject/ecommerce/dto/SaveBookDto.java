@@ -3,8 +3,10 @@ package com.enterpriseapplicationsproject.ecommerce.dto;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.BookFormat;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.BookGenre;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.BookLanguage;
+import com.enterpriseapplicationsproject.ecommerce.validation.ValidImageFile;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -54,5 +56,9 @@ public class SaveBookDto {
 
     @PositiveOrZero(message = "Stock must be positive or zero")
     private Integer stock;
+
+    @NotNull(message = "Book cover is mandatory.")
+    @ValidImageFile
+    private MultipartFile image;
 
 }

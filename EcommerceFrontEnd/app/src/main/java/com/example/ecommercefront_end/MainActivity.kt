@@ -1,10 +1,12 @@
 package com.example.ecommercefront_end
 
 import CheckoutViewModel
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -56,7 +58,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -64,6 +65,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.repository.AddressRepository
@@ -72,6 +74,7 @@ import com.example.ecommercefront_end.repository.AuthRepository
 import com.example.ecommercefront_end.repository.BookRepository
 import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.repository.CheckoutRepository
+import com.example.ecommercefront_end.repository.GroupRepository
 import com.example.ecommercefront_end.repository.TransactionRepository
 
 import com.example.ecommercefront_end.repository.WishlistRepository
@@ -86,7 +89,6 @@ import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.ui.user.AccountManagerScreen
 import com.example.ecommercefront_end.ui.user.AddressesScreen
 import com.example.ecommercefront_end.ui.admin.AdminHomeScreen
-import com.example.ecommercefront_end.ui.admin.AdminOrdersScreen
 import com.example.ecommercefront_end.ui.admin.AdminSingleBookScreen
 import com.example.ecommercefront_end.ui.admin.AdminUserDetailsScreen
 import com.example.ecommercefront_end.ui.admin.AdminUsersListScreen
@@ -94,17 +96,20 @@ import com.example.ecommercefront_end.ui.admin.InsertProductScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutAddressScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutPaymentScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
+import com.example.ecommercefront_end.ui.admin.AdminOrdersScreen
 import com.example.ecommercefront_end.ui.checkout.OrderConfirmationScreen
+import com.example.ecommercefront_end.ui.user.GroupScreen
 import com.example.ecommercefront_end.ui.user.InsertAddressScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
+import com.example.ecommercefront_end.ui.user.SignInUpScreen
 import com.example.ecommercefront_end.ui.user.TransactionsScreen
-import com.example.ecommercefront_end.ui.user.UserAuthScreen
 import com.example.ecommercefront_end.ui.wishlist.WishlistsScreen
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
 import com.example.ecommercefront_end.viewmodels.AdminViewModel
 import com.example.ecommercefront_end.viewmodels.BookViewModel
 import com.example.ecommercefront_end.viewmodels.CartViewModel
+import com.example.ecommercefront_end.viewmodels.GroupViewModel
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
 import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
 import com.example.ecommercefront_end.viewmodels.TransactionViewModel
@@ -114,6 +119,7 @@ import java.util.UUID
 
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -137,19 +143,28 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun NavigationView(navController: NavHostController) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     val selectedIndex = remember { mutableIntStateOf(0) }
 
     // Usa remember per mantenere i ViewModel
-    val cartViewModel = remember { CartViewModel(repository = CartRepository(RetrofitClient.cartApiService)) }
+    val cartRepository = CartRepository(RetrofitClient.cartApiService)
+    val cartViewModel = remember { CartViewModel(repository = cartRepository) }
     val accountViewModel = remember { AccountViewModel(repository = AccountRepository(RetrofitClient.userApiService)) }
     val addressViewModel = remember { AddressViewModel(repository = AddressRepository(RetrofitClient.addressApiService)) }
     val bookViewModel = remember { BookViewModel(repository = BookRepository(RetrofitClient.booksApiService)) }
+
     val adminViewModel = remember { AdminViewModel(repository = AdminRepository(RetrofitClient.adminApiService)) }
     val checkoutViewModel = remember { CheckoutViewModel(checkoutRepository = CheckoutRepository(RetrofitClient.checkoutApiService), cartViewModel = cartViewModel, navController = navController) }
     val transactionViewModel = remember { TransactionViewModel(transactionRepository = TransactionRepository(RetrofitClient.transactionApiService)) }
+
+    val wRepository = WishlistRepository( RetrofitClient.wishlistApiService, RetrofitClient.wishlistItemApiService)
+    val groupRepository = GroupRepository(RetrofitClient.groupApiService)
+    val groupViewModel = GroupViewModel(groupRepository)
+
+    val wishlistViewModel = remember { WishlistViewModel(wRepository, groupRepository) }
 
     val startDestination = if (SessionManager.user?.role == "ROLE_ADMIN") {
         "admin-home"
@@ -190,14 +205,15 @@ fun NavigationView(navController: NavHostController) {
                 // Carica il libro corrispondente all'id
                 LaunchedEffect(idBook) {
                     bookViewModel.loadBook(idBook)
+                    wishlistViewModel.fetchWishlists(null)
                 }
 
                 // Osserva i cambiamenti del libro
                 val book by bookViewModel.bookFlow.collectAsState()
 
                 book?.let {
-                    BookDetailsScreen(book = it, cartRepository = CartRepository(RetrofitClient.cartApiService), navController)
-                } ?: Text("Libro non trovato")
+                    BookDetailsScreen(book = it, bookViewModel = bookViewModel, cartViewModel = cartViewModel, wishlistViewModel,navController)
+                } ?: Text("Book not found")
             }
 
             composable("/admin/book_details/{idBook}", arguments = listOf(navArgument("idBook") { type = NavType.LongType })) { backStackEntry ->
@@ -226,7 +242,7 @@ fun NavigationView(navController: NavHostController) {
 
                 LaunchedEffect(userId) {
                     if(userId != null)
-                        adminViewModel.loadUser(userId)
+                        adminViewModel.loadUser(userId) // carica
                 }
 
                 val user by adminViewModel.userFlow.collectAsState()
@@ -248,19 +264,39 @@ fun NavigationView(navController: NavHostController) {
                     if (cartViewModel.isCheckoutEnabled.value) navController.navigate("checkout") })
 
             }
-            composable("wishlist") {
-                selectedIndex.value = 3
-                val _wishlistApiService = RetrofitClient.wishlistApiService
-                val _wishlistItemApiService = RetrofitClient.wishlistItemApiService
-                val repository = WishlistRepository(_wishlistApiService, _wishlistItemApiService)
-                WishlistsScreen(viewModel = WishlistViewModel(repository), navController = navController)
+            composable("/admin/wishlist/{userId}", arguments = listOf(navArgument("userId") { type = NavType.StringType })) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId")?.let {
+                    try {
+                        UUID.fromString(it)
+                    } catch (e: IllegalArgumentException) {
+                        null  // oppure gestisci l'errore in un altro modo
+                    }
+                }
+                LaunchedEffect(userId) {
+                    if(userId != null)
+                        wishlistViewModel.fetchWishlists(idUser = userId)
+                        //wishlistViewModel.fetchWishlistItems()
+
+                }
+                //val user by adminViewModel.userFlow.collectAsState()
+
+
+                WishlistsScreen(wishlistViewModel = wishlistViewModel, bookViewModel= bookViewModel, cartViewModel = cartViewModel, navController = navController)
 
             }
+            composable("wishlist") {
+                selectedIndex.value = 3
+                LaunchedEffect(Unit) {
+                    wishlistViewModel.fetchWishlists(null)
+                }
+                WishlistsScreen(wishlistViewModel = wishlistViewModel, bookViewModel= bookViewModel, cartViewModel = cartViewModel, navController = navController)
+            }
+
             composable("userAuth") {
                 selectedIndex.value = 1
                 val _authApiService = RetrofitClient.authApiService
                 val repository = AuthRepository(_authApiService)
-                UserAuthScreen(loginViewModel = LoginViewModel(repository), registrationViewModel = RegistrationViewModel(repository), navController)
+                SignInUpScreen(loginViewModel = LoginViewModel(repository), registrationViewModel = RegistrationViewModel(repository), navController)
             }
 
             composable("account-manager") {
@@ -286,6 +322,15 @@ fun NavigationView(navController: NavHostController) {
                 MyAccountScreen(
                     accountViewModel = accountViewModel, addressViewModel = addressViewModel,
                     navHostController = navController)
+            }
+            composable("groups") {
+                LaunchedEffect(Unit) {
+                    val groupoJob = async {groupViewModel.fetchGroups()}
+                    //groupViewModel.fetchGroupMembers()
+
+                    groupoJob.await()
+                }
+                GroupScreen(groupViewModel, navController)
             }
 
             composable("filtered-books") {
@@ -373,7 +418,7 @@ fun TopBar(navHostController: NavHostController, bookViewModel: BookViewModel) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
-    val isSearchVisible = currentRoute == "home" || currentRoute == "filtered-books" || currentRoute == "admin-home"
+    val isSearchVisible = currentRoute == "home" || currentRoute == "filtered-books"
     var filterOptions by remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
 
@@ -428,8 +473,7 @@ fun SearchBar(navHostController: NavHostController, filterOptions: Boolean, onFi
                 if(searchValue == "" && currentRoute == "filtered-books"){
                     navHostController.popBackStack()
                 }
-                bookViewModel.updateFilter(title = it, author = it, publisher = it);
-                bookViewModel.searchBooks(navHostController, currentRoute)},
+                bookViewModel.searchBooks(BookFilter(title = it, author = it, publisher = it),navHostController, currentRoute)},
             label = { Text("Search by Title, Author or Publisher") },
             shape = RoundedCornerShape(16.dp),
             singleLine = true,

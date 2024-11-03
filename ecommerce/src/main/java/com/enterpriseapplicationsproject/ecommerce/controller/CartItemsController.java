@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.ShoppingCartsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.CartItem;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.ShoppingCart;
@@ -26,6 +27,8 @@ public class CartItemsController {
 
     private final CartItemsService cartItemsService;
 
+
+    @RateLimit(type = "USER")
     @GetMapping("/get/items/{userId}/{cartId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<List<CartItemDto>> getItems(@PathVariable UUID userId, @PathVariable Long cartId) {
@@ -33,7 +36,7 @@ public class CartItemsController {
         return new ResponseEntity<>(items, HttpStatus.OK);
     }
 
-
+    @RateLimit(type = "USER")
     @PostMapping("/{userId}/{cartId}/{bookId}/insert")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<CartItemDto> insertItem(@RequestBody QuantityCartItemDto quantityCartItemDto,@PathVariable Long cartId, @PathVariable Long bookId,  @PathVariable UUID userId) {
@@ -42,6 +45,7 @@ public class CartItemsController {
         return new ResponseEntity<>(insertedItem, HttpStatus.CREATED);
     }
 
+    @RateLimit(type = "USER")
     @DeleteMapping("/{userId}/{cartId}/{itemId}/remove")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<CartItemDto> removeItem(@PathVariable Long cartId, @PathVariable Long itemId,@PathVariable UUID userId) {
@@ -54,6 +58,7 @@ public class CartItemsController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @RateLimit(type = "USER")
     @PutMapping("{userId}/{cartId}/{itemId}/edit-quantity")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<CartItemDto> updateQuantity(@PathVariable UUID userId, @PathVariable Long cartId, @PathVariable Long itemId, @RequestBody QuantityCartItemDto quantityCartItemDto) {

@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end.repository
 
+import com.example.ecommercefront_end.model.SaveWishlist
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.network.WishlistApiService
@@ -10,14 +11,8 @@ import java.util.UUID
 class WishlistRepository (private val wApiService : WishlistApiService, private val WIApiService: WishlistItemApiService) {
 
 
-
-    suspend fun updateWishlist(w: Wishlist) {
-        wApiService.updateWishlist(w)
-
-    }
-
-    suspend fun removeWishlist(id: Long): Response<Unit>{
-        return wApiService.deleteWishlist(id)
+    suspend fun removeWishlist(id: Long, idUser: UUID): Response<Unit>{
+        return wApiService.deleteWishlist(id, idUser)
     }
 
     suspend fun getWishlistsByUser(userId : UUID): List<Wishlist>{
@@ -40,7 +35,7 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
     suspend fun getFriendWishlist(userId : UUID): List<Wishlist>{
         return try {
             val wishlists = wApiService.getFriendWishlists(userId)
-            println("Cercando wishlist per amico "+ userId)
+            println("Cercando wishlist per amico $userId")
             if (wishlists.isEmpty()) {
                 println("Nessuna lista dei desideri trovata per l amico")
             } else {
@@ -72,9 +67,9 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
         }
     }
 
-    suspend fun getWishlistItems(wishlistId: Long): List<WishlistItem>{
+    suspend fun getWishlistItems(wishlistId: Long, userId: UUID): List<WishlistItem>{
         return try {
-            val wishlistItems = WIApiService.getWishlistItems(wishlistId)
+            val wishlistItems = WIApiService.getByWishlist(wishlistId, userId)
 
             if (wishlistItems.isEmpty()) {
                 println("Nessun elemento della lista dei desideri trovato")
@@ -89,30 +84,26 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
         }
     }
 
-    suspend fun addWishlist(wishlist: Wishlist) {
-        wApiService.addWishlist(wishlist)
+    suspend fun addWishlist(wishlist: SaveWishlist, idUser: UUID) {
+        wApiService.addWishlist(idUser, wishlist.name, wishlist.privacySetting)
     }
-    suspend fun updatePrivacySettings(wishlist: Wishlist) {
+    suspend fun updateWishlist(wishlist: Wishlist) {
         wApiService.updateWishlist(wishlist)
     }
 
-    suspend fun removeWishlistItem(id: Long): Response<Unit> {
-        return WIApiService.deleteWishlistItem(id)
-    }
-    suspend fun shareWishlist(wishlist: Wishlist): Map<String, String> {
-        return wApiService.shareWishlist(wishlist)
+    suspend fun addWishlistItem(bookId: Long, wishlistId: Long, idUser: UUID): Response<Unit> {
+       return WIApiService.addItem(bookId, wishlistId, idUser)
     }
 
-    suspend fun joinWishlist(userId: UUID , token: String ): Response<Boolean> {
-        return  wApiService.joinWishlist(userId, token)
+    suspend fun removeWishlistItem(id: Long, idUser : UUID): Response<Unit> {
+        return WIApiService.removeItem(id, idUser)
     }
 
     suspend fun getWishlistsByFriends(id: UUID): List<Wishlist> {
         return wApiService.getFriendWishlists(id)
     }
 
-    suspend fun unshareWishlist(id: UUID, wishlist: Wishlist): Response<Boolean> {
-        return wApiService.unshareWishlist(id, wishlist)
-    }
+
+
 
 }

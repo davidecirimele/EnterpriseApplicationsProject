@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end.ui.admin
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,23 +37,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
 import com.example.ecommercefront_end.model.Book
+import com.example.ecommercefront_end.model.BookFilter
+import com.example.ecommercefront_end.network.RetrofitClient
+import com.example.ecommercefront_end.ui.books.BookCover
 import com.example.ecommercefront_end.ui.books.BooksFilterScreen
-import com.example.ecommercefront_end.ui.home.testImgs
 import com.example.ecommercefront_end.viewmodels.BookViewModel
+import okhttp3.OkHttpClient
 
 fun Modifier.bookEntryModifier(navController: NavController, bookId: Long) = composed {
     this
         .fillMaxWidth()
-        .height(200.dp)
+        .fillMaxHeight(0.35f)
         .clickable { navController.navigate("/admin/book_details/${bookId}") }
 }
 @Composable
@@ -64,7 +68,7 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navHostController: NavHos
     var filterOptions by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        bookViewModel.fetchAllAvailableProducts();
+        bookViewModel.fetchAllAvailableProducts()
     }
 
     Column(modifier = Modifier.fillMaxSize()){
@@ -82,8 +86,7 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navHostController: NavHos
             TextField(
                 value = searchValue,
                 onValueChange = { searchValue = it;
-                    bookViewModel.updateFilter(title = it, author = it, publisher = it);
-                    bookViewModel.searchBooks(navController = navHostController,"admin-catalogue")
+                    bookViewModel.searchBooks(filter = BookFilter(title = it, author = it, publisher = it), navController = navHostController,"admin-catalogue")
                 },
                 label = { Text("Search by Title, Author, Publisher or ISBN") },
                 shape = RoundedCornerShape(16.dp),
@@ -107,15 +110,16 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navHostController: NavHos
             if(products.isNotEmpty()) {
                 for ((index,product) in products.withIndex())
                     item {
-                        Row(){
+                        Row(modifier = Modifier.fillMaxWidth()){
                             Text(text = (index + 1).toString(),
                                 fontWeight = FontWeight.ExtraBold,
-                                fontSize = 20.sp,
                                 modifier = Modifier
                                     .align(Alignment.CenterVertically)
-                                    .padding(4.dp))
+                                    .padding(2.dp).fillMaxWidth(0.08f),
+                                maxLines = 1
+                            )
                             Spacer(modifier = Modifier.padding(2.dp))
-                            BookEntry(book = product, navHostController)
+                            BookEntry(book = product, bookViewModel, navHostController)
                         }
                     }
             }
@@ -143,17 +147,7 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navHostController: NavHos
 }
 
 @Composable
-fun BookEntry(book: Book, navHostController: NavHostController){
-
-    val imageUrl = remember(book.id) {
-        testImgs[book.id.hashCode() % testImgs.size]
-    }
-
-    val imagePainter = rememberAsyncImagePainter(
-        model = imageUrl,
-        error = rememberAsyncImagePainter("https://mockuptree.com/wp-content/uploads/edd/2019/10/free-Book-mockup-150x150.jpg")
-    )
-    val isLoading = imagePainter.state is AsyncImagePainter.State.Loading
+fun BookEntry(book: Book, bookViewModel: BookViewModel, navHostController: NavHostController){
 
     Row(modifier = Modifier.bookEntryModifier(navHostController,book.id)) {
         Card(modifier = Modifier
@@ -166,17 +160,7 @@ fun BookEntry(book: Book, navHostController: NavHostController){
                             .height((250 * 0.6f).dp)
                             .width((200 * 0.6f).dp)
                     ) {
-                        Image(
-                            painter = imagePainter,
-                            contentDescription = book.title,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                        if (isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        }
+                        BookCover(book, bookViewModel)
                     }
                     Spacer(modifier = Modifier.padding(4.dp))
 

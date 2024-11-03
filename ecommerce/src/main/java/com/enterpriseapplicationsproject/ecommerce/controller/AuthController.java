@@ -4,6 +4,7 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 import com.enterpriseapplicationsproject.ecommerce.config.security.JwtService;
 import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetails;
 import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetailsService;
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.service.AuthService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RefreshTokenService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
@@ -49,11 +50,13 @@ public class AuthController {
     private final LoggedUserDetailsService loggedUserDetailsService;
 
 
+    @RateLimit
     @PostMapping(consumes = "application/json", path = "/register")
     public ResponseEntity<UserDetailsDto> registerUser(@Valid @RequestBody SaveUserDto userDto) {
         return ResponseEntity.ok(authService.registerUser(userDto));
     }
 
+    @RateLimit
     @PostMapping(consumes = "application/json", path = "/login")
     public ResponseEntity<Map<String, String>> login(@Valid @RequestBody CredentialDto credentials) {
         log.info("Received request for auth/login");

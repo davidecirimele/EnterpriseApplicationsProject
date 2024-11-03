@@ -1,5 +1,6 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.OrdersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.service.OrdersService;
 import com.enterpriseapplicationsproject.ecommerce.dto.CheckoutRequestDto;
@@ -25,6 +26,7 @@ public class OrderController {
 
     private final OrdersService ordersService;
 
+    @RateLimit(type ="USER")
     @PostMapping(consumes = "application/json", path = "/add")
     @PreAuthorize("#orderDto.userId.userId == authentication.principal.getId()")
     public ResponseEntity<SaveOrderDto> addOrder(@Valid @RequestBody CheckoutRequestDto orderDto) {
@@ -32,6 +34,7 @@ public class OrderController {
         return new ResponseEntity<>(addedOrder, HttpStatus.CREATED);
     }
 
+    @RateLimit(type ="USER")
     @GetMapping(consumes = "application/json", path = "/get/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<OrderDto>> getAllUserOrders(@PathVariable UUID userId) {
@@ -39,7 +42,7 @@ public class OrderController {
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
-
+    @RateLimit(type ="USER")
     @PutMapping(consumes = "application/json", path = "/cancel/{orderId}/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<OrderDto> cancelOrder(@PathVariable Long orderId , @PathVariable UUID userId) {
@@ -47,6 +50,8 @@ public class OrderController {
         return new ResponseEntity<>(cancelledOrder, HttpStatus.OK);
     }
 
+
+    @RateLimit(type ="USER")
     @GetMapping(consumes = "application/json", path = "/confirmed/{userId}")
     @PreAuthorize("#userId == authentication.credentials or hasRole('ADMIN')")
     public ResponseEntity<List<OrderDto>> getAllConfirmedOrders(@PathVariable UUID userId) {
@@ -54,6 +59,7 @@ public class OrderController {
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
+    @RateLimit(type ="USER")
     @GetMapping(consumes = "application/json", path = "/cancelled/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<OrderDto>> getAllCancelledOrders(@PathVariable UUID userId) {

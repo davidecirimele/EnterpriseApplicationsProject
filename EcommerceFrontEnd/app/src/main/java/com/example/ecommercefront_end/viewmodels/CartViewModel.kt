@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.ecommercefront_end.SessionManager
+import com.example.ecommercefront_end.model.Book
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,9 +43,6 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     val snackbarHostState = SnackbarHostState()
 
     val isCheckoutEnabled: StateFlow<Boolean> = cartItems.map { it.isNotEmpty() }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
-
-
 
 
 
@@ -113,23 +111,55 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
         }
     }
 
+    fun addItem(book : Book) {
+        viewModelScope.launch {
+            var message = ""
+            try {
+                val userId = SessionManager.user?.id
+                if (userId != null) {
+                    val response = repository.addCartItem(userId, 1, book.id)
+
+                    if (response.isSuccessful) {
+                        updateTotalAmount()
+                        message = "Libro aggiunto al carrello"
+                    }
+                    else {
+                        message = "Errore: ${response.message()}"
+                    }
+                } else {
+                    message = "ID utente non trovato"
+                }
+                triggerSnackbar(message)
+            } catch (e: Exception) {
+                triggerSnackbar("Si è verificato un errore: ${e.message}")
+            }
+        }
+    }
+
     fun removeItem(item: CartItem) {
         viewModelScope.launch {
+            var message = ""
             try {
                 val userId = SessionManager.user?.id
                 if (userId != null) {
 
                     shoppingCart.value?.let {
                         repository.removeItem(item.id, it.id, userId)
+
                         println("shpping cart items post delete: ${_cartItems.value}")
+
                         _cartItems.value = _cartItems.value.filterNot { it.id == item.id }.toList()
+
                         println("Lista aggiornata dopo rimozione: ${_cartItems.value}")
                         updateTotalAmount()
-
                     }
-
+                    message = "Item removed successfully"
+                } else {
+                    message = "User ID not found"
 
                 }
+                triggerSnackbar(message)
+
 
             } catch (e: Exception) {
                 _errorMessage.value = "Si è verificato un errore durante la rimozione dell'articolo: ${e.message}"

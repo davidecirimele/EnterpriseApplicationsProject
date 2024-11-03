@@ -65,7 +65,7 @@ fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: Addres
 
     LazyColumn(modifier = Modifier
         .fillMaxSize()
-        .padding(8.dp), verticalArrangement = Arrangement.Top){
+        .padding(8.dp), verticalArrangement = Arrangement.SpaceAround){
         item {
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -179,9 +179,7 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
             Row(modifier = Modifier.fillMaxWidth()){
                 EditScreen("Phone Number", isEditingPhoneNumber, isErrorPhoneNumberTriggered, accountViewModel = accountViewModel, onSuccess = {
                     isEditingPhoneNumber = false
-                    navController.navigate("my-account") {
-                    popUpTo("my-account") { inclusive = true }
-                }
+                    navController.popBackStack()
             }, onError = {isErrorPhoneNumberTriggered = true})
             }
         }

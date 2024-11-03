@@ -60,6 +60,17 @@ public class ModelMapperConfig {
             }
         });
 
+        modelMapper.addMappings(new PropertyMap<Admin, UserDetailsDto>() {
+            @Override
+            protected void configure() {
+                map(source.getId(), destination.getId());
+                map(source.getFirstName(), destination.getFirstName());
+                map(source.getLastName(), destination.getLastName());
+                map(source.getCredential().getEmail(), destination.getEmail());
+                map(source.getPhoneNumber(), destination.getPhoneNumber());
+            }
+        });
+
         modelMapper.addMappings(new PropertyMap<UserDto, User>() {
             @Override
             protected void configure() {
@@ -107,7 +118,7 @@ public class ModelMapperConfig {
                 map(source.getGroup(), destination.getGroup());
                 map(source.getUser(), destination.getUserId());
                 map(source.getItems(), destination.getItems());
-                map( source.getName(), destination.getName());
+                map(source.getName(), destination.getName());
 
             }
         });

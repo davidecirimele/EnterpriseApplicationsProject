@@ -3,7 +3,6 @@ package com.example.ecommercefront_end.network
 import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.CardProvider
 import com.example.ecommercefront_end.model.CardProviderAdapter
-
 import com.example.ecommercefront_end.model.PaymentMethodType
 import com.example.ecommercefront_end.model.PaymentMethodTypeAdapter
 import com.google.gson.GsonBuilder
@@ -20,11 +19,15 @@ import javax.net.ssl.X509TrustManager
 object RetrofitClient {
     private const val BASE_URL = "https://192.168.1.71:8443/api/v1/"
 
-    private const val SAMUELES_URL = "https://192.168.1.54:8081/api/v1/" //URL di Samuele S
+    private const val BASE2_URL = "https://192.168.1.7:8081/api/v1/"
 
-    private const val DAVIDES_URL = "https://10.0.2.2:8080/api/v1/"
+    private const val BASE3_URL = "https://10.0.2.2:8081/api/v1/"
 
-    private val client: OkHttpClient by lazy {
+    private const val SAMUELES_URL = "https://192.168.143.117:8081/api/v1/" //URL di Samuele S
+
+    const val DAVIDES_URL = "https://10.0.2.2:8080/api/v1/"
+
+    val client: OkHttpClient by lazy {
         val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
             override fun checkClientTrusted(
                 chain: Array<java.security.cert.X509Certificate>,
@@ -60,7 +63,7 @@ object RetrofitClient {
 
     val retrofit: Retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(BASE3_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create(
                 GsonBuilder()
@@ -89,6 +92,10 @@ object RetrofitClient {
 
     val wishlistItemApiService: WishlistItemApiService by lazy {
         retrofit.create(WishlistItemApiService::class.java)
+    }
+
+    val groupApiService: GroupApiService by lazy {
+        retrofit.create(GroupApiService::class.java)
     }
 
     val cartApiService: CartApiService by lazy {

@@ -24,6 +24,6 @@ data class Book(
     val weight: Double,
     val price: Double,
     val stock: Int,
-    //val image: ByteArray,
+    val imagePath: String,
     val available: Boolean
 )

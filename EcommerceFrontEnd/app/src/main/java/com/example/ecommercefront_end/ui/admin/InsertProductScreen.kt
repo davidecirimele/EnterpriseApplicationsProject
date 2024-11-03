@@ -1,5 +1,12 @@
 package com.example.ecommercefront_end.ui.admin
 
+import android.net.Uri
+import android.os.Build
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts.*
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 
@@ -30,20 +37,30 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.ecommercefront_end.model.BookFormat
 import com.example.ecommercefront_end.model.BookGenre
 import com.example.ecommercefront_end.model.BookLanguage
+import com.example.ecommercefront_end.model.Price
 import com.example.ecommercefront_end.model.SaveBook
 import com.example.ecommercefront_end.ui.books.ChoiceSelector
+import com.example.ecommercefront_end.utils.FileUploadButton
+import com.example.ecommercefront_end.utils.ImageFileLoader
+import com.example.ecommercefront_end.utils.RequestStoragePermission
 import com.example.ecommercefront_end.viewmodels.BookViewModel
+import java.io.File
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostController){
 
@@ -61,8 +78,12 @@ fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostControll
     var age by remember { mutableStateOf("") }
     var publishDate by remember { mutableStateOf(LocalDate.now()) }
     var weight by remember { mutableStateOf("") }
+    var image by remember { mutableStateOf<File?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
+        Text(text = "Home", fontSize = 40.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(16.dp).align(
+            Alignment.CenterHorizontally))
+        Spacer(modifier = Modifier.height(8.dp))
             LazyColumn(
                 modifier = Modifier
                     .padding(top = 32.dp)
@@ -273,6 +294,15 @@ fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostControll
 
                     Spacer(modifier = Modifier.height(10.dp))
                 }
+                item {
+                    RequestStoragePermission {
+                        FileUploadButton { cover ->
+                            if (cover != null) {
+                                image = cover
+                            }
+                        }
+                    }
+                }
             }
         Button(
             modifier = Modifier.fillMaxWidth(),
@@ -292,21 +322,18 @@ fun InsertProductScreen(viewModel: BookViewModel, navController: NavHostControll
                         language = BookLanguage.valueOf(language),
                         age = age.toInt(),
                         publishDate = publishDate,
-                        weight = weight.toDouble()
+                        weight = weight.toDouble(),
+                        image = image
                     )
                 )
                 viewModel.fetchBooksData()
-                navController.navigate("admin-home") {
-                    popUpTo("admin-home") {
-                        saveState = true
-                    }
-                }
+                navController.popBackStack()
             },
             enabled = title.isNotEmpty() && author.isNotEmpty() && publisher.isNotEmpty() &&
                     price.isNotEmpty() && stock.isNotEmpty() && isbn.isNotEmpty() &&
                     pages.isNotEmpty() && edition.isNotEmpty() && format.isNotEmpty() &&
                     genre.isNotEmpty() && language.isNotEmpty() && age.isNotEmpty()
-                    && weight.isNotEmpty()
+                    && weight.isNotEmpty() && image != null
         ) {
             Text("Save Product", style = MaterialTheme.typography.bodyLarge)
         }

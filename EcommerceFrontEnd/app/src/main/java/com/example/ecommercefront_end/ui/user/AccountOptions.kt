@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import com.example.ecommercefront_end.SessionManager.user
 import com.example.ecommercefront_end.model.UserId
 import java.util.UUID
 
@@ -20,6 +21,17 @@ fun AccountOptions(userId: UUID?=null, currentRoute: String, navHostController: 
                 popUpTo(currentRoute) { inclusive = true }
             }}){
                 Text(text = "Addresses")
+            }
+        }
+        if (user?.role  == "ROLE_ADMIN"){
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Button(onClick = {
+                    navHostController.navigate("/admin/wishlist/${userId}") {
+                        popUpTo(currentRoute) { inclusive = true }
+                    }
+                }) {
+                    Text(text = "Wishlists")
+                }
             }
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
