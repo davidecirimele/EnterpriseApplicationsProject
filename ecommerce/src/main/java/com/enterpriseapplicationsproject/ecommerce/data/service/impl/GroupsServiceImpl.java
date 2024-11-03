@@ -8,6 +8,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
 import com.enterpriseapplicationsproject.ecommerce.data.service.GroupsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.GroupDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.collection.spi.PersistentBag;
@@ -28,6 +29,7 @@ import static org.springframework.security.authorization.AuthorityAuthorizationM
 @Service
 @RequiredArgsConstructor
 public class GroupsServiceImpl implements GroupsService {
+
     private final GroupsDao groupDao;
     private final UsersDao userDao;
     private final WishlistsDao wishlistDao;
@@ -54,6 +56,28 @@ public class GroupsServiceImpl implements GroupsService {
             throw new IllegalArgumentException("User is not a member or the owner of the group");
         }
         return modelMapper.map(group, GroupDto.class);
+    }
+
+    @Override
+    public List<UserDto> findMembersByGroup(Long idGroup) {
+        return groupDao.findById(idGroup)
+                .map(group -> group.getMembers().stream()
+                        .map(user -> modelMapper.map(user, UserDto.class))
+                        .collect(Collectors.toList()))
+                .orElseThrow(() -> new RuntimeException(String.format("Group not found with id [%s]", idGroup)));
+    }
+
+    @Override
+    public List<GroupDto> findGroupsByUser(UUID idUser) {
+        List<Wishlist> wishlists = wishlistDao.findByUserId(idUser);
+
+        List<Group> groups = wishlists.stream()
+                .map(Wishlist::getGroup)
+                .toList();
+
+        return groups.stream()
+                .map(group -> modelMapper.map(group, GroupDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -42,7 +42,7 @@ public class WishlistController {
 
     @RateLimit//limite di richieste
     @GetMapping(path= "/getAll")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<WishlistDto>> getAll() {
         List<WishlistDto> wishlists = wishlistService.getAllSorted();
         if (wishlists.isEmpty())
@@ -88,7 +88,6 @@ public class WishlistController {
     }
 
 
-
     @RateLimit(type = "USER")
     @GetMapping(path = "/getOfFriend/{idUser}")
     @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
@@ -99,7 +98,6 @@ public class WishlistController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // meglio farlo nel service e gestire l'eccezione con l'handler
         return new ResponseEntity<>(w, HttpStatus.OK);
     }
-
 
 
     @RateLimit(type = "USER")

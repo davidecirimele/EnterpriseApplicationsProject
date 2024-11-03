@@ -93,7 +93,9 @@ fun OptionsSection(navHostController: NavHostController){
             if(SessionManager.user != null && SessionManager.user!!.role!="ROLE_ADMIN") {
                 Spacer(modifier = Modifier.height(20.dp))
                 Row {
-                    Button(onClick = { /*TODO*/ }) {
+                    Button(onClick = { navHostController.navigate("groups"){
+                        popUpTo("account-manager") { saveState = true }
+                    }}) {
                         Text(text = "My Groups")
                     }
                     Spacer(modifier = Modifier.width(20.dp))

@@ -165,6 +165,7 @@ fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navControl
 
 
 
+
 @Composable
 fun TotalSection(totalAmount: Double, onCheckoutClick: () -> Unit, isCheckoutEnabled: Boolean) {
     Column(modifier = Modifier.padding(16.dp)) {

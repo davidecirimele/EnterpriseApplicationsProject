@@ -32,12 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 
-//samu@gm.com   Ciaobello!10
+//samu@gm.com   Cuscinobellico!99
 
 @Composable
 fun AdminHomeScreen(navHostController: NavHostController){
     Column(modifier = Modifier.fillMaxSize()){
-
 
         Text(text = "Home", fontSize = 40.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(16.dp).align(Alignment.CenterHorizontally))
 
