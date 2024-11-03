@@ -70,8 +70,7 @@ fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navControl
     val refreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
         onRefresh = {
-            println("Pull-to-refresh")
-            viewModel.loadCartItems() // Carica di nuovo gli articoli nel carrello
+            viewModel.loadCartItems()
         }
     )
 
@@ -79,14 +78,14 @@ fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navControl
         errorMessage?.let { message ->
             val result = viewModel.snackbarHostState.showSnackbar(
                 message = message,
-                actionLabel = "RIPROVA"
+                actionLabel = "RETRY"
             )
 
             if (result == SnackbarResult.ActionPerformed) {
-                viewModel.loadCartItems() // Riprova a caricare gli articoli
+                viewModel.loadCartItems()
             }
 
-            viewModel.clearErrorMessage() // Reset del messaggio d'errore
+            viewModel.clearErrorMessage()
         }
     }
 
@@ -127,7 +126,7 @@ fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navControl
                     if (cartItems.isEmpty()) {
                         // Visualizza il messaggio quando il carrello è vuoto
                         Text(
-                            text = "Il tuo carrello è vuoto.",
+                            text = "Your cart is empty",
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.align(Alignment.Center)
                         )
