@@ -1,3 +1,4 @@
+import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import java.net.SocketTimeoutException
 
 
 class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, private val cartViewModel: CartViewModel, private val navController: NavController) : ViewModel() {
@@ -167,7 +169,7 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
         println("è da salvare un nuovo indirizzo?" + isNewAddressIsSaved.value)
         println("viewModel data: ${_street.value}, ${_province.value}, ${_city.value}, ${_postalCode.value}, ${_state.value}")
         println("textfields data: ${street.value}, ${province.value}, ${city.value}, ${postalCode.value}, ${state.value}")
-       if (address != null && _addressBeingEdited.value == address) {
+        if (address != null && _addressBeingEdited.value == address) {
             onSaveEdit(address)
         } else if (isNewAddressIsSaved.value) {
             onSave()
@@ -186,6 +188,7 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
                 // Gestire l'errore
 
 
+            }
         }
     }
 
@@ -382,10 +385,10 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
                     )
                     println("checkoutRequest: $checkoutRequest")
                     try {
-                    val order = checkoutRepository.confirmOrder(checkoutRequest)
-                    _order.value = order.body()
-                    navController.navigate("order-confirmation")
-                        }
+                        val order = checkoutRepository.confirmOrder(checkoutRequest)
+                        _order.value = order.body()
+                        navController.navigate("order-confirmation")
+                    }
                     catch (e: Exception) {
                         if (e is SocketTimeoutException)
                             _errorMessage.value = "Error while confirming the order: Connection problem."
@@ -489,4 +492,3 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
     }
 
 }
-

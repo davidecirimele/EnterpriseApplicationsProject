@@ -68,8 +68,7 @@ fun ChangePasswordScreen(viewModel: AccountViewModel, navController: NavHostCont
                 verticalArrangement = Arrangement.Center,
                 ) {
 
-                Text(text = "Password must be at least 8 and at most 20 characters length, and" +
-                        "have at least 1 upper case letter, 1 number and 1 special character",
+                Text(text = "The password must be between 8 and 20 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character",
                     fontWeight = FontWeight.Bold
                 )
 

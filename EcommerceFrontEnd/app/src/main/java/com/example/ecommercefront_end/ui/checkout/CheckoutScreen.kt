@@ -113,9 +113,10 @@ fun CheckoutScreen(viewModel: CheckoutViewModel, navController: NavController) {
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }
-                        else {
-
-
+                    else {
+                        Column(modifier = Modifier
+                            .fillMaxSize(),
+                            Arrangement.spacedBy(16.dp)) {
                             // Sezione Indirizzo di Spedizione (con freccia per modificare)
                             CheckoutSectionWithArrow(
                                 title = "Delivery Address",
@@ -164,6 +165,7 @@ fun CheckoutScreen(viewModel: CheckoutViewModel, navController: NavController) {
                             }
                         }
                     }
+                }
 
             }
         }
@@ -171,42 +173,40 @@ fun CheckoutScreen(viewModel: CheckoutViewModel, navController: NavController) {
 }
 
 
-    @Composable
-    fun CheckoutSectionWithArrow(title: String, content: String, onClick: () -> Unit) {
+@Composable
+fun CheckoutSectionWithArrow(title: String, content: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = title, style = MaterialTheme.typography.titleMedium)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = content, style = MaterialTheme.typography.bodySmall)
+        }
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+            contentDescription = "Edit",
+            modifier = Modifier.size(24.dp)
+        )
+    }
+}
+
+@Composable
+fun CheckoutTotalSection(totalAmount: Double) {
+    Column {
+        Text("Order Summary", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(8.dp))
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onClick() }
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = content, style = MaterialTheme.typography.bodySmall)
-            }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "Edit",
-                modifier = Modifier.size(24.dp)
-            )
+            Text("Total", style = MaterialTheme.typography.bodyMedium)
+            Text("€$totalAmount", style = MaterialTheme.typography.bodyMedium)
         }
     }
-
-    @Composable
-    fun CheckoutTotalSection(totalAmount: Double) {
-        Column {
-            Text("Order Summary", style = MaterialTheme.typography.headlineSmall)
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Total", style = MaterialTheme.typography.bodyMedium)
-                Text("€$totalAmount", style = MaterialTheme.typography.bodyMedium)
-            }
-        }
-    }
-
-
+}

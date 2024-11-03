@@ -77,12 +77,12 @@ fun SignInUpScreen(
                 Tab(
                     selected = selectedTabIndex == 0,
                     onClick = { selectedTabIndex = 0 },
-                    text = { Text("Accedi") }
+                    text = { Text("Sign in") }
                 )
                 Tab(
                     selected = selectedTabIndex == 1,
                     onClick = { selectedTabIndex = 1 },
-                    text = { Text("Registrati") }
+                    text = { Text("Sign up") }
                 )
             }
 
@@ -160,7 +160,7 @@ fun LoginPage(loginViewModel: LoginViewModel, onLoginSuccess: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Bentornato!",
+            text = "Welcome",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 16.dp)
         )
@@ -216,7 +216,7 @@ fun LoginPage(loginViewModel: LoginViewModel, onLoginSuccess: () -> Unit) {
                 .padding(bottom = 16.dp),
             enabled = isEmailValid && isPasswordValid
         ) {
-            Text("Accedi", style = MaterialTheme.typography.bodyLarge)
+            Text("Login", style = MaterialTheme.typography.bodyLarge)
         }
     }
 }
@@ -235,7 +235,7 @@ fun RegistrationScreen(registrationViewModel : RegistrationViewModel ,onRegistra
 
         if (currentStep == 1) {
             TextButton(onClick = onSwitchToLogin) {
-                Text("Hai già un account? Accedi")
+                Text("Already have an account? Sign in!")
             }
         }
     }
@@ -271,14 +271,14 @@ fun RegistrationStep1(registrationViewModel: RegistrationViewModel, onNext: () -
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.Center,
         ) {
-            Text("Step 1 su 2", style = MaterialTheme.typography.headlineSmall)
+            Text("Step 1 / 2", style = MaterialTheme.typography.headlineSmall)
 
             Spacer(modifier = Modifier.height(10.dp))
 
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Nome") },
+                label = { Text("Name") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true
@@ -289,7 +289,7 @@ fun RegistrationStep1(registrationViewModel: RegistrationViewModel, onNext: () -
             OutlinedTextField(
                 value = surname,
                 onValueChange = { surname = it },
-                label = { Text("Cognome") },
+                label = { Text("Surname") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true
@@ -335,8 +335,7 @@ fun RegistrationStep1(registrationViewModel: RegistrationViewModel, onNext: () -
                 isError = !isPasswordValid // Mostra un errore se la password non è valida
             )
             Text(
-                text = "La password deve contenere minimo 8 caratteri e massimo 20, di cui una lettera maiuscola, " +
-                        "una lettera minuscola, un numero e un carattere speciale",
+                text = "The password must be between 8 and 20 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier
                     .padding(top = 4.dp)
@@ -351,7 +350,7 @@ fun RegistrationStep1(registrationViewModel: RegistrationViewModel, onNext: () -
                     confirmPassword = it
                     isConfirmPasswordValid = (it == password) // Controlla se le password corrispondono
                 },
-                label = { Text("Conferma Password") },
+                label = { Text("Confirm Password") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true,
@@ -383,7 +382,7 @@ fun RegistrationStep1(registrationViewModel: RegistrationViewModel, onNext: () -
                 modifier = Modifier.fillMaxWidth(),
                  enabled = isFormValid
             ) {
-                Text("Continua ->", style = MaterialTheme.typography.bodyLarge)
+                Text("Next step ->", style = MaterialTheme.typography.bodyLarge)
             }
         }
     }
@@ -416,7 +415,7 @@ fun RegistrationStep2(registrationViewModel: RegistrationViewModel, onRegistrati
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Step 2 su 2", style = MaterialTheme.typography.headlineSmall)
+            Text("Step 2 / 2", style = MaterialTheme.typography.headlineSmall)
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -424,7 +423,7 @@ fun RegistrationStep2(registrationViewModel: RegistrationViewModel, onRegistrati
             OutlinedTextField(
                 value = selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
                 onValueChange = { },
-                label = { Text("Data di nascita") },
+                label = { Text("Birth Date") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 readOnly = true,
@@ -444,7 +443,7 @@ fun RegistrationStep2(registrationViewModel: RegistrationViewModel, onRegistrati
                     shape = RoundedCornerShape(16.dp),
                     dismissButton = {
                         TextButton(onClick = { showDatePicker = false }) {
-                            Text("Annulla")
+                            Text("Cancel")
                         }
                     }
                 ) {
