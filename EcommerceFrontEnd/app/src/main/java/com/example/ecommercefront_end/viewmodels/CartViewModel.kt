@@ -44,6 +44,11 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
     val isCheckoutEnabled: StateFlow<Boolean> = cartItems.map { it.isNotEmpty() }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    private val _showSnackbar = MutableStateFlow(false)
+    val showSnackbar: StateFlow<Boolean> get() = _showSnackbar
+
+    private val _snackbarMessage = MutableStateFlow("")
+    val snackbarMessage: StateFlow<String> get() = _snackbarMessage
 
 
 
@@ -169,5 +174,15 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
     private fun updateTotalAmount() {
         _totalAmount.value = _cartItems.value.sumOf { it.bookId.price * it.quantity }
+    }
+
+    fun setShowSnackbar(b: Boolean) {
+        _showSnackbar.value = b
+
+    }
+
+    fun triggerSnackbar(message: String) {
+        _snackbarMessage.value = message
+        _showSnackbar.value = true
     }
 }

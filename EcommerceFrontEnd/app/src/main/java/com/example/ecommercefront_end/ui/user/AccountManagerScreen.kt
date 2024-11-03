@@ -163,7 +163,9 @@ fun Buttons(navHostController: NavHostController){
     Column {
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = { navHostController.navigate("change-password"){
+                popUpTo("account-manager") { saveState = true }
+            }}) {
                 Text(text = "Change Password")
             }
         }

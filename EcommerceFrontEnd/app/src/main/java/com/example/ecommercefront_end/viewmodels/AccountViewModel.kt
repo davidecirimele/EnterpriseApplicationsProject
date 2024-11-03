@@ -12,6 +12,7 @@ import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.Order
 import com.example.ecommercefront_end.model.OrderSummary
+import com.example.ecommercefront_end.model.PasswordUser
 import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.model.UserDetails
 import com.example.ecommercefront_end.repository.AccountRepository
@@ -148,6 +149,22 @@ class AccountViewModel(private val repository: AccountRepository): ViewModel() {
                 Log.d(TAG, "fetchPurchasedBooks: ${e.message}")
             }finally {
                 _isLoadingPurchasedBooks.value = false
+            }
+        }
+    }
+
+    fun changePassword(password: PasswordUser){
+        viewModelScope.launch {
+            try {
+                val user = SessionManager.user
+                if (user != null) {
+                    val response = repository.changePassword(user.id, password)
+                } else {
+                    throw Exception("Response is null")
+                }
+
+            } catch (e: Exception) {
+                Log.d(TAG, "Password change: ${e.message}")
             }
         }
     }

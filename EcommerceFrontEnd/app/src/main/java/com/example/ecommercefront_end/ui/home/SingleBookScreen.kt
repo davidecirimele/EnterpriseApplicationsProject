@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end.ui.home
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +31,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,10 +57,11 @@ import com.example.ecommercefront_end.viewmodels.WishlistViewModel
 import com.example.ecommercefront_end.ui.books.BookCover
 import com.example.ecommercefront_end.ui.books.BookInfoCard
 import com.example.ecommercefront_end.viewmodels.BookViewModel
+import com.example.ecommercefront_end.viewmodels.CartViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: CartRepository, wishlistViewModel: WishlistViewModel, navController: NavHostController) {
+fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: CartViewModel, wishlistViewModel: WishlistViewModel, navController: NavHostController) {
     var selectedQuantity by remember { mutableStateOf(1) }
     var shippingAddress by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
@@ -78,7 +85,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
-        paddingValues ->
+            paddingValues ->
 
         LazyColumn(
             modifier = Modifier
@@ -111,10 +118,10 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
                 }
             }
 
-        // Immagine del libro
-        item {
-            BookCover(book, bookViewModel)
-        }
+            // Immagine del libro
+            item {
+                BookCover(book, bookViewModel, navController)
+            }
 
             // Prezzo e quantità: prezzo allineato a sinistra, quantità a destra
             item {
@@ -238,7 +245,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartRepository: 
                                     navController.navigate("wishlist")
                                 }
                                 else {
-                                wExpanded = true
+                                    wExpanded = true
                                 }
                             }
                         }

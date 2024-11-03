@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -58,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -84,8 +86,6 @@ import com.example.ecommercefront_end.ui.admin.AdminCatalogueScreen
 import com.example.ecommercefront_end.ui.user.EditAddressScreen
 import com.example.ecommercefront_end.ui.cart.CartScreen
 import com.example.ecommercefront_end.ui.home.BookDetailsScreen
-import com.example.ecommercefront_end.ui.books.BooksFilterScreen
-import com.example.ecommercefront_end.ui.books.FilteredBooksScreen
 import com.example.ecommercefront_end.ui.home.HomeScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.ui.user.AccountManagerScreen
@@ -107,16 +107,22 @@ import com.example.ecommercefront_end.ui.checkout.CheckoutAddressScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutPaymentScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
 import com.example.ecommercefront_end.ui.checkout.OrderConfirmationScreen
+import com.example.ecommercefront_end.ui.user.ChangePasswordScreen
+import com.example.ecommercefront_end.ui.user.GroupScreen
 import com.example.ecommercefront_end.ui.user.InsertAddressScreen
+import com.example.ecommercefront_end.ui.user.InsertPaymentMethodScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
+import com.example.ecommercefront_end.ui.user.PaymentMethodsScreen
+import com.example.ecommercefront_end.ui.user.SignInUpScreen
 import com.example.ecommercefront_end.ui.user.TransactionsScreen
-import com.example.ecommercefront_end.ui.user.UserAuthScreen
+import com.example.ecommercefront_end.ui.user.UserOrdersScreen
 import com.example.ecommercefront_end.ui.wishlist.WishlistsScreen
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
 import com.example.ecommercefront_end.viewmodels.AdminViewModel
 import com.example.ecommercefront_end.viewmodels.BookViewModel
 import com.example.ecommercefront_end.viewmodels.CartViewModel
+import com.example.ecommercefront_end.viewmodels.GroupViewModel
 import com.example.ecommercefront_end.viewmodels.LoginViewModel
 import com.example.ecommercefront_end.viewmodels.RegistrationViewModel
 import com.example.ecommercefront_end.viewmodels.TransactionViewModel
@@ -260,6 +266,10 @@ fun NavigationView(navController: NavHostController) {
 
             composable("insert-product") {
                 InsertProductScreen(viewModel = bookViewModel, navController)
+            }
+
+            composable("change-password") {
+                ChangePasswordScreen(viewModel = accountViewModel, navController)
             }
 
             composable("insert-payment-method") {
