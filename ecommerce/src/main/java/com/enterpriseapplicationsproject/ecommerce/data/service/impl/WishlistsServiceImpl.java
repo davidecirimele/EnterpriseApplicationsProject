@@ -91,7 +91,11 @@ public class WishlistsServiceImpl implements WishlistsService {
 
         Wishlist wishlist = new Wishlist();
 
-        wishlist.setName(wName);
+        String name = wName;
+        if (name == null || name.isBlank()) {
+            name = "Wishlist";
+        }
+        wishlist.setName(name);
         wishlist.setPrivacySetting(wPrivacySetting);
         wishlist.setUserId(user);
 
@@ -294,9 +298,10 @@ public class WishlistsServiceImpl implements WishlistsService {
             throw new IllegalArgumentException("Wishlist not found");
         }
 
-        if (!w.getUserId().toString() .equals (idUser.toString())) {
+        /*
+        if (!w.getUserId().getId(). equals (idUser)) {
             throw new IllegalArgumentException("User not authorized to delete this wishlist");
-        }
+        }*/
 
         // Elimina tutti gli elementi associati alla Wishlist
         List<WishlistItem> items = WIDao.findByWishlistId(id);

@@ -16,6 +16,7 @@ import com.example.ecommercefront_end.network.AuthApiService
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.AuthRepository
 import com.google.gson.Gson
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
@@ -41,6 +42,9 @@ object SessionManager {
     private set
 
     private var authRepository : AuthRepository? = null
+
+    private val _observableUser = MutableStateFlow<User?>(null)
+    val observableUser = _observableUser
 
      fun init(context: Context) {
         val masterKeyAlias = MasterKey.Builder(context)
@@ -99,6 +103,8 @@ object SessionManager {
                             authToken?.let {
 
                                 user = decodeJwtToken(it)
+                                _observableUser.value = user
+                                println("Updated observableUser: ${_observableUser.value}")
                             }
                             getPrefs().edit().putString(KEY_AUTH_TOKEN, authToken).apply()
                             getPrefs().edit().putString(REFRESH_TOKEN_KEY, refreshToken).apply()
@@ -115,6 +121,7 @@ object SessionManager {
         authToken = token
         getPrefs().edit().putString(KEY_AUTH_TOKEN, token).apply()
         user = decodeJwtToken(token)
+        _observableUser.value = user
         Log.d(TAG, "user: ${user?.firstName}, ${user?.lastName}")
     }
 

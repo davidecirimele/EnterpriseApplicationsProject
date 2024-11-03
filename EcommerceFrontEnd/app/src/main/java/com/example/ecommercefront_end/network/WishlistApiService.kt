@@ -36,9 +36,9 @@ interface WishlistApiService {
     @RequiresAuth
     suspend fun updateWishlist(@Body w: Wishlist): Response<Unit>
 
-    @DELETE("wishlists/delete/{idWishlist}")
+    @DELETE("wishlists/delete/{idWishlist}/{idUser}")
     @RequiresAuth
-    suspend fun deleteWishlist(@Path("idWishlist") idW: Long) : Response<Unit>
+    suspend fun deleteWishlist(@Path("idWishlist") idW: Long, @Path("idUser") idUser: UUID) : Response<Unit>
 
     @GET("wishlists/share")
     @RequiresAuth

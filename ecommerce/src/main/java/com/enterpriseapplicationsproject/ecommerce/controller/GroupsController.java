@@ -1,8 +1,10 @@
 package com.enterpriseapplicationsproject.ecommerce.controller;
 
 import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.GroupsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.GroupDto;
+import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -22,14 +25,25 @@ public class GroupsController {
     private final GroupsService groupsService;
 
     @RateLimit
-    @GetMapping("/getById/{idUser}/{idGroup}")
+    @GetMapping("getById/{idUser}")
     @PreAuthorize(" #idUser == authentication.principal.getId() or hasRole('ADMIN') ")
-    public ResponseEntity<GroupDto> getById(@PathVariable("idUser") UUID idUser, @PathVariable("idGroup") Long id) {
-        GroupDto group = groupsService.findGroupById(id, idUser);
-        if (group == null) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<List<GroupDto>> getAllGroupsByUser(@PathVariable("idUser") UUID idUser) {
+        List<GroupDto> groups = groupsService.findGroupsByUser(idUser);
+        if (groups != null) {
+            return ResponseEntity.ok(groups);
         }
-        return ResponseEntity.ok(group);
+        return ResponseEntity.ok(null);
+    }
+
+    @RateLimit
+    @GetMapping("/getMembers/{idGroup}/{idUser}")
+    @PreAuthorize(" #idUser == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<List<UserDto>> getMembersById(@PathVariable("idGroup") Long idGroup, @PathVariable("idUser") UUID idUser) {
+        List<UserDto> members = groupsService.findMembersByGroup(idGroup);
+        if (members != null) {
+            return ResponseEntity.ok(members);
+        }
+        return ResponseEntity.ok(null);
     }
 
     @PutMapping("/{groupId}")
@@ -64,8 +78,9 @@ public class GroupsController {
     public ResponseEntity<Boolean> removeUser(@PathVariable("idGroup") Long idGroup, @PathVariable("idUser") UUID idUser) {
         boolean resp = groupsService.removeUserFromGroup(idGroup, idUser);
         if (resp)
-            return new ResponseEntity<>(HttpStatus.OK);
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.ok(true);
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false);
     }
 
 

@@ -1,6 +1,7 @@
 package com.example.ecommercefront_end.repository
 
 import com.example.ecommercefront_end.model.Group
+import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.network.GroupApiService
 import java.util.UUID
 import retrofit2.Response
@@ -8,8 +9,11 @@ import retrofit2.Response
 class GroupRepository (private val groupApiService: GroupApiService){
 
 
-    suspend fun getGroupById(userId: UUID, groupId: Long): Group {
-        return groupApiService.getGroupById(userId, groupId)
+    suspend fun getGroupById(userId: UUID): Response<List<Group>> {
+        return groupApiService.getAllGroupsByUser(userId)
+    }
+    suspend fun getGroupMembersById(idGroup: Long, idUser: UUID): Response<List<User>> {
+        return groupApiService.getGroupMembersById(idGroup, idUser )
     }
 
     suspend fun updateGroup(groupId: Long, group: Group): Response<Group> {

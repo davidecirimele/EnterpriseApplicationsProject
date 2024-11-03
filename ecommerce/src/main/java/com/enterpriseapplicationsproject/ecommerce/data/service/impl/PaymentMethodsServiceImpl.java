@@ -53,6 +53,7 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
         System.out.println("PaymentMethod: " + paymentMethod.toString());
         paymentMethod.setUser(user);
         paymentMethod.setCardNumber(encryptedCardNumber);
+        paymentMethod.setValid(true);
         PaymentMethod pm = paymentMethodsDao.save(paymentMethod);
         return modelMapper.map(pm, PaymentMethodDto.class);
     }
