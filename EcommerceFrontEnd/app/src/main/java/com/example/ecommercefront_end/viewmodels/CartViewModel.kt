@@ -113,7 +113,6 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
     fun addItem(book : Book) {
         viewModelScope.launch {
-            var message = ""
             try {
                 val userId = SessionManager.user?.id
                 if (userId != null) {
@@ -121,17 +120,17 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
                     if (response.isSuccessful) {
                         updateTotalAmount()
-                        message = "Libro aggiunto al carrello"
+                            _errorMessage.value = "Libro aggiunto al carrello"
                     }
                     else {
-                        message = "Errore: ${response.message()}"
+                        _errorMessage.value = "Errore: ${response.message()}"
                     }
                 } else {
-                    message = "ID utente non trovato"
+                    _errorMessage.value = "ID utente non trovato"
                 }
-                triggerSnackbar(message)
+
             } catch (e: Exception) {
-                triggerSnackbar("Si è verificato un errore: ${e.message}")
+                _errorMessage.value = "Si è verificato un errore durante l'aggiunta dell'articolo."
             }
         }
     }
@@ -153,16 +152,15 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
                         println("Lista aggiornata dopo rimozione: ${_cartItems.value}")
                         updateTotalAmount()
                     }
-                    message = "Item removed successfully"
+                    _errorMessage.value = "Item removed successfully"
                 } else {
-                    message = "User ID not found"
+                    _errorMessage.value = "User ID not found"
 
                 }
-                triggerSnackbar(message)
 
 
             } catch (e: Exception) {
-                _errorMessage.value = "Si è verificato un errore durante la rimozione dell'articolo: ${e.message}"
+                _errorMessage.value = "Si è verificato un errore durante la rimozione dell'articolo."
             }
         }
     }
