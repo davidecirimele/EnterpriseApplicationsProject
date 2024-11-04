@@ -10,7 +10,7 @@ data class Order(
     val items: List<OrderItem>,
     val totalPrice: Double,
     //val shippingAddress: Address,
-    //val status: OrderStatus,
+    val status: OrderStatus,
     val paymentMethod: PaymentMethod,
     val orderDate : LocalDate? = null
 )

@@ -2,6 +2,9 @@ package com.example.ecommercefront_end.network
 
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.Email
+import com.example.ecommercefront_end.model.Order
+import com.example.ecommercefront_end.model.OrderSummary
+import com.example.ecommercefront_end.model.PasswordUser
 import com.example.ecommercefront_end.model.PhoneNumber
 import com.example.ecommercefront_end.model.RequiresAuth
 import com.example.ecommercefront_end.model.User
@@ -29,4 +32,15 @@ interface UserApiService {
     @RequiresAuth
     suspend fun changePhoneNumber(@Path("id") id: UUID, @Body phoneNumber: PhoneNumber) : Response<User>
 
+    @GET("orders/get/{id}")
+    @RequiresAuth
+    suspend fun getUserOrders(@Path("id") id: UUID) : Response<List<OrderSummary>>
+
+    @GET("orders/purchased-products/{id}")
+    @RequiresAuth
+    suspend fun getPurchasedProducts(@Path("id") id: UUID) : Response<List<Book>>
+
+    @PUT("users/{id}/change-password")
+    @RequiresAuth
+    suspend fun changePassword(@Path("id") id: UUID, @Body password: PasswordUser) : Response<User>
 }

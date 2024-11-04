@@ -1,6 +1,7 @@
 package com.example.ecommercefront_end.repository
 
 import com.example.ecommercefront_end.model.Email
+import com.example.ecommercefront_end.model.PasswordUser
 import com.example.ecommercefront_end.model.PhoneNumber
 import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.network.AddressApiService
@@ -15,4 +16,9 @@ class AccountRepository(private val apiService : UserApiService) {
 
     suspend fun editPhoneNumber(userId: UUID, phoneNumber: String) = apiService.changePhoneNumber(userId, PhoneNumber(phoneNumber))
 
+    suspend fun getUserOrders(userId: UUID) = apiService.getUserOrders(userId)
+
+    suspend fun getPurchasedProducts(userId: UUID) = apiService.getPurchasedProducts(userId)
+
+    suspend fun changePassword(userId: UUID, password: PasswordUser) = apiService.changePassword(userId, password)
 }

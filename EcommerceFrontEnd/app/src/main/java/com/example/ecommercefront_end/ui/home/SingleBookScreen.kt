@@ -85,7 +85,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
-        paddingValues ->
+            paddingValues ->
 
         LazyColumn(
             modifier = Modifier
@@ -120,7 +120,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
 
             // Immagine del libro
             item {
-                BookCover(book, bookViewModel)
+                BookCover(book, bookViewModel, navController)
             }
 
             // Prezzo e quantità: prezzo allineato a sinistra, quantità a destra
@@ -245,7 +245,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
                                     navController.navigate("wishlist")
                                 }
                                 else {
-                                wExpanded = true
+                                    wExpanded = true
                                 }
                             }
                         }

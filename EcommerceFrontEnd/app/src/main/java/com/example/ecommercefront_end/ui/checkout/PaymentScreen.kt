@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.ecommercefront_end.model.PaymentMethod
+import com.example.ecommercefront_end.ui.user.PaymentMethodCard
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -169,16 +170,7 @@ fun PaymentMethodRow(
         ) {
             RadioButton(selected = isSelected, onClick = onSelect)
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(paymentMethod.cardHolderName)
-                Text(paymentMethod.cardNumber)
-                Text(paymentMethod.expirationDate)
-            }
-
-            // Pulsante per cancellare il metodo di pagamento
-            IconButton(onClick = onDeleteClick) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete payment method")
-            }
+            PaymentMethodCard(paymentMethod, onDeleteClick = onDeleteClick)
         }
     }
 }

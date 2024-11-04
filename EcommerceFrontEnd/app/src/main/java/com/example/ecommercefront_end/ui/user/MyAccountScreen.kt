@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Edit
@@ -25,6 +26,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -63,30 +65,37 @@ fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: Addres
 
     val defaultAddress by addressViewModel.defaultAddress.collectAsState()
 
-    LazyColumn(modifier = Modifier
-        .fillMaxSize()
-        .padding(8.dp), verticalArrangement = Arrangement.SpaceAround){
-        item {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "My Account",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 25.sp
-                )
-            }
-        }
-        item{
-        Spacer(modifier = Modifier.height(20.dp))
-        }
-        item{
-        UserInfo(userDetails, defaultAddress,  accountViewModel = accountViewModel, addressViewModel, navHostController)
-        }
-        if(SessionManager.user != null && SessionManager.user!!.role!="ROLE_ADMIN") {
+    Scaffold(topBar = {
+        TopAppBar(
+            title = { androidx.compose.material.Text("My Account") },
+            backgroundColor = Color(0xFF1F1F1F),
+            contentColor = Color.White
+        )
+    }) {paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues), verticalArrangement = Arrangement.SpaceAround
+        ) {
             item {
                 Spacer(modifier = Modifier.height(20.dp))
             }
             item {
-                AccountOptions(userDetails?.id,"my-account",navHostController)
+                UserInfo(
+                    userDetails,
+                    defaultAddress,
+                    accountViewModel = accountViewModel,
+                    addressViewModel,
+                    navHostController
+                )
+            }
+            if (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN") {
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
+                item {
+                    AccountOptions(userDetails?.id, "my-account", navHostController)
+                }
             }
         }
     }
