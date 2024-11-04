@@ -347,7 +347,7 @@ fun NavigationView(navController: NavHostController) {
                 }
                 MyAccountScreen(
                     accountViewModel = accountViewModel, addressViewModel = addressViewModel,
-                    navHostController = navController)
+                    navController = navController)
             }
             composable("groups") {
                 LaunchedEffect(Unit) {

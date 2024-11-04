@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ecommercefront_end.SessionManager
+import com.example.ecommercefront_end.SessionManager.clearSession
 import com.example.ecommercefront_end.SessionManager.user
 import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.model.Book
@@ -42,6 +43,12 @@ class AccountViewModel(private val repository: AccountRepository): ViewModel() {
 
     private val _isLoadingPurchasedBooks = MutableStateFlow(false)
     val isLoadingPurchasedBooks: StateFlow<Boolean> get() = _isLoadingPurchasedBooks
+
+    private val _isLoggingOut = MutableStateFlow(false)
+    val isLoggingOut: StateFlow<Boolean> get() = _isLoggingOut
+
+    private val _isDeletingAccount = MutableStateFlow(false)
+    val isDeletingAccount: StateFlow<Boolean> get() = _isDeletingAccount
 
     fun loadUserDetails(forceReload : Boolean = false) {
 
@@ -165,6 +172,48 @@ class AccountViewModel(private val repository: AccountRepository): ViewModel() {
 
             } catch (e: Exception) {
                 Log.d(TAG, "Password change: ${e.message}")
+            }
+        }
+    }
+
+    fun logoutUser(userId: UUID, onLogout: ()->Unit){
+        _isLoggingOut.value = true
+        viewModelScope.launch {
+            try{
+                val response = repository.logout(userId)
+
+                if(response.isSuccessful)
+                {
+                    onLogout()
+                }
+                else{
+                    throw Exception("Logout Failed")
+                }
+            }catch(e : Exception){
+
+            }finally{
+                _isLoggingOut.value = false
+            }
+        }
+    }
+
+    fun deleteUser(userId: UUID, onDelete: ()->Unit){
+        _isDeletingAccount.value = true
+        viewModelScope.launch {
+            try{
+                val response = repository.deleteAccount(userId)
+
+                if(response.isSuccessful)
+                {
+                    onDelete()
+                }
+                else{
+                    throw Exception("Deletion failed")
+                }
+            }catch(e : Exception){
+                throw e
+            }finally{
+                _isDeletingAccount.value = false
             }
         }
     }

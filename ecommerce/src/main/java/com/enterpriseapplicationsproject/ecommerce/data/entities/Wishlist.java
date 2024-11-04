@@ -31,7 +31,7 @@ public class Wishlist {
     @Column(name = "NAME")
     private String name;
 
-    @ManyToOne()
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(
             name = "USER_ID",
             referencedColumnName = "ID"

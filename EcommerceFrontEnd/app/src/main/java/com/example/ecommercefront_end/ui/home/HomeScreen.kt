@@ -87,9 +87,14 @@ fun HomeScreen(bookViewModel: BookViewModel, navController: NavController) {
 
     val coroutineScope = rememberCoroutineScope()
 
+    LaunchedEffect(Unit){
+        if (allProducts.isEmpty())
+            bookViewModel.fetchAllAvailableProducts()
+    }
+
     LaunchedEffect(searchValue) {
         filteredProducts = if (searchValue != "")
-            bookViewModel.fetchBooksByFilter(BookFilter(title = searchValue, author = searchValue, publisher = searchValue))
+            bookViewModel.localFilter(allProducts, BookFilter(title = searchValue, author = searchValue, publisher = searchValue))
         else
             emptyList()
     }

@@ -35,7 +35,7 @@ import com.example.ecommercefront_end.viewmodels.AddressViewModel
 import java.util.UUID
 
 @Composable
-fun AddressView(address: Address, userId: UUID?=null, addressViewModel: AddressViewModel, navController: NavHostController, showButtons: Boolean){
+fun AddressView(address: Address, userId: UUID?=null, addressViewModel: AddressViewModel, navController: NavController, showButtons: Boolean){
 
     var checked by remember { mutableStateOf(address.defaultAddress) }
 
@@ -164,7 +164,7 @@ fun AddressView(address: Address, userId: UUID?=null, addressViewModel: AddressV
 }
 
 @Composable
-fun defaultCheckBox(checked : Boolean, addressViewModel: AddressViewModel, address: Address, userId: UUID?=null, navController: NavHostController, onCheckedChange: (Boolean) -> Unit){
+fun defaultCheckBox(checked : Boolean, addressViewModel: AddressViewModel, address: Address, userId: UUID?=null, navController: NavController, onCheckedChange: (Boolean) -> Unit){
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {

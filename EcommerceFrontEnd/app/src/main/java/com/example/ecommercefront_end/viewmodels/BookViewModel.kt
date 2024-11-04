@@ -446,4 +446,14 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
             Log.d("Books", "fetchRecentBooks: ${e.message}")
         }
     }
+
+    fun localFilter(books: List<Book>, filter: BookFilter): List<Book> {
+        return books.filter { book ->
+            val matchesTitle = filter.title?.let { book.title.contains(it, ignoreCase = true) } ?: true
+            val matchesAuthor = filter.author?.let { book.author.contains(it, ignoreCase = true) } ?: true
+            val matchesPublisher = filter.publisher?.let{book.publisher.contains(it, ignoreCase = true)} ?: true
+
+            matchesTitle || matchesAuthor || matchesPublisher
+        }
+    }
 }

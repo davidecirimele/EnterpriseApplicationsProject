@@ -8,16 +8,17 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.ecommercefront_end.SessionManager.user
 import com.example.ecommercefront_end.model.UserId
 import java.util.UUID
 
 @Composable
-fun AccountOptions(userId: UUID?=null, currentRoute: String, navHostController: NavHostController){
+fun AccountOptions(userId: UUID?=null, currentRoute: String, navController: NavController){
     Column {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-            Button(onClick = { navHostController.navigate("addresses/${userId}"){
+            Button(onClick = { navController.navigate("addresses/${userId}"){
                 popUpTo(currentRoute) { inclusive = true }
             }}){
                 Text(text = "Addresses")
@@ -26,7 +27,7 @@ fun AccountOptions(userId: UUID?=null, currentRoute: String, navHostController: 
         if (user?.role  == "ROLE_ADMIN"){
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Button(onClick = {
-                    navHostController.navigate("/admin/wishlist/${userId}") {
+                    navController.navigate("/admin/wishlist/${userId}") {
                         popUpTo(currentRoute) { inclusive = true }
                     }
                 }) {
@@ -35,14 +36,15 @@ fun AccountOptions(userId: UUID?=null, currentRoute: String, navHostController: 
             }
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-            Button(onClick = { navHostController.navigate("payment-methods"){
+            Button(onClick = { navController.navigate("payment-methods"){
                 popUpTo(currentRoute) { inclusive = true }
             }}) {
                 Text(text = "Payment Methods")
             }
         }
+
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-            Button(onClick = { navHostController.navigate("transactions")}) {
+            Button(onClick = { navController.navigate("transactions")}) {
                 Text(text = "Transactions")
             }
         }
