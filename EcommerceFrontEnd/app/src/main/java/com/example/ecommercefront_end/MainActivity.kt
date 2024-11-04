@@ -567,7 +567,7 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
                             saveState = true
                         }
                         launchSingleTop = true
-                        restoreState = true
+                        restoreState = false
                     }
                 },
                 icon = {

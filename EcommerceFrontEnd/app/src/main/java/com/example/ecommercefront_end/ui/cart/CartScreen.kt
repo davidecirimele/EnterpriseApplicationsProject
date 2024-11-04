@@ -70,24 +70,25 @@ fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navControl
     val refreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
         onRefresh = {
-            viewModel.loadCartItems()
+            println("Pull-to-refresh")
+            viewModel.loadCartItems() // Carica di nuovo gli articoli nel carrello
         }
     )
 
-    LaunchedEffect(errorMessage) {
+    /*LaunchedEffect(errorMessage) {
         errorMessage?.let { message ->
             val result = viewModel.snackbarHostState.showSnackbar(
                 message = message,
-                actionLabel = "RETRY"
+                actionLabel = "RIPROVA"
             )
 
             if (result == SnackbarResult.ActionPerformed) {
-                viewModel.loadCartItems()
+                viewModel.loadCartItems() // Riprova a caricare gli articoli
             }
 
-            viewModel.clearErrorMessage()
+            viewModel.clearErrorMessage() // Reset del messaggio d'errore
         }
-    }
+    }*/
 
     LaunchedEffect(Unit) {
         if (SessionManager.user != null) {
@@ -126,7 +127,7 @@ fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navControl
                     if (cartItems.isEmpty()) {
                         // Visualizza il messaggio quando il carrello è vuoto
                         Text(
-                            text = "Your cart is empty",
+                            text = "Il tuo carrello è vuoto.",
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.align(Alignment.Center)
                         )
@@ -161,7 +162,6 @@ fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navControl
         }
     }
 }
-
 
 
 

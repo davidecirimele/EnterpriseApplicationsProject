@@ -80,6 +80,8 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, bookViewModel : BookVi
     val cartShowSnackbar by cartViewModel.showSnackbar.collectAsState()
     val cartSnackbarMessage by cartViewModel.snackbarMessage.collectAsState()
 
+    val errorMessage by cartViewModel.errorMessage.collectAsState()
+
 
     // Gestione della selezione della wishlist
     val selectedWishlist = remember(wLists) {
@@ -126,7 +128,7 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, bookViewModel : BookVi
                 }
             }
         }
-        LaunchedEffect(wShowSnackbar, cartShowSnackbar) {
+        LaunchedEffect(wShowSnackbar, errorMessage) {
             if (wShowSnackbar) {
                 snackbarHostState.showSnackbar(
                     message = wSnackbarMessage,
@@ -134,12 +136,13 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, bookViewModel : BookVi
                 )
                 wishlistViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
             }
-            if (cartShowSnackbar) {
+            errorMessage?.let {
                 snackbarHostState.showSnackbar(
-                    message = cartSnackbarMessage,
+                    message = it,
                     duration = SnackbarDuration.Short
                 )
-                cartViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
+                cartViewModel.setShowSnackbar(false)
+                cartViewModel.clearErrorMessage()
             }
         }
 

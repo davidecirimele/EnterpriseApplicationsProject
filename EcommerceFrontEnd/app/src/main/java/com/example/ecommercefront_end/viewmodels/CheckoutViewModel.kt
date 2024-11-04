@@ -25,6 +25,7 @@ import com.example.ecommercefront_end.viewmodels.CartViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import java.net.SocketTimeoutException
@@ -130,6 +131,20 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
     ) { street, province, city, postalCode, state -> println("street: $street, province: $province, city: $city, postalCode: $postalCode, state: $state")
         street.isNotBlank() && province.isNotBlank() && city.isNotBlank() && postalCode.isNotBlank() && state.isNotBlank()
     }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    init {
+        observeUserChanges()
+    }
+
+    private fun observeUserChanges() {
+        viewModelScope.launch {
+            SessionManager.observableUser.collectLatest { user ->
+                if (user != null) {
+                    clearData()
+                }
+            }
+        }
+    }
 
 
     // Funzione per attivare o disattivare la modalità di modifica di un indirizzo
