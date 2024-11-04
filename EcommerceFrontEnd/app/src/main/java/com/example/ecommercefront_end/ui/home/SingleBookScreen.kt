@@ -74,9 +74,9 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
     val wShowSnackbar by wishlistViewModel.showSnackbar.collectAsState()
     val wSnackbarMessage by wishlistViewModel.snackbarMessage.collectAsState()
 
+    val errorMessage = cartViewModel.errorMessage.collectAsState().value
 
-    val cartShowSnackbar by cartViewModel.showSnackbar.collectAsState()
-    val cartSnackbarMessage by cartViewModel.snackbarMessage.collectAsState()
+
 
 
     var wExpanded by remember { mutableStateOf(false) }
@@ -285,7 +285,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
             }
         }
 
-        LaunchedEffect(wShowSnackbar, cartShowSnackbar) {
+        LaunchedEffect(wShowSnackbar, errorMessage) {
             if (wShowSnackbar) {
                 snackbarHostState.showSnackbar(
                     message = wSnackbarMessage,
@@ -293,12 +293,18 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
                 )
                 wishlistViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
             }
-            if (cartShowSnackbar) {
+
+            if (errorMessage != ""){
+            errorMessage?.let {
+
                 snackbarHostState.showSnackbar(
-                    message = cartSnackbarMessage,
+                    message = it,
                     duration = SnackbarDuration.Short
                 )
-                cartViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
+                cartViewModel.setShowSnackbar(false)
+                cartViewModel.clearErrorMessage()
+                println("Errore: $it")
+            }
             }
         }
     }

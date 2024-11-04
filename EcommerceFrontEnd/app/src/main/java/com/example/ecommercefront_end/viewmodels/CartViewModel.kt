@@ -37,8 +37,8 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage
+    private val _errorMessage = MutableStateFlow("")
+    val errorMessage: StateFlow<String?>  get() = _errorMessage
 
     val snackbarHostState = SnackbarHostState()
 
@@ -49,6 +49,7 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
     private val _snackbarMessage = MutableStateFlow("")
     val snackbarMessage: StateFlow<String> get() = _snackbarMessage
+
 
 
 
@@ -90,7 +91,9 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     }
 
     fun clearErrorMessage() {
-        _errorMessage.value = null
+        _errorMessage.value = ""
+        println("error message ${_errorMessage.value}")
+        println("error message ${errorMessage}")
     }
 
     fun updateItemQuantity(item: CartItem, newQuantity: Int) {
@@ -142,7 +145,6 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
     fun removeItem(item: CartItem) {
         viewModelScope.launch {
-            var message = ""
             try {
                 val userId = SessionManager.user?.id
                 if (userId != null) {
@@ -150,11 +152,11 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
                     shoppingCart.value?.let {
                         repository.removeItem(item.id, it.id, userId)
 
-                        println("shpping cart items post delete: ${_cartItems.value}")
+
 
                         _cartItems.value = _cartItems.value.filterNot { it.id == item.id }.toList()
 
-                        println("Lista aggiornata dopo rimozione: ${_cartItems.value}")
+
                         updateTotalAmount()
                     }
                     _errorMessage.value = "Item removed successfully"
@@ -165,7 +167,7 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
 
             } catch (e: Exception) {
-                _errorMessage.value = "Si è verificato un errore durante la rimozione dell'articolo."
+                _errorMessage.value = " An error occurred while removing the item."
             }
         }
     }
@@ -177,10 +179,5 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     fun setShowSnackbar(b: Boolean) {
         _showSnackbar.value = b
 
-    }
-
-    fun triggerSnackbar(message: String) {
-        _snackbarMessage.value = message
-        _showSnackbar.value = true
     }
 }

@@ -87,6 +87,7 @@ object SessionManager {
                     if (validatedToken != null && validatedToken.isSuccessful) {
                         authToken = tokenMustValidated
                         user = decodeJwtToken(tokenMustValidated)
+                        _observableUser.value = user
                         println("user: ${user?.firstName}, ${user?.lastName}")
                         return@launch
                     } else if (validatedToken != null && validatedToken.code() == 401) {
