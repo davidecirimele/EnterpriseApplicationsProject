@@ -49,7 +49,7 @@ android {
 }
 
 dependencies {
-    implementation(libs.accompanist.permissions.v0320)
+    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
     implementation(libs.glide)
     implementation(libs.jackson.core)
     implementation (libs.jackson.annotations)
@@ -59,7 +59,7 @@ dependencies {
     implementation("io.ktor:ktor-client-serialization:2.3.4")
     implementation("io.ktor:ktor-client-logging:2.3.4")
     implementation("com.google.code.gson:gson:2.8.2")
-    implementation(libs.coil3.coil.compose)
+    implementation("io.coil-kt.coil3:coil-compose:3.0.0-rc02")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

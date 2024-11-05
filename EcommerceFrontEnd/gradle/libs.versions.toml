@@ -1,9 +1,10 @@
 [versions]
-accompanistPermissions = "0.28.0"
+accompanistPermissions = "0.32.0"
 agp = "8.5.2"
 androidxMaterial = "1.7.2"
 androidxMaterialVersion = "1.4.3"
 coilCompose = "2.4.0"
+coilComposeCore = "3.0.0-alpha06"
 coilComposeVersion = "2.7.0"
 coilKtCoilCompose = "2.4.0"
 converterGson = "2.9.0"
