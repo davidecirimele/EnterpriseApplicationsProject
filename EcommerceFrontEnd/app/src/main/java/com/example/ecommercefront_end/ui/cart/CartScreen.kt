@@ -63,12 +63,10 @@ fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navControl
     val cartItems by viewModel.cartItems.collectAsStateWithLifecycle()
     val totalAmount by viewModel.totalAmount.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val isCheckoutEnabled by viewModel.isCheckoutEnabled.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
-
 
     val refreshState = rememberPullRefreshState(
         refreshing = isRefreshing,

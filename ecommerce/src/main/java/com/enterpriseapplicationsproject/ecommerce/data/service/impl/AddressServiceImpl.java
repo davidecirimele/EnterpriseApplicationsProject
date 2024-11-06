@@ -9,9 +9,12 @@ import com.enterpriseapplicationsproject.ecommerce.dto.AddressDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.AddressIdDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.SaveAddressDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.AddressNotFoundException;
+import com.enterpriseapplicationsproject.ecommerce.exception.UnauthorizedAccessException;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AddressServiceImpl implements AddressService {
@@ -31,161 +35,211 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public List<AddressDto> getAddressesByUserId(UUID userid){
-        List<Address> addresses = addressesDao.findByUserId(userid);
-        return addresses.stream().map(address -> modelMapper.map(address , AddressDto.class)).toList();
+        try{
+            List<Address> addresses = addressesDao.findByUserId(userid);
+
+            return addresses.stream().map(address -> modelMapper.map(address , AddressDto.class)).toList();
+        }catch(Exception e){
+            log.error("Unexpected error while fetching addresses by user ID: "+ userid +", "+ e);
+            throw new RuntimeException("Unexpected error occurred");
+        }
+
     }
 
     @Override
-    public AddressDto getAddressById(Long addressId) {
-        Optional<Address> optionalAddress = addressesDao.findAddressById(addressId);
+    public AddressDto getAddressById(UUID userId, Long addressId) {
+        try{
+            Address address = addressesDao.findAddressById(addressId).orElseThrow(()->new AddressNotFoundException("Address not found"));
 
-        if(optionalAddress.isPresent()){
-            Address address = optionalAddress.get();
-
-            return modelMapper.map(address, AddressDto.class);
+            if(address.getUserId().getId().equals(userId))
+                return modelMapper.map(address, AddressDto.class);
+            else
+                throw new UnauthorizedAccessException("You are not authorized to access this resource");
+        }catch(Exception e){
+            log.error("Unexpected error while fetching address with ID: "+ addressId +", "+ e);
+            throw new RuntimeException("Unexpected error occurred");
         }
-        else{
-            throw new RuntimeException("Address with id " + addressId + " not found");
-        }
-
-
     }
 
     @Override
     public AddressDto getAddressByUserIdAndDefaultTrue(UUID userid){
-        Optional<Address> optionalAddress = addressesDao.findByDefaultAddress(userid);
+        try {
+            Address address = addressesDao.findByDefaultAddress(userid).orElse(null);
 
-        if(optionalAddress.isPresent()){
-            Address address = optionalAddress.get();
+            if(address == null)
+                return null;
 
-            return modelMapper.map(address, AddressDto.class);
-        }
-        else{
-            throw new AddressNotFoundException("Default address not found");
+            if(address.getUserId().getId().equals(userid))
+                return modelMapper.map(address, AddressDto.class);
+            else
+                throw new UnauthorizedAccessException("You are not authorized to access this resource");
+        }catch(Exception e){
+            log.error("Unexpected error while fetching default address for user with ID: "+ userid +", "+ e);
+            throw new RuntimeException("Unexpected error occurred");
         }
     }
 
     @Override
     public List<AddressDto> getValidAddressesByUserId(UUID userid){
-        List<Address> addresses = addressesDao.findAllByValidity(userid);
-        return addresses.stream().map(address -> modelMapper.map(address , AddressDto.class)).toList();
+        try {
+            List<Address> addresses = addressesDao.findAllByValidity(userid);
+            return addresses.stream().map(address -> modelMapper.map(address, AddressDto.class)).toList();
+        }catch(Exception e){
+            log.error("Unexpected error while fetching addresses by user ID: "+ userid +", "+ e);
+            throw new RuntimeException("Unexpected error occurred");
+        }
     }
 
     @Override
     public List<AddressDto> getAddresses(){
-        List<Address> addresses = addressesDao.findAll();
-        return addresses.stream().map(address -> modelMapper.map(address , AddressDto.class)).toList();
+        try {
+            List<Address> addresses = addressesDao.findAll();
+            return addresses.stream().map(address -> modelMapper.map(address, AddressDto.class)).toList();
+        }catch(Exception e){
+            log.error("Unexpected error while fetching addresses "+ e);
+            throw new RuntimeException("Unexpected error occurred");
+        }
     }
 
     @Override
-    public AddressDto updateAddress(Long addressId, SaveAddressDto addressDto) {
+    public AddressDto updateAddress(UUID userId, Long addressId, SaveAddressDto addressDto) {
+        try {
+            Address address = addressesDao.findById(addressId).orElseThrow(()->new AddressNotFoundException(
+                    "Address not found"
+            ));
 
-        Optional<Address> optionalAddress = addressesDao.findById(addressId);
+            if(address.getUserId().getId().equals(userId)) {
+                address.setStreet(addressDto.getStreet());
+                address.setState(addressDto.getState());
+                address.setProvince(addressDto.getProvince());
+                address.setCity(addressDto.getCity());
+                address.setPostalCode(addressDto.getPostalCode());
+                address.setAdditionalInfo(addressDto.getAdditionalInfo());
 
-        if(optionalAddress.isPresent())
-        {
-            Address address = optionalAddress.get();
-            address.setStreet(addressDto.getStreet());
-            address.setState(addressDto.getState());
-            address.setProvince(addressDto.getProvince());
-            address.setCity(addressDto.getCity());
-            address.setPostalCode(addressDto.getPostalCode());
-            address.setAdditionalInfo(addressDto.getAdditionalInfo());
+                Address savedAddress = addressesDao.save(address);
+                return modelMapper.map(savedAddress, AddressDto.class);
+            }else{
+                throw new UnauthorizedAccessException("You are not authorized to access this resource");
+            }
 
-            Address savedAddress = addressesDao.save(address);
-            return modelMapper.map(savedAddress, AddressDto.class);
+        }catch(DataIntegrityViolationException e){
+            log.error("Data integrity violation while updating address with ID: {}", addressId, e);
+            throw new IllegalArgumentException("Data integrity violation: " + e.getMessage());
         }
-        else{
-            throw new RuntimeException("Address with id " + addressId + " not found");
+        catch(Exception e){
+            log.error("Unexpected error while updating address with ID: "+ addressId +", "+ e);
+            throw new RuntimeException("Unexpected error occurred");
         }
     }
 
     @Override
     public AddressDto save(Address address) {
-        Address savedAddress = addressesDao.save(address);
-        return modelMapper.map(savedAddress, AddressDto.class);
+        try {
+            Address savedAddress = addressesDao.save(address);
+            return modelMapper.map(savedAddress, AddressDto.class);
+        } catch (DataIntegrityViolationException e) {
+            log.error("Data integrity violation while saving address: {}", address, e);
+            throw new IllegalArgumentException("Data integrity violation: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("Unexpected error while saving address: {}", address, e);
+            throw new RuntimeException("Unexpected error occurred while saving address");
+        }
     }
 
     @Override
     public AddressDto insertAddress(UUID userId, SaveAddressDto addressDto) {
-        User user = userDao.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
+        try {
+            User user = userDao.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
 
+            Address address = modelMapper.map(addressDto, Address.class);
+            address.setUser(user);
 
-        Address address = modelMapper.map(addressDto, Address.class);
-        address.setUser(user);
-        List<Address> addressess = addressesDao.findAllByValidity(userId);
-        if(addressess.isEmpty())
-            address.setDefaultAddress(true);
-        address.setIsValidAddress(true);
-        Address savedAddress = addressesDao.save(address);
-        return modelMapper.map(savedAddress, AddressDto.class);
-    }
+            List<Address> addressess = addressesDao.findAllByValidity(userId);
 
-    @Override
-    public AddressDto updateDefaultAddress(Long id){
-        Optional<Address> optionalAddress = addressesDao.findById(id);
-
-        if(optionalAddress.isPresent() && optionalAddress.get().isValid())
-        {
-            Address address = optionalAddress.get();
-
-            List<Address> addresses = new ArrayList<>();
-
-            Optional<Address> optionalDefaultAddress = addressesDao.findByDefaultAddress(addressesDao.findUserByAddressId(id).getId());
-
-            if(optionalDefaultAddress.isPresent()) {
-                Address defaultAddress = optionalDefaultAddress.get();
-                defaultAddress.setDefaultAddress(false);
+            if (addressess.isEmpty())
                 address.setDefaultAddress(true);
 
-                addresses.add(defaultAddress);
-                addresses.add(address);
+            address.setIsValidAddress(true);
 
-                addressesDao.saveAll(addresses);
-
-                return modelMapper.map(address, AddressDto.class);
-            }
-            else{
-                throw new RuntimeException("Default Address not found");
-            }
+            Address savedAddress = addressesDao.save(address);
+            return modelMapper.map(savedAddress, AddressDto.class);
+        }catch(Exception e){
+            log.error("Unexpected error: " + e);
+            throw new RuntimeException("Unexpected error occurred while saving address");
         }
-        else{
-            throw new RuntimeException("Address with id " + id + " not found");
+    }
+
+    @Override
+    public AddressDto updateDefaultAddress(UUID userId, Long id){
+        try {
+            Address address = addressesDao.findById(id).orElseThrow(()->new AddressNotFoundException("Address not found"));
+
+            if(address.getUserId().getId().equals(userId)) {
+                if (address.isValid()) {
+                    List<Address> addresses = new ArrayList<>();
+
+                    Address defaultAddress = addressesDao.findByDefaultAddress(addressesDao.findUserByAddressId(id).getId()).orElseThrow(() ->
+                            new AddressNotFoundException("Address not found"));
+
+                    defaultAddress.setDefaultAddress(false);
+                    address.setDefaultAddress(true);
+
+                    addresses.add(defaultAddress);
+                    addresses.add(address);
+
+                    addressesDao.saveAll(addresses);
+
+                    return modelMapper.map(address, AddressDto.class);
+                } else {
+                    throw new AddressNotFoundException("Address with id " + id + " not found");
+                }
+            }else{
+                throw new UnauthorizedAccessException("You are not authorized to access this resource");
+            }
+        }catch(Exception e){
+            log.error("Unexpected error while updating default address: " + e);
+            throw new RuntimeException("Unexpected error occurred while updating default address");
         }
 
     }
 
     @Override
-    public boolean deleteAddress(Long id) {
-        Optional<Address> optionalAddress = addressesDao.isValidByAddressId(id);
-        if(optionalAddress.isPresent())
-        {
-            Address address = optionalAddress.get();
-            address.setIsValidAddress(false);
-            if(address.isDefaultAddress())
-                assignNewDefault(id);
-            address.setDefaultAddress(false);
+    public void deleteAddress(UUID userId, Long id) {
+        try {
+            Address address = addressesDao.isValidByAddressId(id).orElseThrow(()->new AddressNotFoundException("Address not found"));
 
+            if(address.getUserId().getId().equals(userId)) {
+                address.setIsValidAddress(false);
+                if (address.isDefaultAddress())
+                    assignNewDefault(userId, id);
+                address.setDefaultAddress(false);
 
-            addressesDao.save(address);
-            return true;
-        }
-        else{
-            throw new RuntimeException("Address with id " + id + " not found");
+                addressesDao.save(address);
+            }else{
+                throw new UnauthorizedAccessException("You are not authorized to access this resource");
+            }
+        }catch(Exception e){
+            log.error("Unexpected error while deleting address with ID: {}", id, e);
+            throw new RuntimeException("Unexpected error occurred while deleting address");
         }
     }
 
-    private void assignNewDefault(Long id){
-        List<Address> valid_addresses = addressesDao.findAllByValidity(addressesDao.findUserByAddressId(id).getId());
+    private void assignNewDefault(UUID userId, Long id){
+        try {
+            List<Address> valid_addresses = addressesDao.findAllByValidity(addressesDao.findUserByAddressId(id).getId());
 
-        if(valid_addresses.isEmpty())
-            return;
+            if (valid_addresses.isEmpty())
+                throw new AddressNotFoundException("Addresses not found");
 
-        for(Address a:valid_addresses){
-            if(!a.getId().equals(id)) {
-                updateDefaultAddress(a.getId());
-                return;
+            for (Address a : valid_addresses) {
+                if (!a.getId().equals(id)) {
+                    updateDefaultAddress(userId, a.getId());
+                    return;
+                }
             }
+        }catch(Exception e){
+            log.error("Unexpected error while assigning new default address" + e);
+            throw new RuntimeException("Unexpected error occurred");
         }
     }
 }

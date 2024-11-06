@@ -27,6 +27,4 @@ public interface RefreshTokenService {
     void revokeRefreshTokenByToken(String token);
 
     List<RefreshTokenDto> getAll();
-
-    RefreshToken convertDto(RefreshTokenDto refreshTokenDto, User user);
 }

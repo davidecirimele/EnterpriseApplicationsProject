@@ -25,10 +25,10 @@ interface CheckoutApiService {
     suspend fun getDefaultAddressByUserId(@Path("id") userId: UUID) : Response<Address?>
 
     // Aggiorna l'indirizzo di spedizione dell'utente
-    @PUT("{addressId}/update-default")
+    @PUT("{userId}/{addressId}/update-default")
     suspend fun updateDefaultShippingAddress(
         @Path("addressId") addressId: Long,
-        @Body userId: UserId
+        @Path("userId") userId: UUID
     ) : Address
 
     @PUT("addresses/{userId}/{addressId}/edit-address")

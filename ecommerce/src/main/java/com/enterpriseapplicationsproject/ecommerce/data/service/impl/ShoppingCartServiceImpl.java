@@ -7,13 +7,16 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.ShoppingCartServ
 import com.enterpriseapplicationsproject.ecommerce.dto.ShoppingCartDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.ShoppingCartNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ShoppingCartServiceImpl implements ShoppingCartService {
@@ -25,85 +28,70 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ShoppingCartDto getByUserId(UUID userId) {
-        Optional<ShoppingCart> optionalShoppingCart = shoppingCartDao.findByUserId(userId);
+        try {
+            ShoppingCart cart = shoppingCartDao.findByUserId(userId).orElseThrow(()->new ShoppingCartNotFoundException("Shopping cart not found"));
 
-        if(optionalShoppingCart.isPresent())
-        {
-            ShoppingCart cart = optionalShoppingCart.get();
             return modelMapper.map(cart, ShoppingCartDto.class);
-        }
-        else{
-            throw new RuntimeException("Cart of user with id " + userId + " not found");
-        }
-    }
-
-    @Override
-    public ShoppingCartDto getByCartId(Long cartId) {
-        Optional<ShoppingCart> optionalShoppingCart = shoppingCartDao.findById(cartId);
-
-        if(optionalShoppingCart.isPresent())
-        {
-            ShoppingCart cart = optionalShoppingCart.get();
-            System.out.println("total" + cart.getTotal());
-            return modelMapper.map(cart, ShoppingCartDto.class);
-        }
-        else{
-            throw new RuntimeException("Cart with id " + cartId + " not found");
+            } catch(Exception e) {
+            log.error("Unexpected error while fetching shopping cart for user with ID: "+userId+", " + e);
+            throw new RuntimeException("Unexpected error occurred");
         }
     }
 
     @Override
     public ShoppingCartDto save(ShoppingCart sc) {
-        ShoppingCart savedCart = shoppingCartDao.save(sc);
-        return modelMapper.map(savedCart, ShoppingCartDto.class);
+        try {
+            ShoppingCart savedCart = shoppingCartDao.save(sc);
+            return modelMapper.map(savedCart, ShoppingCartDto.class);
+        }catch (DataIntegrityViolationException e) {
+            log.error("Data integrity violation while saving shopping cart: {}", sc, e);
+            throw new IllegalArgumentException("Data integrity violation: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("Unexpected error while saving shopping cart: {}", sc, e);
+            throw new RuntimeException("Unexpected error occurred while saving shopping cart");
+        }
     }
 
     @Override
     public List<ShoppingCartDto> getAll() {
-        List<ShoppingCart> shoppingCarts = shoppingCartDao.findAll();
-        return shoppingCarts.stream().map(shoppingCart1 -> modelMapper.map(shoppingCart1 , ShoppingCartDto.class)).toList();
+        try {
+            List<ShoppingCart> shoppingCarts = shoppingCartDao.findAll();
+            return shoppingCarts.stream().map(shoppingCart1 -> modelMapper.map(shoppingCart1, ShoppingCartDto.class)).toList();
+        }catch (Exception e) {
+            log.error("Unexpected error while fetching shopping carts: " + e);
+            throw new RuntimeException("Unexpected error occurred while fetching shopping carts");
+        }
     }
 
     @Override
     public boolean delete(UUID userId, Long cartId){
-        Optional<ShoppingCart> optionalSC = shoppingCartDao.findByUserId(userId);
+        try {
+            ShoppingCart shoppingCart = shoppingCartDao.findByUserId(userId).orElseThrow(()->new ShoppingCartNotFoundException("Shopping cart not found"));
 
-        if(optionalSC.isPresent())
-        {
-            ShoppingCart shoppingCart = optionalSC.get();
-            if(shoppingCart.getId().equals(cartId)) {
+
+            if (shoppingCart.getId().equals(cartId)) {
                 shoppingCart.getCartItems().clear();
 
                 shoppingCartDao.save(shoppingCart);
                 return true;
-            }
-            else{
+            } else {
                 throw new SecurityException("You can't access this resource");
             }
+        }catch(Exception e){
+            log.error("Unexpected error while deleting shopping cart with ID: "+ cartId +", " + e);
+            throw new RuntimeException("Unexpected error occurred while deleting shopping cart");
         }
-        else{
-            throw new RuntimeException("Cart with id " + cartId + " not found");
-        }
-    }
-
-    @Override
-    public ShoppingCartDto saveCart(ShoppingCartDto shoppingCartDto) {
-        ShoppingCart cart = modelMapper.map(shoppingCartDto, ShoppingCart.class);
-        ShoppingCart savedCart = shoppingCartDao.save(cart);
-        return modelMapper.map(savedCart, ShoppingCartDto.class);
     }
 
     @Override
     public Double getTotal(UUID userId) {
-        Optional<ShoppingCart> optionalShoppingCart = shoppingCartDao.findByUserId(userId);
+        try {
+            ShoppingCart cart = shoppingCartDao.findByUserId(userId).orElseThrow(()->new ShoppingCartNotFoundException("Shopping cart not found"));
 
-        if(optionalShoppingCart.isPresent())
-        {
-            ShoppingCart cart = optionalShoppingCart.get();
             return cart.getTotal();
-        }
-        else{
-            throw new ShoppingCartNotFoundException("This user does not have a shopping cart");
+        }catch(Exception e){
+            log.error("Unexpected error while fetching shopping cart total for user with ID: "+ userId +", " + e);
+            throw new RuntimeException("Unexpected error occurred while fetching shopping cart total");
         }
     }
 }

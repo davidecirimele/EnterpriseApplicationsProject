@@ -80,8 +80,7 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, bookViewModel : BookVi
     val cartShowSnackbar by cartViewModel.showSnackbar.collectAsState()
     val cartSnackbarMessage by cartViewModel.snackbarMessage.collectAsState()
 
-    val errorMessage by cartViewModel.errorMessage.collectAsState()
-
+    val errorMessage by cartViewModel.errorMessage.collectAsState(initial = "")
 
     // Gestione della selezione della wishlist
     val selectedWishlist = remember(wLists) {
@@ -91,7 +90,7 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, bookViewModel : BookVi
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
-        paddingValues ->
+            paddingValues ->
 
         if (isWishlistLoading) {
             Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
@@ -100,7 +99,7 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, bookViewModel : BookVi
         } else {
             // Ricarica gli elementi della wishlist selezionata
             LazyColumn(modifier = Modifier.fillMaxSize()
-                            .padding(paddingValues))
+                .padding(paddingValues))
             {
                 item {
                     WishlistsList(
@@ -149,7 +148,6 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, bookViewModel : BookVi
                         duration = SnackbarDuration.Short
                     )
                     cartViewModel.setShowSnackbar(false)
-                    cartViewModel.clearErrorMessage()
                 }
             }
         }
@@ -338,7 +336,7 @@ fun AddWishlistDialog(
                     Button(
                         onClick = onDismissRequest,
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-                        )
+                    )
                     {
                         Text("Cancel")
 
@@ -518,8 +516,3 @@ fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit, wishlistUpdatable
         }
     }
 }
-
-
-
-
-

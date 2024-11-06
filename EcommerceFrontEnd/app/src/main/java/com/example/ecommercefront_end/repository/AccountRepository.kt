@@ -21,4 +21,8 @@ class AccountRepository(private val apiService : UserApiService) {
     suspend fun getPurchasedProducts(userId: UUID) = apiService.getPurchasedProducts(userId)
 
     suspend fun changePassword(userId: UUID, password: PasswordUser) = apiService.changePassword(userId, password)
+
+    suspend fun logout(userId: UUID) = apiService.logout(userId)
+
+    suspend fun deleteAccount(userId: UUID) = apiService.deleteAccount(userId)
 }

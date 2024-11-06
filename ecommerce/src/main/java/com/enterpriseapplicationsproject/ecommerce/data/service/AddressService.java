@@ -14,7 +14,7 @@ public interface AddressService {
 
     List<AddressDto> getAddressesByUserId(UUID userid);
 
-    AddressDto getAddressById(Long addressId);
+    AddressDto getAddressById(UUID userId, Long addressId);
 
     AddressDto getAddressByUserIdAndDefaultTrue(UUID userid);
 
@@ -22,13 +22,13 @@ public interface AddressService {
 
     List<AddressDto> getAddresses();
 
-    AddressDto updateAddress(Long addressId, SaveAddressDto addressDto);
+    AddressDto updateAddress(UUID userId, Long addressId, SaveAddressDto addressDto);
 
     AddressDto save(Address address);
 
     public AddressDto insertAddress(UUID userId, SaveAddressDto addressDto);
 
-    public AddressDto updateDefaultAddress(Long id);
+    public AddressDto updateDefaultAddress(UUID userId,Long id);
 
-    public boolean deleteAddress(Long id);
+    public void deleteAddress(UUID userId, Long id);
 }

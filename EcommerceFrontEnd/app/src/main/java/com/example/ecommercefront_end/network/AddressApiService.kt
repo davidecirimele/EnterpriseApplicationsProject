@@ -4,6 +4,7 @@ import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.model.RequiresAuth
 import com.example.ecommercefront_end.model.SaveAddress
 import com.example.ecommercefront_end.model.UserId
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -17,31 +18,30 @@ interface AddressApiService {
 
     @GET("addresses/{userid}")
     @RequiresAuth
-    suspend fun getAddresses(@Path("userid") userid: UUID) : List<Address>?
+    suspend fun getAddresses(@Path("userid") userid: UUID) : Response<List<Address>>
 
     @GET("addresses/{userId}/{addressId}")
     @RequiresAuth
-    suspend fun getAddress(@Path("userId") userId: UUID, @Path("addressId") addressId: Long) : Address?
+    suspend fun getAddress(@Path("userId") userId: UUID, @Path("addressId") addressId: Long) : Response<Address?>
 
     @GET("addresses/{userId}/default")
     @RequiresAuth
-    suspend fun getDefaultAddress(@Path("userId") userId: UUID) : Address?
+    suspend fun getDefaultAddress(@Path("userId") userId: UUID) : Response<Address?>
 
     @POST("addresses/{userId}/insert-address")
     @RequiresAuth
-    suspend fun insertAddress(@Path("userId") userId: UUID, @Body address: SaveAddress) : Address?
+    suspend fun insertAddress(@Path("userId") userId: UUID, @Body address: SaveAddress) : Response<Address?>
 
-    //@DELETE("addresses/{id}/delete")
-    @HTTP(method = "DELETE", path = "addresses/{id}/delete", hasBody = true)
+    @DELETE("addresses/{userId}/{id}/delete")
     @RequiresAuth
-    suspend fun removeAddress(@Path("id") id: Long, @Body userId: UserId)
+    suspend fun removeAddress(@Path("id") id: Long, @Path ("userId") userId: UUID)
 
-    @PUT("addresses/{id}/update-default")
+    @PUT("addresses/{userId}/{id}/update-default")
     @RequiresAuth
-    suspend fun updateDefaultAddress(@Path("id") id:Long, @Body userId: UserId)
+    suspend fun updateDefaultAddress(@Path("id") id:Long, @Path ("userId") userId: UUID) : Response<Address>
 
     @PUT("addresses/{userId}/{addressId}/edit-address")
     @RequiresAuth
-    suspend fun editAddress(@Path("userId") userId: UUID,@Path("addressId") addressId:Long, @Body address: SaveAddress)
+    suspend fun editAddress(@Path("userId") userId: UUID,@Path("addressId") addressId:Long, @Body address: SaveAddress): Response<Address>
 
 }

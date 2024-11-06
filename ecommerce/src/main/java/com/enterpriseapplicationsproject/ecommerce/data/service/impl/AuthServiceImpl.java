@@ -2,6 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 
 import com.enterpriseapplicationsproject.ecommerce.config.security.JwtService;
 import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDetails;
+import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.ShoppingCartsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Admin;
@@ -50,6 +51,7 @@ public class AuthServiceImpl implements  AuthService{
     private final Integer expirationTimeInHours = 96;
 
 
+    @RateLimit(type = "USER")
     @Override
     public UserDetailsDto registerUser(@Valid SaveUserDto userDto) {
         System.out.println("UserDto: " + userDto);
@@ -77,6 +79,7 @@ public class AuthServiceImpl implements  AuthService{
         return modelMapper.map(savedUser, UserDetailsDto.class);
     }
 
+    @RateLimit(type = "USER")
     @Override
     public UserDetailsDto registerAdmin(@Valid SaveUserDto userDto) {
         System.out.println("Admin UserDto: " + userDto);

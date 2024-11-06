@@ -79,6 +79,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/v1/groups/**").authenticated();
                     auth.requestMatchers("/api/v1/shopping-cart/get/total/**").authenticated();
                     auth.requestMatchers("/api/v1/orders/**").authenticated();
+                                auth.requestMatchers("/api/v1/transactions/**").authenticated();
                     }
                     )
                     .sessionManagement(session -> session

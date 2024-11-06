@@ -11,6 +11,7 @@ import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.model.WishlistPrivacy
 import com.example.ecommercefront_end.repository.GroupRepository
 import com.example.ecommercefront_end.repository.WishlistRepository
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -442,7 +443,15 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
         _showSnackbar.value = true
     }
 
-
+    fun onLogout(){
+        //viewModelScope.cancel()
+        _wishlists.value = emptyList()
+        _onlyMyWishlists.value = emptyList()
+        _wishlistItems.value = emptyList()
+        _friendWishlists.value = emptyList()
+        _userSelectedByAdmin.value = null
+        _tokenToShare.value = ""
+    }
 
 }
 

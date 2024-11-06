@@ -179,4 +179,11 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
         _showSnackbar.value = b
 
     }
+
+    fun onLogout(){
+        //viewModelScope.cancel()
+        _cartItems.value = emptyList()
+        _shoppingCart.value = null
+        _totalAmount.value = 0.0
+    }
 }
