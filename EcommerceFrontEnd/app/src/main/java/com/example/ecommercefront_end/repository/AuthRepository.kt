@@ -22,6 +22,6 @@ class AuthRepository (private val apiService : AuthApiService) {
 
     suspend fun validateToken(accessToken : AccessToken) = apiService.validateToken(accessToken)
 
-    suspend fun refreshToken(refreshToken: RefreshToken) = apiService.refreshToken(refreshToken)
+    suspend fun refreshToken(userId: UUID, refreshToken: RefreshToken) = apiService.refreshToken(userId, refreshToken)
 }
 

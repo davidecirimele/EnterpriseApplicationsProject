@@ -61,7 +61,6 @@ object SessionManager {
         setAuthRepository(AuthRepository(RetrofitClient.authApiService))
 
         loadSession()
-
     }
 
     private fun getPrefs(): SharedPreferences {
@@ -91,7 +90,8 @@ object SessionManager {
                         println("user: ${user?.firstName}, ${user?.lastName}")
                         return@launch
                     } else if (validatedToken != null && validatedToken.code() == 401) {
-                        val tokenResponse = authRepository?.refreshToken(RefreshToken(_refreshToken))
+                        val tokenResponse =
+                            user?.let { authRepository?.refreshToken(it.id,RefreshToken(_refreshToken)) }
                         if (tokenResponse != null) {
                             println( "tokenResponseBody: ${tokenResponse.body()}")
                             println("tokenResponseCode: ${tokenResponse.code()}")
@@ -132,12 +132,10 @@ object SessionManager {
     }
 
     fun clearSession(){
-        Log.d("LOGOUT DEBUG", "clearSession: STO PULENDO LA SESSIONE")
         getPrefs().edit().clear().apply()
         authToken = null
         refreshToken = null
         user = null
-        Log.d("LOGOUT DEBUG", "clearSession: HO PULITO LA SESSIONE")
     }
 
     private fun decodeJwtToken(token: String): User? {
@@ -171,15 +169,5 @@ object SessionManager {
         println("UserId recuperato: $userId")
         return UserId(userId)
     }
-
-
-
-
-
-
-
-
-
-
 
 }

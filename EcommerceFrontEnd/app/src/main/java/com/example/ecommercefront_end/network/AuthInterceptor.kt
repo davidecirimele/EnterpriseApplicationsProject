@@ -49,27 +49,32 @@ class AuthInterceptor(
 
                     val refreshToken = sessionManager.refreshToken
                     if (refreshToken != null) {
-                        val newTokensResponse = runBlocking { withContext(Dispatchers.IO) {authApiService.refreshToken(RefreshToken(refreshToken)) } }
-                        if (newTokensResponse.isSuccessful) {
-                            val newAccessToken = newTokensResponse.body()?.accessToken
-                            val newRefreshToken = newTokensResponse.body()?.refreshToken
+                        val newTokensResponse = runBlocking { withContext(Dispatchers.IO) { sessionManager.user?.let {
+                            authApiService.refreshToken(
+                                it.id,RefreshToken(refreshToken))
+                        } } }
+                        if (newTokensResponse != null) {
+                            if (newTokensResponse.isSuccessful) {
+                                val newAccessToken = newTokensResponse.body()?.accessToken
+                                val newRefreshToken = newTokensResponse.body()?.refreshToken
 
-                            if (newAccessToken != null && newRefreshToken != null) {
-                                sessionManager.saveAuthToken(newAccessToken)
-                                sessionManager.saveRefreshToken(newRefreshToken)
+                                if (newAccessToken != null && newRefreshToken != null) {
+                                    sessionManager.saveAuthToken(newAccessToken)
+                                    sessionManager.saveRefreshToken(newRefreshToken)
 
-                                val newRequest = originalRequest.newBuilder()
-                                    .header("Authorization", "Bearer $newAccessToken")
-                                    .build()
+                                    val newRequest = originalRequest.newBuilder()
+                                        .header("Authorization", "Bearer $newAccessToken")
+                                        .build()
 
-                                response.close()
+                                    response.close()
 
-                                return chain.proceed(newRequest)
-                            } else {
-                                // Se il refresh token non funziona, logout o richiedi il login
-                                sessionManager.clearSession()
-                                // Puoi anche lanciare un'eccezione o gestire il logout in altro modo
-                                //FIXME logout + redirect to login
+                                    return chain.proceed(newRequest)
+                                } else {
+                                    // Se il refresh token non funziona, logout o richiedi il login
+                                    sessionManager.clearSession()
+                                    // Puoi anche lanciare un'eccezione o gestire il logout in altro modo
+                                    //FIXME logout + redirect to login
+                                }
                             }
                         }
                     }

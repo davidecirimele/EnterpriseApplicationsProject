@@ -156,20 +156,26 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserRegistrationException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ServiceError onUserRegistrationException(WebRequest req, OrderCreationException ex){
+    public ServiceError onUserRegistrationException(WebRequest req, UserRegistrationException ex){
         return errorResponse(HttpStatus.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()), req, ex.getMessage());
     }
 
     @ExceptionHandler(TokenNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ServiceError onTokenNotFoundException(WebRequest req, OrderCreationException ex){
+    public ServiceError onTokenNotFoundException(WebRequest req, TokenNotFoundException ex){
         return errorResponse(HttpStatus.valueOf(HttpStatus.NOT_FOUND.value()), req, ex.getMessage());
     }
 
     @ExceptionHandler(RevokingTokenErrorException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ServiceError onRevokingTokenErrorException(WebRequest req, OrderCreationException ex){
+    public ServiceError onRevokingTokenErrorException(WebRequest req, RevokingTokenErrorException ex){
         return errorResponse(HttpStatus.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()), req, ex.getMessage());
+    }
+
+    @ExceptionHandler(IsTokenRevokedException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ServiceError onResourceNotFoundException(WebRequest req, IsTokenRevokedException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.NOT_FOUND.value()), req, ex.getMessage());
     }
 
     @ExceptionHandler(NullPointerException.class)
