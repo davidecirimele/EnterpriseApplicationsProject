@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end.ui.cart
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -166,6 +167,7 @@ fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navControl
 
 
 
+    @SuppressLint("DefaultLocale")
     @Composable
     fun TotalSection(totalAmount: Double, onCheckoutClick: () -> Unit, isCheckoutEnabled: Boolean) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -175,7 +177,7 @@ fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navControl
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text("Total ", style = MaterialTheme.typography.titleMedium)
-                Text("$totalAmount €", style = MaterialTheme.typography.titleMedium)
+                Text(String.format("%.2f €", totalAmount), style = MaterialTheme.typography.titleMedium)
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(
