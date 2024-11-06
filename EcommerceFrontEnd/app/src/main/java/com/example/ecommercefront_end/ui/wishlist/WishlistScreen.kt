@@ -128,24 +128,31 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, bookViewModel : BookVi
                 }
             }
         }
-        LaunchedEffect(wShowSnackbar, errorMessage) {
+        LaunchedEffect(wShowSnackbar, cartShowSnackbar, errorMessage) {
             if (wShowSnackbar) {
                 snackbarHostState.showSnackbar(
                     message = wSnackbarMessage,
                     duration = SnackbarDuration.Short
                 )
                 wishlistViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
-            }
-            errorMessage?.let {
+
+            } else if (cartShowSnackbar) {
                 snackbarHostState.showSnackbar(
-                    message = it,
+                    message = cartSnackbarMessage,
                     duration = SnackbarDuration.Short
                 )
                 cartViewModel.setShowSnackbar(false)
-                cartViewModel.clearErrorMessage()
+            } else if (errorMessage != "") {
+                errorMessage?.let {
+                    snackbarHostState.showSnackbar(
+                        message = it,
+                        duration = SnackbarDuration.Short
+                    )
+                    cartViewModel.setShowSnackbar(false)
+                    cartViewModel.clearErrorMessage()
+                }
             }
         }
-
     }
 }
 
@@ -167,13 +174,13 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
     ) {
         Text(
             text = if (isAdmin && (wishlists.get(0).user?.id == idUserSelectedByAdmin) )
-                "Liste di ${wishlists.get(0).user?.firstName} ${wishlists.get(0).user?.lastName}" else "Le tue liste dei desideri",
+                "Liste di ${wishlists.get(0).user?.firstName} ${wishlists.get(0).user?.lastName}" else "Your wishlists",
 
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
         IconButton(onClick = { showAddWishlistMain = true }) {
-            Icon(imageVector = Icons.Filled.AddCircleOutline, contentDescription = "Aggiungi Lista", tint = Color.Green, modifier = Modifier.size(28.dp))
+            Icon(imageVector = Icons.Filled.AddCircleOutline, contentDescription = "Add a wishlist", tint = Color.Green, modifier = Modifier.size(28.dp))
         }
 
 
@@ -199,7 +206,7 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Ancora nessuna lista creata.",
+                text = "No wishlist created yet",
                 fontSize = 18.sp,
                 textAlign = TextAlign.Center
             )
@@ -256,7 +263,7 @@ fun AddWishlistDialog(
             onDismissRequest = onDismissRequest,
             title = {
                 Text(
-                    text = "Crea una nuova lista",
+                    text = "Create a new wishlist",
                     modifier = Modifier.fillMaxWidth().wrapContentSize(Alignment.Center)
                 )
             },
@@ -276,7 +283,7 @@ fun AddWishlistDialog(
                                 nameWishlistValid = it.isNotBlank()
 
                             },
-                            label = { Text("Nome della lista") },
+                            label = { Text("List name") },
                             modifier = Modifier
                                 .fillMaxWidth(0.9f)
                                 .padding(bottom = 8.dp),
@@ -333,7 +340,7 @@ fun AddWishlistDialog(
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
                         )
                     {
-                        Text("Annulla")
+                        Text("Cancel")
 
                     }
                 }
@@ -354,7 +361,7 @@ fun AddWishlistDialog(
                         .wrapContentWidth(Alignment.CenterHorizontally)
                 ) {
                     Text(
-                        "Unisciti alla lista di un amico",
+                        "Join a friend's wishlist",
                         textAlign = TextAlign.Center
                     )
                 }
@@ -368,7 +375,7 @@ fun AddWishlistDialog(
                     OutlinedTextField(
                         value = tokenShared,
                         onValueChange = { tokenShared = it },
-                        label = { Text("Inserisci il token ricevuto") },
+                        label = { Text("Insert token you receive") },
                         modifier = Modifier
                             .fillMaxWidth(0.9f)
                             .padding(bottom = 8.dp),
@@ -390,13 +397,13 @@ fun AddWishlistDialog(
                             showJoinWishlist = false
                         }
                     ) {
-                        Text("Partecipa")
+                        Text("Join")
                     }
                     Button(
                         onClick = { showJoinWishlist = false },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
                     ) {
-                        Text("Annulla")
+                        Text("Cancel")
                     }
                 }
             },
@@ -425,7 +432,7 @@ fun AddWishlistDialog(
                                     .height(75.dp) // Altezza uniforme
                                     .padding(horizontal = 2.dp),
                             ) {
-                                Text("Crea una nuova lista")
+                                Text("Create a new wishlist")
                             }
 
                             Spacer(modifier = Modifier.width(8.dp)) // Spazio tra i pulsanti
@@ -437,7 +444,7 @@ fun AddWishlistDialog(
                                     .height(75.dp) // Altezza uniforme
                                     .padding(horizontal = 4.dp)
                             ) {
-                                Text("Unisciti alla lista di un amico")
+                                Text("Join a friend's wishlist")
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp)) // Spazio tra i pulsanti e "Annulla"
@@ -453,7 +460,7 @@ fun AddWishlistDialog(
                         onClick = onDismissRequest,
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
                     ) {
-                        Text("Annulla")
+                        Text("Cancel")
                     }
                 }
             },

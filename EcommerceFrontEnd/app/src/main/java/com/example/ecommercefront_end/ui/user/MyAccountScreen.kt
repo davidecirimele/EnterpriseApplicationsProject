@@ -55,8 +55,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.model.UserDetails
-import com.example.ecommercefront_end.network.RetrofitClient
-import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
 import kotlinx.coroutines.launch

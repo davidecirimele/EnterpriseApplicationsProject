@@ -127,7 +127,7 @@ fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navControl
                     if (cartItems.isEmpty()) {
                         // Visualizza il messaggio quando il carrello è vuoto
                         Text(
-                            text = "Il tuo carrello è vuoto.",
+                            text = "Your cart is empty",
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.align(Alignment.Center)
                         )

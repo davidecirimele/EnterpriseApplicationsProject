@@ -14,6 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ecommercefront_end.model.OrderSummary
 import com.example.ecommercefront_end.viewmodels.AdminViewModel
@@ -93,7 +99,7 @@ fun OrderItem(order: OrderSummary, onClick: () -> Unit) {
         elevation = 4.dp
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Order ID: ${order.orderId}", style = MaterialTheme.typography.subtitle1)
+            Text(text = "Order ID: ${order.orderId}", style = MaterialTheme.typography.bodyLarge)
             Text(text = "User: ${order.email}")
             Text(text = "Order date: ${order.orderDate}")
             Text(text = "Total amount: €${order.totalAmount}")

@@ -294,7 +294,7 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
             val newPaymentMethod = SavePaymentMethod(
                 user = user,
                 cardHolderName = _cardHolderName.value,
-                cardNumber = _cardNumber.value,
+                cardNumber = _cardNumber.value.filter { it.isDigit() },
                 paymentMethodType = _selectedPaymentMethodType.value,
                 provider = _selectedCardProvider.value,
                 expirationDate = _expirationDate.value

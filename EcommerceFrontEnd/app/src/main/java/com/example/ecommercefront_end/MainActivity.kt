@@ -1,7 +1,6 @@
 package com.example.ecommercefront_end
 
 import CheckoutViewModel
-import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -9,18 +8,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 //import androidx.compose.material3.BottomNavigation
 //import androidx.compose.material3.BottomNavigationItem
 
@@ -30,7 +25,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,7 +38,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -61,8 +54,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -70,7 +61,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.repository.AddressRepository
@@ -84,13 +74,13 @@ import com.example.ecommercefront_end.repository.TransactionRepository
 
 import com.example.ecommercefront_end.repository.WishlistRepository
 import com.example.ecommercefront_end.ui.admin.AdminCatalogueScreen
-import com.example.ecommercefront_end.ui.user.EditAddressScreen
+import com.example.ecommercefront_end.ui.user.Address.EditAddressScreen
 import com.example.ecommercefront_end.ui.cart.CartScreen
 import com.example.ecommercefront_end.ui.home.BookDetailsScreen
 import com.example.ecommercefront_end.ui.home.HomeScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.ui.user.AccountManagerScreen
-import com.example.ecommercefront_end.ui.user.AddressesScreen
+import com.example.ecommercefront_end.ui.user.Address.AddressesScreen
 import com.example.ecommercefront_end.ui.admin.AdminHomeScreen
 import com.example.ecommercefront_end.ui.admin.AdminSingleBookScreen
 import com.example.ecommercefront_end.ui.admin.AdminUserDetailsScreen
@@ -100,22 +90,15 @@ import com.example.ecommercefront_end.ui.checkout.CheckoutAddressScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutPaymentScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
 import com.example.ecommercefront_end.ui.admin.AdminOrdersScreen
-import com.example.ecommercefront_end.ui.admin.AdminSingleBookScreen
-import com.example.ecommercefront_end.ui.admin.AdminUserDetailsScreen
-import com.example.ecommercefront_end.ui.admin.AdminUsersListScreen
-import com.example.ecommercefront_end.ui.admin.InsertProductScreen
-import com.example.ecommercefront_end.ui.checkout.CheckoutAddressScreen
-import com.example.ecommercefront_end.ui.checkout.CheckoutPaymentScreen
-import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
 import com.example.ecommercefront_end.ui.checkout.OrderConfirmationScreen
 import com.example.ecommercefront_end.ui.user.ChangePasswordScreen
 import com.example.ecommercefront_end.ui.user.GroupScreen
-import com.example.ecommercefront_end.ui.user.InsertAddressScreen
-import com.example.ecommercefront_end.ui.user.InsertPaymentMethodScreen
+import com.example.ecommercefront_end.ui.user.Address.InsertAddressScreen
+import com.example.ecommercefront_end.ui.user.Payments.InsertPaymentMethodScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
-import com.example.ecommercefront_end.ui.user.PaymentMethodsScreen
+import com.example.ecommercefront_end.ui.user.Payments.PaymentMethodsScreen
 import com.example.ecommercefront_end.ui.user.SignInUpScreen
-import com.example.ecommercefront_end.ui.user.TransactionsScreen
+import com.example.ecommercefront_end.ui.user.Payments.TransactionsScreen
 import com.example.ecommercefront_end.ui.user.UserOrdersScreen
 import com.example.ecommercefront_end.ui.wishlist.WishlistsScreen
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
@@ -219,6 +202,7 @@ fun NavigationView(navController: NavHostController) {
                 // Carica il libro corrispondente all'id
                 LaunchedEffect(idBook) {
                     bookViewModel.loadBook(idBook)
+                    wishlistViewModel.fetchWishlists(null)
                 }
 
                 // Osserva i cambiamenti del libro
@@ -307,12 +291,6 @@ fun NavigationView(navController: NavHostController) {
             }
             composable("wishlist") {
                 selectedIndex.value = 3
-                val _wishlistApiService = RetrofitClient.wishlistApiService
-                val _wishlistItemApiService = RetrofitClient.wishlistItemApiService
-                val wRepository = WishlistRepository( RetrofitClient.wishlistApiService, RetrofitClient.wishlistItemApiService)
-                val groupRepository = GroupRepository(RetrofitClient.groupApiService)
-                val wishlistViewModel = remember { WishlistViewModel(wRepository, groupRepository) }
-
                 LaunchedEffect(Unit) {
                     wishlistViewModel.fetchWishlists(null)
                 }

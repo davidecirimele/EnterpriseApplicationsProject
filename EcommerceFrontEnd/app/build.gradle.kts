@@ -49,17 +49,17 @@ android {
 }
 
 dependencies {
-    implementation(libs.accompanist.permissions.v0320)
+    implementation(libs.accompanist.permissions)
     implementation(libs.glide)
     implementation(libs.jackson.core)
     implementation (libs.jackson.annotations)
-    implementation ("com.squareup.okhttp3:logging-interceptor:4.10.0")
-    implementation("io.ktor:ktor-client-core:2.3.4")
-    implementation("io.ktor:ktor-client-cio:2.3.4")
-    implementation("io.ktor:ktor-client-serialization:2.3.4")
-    implementation("io.ktor:ktor-client-logging:2.3.4")
-    implementation("com.google.code.gson:gson:2.8.2")
-    implementation(libs.coil3.coil.compose)
+    implementation (libs.logging.interceptor)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.serialization)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.gson.v2101)
+    implementation(libs.coil.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -101,13 +101,13 @@ dependencies {
     implementation (libs.androidx.security.crypto)
     implementation (libs.jwtdecode)
 
-    implementation("com.google.android.material:material:1.4.0")
+    implementation(libs.material.v1120)
 
     // Mantieni Material 2 per BottomNavigation
-    implementation("androidx.compose.material:material:1.4.3")
+    implementation(libs.androidx.material)
 
     // Material 3
-    implementation("androidx.compose.material3:material3:1.1.1")
+    implementation(libs.androidx.material3)
 }
 
 kotlin {

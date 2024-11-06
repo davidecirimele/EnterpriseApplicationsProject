@@ -1,4 +1,4 @@
-package com.example.ecommercefront_end.ui.user
+package com.example.ecommercefront_end.ui.user.Address
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

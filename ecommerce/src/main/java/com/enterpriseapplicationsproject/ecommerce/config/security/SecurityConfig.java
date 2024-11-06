@@ -73,8 +73,10 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/v1/books/get-catalogue").permitAll();
                                 auth.requestMatchers("/api/v1/books/get-cover/**").permitAll();
                                 auth.requestMatchers("/api/v1/books/get/*").permitAll();
-                    auth.requestMatchers("/api/v1/wishlists/**").permitAll();
-                    auth.requestMatchers("/api/v1/wishlist-items/**").permitAll();
+
+                    auth.requestMatchers("/api/v1/wishlists/**").authenticated();
+                    auth.requestMatchers("/api/v1/wishlist-items/**").authenticated();
+                    auth.requestMatchers("/api/v1/groups/**").authenticated();
                     auth.requestMatchers("/api/v1/shopping-cart/get/total/**").authenticated();
                     auth.requestMatchers("/api/v1/orders/**").authenticated();
                                 auth.requestMatchers("/api/v1/transactions/**").authenticated();

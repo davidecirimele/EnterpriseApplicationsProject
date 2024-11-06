@@ -62,14 +62,14 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
 
                     } else {
                         Log.e("fetchGroups", "Errore durante il recupero dei gruppi: ${response.errorBody()}")
-                        message = "Errore durante il recupero dei gruppi"
+                        message = "Error during fetching groups: ${response.errorBody()}"
                         triggerSnackbar(message)
 
                     }
                 }
             } catch (e: Exception) {
                 Log.e("fetchGroups", "Errore durante il recupero dei gruppi: ${e.message}")
-                message = "Errore durante il recupero dei gruppi"
+                message = "Error during fetching groups: ${e.message}"
                 triggerSnackbar(message)
             }
             _isLoading.value = false
@@ -82,8 +82,8 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
                 fetchGroupMembers(groupId)
             } catch (e: Exception) {
                 // Gestione errori, ad esempio mostrando un messaggio di errore
-                Log.e("loadGroupMembers", "Errore durante il recupero dei membri del gruppo: ${e.message}")
-                triggerSnackbar("Errore durante il recupero dei membri del gruppo")
+                Log.e("loadGroupMembers", "Error during fetching group members: ${e.message}")
+                triggerSnackbar("Error during fetching group members: ${e.message}")
             }
         }
     }
@@ -97,13 +97,13 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
                     _groupMembers.value = response.body()!!
 
                 } else {
-                    Log.e("fetchGroupMembers", "Errore durante il recupero dei membri del gruppo: ${response.errorBody()}")
-                    message = "Errore durante il recupero dei membri del gruppo"
+                    Log.e("fetchGroupMembers", "Error during fetching group members: ${response.errorBody()}")
+                    message = "Error during fetching group members: ${response.errorBody()}"
                     triggerSnackbar(message)
                 }
             } catch (e: Exception) {
-                Log.e("fetchGroupMembers", "Errore durante il recupero dei membri del gruppo: ${e.message}")
-                message = "Errore durante il recupero dei membri del gruppo"
+                Log.e("fetchGroupMembers", "Error during fetching group members: ${e.message}")
+                message = "Error during fetching group members: ${e.message}"
                 triggerSnackbar(message)
             }
         }
@@ -132,20 +132,20 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
 
 
                 if (response != null && response.isSuccessful) {
-                    Log.d("joinWishlist", "Utente aggiunto con successo alla wishlist")
-                    message = "Ti sei unito alla wishlist con successo"
+                    Log.d("joinWishlist", "User added to wishlist successfully")
+                    message = "You joined the wishlist successfully"
                 } else {
                     //Log.e("joinWishlist", "Errore durante l'aggiunta dell'utente alla wishlist: ${response.errorBody()}")
-                    message = "Errore durante l'aggiunta dell'utente alla wishlist"
+                    message = "Erro during joining the wishlist: + ${response?.errorBody()}"
                 }
                 triggerSnackbar(message)
 
             } catch (e: Exception) {
                 Log.e(
                     "joinWishlist",
-                    "Errore durante l'aggiunta dell'utente alla wishlist: ${e.message}"
+                    "Error during adding user to wishlist: ${e.message}"
                 )
-                message = "Errore durante l'aggiunta dell'utente alla wishlist"
+                message = "Error during adding user to wishlist ${e.message}"
                 triggerSnackbar(message)
 
             }
@@ -177,23 +177,23 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
                 if (response != null && response.isSuccessful) {
                     fetchGroupMembers(groupId)
                     Log.d("unshareWishlist", "Wishlist non più condivisa con successo")
-                    message = "Wishlist non più condivisa con successo"
+                    message = "Wishlist not shared anymore"
                 } else {
                     if (response != null) {
                         Log.e(
                             "unshareWishlist",
-                            "Errore durante l'uscita della condivisione della wishlist: ${response.errorBody()}"
+                            "Error during unsharing wishlist: ${response.errorBody()}"
                         )
-                        message = "Errore durante l'uscita della condivisione della wishlist"
+                        message = "Error during unsharing wishlist: ${response.errorBody()}"
                     }
                 }
                 triggerSnackbar(message)
             } catch (e: Exception) {
                 Log.e(
                     "unshareWishlist",
-                    "Errore durante l'eliminazione della condivisione della wishlist: ${e.message}"
+                    "Error during unsharing wishlist: ${e.message}"
                 )
-                message = "Errore durante l'eliminazione della condivisione della wishlist"
+                message = "Error during unsharing wishlist: ${e.message}"
                 triggerSnackbar(message)
             }
         }

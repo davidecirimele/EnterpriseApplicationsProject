@@ -77,13 +77,13 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
                         updateTotalAmount()
                     }.onFailure { e ->
                         if (e is SocketTimeoutException)
-                            _errorMessage.value = "Errore: Si è verificato un problema di connessione."
+                            _errorMessage.value = "Error: a connection timeout occurred: ${e.message}"
                         else
-                            _errorMessage.value = "Errore: ${e.message}"
+                            _errorMessage.value = "Error: ${e.message}"
                     }
                 }
             } catch (e: Exception) {
-                _errorMessage.value = "Errore durante il caricamento del carrello: ${e.message}"
+                _errorMessage.value = "Error during cart loading: ${e.message}"
             } finally {
                 _isLoading.value = false
                 _isRefreshing.value = false
@@ -115,7 +115,7 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
                 updateTotalAmount()
 
             } catch (e: Exception) {
-                _errorMessage.value = "Si è verificato  un errore durante l'aggiornamento della quantità: ${e.message}"
+                _errorMessage.value = "An errror occurred while updating the quantity: ${e.message}"
             }
         }
     }
@@ -129,17 +129,17 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
                     if (response.isSuccessful) {
                         updateTotalAmount()
-                            _errorMessage.value = "Libro aggiunto al carrello"
+                            _errorMessage.value = "Book added to cart successfully"
                     }
                     else {
-                        _errorMessage.value = "Errore: ${response.message()}"
+                        _errorMessage.value = "Error: ${response.message()}"
                     }
                 } else {
-                    _errorMessage.value = "ID utente non trovato"
+                    _errorMessage.value = "User ID not found"
                 }
 
             } catch (e: Exception) {
-                _errorMessage.value = "Si è verificato un errore durante l'aggiunta dell'articolo."
+                _errorMessage.value = "An error occurred while adding the item to the cart."
             }
         }
     }

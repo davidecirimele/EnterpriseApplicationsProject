@@ -62,6 +62,7 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
     public List<PaymentMethodDto> getAllPaymentMethodByUserId(UUID userId) {
         List<PaymentMethod> paymentMethod = paymentMethodsDao.findAllByUserId(userId);
         System.out.println("PaymentMethod: " + paymentMethod.toString());
+        System.out.println("Card number: " + paymentMethod.get(0).getCardNumber());
         EncryptionUtils encryptionUtils = new EncryptionUtils(encryptionConfig.getSecretKey());
         List<PaymentMethodDto> paymentMethodDtoList = paymentMethod.stream().map(pm -> {
             String decryptedCardNumber;

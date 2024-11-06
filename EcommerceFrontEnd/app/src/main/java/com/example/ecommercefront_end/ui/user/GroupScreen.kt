@@ -89,7 +89,7 @@ fun GroupScreen(groupViewModel: GroupViewModel, navController: NavController) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Crea una lista desiideri per visionare i gruppi associati",
+                        text = "Create a group to share your wishlist with friends and family",
                         fontSize = 22.sp,
                         textAlign = TextAlign.Center
                     )
@@ -168,8 +168,7 @@ fun GroupDetails(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Ancora nessun membro nel gruppo \n " +
-                            "Condividi la tua lista desideri con i tuoi amici",
+                    text = "Not members in the group yet \n Share your wishlist to add members and manage it together",
                     fontSize = 20.sp,
                     textAlign = TextAlign.Center
                 )
@@ -177,7 +176,7 @@ fun GroupDetails(
         }
         else {
             Text(
-                text = "Membri del gruppo",
+                text = "Group Members",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -263,7 +262,7 @@ fun GroupList(groups : List<Group>, viewModel: GroupViewModel, onGroupSelected: 
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "I tuoi gruppi delle liste desideri",
+            text = "Your wishlist groups",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )

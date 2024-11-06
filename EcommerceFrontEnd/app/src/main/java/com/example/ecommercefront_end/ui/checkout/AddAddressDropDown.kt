@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.TextField
@@ -39,7 +41,7 @@ fun AddAddressDropDown(
     onCityChange: (String) -> Unit,
     onPostalCodeChange: (String) -> Unit,
     onAdditionalInfoChange: (String) -> Unit,
-    isEditing : Boolean
+    isEditing : Boolean,
 ) {
     Column(modifier = Modifier.padding(16.dp)) {
         // RIGA CHE MOSTRA L'INTESTAZIONE DEL FORM E LA FRECCIA PER ESPANDERE/COMPRIMERE
@@ -71,45 +73,55 @@ fun AddAddressDropDown(
 
 
             Spacer(modifier = Modifier.height(8.dp))
-            TextField(
+            OutlinedTextField(
                 value = _street,
                 onValueChange = onStreetChange,
-                label = { Text("Address line 1") }
+                label = { Text("Address line 1") },
+                shape = RoundedCornerShape(16.dp)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
-            TextField(
+            OutlinedTextField(
                 value = _city,
                 onValueChange = onCityChange,
-                label = { Text("City") }
+                label = { Text("City") },
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
             )
             Spacer(modifier = Modifier.height(8.dp))
-            TextField(
+            OutlinedTextField(
                 value = _postalCode,
                 onValueChange = onPostalCodeChange,
-                label = { Text("Postcode") }
+                label = { Text("Postcode") },
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            TextField(
+            OutlinedTextField(
                 value = _province,
                 onValueChange = onProvinceChange,
-                label = { Text("Province") }
+                label = { Text("Province") },
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
             )
             Spacer(modifier = Modifier.height(8.dp))
-            TextField(
+            OutlinedTextField(
                 value = _state,
                 onValueChange = onStateChange,
-                label = { Text("State") }
+                label = { Text("State") },
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
 
             )
 
             Spacer(modifier = Modifier.height(8.dp))
-            TextField(
+            OutlinedTextField(
                 value = _additionalInfo,
                 onValueChange = onAdditionalInfoChange,
-                label = { Text("Additional Info") }
+                label = { Text("Additional Info") },
+                shape = RoundedCornerShape(16.dp)
             )
 
             Spacer(modifier = Modifier.height(16.dp))

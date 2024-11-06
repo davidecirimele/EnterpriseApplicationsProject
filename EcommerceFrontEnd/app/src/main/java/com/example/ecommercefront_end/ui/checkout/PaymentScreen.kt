@@ -12,14 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -35,7 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.ecommercefront_end.model.PaymentMethod
-import com.example.ecommercefront_end.ui.user.PaymentMethodCard
+import com.example.ecommercefront_end.ui.user.Payments.PaymentMethodCard
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -140,6 +136,7 @@ fun CheckoutPaymentScreen(viewModel: CheckoutViewModel, navController: NavContro
                         }
 
                         // Pulsante per confermare la selezione del metodo di pagamento
+
                         item {
                             Button(
                                 onClick = { navController.navigateUp() },
