@@ -23,12 +23,6 @@ public class TransactionController {
 
     private final TransactionsService transactionsService;
 
-    /*@PostMapping(consumes =  "application/json", path = "/add")
-    public ResponseEntity<TransactionDto> addTransaction( @Valid @RequestBody TransactionDto transactionDto){
-        TransactionDto addeddTransaction = transactionsService.addTransactionDto(transactionDto);
-        return new ResponseEntity<>(addeddTransaction, HttpStatus.CREATED);
-
-    }*/
 
     @RateLimit(type ="USER")
     @GetMapping(path = "/get/{userId}")

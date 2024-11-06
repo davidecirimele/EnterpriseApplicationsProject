@@ -55,13 +55,13 @@ public class OrdersServiceImpl implements OrdersService {
         User user = usersDao.findById(orderDto.getUserId().getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
         ShoppingCart shoppingCart = shoppingCartDao.findByUserId(orderDto.getUserId().getUserId()).orElseThrow(() -> new ShoppingCartNotFoundException("Shopping cart not found"));
         Address add = addressesDao.findById(orderDto.getAddress().getId()).orElseThrow(() -> new AddressNotFoundException("Address not found"));
-        //System.out.println("address" + add.toString());
+
 
         if (!add.getUserId().getId().equals(user.getId())) {
             throw new UnauthorizedAccessException("Unauthorized access to this address");
         }
         PaymentMethod paymentMethod = paymentMethodsDao.findById(orderDto.getPaymentMethodId().getPaymentMethodId()).orElseThrow(() -> new PaymentMethodNotFoundException("Payment method not found"));
-        //System.out.println("payment method" + paymentMethod.toString());
+
         if (!paymentMethod.getUser().getId().equals(user.getId())) {
             throw new UnauthorizedAccessException("Unauthorized access to this payment method");
         }
@@ -69,14 +69,13 @@ public class OrdersServiceImpl implements OrdersService {
             throw new OutOfStockException("Products out of stock");
         }
         Order order = setOrder(shoppingCart, user, paymentMethod, add);
-        //System.out.println(order);
+
         try {
             Order savedOr = ordersDao.save(order);
-            //System.out.println("ordine salvato" + savedOr);
+
             List<OrderItem> orderItems = getOrderItems(shoppingCart, savedOr);
             savedOr.setOrderItems(orderItems);
-            System.out.println("order items" + orderItems.size());
-            System.out.println("ordine con gli order items" + savedOr.getOrderItems().size());
+
             Order fullOrder = ordersDao.save(savedOr);
 
 
