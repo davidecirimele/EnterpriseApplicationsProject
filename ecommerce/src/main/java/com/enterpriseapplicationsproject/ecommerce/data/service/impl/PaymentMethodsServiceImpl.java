@@ -86,7 +86,6 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
     @Override
     @Transactional
     public void deletePaymentMethodByUserId(UUID userId, Long paymentMethodId) {
-        System.out.println("userId: " + userId + " paymentMethodId: " + paymentMethodId);
          Integer res = paymentMethodsDao.setPaymentMethodToFalse(userId, paymentMethodId);
         if (res == 0) {
             throw new UnauthorizedAccessException("Unauthorized access");

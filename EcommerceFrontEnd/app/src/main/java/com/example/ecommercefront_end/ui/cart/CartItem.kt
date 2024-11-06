@@ -38,16 +38,6 @@ fun CartItem(
         .fillMaxWidth()
         .padding(16.dp)
     ) {
-        // Immagine del prodotto
-        //FIXME : add image url
-
-        /*val bitmap = BitmapFactory.decodeByteArray(item.bookId.cover, 0, item.bookId.cover.size)
-        Image(
-            bitmap = bitmap.asImageBitmap(),
-            contentDescription = "Product image",
-            modifier = Modifier.size(100.dp),
-            contentScale = androidx.compose.ui.layout.ContentScale.Crop
-        )*/
 
 
         // Dettagli del prodotto
