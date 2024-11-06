@@ -1,3 +1,4 @@
+import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
@@ -16,6 +17,7 @@ import com.example.ecommercefront_end.model.PaymentMethodType
 import com.example.ecommercefront_end.model.SaveAddress
 import com.example.ecommercefront_end.model.SaveOrder
 import com.example.ecommercefront_end.model.SavePaymentMethod
+import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.model.UserId
 import com.example.ecommercefront_end.repository.AddressRepository
 import com.example.ecommercefront_end.repository.CheckoutRepository
@@ -23,8 +25,10 @@ import com.example.ecommercefront_end.viewmodels.CartViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import java.net.SocketTimeoutException
 
 
 class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, private val cartViewModel: CartViewModel, private val navController: NavController) : ViewModel() {
@@ -96,6 +100,19 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
     private val _order = MutableStateFlow<SaveOrder?>(null)
     val order: StateFlow<SaveOrder?> = _order
 
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
+
+    val snackbarHostState = SnackbarHostState()
+
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
+
+
+
 
     val isCheckoutEnabled: StateFlow<Boolean> = combine(
         _selectedAddress,
@@ -114,6 +131,20 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
     ) { street, province, city, postalCode, state -> println("street: $street, province: $province, city: $city, postalCode: $postalCode, state: $state")
         street.isNotBlank() && province.isNotBlank() && city.isNotBlank() && postalCode.isNotBlank() && state.isNotBlank()
     }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    init {
+        observeUserChanges()
+    }
+
+    private fun observeUserChanges() {
+        viewModelScope.launch {
+            SessionManager.observableUser.collectLatest { user ->
+                if (user != null) {
+                    clearData()
+                }
+            }
+        }
+    }
 
 
     // Funzione per attivare o disattivare la modalità di modifica di un indirizzo
@@ -153,7 +184,7 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
         println("è da salvare un nuovo indirizzo?" + isNewAddressIsSaved.value)
         println("viewModel data: ${_street.value}, ${_province.value}, ${_city.value}, ${_postalCode.value}, ${_state.value}")
         println("textfields data: ${street.value}, ${province.value}, ${city.value}, ${postalCode.value}, ${state.value}")
-       if (address != null && _addressBeingEdited.value == address) {
+        if (address != null && _addressBeingEdited.value == address) {
             onSaveEdit(address)
         } else if (isNewAddressIsSaved.value) {
             onSave()
@@ -162,13 +193,17 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
 
     fun addAndSelectNewAddress(newAddress: SaveAddress, sessionManager: SessionManager) {
         viewModelScope.launch {
-            _addresses.value = _addresses.value.toMutableList().apply {
-                checkoutRepository.addShippingAddress(newAddress, sessionManager)
-                    ?.let { add(it) }
+            try {
+                _addresses.value = _addresses.value.toMutableList().apply {
+                    checkoutRepository.addShippingAddress(newAddress, sessionManager)
+                        ?.let { add(it) }
+                }
+                _selectedAddress.value = _addresses.value.last()
+            } catch (e: Exception) {
+                // Gestire l'errore
+
+
             }
-            _selectedAddress.value = _addresses.value.last()
-
-
         }
     }
 
@@ -230,46 +265,68 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
                 postalCode = address.postalCode,
                 additionalInfo = address.additionalInfo
             )
-            checkoutRepository.updateShippingAddress(newAddress, SessionManager, addressId)
-            _selectedAddress.value = address
-            toggleDropDown()
-            prepareNewAdddress()
+            try {
+                checkoutRepository.updateShippingAddress(newAddress, SessionManager, addressId)
+                _selectedAddress.value = address
+                toggleDropDown()
+                prepareNewAdddress()
+            }
+            catch (e: Exception) {
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error while saving the address: Connection problem."
+                else
+                    _errorMessage.value = "Error while saving the address."
+            }
         }
     }
 
     // Funzione per selezionare il metodo di pagamento
     fun selectPaymentMethod(paymentMethod: PaymentMethod) {
         _selectedPaymentMethod.value = paymentMethod
+
     }
 
     fun onAddPaymentMethodClick() {
         viewModelScope.launch {
+
             val user = SessionManager.getUser()
             val newPaymentMethod = SavePaymentMethod(
                 user = user,
                 cardHolderName = _cardHolderName.value,
-                cardNumber = _cardNumber.value,
+                cardNumber = _cardNumber.value.filter { it.isDigit() },
                 paymentMethodType = _selectedPaymentMethodType.value,
                 provider = _selectedCardProvider.value,
                 expirationDate = _expirationDate.value
             )
-            val addResponse = checkoutRepository.addPaymentMethod(newPaymentMethod)
-            val paymentMethod = addResponse.body()
-            if (paymentMethod != null) {
-                resetPaymentMethodForm()
+
+            try {
+                val addResponse = checkoutRepository.addPaymentMethod(newPaymentMethod)
+                val paymentMethod = addResponse.body()
+                if (paymentMethod != null) {
+                    resetPaymentMethodForm()
 
 
-                val getResponse = checkoutRepository.getPaymentMethod(user.userId, paymentMethod.id)
-                if (getResponse.isSuccessful) {
-                    getResponse.body()?.let { pm ->
-                        _paymentMethods.value = _paymentMethods.value.toMutableList().apply {
-                            add(pm)
+                    val getResponse =
+                        checkoutRepository.getPaymentMethod(user.userId, paymentMethod.id)
+                    if (getResponse.isSuccessful) {
+                        getResponse.body()?.let { pm ->
+                            _paymentMethods.value = _paymentMethods.value.toMutableList().apply {
+                                add(pm)
+                            }
+                            _selectedPaymentMethod.value = pm
+                            println("selected payment method: ${_selectedPaymentMethod.value}")
                         }
-                        _selectedPaymentMethod.value = pm
                     }
                 }
             }
+            catch (e: Exception) {
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error while saving the payment method: Connection problem."
+                else
+                    _errorMessage.value = "Error while saving the payment method."
+            }
         }
+
     }
 
 
@@ -308,15 +365,23 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
         viewModelScope.launch {
             val user = SessionManager.user?.id
             if (user != null)
-                checkoutRepository.deletePaymentMethod(user, paymentMethod)
-            _paymentMethods.value = _paymentMethods.value.toMutableList().apply {
-                removeIf { it.id == paymentMethod }
-            }
+                try {
+                    checkoutRepository.deletePaymentMethod(user, paymentMethod)
+                    _paymentMethods.value = _paymentMethods.value.toMutableList().apply {
+                        removeIf { it.id == paymentMethod }
+                    }
 
-            if (_selectedPaymentMethod.value?.id == paymentMethod) {
-                _selectedPaymentMethod.value = _paymentMethods.value.firstOrNull()
+                    if (_selectedPaymentMethod.value?.id == paymentMethod) {
+                        _selectedPaymentMethod.value = _paymentMethods.value.firstOrNull()
 
-            }
+                    }
+                } catch (e: Exception) {
+                    if (e is SocketTimeoutException)
+                        _errorMessage.value =
+                            "Error while deleting the payment method: Connection problem."
+                    else
+                        _errorMessage.value = "Error while deleting the payment method."
+                }
         }
     }
 
@@ -334,9 +399,17 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
                         address = add
                     )
                     println("checkoutRequest: $checkoutRequest")
-                    val order = checkoutRepository.confirmOrder(checkoutRequest)
-                    _order.value = order.body()
-                    navController.navigate("order-confirmation")
+                    try {
+                        val order = checkoutRepository.confirmOrder(checkoutRequest)
+                        _order.value = order.body()
+                        navController.navigate("order-confirmation")
+                    }
+                    catch (e: Exception) {
+                        if (e is SocketTimeoutException)
+                            _errorMessage.value = "Error while confirming the order: Connection problem."
+                        else
+                            _errorMessage.value = "Error while confirming the order."
+                    }
 
                 }
             }
@@ -361,13 +434,13 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
                             _selectedAddress.value = null
                         }
                     }
-                    println("mDp selezionato: ${_selectedPaymentMethod.value}")
+
                     if (_selectedPaymentMethod.value == null) {
                         val response = checkoutRepository.getPaymentMethods(user)
-                        println("response status: ${response.isSuccessful}")
+
                         if (response.isSuccessful) {
                             val paymentMethods = response.body()
-                            println("metodi di pagamento: $paymentMethods")
+
                             if (paymentMethods != null) {
                                 _paymentMethods.value = paymentMethods
                                 _selectedPaymentMethod.value = paymentMethods.firstOrNull()
@@ -375,10 +448,16 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
                         }
                     }
                     _totalAmount.value = cartViewModel.totalAmount.value
-                    println("totale ordine: ${_totalAmount.value}")
+
                 }
             } catch (e: Exception) {
-                // Gestire l'errore
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error while loading the checkout data: Connection problem."
+                else
+                    _errorMessage.value = "Error while loading the checkout data."
+            } finally {
+                _isLoading.value = false
+                _isRefreshing.value = false
             }
         }
     }
@@ -397,7 +476,7 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
                     }
                 }
             } catch (e: Exception) {
-                // Gestire l'errore
+                _errorMessage.value = "Error while loading the addresses."
             }
         }
     }
@@ -416,7 +495,7 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
                     }
                 }
             } catch (e: Exception) {
-                // Gestire l'errore
+                _errorMessage.value = "Error while loading the payment methods."
             }
         }
     }
@@ -428,4 +507,3 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
     }
 
 }
-

@@ -1,4 +1,4 @@
-package com.example.ecommercefront_end.ui.user
+package com.example.ecommercefront_end.ui.user.Payments
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box

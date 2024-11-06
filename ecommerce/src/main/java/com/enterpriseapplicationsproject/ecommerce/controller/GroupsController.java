@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("api/v1/groups")
+@RequestMapping("/api/v1/groups")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 public class GroupsController {
@@ -25,8 +25,8 @@ public class GroupsController {
     private final GroupsService groupsService;
 
     @RateLimit
-    @GetMapping("getById/{idUser}")
-    @PreAuthorize(" #idUser == authentication.principal.getId() or hasRole('ADMIN') ")
+    @GetMapping("/getById/{idUser}")
+    @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN') ")
     public ResponseEntity<List<GroupDto>> getAllGroupsByUser(@PathVariable("idUser") UUID idUser) {
         List<GroupDto> groups = groupsService.findGroupsByUser(idUser);
         if (groups != null) {

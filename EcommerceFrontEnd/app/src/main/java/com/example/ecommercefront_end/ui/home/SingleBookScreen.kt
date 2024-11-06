@@ -74,9 +74,12 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
     val wShowSnackbar by wishlistViewModel.showSnackbar.collectAsState()
     val wSnackbarMessage by wishlistViewModel.snackbarMessage.collectAsState()
 
-
     val cartShowSnackbar by cartViewModel.showSnackbar.collectAsState()
     val cartSnackbarMessage by cartViewModel.snackbarMessage.collectAsState()
+
+    val errorMessage = cartViewModel.errorMessage.collectAsState().value
+
+
 
 
     var wExpanded by remember { mutableStateOf(false) }
@@ -85,7 +88,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
-        paddingValues ->
+            paddingValues ->
 
         LazyColumn(
             modifier = Modifier
@@ -120,7 +123,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
 
             // Immagine del libro
             item {
-                BookCover(book, bookViewModel)
+                BookCover(book, bookViewModel, navController)
             }
 
             // Prezzo e quantità: prezzo allineato a sinistra, quantità a destra
@@ -245,7 +248,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
                                     navController.navigate("wishlist")
                                 }
                                 else {
-                                wExpanded = true
+                                    wExpanded = true
                                 }
                             }
                         }
@@ -285,7 +288,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
             }
         }
 
-        LaunchedEffect(wShowSnackbar, cartShowSnackbar) {
+        LaunchedEffect(wShowSnackbar, cartShowSnackbar, errorMessage) {
             if (wShowSnackbar) {
                 snackbarHostState.showSnackbar(
                     message = wSnackbarMessage,
@@ -293,12 +296,25 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
                 )
                 wishlistViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
             }
-            if (cartShowSnackbar) {
+            else if (cartShowSnackbar) {
                 snackbarHostState.showSnackbar(
                     message = cartSnackbarMessage,
                     duration = SnackbarDuration.Short
                 )
-                cartViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
+                cartViewModel.setShowSnackbar(false)
+            }
+
+            else if (errorMessage != ""){
+            errorMessage?.let {
+
+                snackbarHostState.showSnackbar(
+                    message = it,
+                    duration = SnackbarDuration.Short
+                )
+                cartViewModel.setShowSnackbar(false)
+                cartViewModel.clearErrorMessage()
+                println("Errore: $it")
+            }
             }
         }
     }

@@ -42,4 +42,9 @@ public class PaymentMethod {
 
     @Column(name = "IS_VALID", nullable = false)
     private boolean valid;
+
+    @PrePersist
+    public void prePersist() {
+        this.valid = true;
+    }
 }

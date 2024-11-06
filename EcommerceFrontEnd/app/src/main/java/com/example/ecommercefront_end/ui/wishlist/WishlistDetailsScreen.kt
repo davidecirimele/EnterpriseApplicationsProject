@@ -422,7 +422,8 @@ fun WishlistItemCard(
             ) {
                 BookCover(
                     book = wishlistItem.book,
-                    viewModel = bookViewModel
+                    viewModel = bookViewModel,
+                    navController = navController
                 )
             }
 

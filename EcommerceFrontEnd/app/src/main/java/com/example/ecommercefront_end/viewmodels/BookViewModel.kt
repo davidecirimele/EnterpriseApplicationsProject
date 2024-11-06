@@ -4,6 +4,10 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -26,11 +30,9 @@ import kotlinx.coroutines.launch
 import retrofit2.Response
 import java.io.File
 import java.time.LocalDate
+import kotlin.math.log
 
 class BookViewModel(private val repository: BookRepository): ViewModel() {
-
-    private val _filteredProducts = MutableStateFlow<List<Book>>(emptyList())
-    val filteredProducts: StateFlow<List<Book>> = _filteredProducts.asStateFlow()
 
     private val _allProducts = MutableStateFlow<List<Book>>(emptyList())
     val allProducts: StateFlow<List<Book>> = _allProducts.asStateFlow()
@@ -167,7 +169,6 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
             if (response.isSuccessful && response.body() != null) {
                 _allProducts.value = response.body()!!
-                _filteredProducts.value = _allProducts.value
             } else {
                 throw Exception("Error fetching products")
             }
@@ -187,7 +188,6 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
             if (response.isSuccessful && response.body() != null) {
                 _allAvailableProducts.value = response.body()!!
-                _filteredProducts.value = _allAvailableProducts.value
             } else {
                 throw Exception("Error fetching products")
             }
@@ -201,7 +201,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         }
     }
 
-    private suspend fun fetchBooksByFilter(filter: BookFilter): List<Book> {
+    suspend fun fetchBooksByFilter(filter: BookFilter): List<Book> {
         _isLoadingFilteredBooks.value = true
         try {
             val response = repository.getFilteredBooks(filter)
@@ -222,38 +222,26 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
     fun setOrderOption(option: String){
         _sortOption.value = option
-        sortProducts()
     }
 
-    fun searchBooks(filter: BookFilter, navController: NavController, currentRoute: String?){
-        if(currentRoute != null && (currentRoute != "filtered-books" && currentRoute != "admin-catalogue")) {
-            navController.navigate("filtered-books") {
-                popUpTo("home") {
-                    saveState = true
-                }
+    fun sortProducts(products: List<Book>): List<Book> {
+        Log.d("SORT BOOKS", "sort by: ${_sortOption.value} sortProducts: $products ")
+        return if (products.isNotEmpty()) {
+            when (_sortOption.value) {
+                "Price: Low to High" -> products.sortedBy { it.price }
+                "Price: High to Low" -> products.sortedByDescending { it.price }
+                "Weight: Low to High" -> products.sortedBy { it.weight }
+                "Weight: High to Low" -> products.sortedByDescending { it.weight }
+                "Number of pages: Low to High" -> products.sortedBy { it.pages }
+                "Number of pages: High to Low" -> products.sortedByDescending { it.pages }
+                "Age: Low to High" -> products.sortedBy { it.age }
+                "Age: High to Low" -> products.sortedByDescending { it.age }
+                "Newest" -> products.sortedByDescending { it.publishDate }
+                "Oldest" -> products.sortedBy { it.publishDate }
+                else -> products
             }
-        }
-
-        viewModelScope.launch {
-            _filteredProducts.value = fetchBooksByFilter(filter)
-        }
-    }
-
-    fun sortProducts(){
-        if(filteredProducts.value.isNotEmpty()){
-            _filteredProducts.value = when (_sortOption.value) {
-                "Price: Low to High" -> _filteredProducts.value.sortedBy { it.price }
-                "Price: High to Low" -> _filteredProducts.value.sortedByDescending { it.price }
-                "Weight: Low to High" -> filteredProducts.value.sortedBy { it.weight }
-                "Weight: High to Low" -> filteredProducts.value.sortedByDescending { it.weight }
-                "Number of pages: Low to High" -> filteredProducts.value.sortedBy { it.pages }
-                "Number of pages: High to Low" -> filteredProducts.value.sortedByDescending { it.pages }
-                "Age: Low to High" -> filteredProducts.value.sortedBy { it.age }
-                "Age: High to Low" -> filteredProducts.value.sortedByDescending { it.age }
-                "Newest" -> _filteredProducts.value.sortedByDescending { it.publishDate.year}
-                "Oldest" -> _filteredProducts.value.sortedBy { it.publishDate.year}
-                else -> _filteredProducts.value
-            }
+        } else {
+            products
         }
     }
 

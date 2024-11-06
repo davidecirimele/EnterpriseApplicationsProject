@@ -1,5 +1,6 @@
 package com.example.ecommercefront_end.viewmodels
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -15,9 +16,9 @@ import com.example.ecommercefront_end.model.ShoppingCart
 import com.example.ecommercefront_end.model.UserId
 import com.example.ecommercefront_end.repository.CartRepository
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import java.net.SocketTimeoutException
 import java.util.UUID
 
 class CartViewModel(private val repository: CartRepository) : ViewModel() {
@@ -30,6 +31,19 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     private val _totalAmount = MutableStateFlow(0.0)
     val totalAmount: StateFlow<Double> = _totalAmount
 
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
+
+    private val _errorMessage = MutableStateFlow("")
+    val errorMessage: StateFlow<String?>  get() = _errorMessage
+
+    val snackbarHostState = SnackbarHostState()
+
+    val isCheckoutEnabled: StateFlow<Boolean> = cartItems.map { it.isNotEmpty() }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
     private val _showSnackbar = MutableStateFlow(false)
     val showSnackbar: StateFlow<Boolean> get() = _showSnackbar
 
@@ -37,14 +51,16 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     val snackbarMessage: StateFlow<String> get() = _snackbarMessage
 
 
-    val isCheckoutEnabled: StateFlow<Boolean> = cartItems.map { cartItems ->
-        println("cartItems: $cartItems")
-        cartItems.isNotEmpty()
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
 
     fun loadCartItems() {
         viewModelScope.launch {
+
+            if (_isLoading.value) {
+                _isLoading.value = true
+            } else {
+                _isRefreshing.value = true
+            }
 
             try {
                 println("sto caricando il carrello")
@@ -59,13 +75,25 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
                         }
                         updateTotalAmount()
                     }.onFailure { e ->
-                        println("Errore: ${e.message}")
+                        if (e is SocketTimeoutException)
+                            _errorMessage.value = "Error: a connection timeout occurred: ${e.message}"
+                        else
+                            _errorMessage.value = "Error: ${e.message}"
                     }
                 }
             } catch (e: Exception) {
-                // Gestire l'errore, ad esempio mostrando un messaggio all'utente
+                _errorMessage.value = "Error during cart loading: ${e.message}"
+            } finally {
+                _isLoading.value = false
+                _isRefreshing.value = false
             }
         }
+    }
+
+    fun clearErrorMessage() {
+        _errorMessage.value = ""
+        println("error message ${_errorMessage.value}")
+        println("error message ${errorMessage}")
     }
 
     fun updateItemQuantity(item: CartItem, newQuantity: Int) {
@@ -86,14 +114,13 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
                 updateTotalAmount()
 
             } catch (e: Exception) {
-                // Gestire l'errore
+                _errorMessage.value = "An errror occurred while updating the quantity: ${e.message}"
             }
         }
     }
 
     fun addItem(book : Book) {
         viewModelScope.launch {
-            var message = ""
             try {
                 val userId = SessionManager.user?.id
                 if (userId != null) {
@@ -101,53 +128,49 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
                     if (response.isSuccessful) {
                         updateTotalAmount()
-                        message = "Libro aggiunto al carrello"
+                            _errorMessage.value = "Book added to cart successfully"
                     }
                     else {
-                        message = "Errore: ${response.message()}"
+                        _errorMessage.value = "Error: ${response.message()}"
                     }
                 } else {
-                    message = "ID utente non trovato"
+                    _errorMessage.value = "User ID not found"
                 }
-                triggerSnackbar(message)
+
             } catch (e: Exception) {
-                triggerSnackbar("Si è verificato un errore: ${e.message}")
+                _errorMessage.value = "An error occurred while adding the item to the cart."
             }
         }
     }
 
     fun removeItem(item: CartItem) {
         viewModelScope.launch {
-            var message = ""
             try {
                 val userId = SessionManager.user?.id
                 if (userId != null) {
-                    println("shpping cart items pre delete: ${_cartItems.value}")
+
                     shoppingCart.value?.let {
                         repository.removeItem(item.id, it.id, userId)
 
-                        println("shpping cart items post delete: ${_cartItems.value}")
+
 
                         _cartItems.value = _cartItems.value.filterNot { it.id == item.id }.toList()
 
-                        println("Lista aggiornata dopo rimozione: ${_cartItems.value}")
+
                         updateTotalAmount()
                     }
-                    message = "Item removed successfully"
+                    _errorMessage.value = "Item removed successfully"
                 } else {
-                    message = "User ID not found"
+                    _errorMessage.value = "User ID not found"
 
                 }
-                triggerSnackbar(message)
 
 
             } catch (e: Exception) {
-                println()
-                triggerSnackbar("An error occurred: ${e.message}")
+                _errorMessage.value = " An error occurred while removing the item."
             }
         }
     }
-
 
     private fun updateTotalAmount() {
         _totalAmount.value = _cartItems.value.sumOf { it.bookId.price * it.quantity }
@@ -157,11 +180,4 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
         _showSnackbar.value = b
 
     }
-
-    fun triggerSnackbar(message: String) {
-        _snackbarMessage.value = message
-        _showSnackbar.value = true
-    }
-
-
 }

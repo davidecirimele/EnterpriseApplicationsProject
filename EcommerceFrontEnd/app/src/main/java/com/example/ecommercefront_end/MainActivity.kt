@@ -7,18 +7,15 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 //import androidx.compose.material3.BottomNavigation
 //import androidx.compose.material3.BottomNavigationItem
 
@@ -28,7 +25,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,7 +37,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -57,7 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -65,7 +60,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.network.RetrofitClient
 import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.repository.AddressRepository
@@ -79,15 +73,13 @@ import com.example.ecommercefront_end.repository.TransactionRepository
 
 import com.example.ecommercefront_end.repository.WishlistRepository
 import com.example.ecommercefront_end.ui.admin.AdminCatalogueScreen
-import com.example.ecommercefront_end.ui.user.EditAddressScreen
+import com.example.ecommercefront_end.ui.user.Address.EditAddressScreen
 import com.example.ecommercefront_end.ui.cart.CartScreen
 import com.example.ecommercefront_end.ui.home.BookDetailsScreen
-import com.example.ecommercefront_end.ui.books.BooksFilterScreen
-import com.example.ecommercefront_end.ui.books.FilteredBooksScreen
 import com.example.ecommercefront_end.ui.home.HomeScreen
 import com.example.ecommercefront_end.ui.theme.EcommerceFrontEndTheme
 import com.example.ecommercefront_end.ui.user.AccountManagerScreen
-import com.example.ecommercefront_end.ui.user.AddressesScreen
+import com.example.ecommercefront_end.ui.user.Address.AddressesScreen
 import com.example.ecommercefront_end.ui.admin.AdminHomeScreen
 import com.example.ecommercefront_end.ui.admin.AdminSingleBookScreen
 import com.example.ecommercefront_end.ui.admin.AdminUserDetailsScreen
@@ -98,11 +90,15 @@ import com.example.ecommercefront_end.ui.checkout.CheckoutPaymentScreen
 import com.example.ecommercefront_end.ui.checkout.CheckoutScreen
 import com.example.ecommercefront_end.ui.admin.AdminOrdersScreen
 import com.example.ecommercefront_end.ui.checkout.OrderConfirmationScreen
+import com.example.ecommercefront_end.ui.user.ChangePasswordScreen
 import com.example.ecommercefront_end.ui.user.GroupScreen
-import com.example.ecommercefront_end.ui.user.InsertAddressScreen
+import com.example.ecommercefront_end.ui.user.Address.InsertAddressScreen
+import com.example.ecommercefront_end.ui.user.Payments.InsertPaymentMethodScreen
 import com.example.ecommercefront_end.ui.user.MyAccountScreen
+import com.example.ecommercefront_end.ui.user.Payments.PaymentMethodsScreen
 import com.example.ecommercefront_end.ui.user.SignInUpScreen
-import com.example.ecommercefront_end.ui.user.TransactionsScreen
+import com.example.ecommercefront_end.ui.user.Payments.TransactionsScreen
+import com.example.ecommercefront_end.ui.user.UserOrdersScreen
 import com.example.ecommercefront_end.ui.wishlist.WishlistsScreen
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
@@ -173,7 +169,7 @@ fun NavigationView(navController: NavHostController) {
     }
 
     Scaffold(
-        topBar = { TopBar(navController, bookViewModel) },
+        topBar = { TopBar(navController) },
         bottomBar = { BottomBar(selectedIndex, navController) }
     ) { innerPadding ->
         NavHost(
@@ -192,7 +188,7 @@ fun NavigationView(navController: NavHostController) {
             }
 
             composable("admin-catalogue") {
-                AdminCatalogueScreen(bookViewModel = bookViewModel, navHostController = navController)
+                AdminCatalogueScreen(bookViewModel = bookViewModel, navController = navController)
             }
 
             composable("admin-users-list") {
@@ -227,7 +223,7 @@ fun NavigationView(navController: NavHostController) {
                 val book by bookViewModel.bookFlow.collectAsState()
 
                 book?.let {
-                    AdminSingleBookScreen(bookViewModel = bookViewModel, navHostController = navController)
+                    AdminSingleBookScreen(bookViewModel = bookViewModel, navController = navController)
                 } ?: Text("Book not found")
             }
 
@@ -254,6 +250,14 @@ fun NavigationView(navController: NavHostController) {
 
             composable("insert-product") {
                 InsertProductScreen(viewModel = bookViewModel, navController)
+            }
+
+            composable("change-password") {
+                ChangePasswordScreen(viewModel = accountViewModel, navController)
+            }
+
+            composable("insert-payment-method") {
+                InsertPaymentMethodScreen(viewModel = checkoutViewModel, navController)
             }
 
             composable("cart") {
@@ -308,7 +312,7 @@ fun NavigationView(navController: NavHostController) {
 
                 val _userApiService = RetrofitClient.userApiService
                 val repository = AccountRepository(_userApiService)
-                AccountManagerScreen(viewModel = accountViewModel, navController)
+                AccountManagerScreen(viewModel = accountViewModel, bookViewModel, navController)
             }
             composable("my-account") {
                 LaunchedEffect(Unit) {
@@ -331,11 +335,6 @@ fun NavigationView(navController: NavHostController) {
                     groupoJob.await()
                 }
                 GroupScreen(groupViewModel, navController)
-            }
-
-            composable("filtered-books") {
-                FilteredBooksScreen(
-                    bookViewModel = bookViewModel, navController = navController)
             }
 
             composable("addresses/{userId}", arguments = listOf(navArgument("userId") { type = NavType.StringType })) { backStackEntry ->
@@ -403,6 +402,14 @@ fun NavigationView(navController: NavHostController) {
                 })
             }
 
+            composable("orders") {
+                UserOrdersScreen(viewModel = accountViewModel, onOrderClick = {
+                })
+            }
+            composable("payment-methods") {
+                PaymentMethodsScreen(viewModel = checkoutViewModel, navController = navController)
+            }
+
             composable("transactions"){
                 TransactionsScreen( viewModel = transactionViewModel)
             }
@@ -414,7 +421,7 @@ fun NavigationView(navController: NavHostController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navHostController: NavHostController, bookViewModel: BookViewModel) {
+fun TopBar(navHostController: NavHostController) {
     val currentBackStackEntry by navHostController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
     val showBackIcon by remember(currentBackStackEntry) { derivedStateOf { navHostController.previousBackStackEntry != null } }
@@ -424,10 +431,14 @@ fun TopBar(navHostController: NavHostController, bookViewModel: BookViewModel) {
 
     TopAppBar(
         title = {
-            if (isSearchVisible) {
-                SearchBar(navHostController, filterOptions,{ newValue -> filterOptions = newValue } , bookViewModel, currentRoute)
-            } else {
-                Text(stringResource(R.string.app_name))
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center // Allinea il contenuto al centro
+            ) {
+                Text(
+                    text = stringResource(R.string.app_name),
+                    textAlign = TextAlign.Center
+                )
             }
         },
         navigationIcon = {
@@ -450,49 +461,6 @@ fun TopBar(navHostController: NavHostController, bookViewModel: BookViewModel) {
             actionIconContentColor = colorScheme.onPrimary // Usa il colore onPrimary del tema
         )
     )
-
-    if(filterOptions) {
-        BooksFilterScreen(
-            viewModel = bookViewModel,
-            navController = navHostController,
-            currentRoute = currentRoute,
-            onDismiss = {
-                filterOptions = false
-            })
-    }
-}
-
-@Composable
-fun SearchBar(navHostController: NavHostController, filterOptions: Boolean, onFilterOptionsChange: (Boolean) -> Unit, bookViewModel: BookViewModel, currentRoute: String?) {
-    var searchValue by remember { mutableStateOf("") }
-
-    Row(modifier = Modifier.fillMaxWidth()) {
-        TextField(
-            value = searchValue,
-            onValueChange = { searchValue = it;
-                if(searchValue == "" && currentRoute == "filtered-books"){
-                    navHostController.popBackStack()
-                }
-                bookViewModel.searchBooks(BookFilter(title = it, author = it, publisher = it),navHostController, currentRoute)},
-            label = { Text("Search by Title, Author or Publisher") },
-            shape = RoundedCornerShape(16.dp),
-            singleLine = true,
-            modifier = Modifier.widthIn(if (currentRoute == "home") 320.dp else 280.dp)
-        )
-
-        IconButton(modifier = Modifier.align(Alignment.CenterVertically),onClick = {
-            if(!filterOptions)
-                onFilterOptionsChange(true)
-            else
-                onFilterOptionsChange(false)
-        }) {
-            Icon(
-                Icons.Filled.FilterAlt,
-                contentDescription = "Filter Books",
-                modifier = Modifier.size(35.dp)
-            )
-        }
-    }
 }
 
 @Composable
@@ -567,7 +535,7 @@ fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostContro
                             saveState = true
                         }
                         launchSingleTop = true
-                        restoreState = true
+                        restoreState = false
                     }
                 },
                 icon = {

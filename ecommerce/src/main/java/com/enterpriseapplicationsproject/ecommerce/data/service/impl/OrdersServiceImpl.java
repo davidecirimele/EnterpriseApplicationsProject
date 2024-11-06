@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -93,13 +94,30 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public List<OrderDto> getAllOrdersByUserId(UUID userId) {
+    public List<OrderSummaryDto> getAllOrdersByUserId(UUID userId) {
 
-        List<Order> orders = ordersDao.findAllByUserId(userId, Sort.by(Sort.Order.desc("ordedDate")));
+        List<Order> orders = ordersDao.findAllByUserId(userId, Sort.by(Sort.Order.desc("orderDate")));
 
 
+        return orders.stream().map(o -> modelMapper.map(o, OrderSummaryDto.class)).toList();
+    }
 
-        return orders.stream().map(o -> modelMapper.map(o, OrderDto.class)).toList();
+    @Override
+    public List<BookDto> getProductsByUserId(UUID userId) {
+
+        List<Order> orders = ordersDao.findAllByUserId(userId, Sort.by(Sort.Order.desc("orderDate")));
+
+        List<Book> purchased = new ArrayList<>();
+
+        orders.forEach(order -> {
+            order.getOrderItems().forEach(orderItem -> {
+                if(!purchased.contains(orderItem.getBook())){
+                    purchased.add(orderItem.getBook());
+                }
+            });
+        });
+
+        return purchased.stream().map(p -> modelMapper.map(p, BookDto.class)).toList();
     }
 
     @Override

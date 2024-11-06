@@ -7,13 +7,19 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ecommercefront_end.SessionManager
+import com.example.ecommercefront_end.SessionManager.user
 import com.example.ecommercefront_end.model.Address
 import com.example.ecommercefront_end.model.Book
+import com.example.ecommercefront_end.model.Order
+import com.example.ecommercefront_end.model.OrderSummary
+import com.example.ecommercefront_end.model.PasswordUser
 import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.model.UserDetails
 import com.example.ecommercefront_end.repository.AccountRepository
+import com.example.ecommercefront_end.ui.checkout.PaymentMethodRow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import java.util.UUID
@@ -22,8 +28,20 @@ class AccountViewModel(private val repository: AccountRepository): ViewModel() {
     private val _userDetails = MutableStateFlow<UserDetails?>(null)
     val userDetails: StateFlow<UserDetails?> = _userDetails
 
+    private val _userOrders = MutableStateFlow<List<OrderSummary>>(emptyList())
+    val userOrders: StateFlow<List<OrderSummary>> get() = _userOrders
+
+    private val _purchasedBooks = MutableStateFlow<List<Book>>(emptyList())
+    val purchasedBooks: StateFlow<List<Book>> get() = _purchasedBooks
+
     private val _onError = MutableLiveData<String>()
     val onError: LiveData<String> get() = _onError
+
+    private val _isLoadingOrders = MutableStateFlow(false)
+    val isLoadingOrders: StateFlow<Boolean> get() = _isLoadingOrders
+
+    private val _isLoadingPurchasedBooks = MutableStateFlow(false)
+    val isLoadingPurchasedBooks: StateFlow<Boolean> get() = _isLoadingPurchasedBooks
 
     fun loadUserDetails(forceReload : Boolean = false) {
 
@@ -69,6 +87,84 @@ class AccountViewModel(private val repository: AccountRepository): ViewModel() {
                 }
             } catch (e: Exception) {
                 onError()
+            }
+        }
+    }
+
+    fun fetchOrders() {
+        viewModelScope.launch {
+            _isLoadingOrders.value = true
+            try {
+                val user = SessionManager.user
+
+                if(user != null && user.role != "ROLE_ADMIN") {
+                    val response = repository.getUserOrders(user.id)
+                    if (response.isSuccessful) {
+                        val responseBody = response.body() as? List<OrderSummary>
+                        if (responseBody != null) {
+                            _userOrders.value = responseBody
+                        }
+                        else{
+                            throw Exception("Response is null")
+                        }
+                    } else {
+                        Log.e("AdminError", "Errore nella risposta: ${response?.code()}")
+                    }
+                } else{
+                    throw Exception("User is null")
+                }
+            } catch (e: Exception) {
+                Log.e("AdminError", "Errore durante il caricamento degli ordini", e)
+            } finally {
+                _isLoadingOrders.value = false
+            }
+        }
+    }
+
+    fun fetchPurchasedBooks(){
+        viewModelScope.launch {
+            _isLoadingPurchasedBooks.value = true
+            try{
+                val user = SessionManager.user
+                if(user != null && user.role != "ROLE_ADMIN")
+                {
+                    val response = user?.let { repository.getPurchasedProducts(it.id) }
+
+                    if (response != null) {
+                        if(response.isSuccessful && response.body() != null)
+                        {
+                            _purchasedBooks.value = response.body()!!
+                        }
+                        else{
+                            throw Exception("Response Body is null")
+                        }
+                    } else{
+                        throw Exception("Response is null")
+                    }
+                }
+                else{
+                    throw Exception("Access Denied")
+                }
+            }catch(e: Exception){
+                Log.d(TAG, "fetchPurchasedBooks: ${e.message}")
+            }finally {
+                _isLoadingPurchasedBooks.value = false
+            }
+        }
+    }
+
+    fun changePassword(password: PasswordUser){
+        viewModelScope.launch {
+            try {
+                val user = SessionManager.user
+                if (user != null) {
+                    val response = repository.changePassword(user.id, password)
+                } else {
+                    throw Exception("Response is null")
+                }
+
+            } catch (e: Exception) {
+                Log.d(TAG, "Password change: ${e.message}")
             }
         }
     }

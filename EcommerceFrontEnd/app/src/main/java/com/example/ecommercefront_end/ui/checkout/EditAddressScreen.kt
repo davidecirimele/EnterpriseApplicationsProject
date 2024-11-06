@@ -45,6 +45,7 @@ fun CheckoutAddressScreen(viewModel: CheckoutViewModel, navController: NavContro
     val additionalInfo by viewModel.additionalInfo.collectAsState()
     val addressBeingEdited by viewModel.addressBeingEdited.collectAsState()
 
+
     LaunchedEffect(Unit) {
         if (addresses.isEmpty())  // Se non ci sono indirizzi, carica quelli esistenti
         viewModel.loadAddresses()
@@ -117,13 +118,16 @@ fun CheckoutAddressScreen(viewModel: CheckoutViewModel, navController: NavContro
             Spacer(modifier = Modifier.height(16.dp))
         }
 
+        var newAddrSavable = street.isNotEmpty() && city.isNotEmpty() && postalCode.isNotEmpty() && province.isNotEmpty() && state.isNotEmpty()
 
-        item {
+
+            item {
             // Pulsante per salvare la selezione
             Button(
                 onClick = {
                     viewModel.onSaveClick(selectedAddress) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = newAddrSavable
             ) {
                 Text("Save")
             }

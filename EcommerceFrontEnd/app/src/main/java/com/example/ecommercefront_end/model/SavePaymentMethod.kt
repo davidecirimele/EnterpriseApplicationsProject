@@ -8,5 +8,4 @@ data class SavePaymentMethod(
         val provider : CardProvider?,
         val cardNumber: String,
         val expirationDate: String
-
 )

@@ -50,9 +50,10 @@ public class UserController {
     @RateLimit(type ="USER")
     @PutMapping(value = "{userId}/change-password", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("#userId == authentication.principal.getId()")
-    public ResponseEntity<UserDto> updatePassword(@PathVariable UUID userId,@Valid @RequestBody PasswordUserDto userDto){
+    public ResponseEntity<UserDto> updatePassword(@PathVariable UUID userId,@Valid @RequestBody PasswordUserDto password){
         try{
-            UserDto updatedUser= userService.updatePassword(userId, userDto);
+            log.info("Password: "+ password.getOldPassword()+", "+password.getNewPassword());
+            UserDto updatedUser= userService.updatePassword(userId, password);
             String toRevoke = refreshTokenService.getTokenByUserId(userId).getToken();
             revokedTokenService.revokeToken(toRevoke);
             return new ResponseEntity<>(updatedUser, HttpStatus.OK);}

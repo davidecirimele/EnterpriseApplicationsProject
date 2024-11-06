@@ -11,7 +11,9 @@ public interface OrdersService {
 
     SaveOrderDto addOrder(CheckoutRequestDto orderDto);
 
-    List<OrderDto> getAllOrdersByUserId(UUID userId);
+    List<OrderSummaryDto> getAllOrdersByUserId(UUID userId);
+
+    List<BookDto> getProductsByUserId(UUID userId);
 
     OrderDto setOrderStatusToCancelled(Long orderId, UUID userId);
 
