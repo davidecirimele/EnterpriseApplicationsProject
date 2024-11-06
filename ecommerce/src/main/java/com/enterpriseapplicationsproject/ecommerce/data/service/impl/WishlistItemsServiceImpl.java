@@ -149,7 +149,10 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
 
 
     private boolean WishlistValidToUpdate(Wishlist wishlist, UUID idUser) {
-        if (wishlist.getUserId() == null || !wishlist.getUserId().getId().equals(idUser)) {
+        if (wishlist.getUserId() == null){
+            return false;
+        }
+        if (!wishlist.getUserId().getId().equals(idUser)) {
             Group group = wishlist.getGroup();
             if (group == null ) {
                 return false;
@@ -159,7 +162,7 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
                     && wishlist.getPrivacySetting().equals(WishlistPrivacy.SHARED);
 
         }
-        return true;
+        else return true;
     }
 
     private boolean ItemInWishlist(Long idWishlist, Long idBook) {
