@@ -77,6 +77,7 @@ fun AdminHomeScreen(navHostController: NavHostController){
                         }, icon = Icons.Default.Payments, contentDescription = "Orders")
 
                         Spacer(modifier = Modifier.padding(10.dp))
+                    }
                 }
             }
         }
