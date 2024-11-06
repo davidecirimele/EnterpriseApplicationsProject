@@ -39,18 +39,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    public ShoppingCartDto getByCartId(Long cartId) {
-        try {
-            ShoppingCart cart = shoppingCartDao.findById(cartId).orElseThrow(()->new ShoppingCartNotFoundException("Shopping cart not found"));
-
-            return modelMapper.map(cart, ShoppingCartDto.class);
-            } catch(Exception e) {
-            log.error("Unexpected error while fetching shopping cart with ID: "+cartId+", " + e);
-            throw new RuntimeException("Unexpected error occurred");
-        }
-    }
-
-    @Override
     public ShoppingCartDto save(ShoppingCart sc) {
         try {
             ShoppingCart savedCart = shoppingCartDao.save(sc);

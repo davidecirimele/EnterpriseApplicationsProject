@@ -78,17 +78,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public UserDto getByEmail(String email) {
-        try{
-            User user = userDao.findByCredentialEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
-
-            return modelMapper.map(user, UserDto.class);
-        }catch (Exception e) {
-            log.error("Unexpected error while fetching user by email: "+ email +", "+ e);
-            throw new RuntimeException("Unexpected error occurred");
-        }
-    }
-
     public List<UserDetailsDto> getAllDto() {
         try{
             List<User> users = userDao.findAll();
@@ -124,17 +113,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
-    public User getUserByEmail(String email) {
-        try {
-            return userDao.findByCredentialEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
-        }catch(Exception e){
-            log.error("Unexpected error while fetching user with email: "+ email+", "+e);
-            throw new RuntimeException("Unexpected error occurred");
-        }
-    }
-
-
     public UserDto updatePassword(UUID userId, PasswordUserDto userDto) {
         try {
             User user = userDao.findById(userId)
@@ -149,15 +127,6 @@ public class UserServiceImpl implements UserService {
             return modelMapper.map(user, UserDto.class);
         }catch(Exception e){
             log.error("Unexpected error while updating user password with id: "+userId+", "+e);
-            throw new RuntimeException("Unexpected error occurred");
-        }
-    }
-
-    public User convertDto(UserDto userDto) {
-        try {
-            return modelMapper.map(userDto, User.class);
-        }catch (Exception e){
-            log.error("Unexpected error while converting Dto");
             throw new RuntimeException("Unexpected error occurred");
         }
     }
@@ -216,17 +185,6 @@ public class UserServiceImpl implements UserService {
         }
         catch(Exception e){
             log.error("Unexpected error while deleting user with id: "+userId+", "+e);
-            throw new RuntimeException("Unexpected error occurred");
-        }
-    }
-
-    @Override
-    public String getUserRole(UUID userId) {
-        try {
-            User user = userDao.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
-            return user.getClass().getAnnotation(DiscriminatorValue.class).value();
-        }catch(Exception e){
-            log.error("Unexpected error while fetching user role with id: "+userId+", "+e);
             throw new RuntimeException("Unexpected error occurred");
         }
     }

@@ -69,7 +69,10 @@ public class AddressServiceImpl implements AddressService {
             if(address == null)
                 return null;
 
-            return modelMapper.map(address, AddressDto.class);
+            if(address.getUserId().getId().equals(userid))
+                return modelMapper.map(address, AddressDto.class);
+            else
+                throw new UnauthorizedAccessException("You are not authorized to access this resource");
         }catch(Exception e){
             log.error("Unexpected error while fetching default address for user with ID: "+ userid +", "+ e);
             throw new RuntimeException("Unexpected error occurred");
