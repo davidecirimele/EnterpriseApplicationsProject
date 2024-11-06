@@ -161,12 +161,6 @@ public class GlobalExceptionHandler {
         return "NULLLLLLLLLLLLLLLLLLLLLLLLLLLLL POINTER!!!";
     }
 
-    /*@ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ServiceError defaultErrorHandler(HttpStatus httpStatus, WebRequest req ,Exception ex){
-        System.out.println("Exception handler :::: " + ex);
-        return errorResponse(httpStatus, req, ex.getMessage());
-    }*/
 
 
     private ServiceError errorResponse (HttpStatus httpStatus, WebRequest req, String message) {

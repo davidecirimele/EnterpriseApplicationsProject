@@ -47,13 +47,6 @@ public class ShoppingCartController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    /*@PutMapping("/save")
-    @PreAuthorize("#ShoppingCartDto.userId == authentication.principal.getId()")
-    public ResponseEntity<ShoppingCartDto> saveCart(@RequestBody ShoppingCartDto ShoppingCartDto) {
-        ShoppingCartDto savedCart = shoppingCartService.saveCart(ShoppingCartDto);
-        return new ResponseEntity<>(savedCart, HttpStatus.OK);
-    }*/
-
     @GetMapping("/get/total/{userId}")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<Double> getTotal(@PathVariable UUID userId) {

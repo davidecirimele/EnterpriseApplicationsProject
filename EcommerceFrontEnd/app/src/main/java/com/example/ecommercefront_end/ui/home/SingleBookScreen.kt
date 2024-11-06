@@ -288,7 +288,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
             }
         }
 
-        LaunchedEffect(wShowSnackbar, cartShowSnackbar, errorMessage) {
+        LaunchedEffect(wShowSnackbar) {
             if (wShowSnackbar) {
                 snackbarHostState.showSnackbar(
                     message = wSnackbarMessage,
@@ -304,18 +304,8 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
                 cartViewModel.setShowSnackbar(false)
             }
 
-            else if (errorMessage != ""){
-            errorMessage?.let {
 
-                snackbarHostState.showSnackbar(
-                    message = it,
-                    duration = SnackbarDuration.Short
-                )
-                cartViewModel.setShowSnackbar(false)
-                cartViewModel.clearErrorMessage()
-                println("Errore: $it")
-            }
             }
         }
     }
-}
+

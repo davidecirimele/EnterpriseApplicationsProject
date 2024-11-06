@@ -38,16 +38,6 @@ fun CartItem(
         .fillMaxWidth()
         .padding(16.dp)
     ) {
-        // Immagine del prodotto
-        //FIXME : add image url
-
-        /*val bitmap = BitmapFactory.decodeByteArray(item.bookId.cover, 0, item.bookId.cover.size)
-        Image(
-            bitmap = bitmap.asImageBitmap(),
-            contentDescription = "Product image",
-            modifier = Modifier.size(100.dp),
-            contentScale = androidx.compose.ui.layout.ContentScale.Crop
-        )*/
 
 
         // Dettagli del prodotto
@@ -59,12 +49,12 @@ fun CartItem(
 
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Di: ${item.bookId.author}",
+                text = "By: ${item.bookId.author}",
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Prezzo: ${item.bookId.price}€",
+                text = "Price: ${item.bookId.price}€",
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(4.dp))

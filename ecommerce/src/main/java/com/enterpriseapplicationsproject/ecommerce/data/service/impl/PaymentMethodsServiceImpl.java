@@ -5,10 +5,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.PaymentMethod;
 
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.dto.SavePaymentMethodDto;
-import com.enterpriseapplicationsproject.ecommerce.exception.DecryptionErrorException;
-import com.enterpriseapplicationsproject.ecommerce.exception.EncryptionErrorException;
-import com.enterpriseapplicationsproject.ecommerce.exception.UnauthorizedAccessException;
-import com.enterpriseapplicationsproject.ecommerce.exception.UserNotFoundException;
+import com.enterpriseapplicationsproject.ecommerce.exception.*;
 import com.enterpriseapplicationsproject.ecommerce.utils.EncryptionUtils;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.PaymentMethodsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.UsersDao;
@@ -39,7 +36,6 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
 
     @Override
     public PaymentMethodDto addPaymentMethod(SavePaymentMethodDto paymentMethodDto) {
-        System.out.println("PaymentMethodDto: " + paymentMethodDto.toString());
         User user = userDao.findById(paymentMethodDto.getUser().getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
         EncryptionUtils encryptionUtils = new EncryptionUtils(encryptionConfig.getSecretKey());
         String encryptedCardNumber;
@@ -50,7 +46,6 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
             throw  new EncryptionErrorException("Error encrypting card number");
         }
         PaymentMethod paymentMethod = modelMapper.map(paymentMethodDto, PaymentMethod.class);
-        System.out.println("PaymentMethod: " + paymentMethod.toString());
         paymentMethod.setUser(user);
         paymentMethod.setCardNumber(encryptedCardNumber);
         paymentMethod.setValid(true);
@@ -60,9 +55,10 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
 
     @Override
     public List<PaymentMethodDto> getAllPaymentMethodByUserId(UUID userId) {
-        List<PaymentMethod> paymentMethod = paymentMethodsDao.findAllByUserId(userId);
-        System.out.println("PaymentMethod: " + paymentMethod.toString());
-        System.out.println("Card number: " + paymentMethod.get(0).getCardNumber());
+        try {
+            List<PaymentMethod> paymentMethod = paymentMethodsDao.findAllByUserId(userId);
+
+
         EncryptionUtils encryptionUtils = new EncryptionUtils(encryptionConfig.getSecretKey());
         List<PaymentMethodDto> paymentMethodDtoList = paymentMethod.stream().map(pm -> {
             String decryptedCardNumber;
@@ -77,15 +73,19 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
             return paymentMethodDto;
         }).collect(Collectors.toList());
 
-        System.out.println("PaymentMethodDtoList: " + paymentMethodDtoList.toString());
+
 
         return paymentMethodDtoList;
+        }
+         catch (Exception e){
+            throw new PaymentMethodNotFoundException("Payment method not found");
+        }
+
     }
 
     @Override
     @Transactional
     public void deletePaymentMethodByUserId(UUID userId, Long paymentMethodId) {
-        System.out.println("userId: " + userId + " paymentMethodId: " + paymentMethodId);
          Integer res = paymentMethodsDao.setPaymentMethodToFalse(userId, paymentMethodId);
         if (res == 0) {
             throw new UnauthorizedAccessException("Unauthorized access");
