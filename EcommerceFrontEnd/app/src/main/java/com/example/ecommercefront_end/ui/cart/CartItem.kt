@@ -59,12 +59,12 @@ fun CartItem(
 
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Di: ${item.bookId.author}",
+                text = "By: ${item.bookId.author}",
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Prezzo: ${item.bookId.price}€",
+                text = "Price: ${item.bookId.price}€",
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(4.dp))

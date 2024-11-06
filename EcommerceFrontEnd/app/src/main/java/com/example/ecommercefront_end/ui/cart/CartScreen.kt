@@ -62,129 +62,130 @@ fun CartScreen(viewModel: CartViewModel, onCheckoutClick: () -> Unit, navControl
     val cartItems by viewModel.cartItems.collectAsStateWithLifecycle()
     val totalAmount by viewModel.totalAmount.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val isCheckoutEnabled by viewModel.isCheckoutEnabled.collectAsStateWithLifecycle()
+
+    val snackbarHostState = remember { SnackbarHostState() }
 
 
     val refreshState = rememberPullRefreshState(
         refreshing = isRefreshing,
         onRefresh = {
-            println("Pull-to-refresh")
-            viewModel.loadCartItems() // Carica di nuovo gli articoli nel carrello
+            viewModel.loadCartItems()
         }
     )
 
-    /*LaunchedEffect(errorMessage) {
-        errorMessage?.let { message ->
-            val result = viewModel.snackbarHostState.showSnackbar(
-                message = message,
-                actionLabel = "RIPROVA"
-            )
-
-            if (result == SnackbarResult.ActionPerformed) {
-                viewModel.loadCartItems() // Riprova a caricare gli articoli
-            }
-
-            viewModel.clearErrorMessage() // Reset del messaggio d'errore
-        }
-    }*/
 
     LaunchedEffect(Unit) {
-        if (SessionManager.user != null) {
-            viewModel.loadCartItems()
-        } else {
-            navController.navigate("userAuth") {
-                popUpTo("cart") {
-                    inclusive = true
-                }
-            }
+        viewModel.errorMessage.collect { message ->
+            snackbarHostState.showSnackbar(message)
 
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(viewModel.snackbarHostState) }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)  // Distribuisci lo spazio tra la parte superiore e la parte inferiore
-                    .fillMaxWidth()
-                    .pullRefresh(refreshState)
-                    .padding(16.dp)
-            ) {
-                if (isLoading) {
-                    // Visualizza l'indicatore di caricamento al centro
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                } else {
-                    if (cartItems.isEmpty()) {
-                        // Visualizza il messaggio quando il carrello è vuoto
-                        Text(
-                            text = "Il tuo carrello è vuoto.",
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    } else {
-                        // Visualizza la lista degli articoli del carrello
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            items(cartItems) { item ->
-                                CartItem(
-                                    item = item,
-                                    onRemoveClick = { viewModel.removeItem(item) },
-                                    onQuantityChange = { newQuantity ->
-                                        viewModel.updateItemQuantity(item, newQuantity)
-                                    }
-                                )
-                            }
-                        }
+
+
+
+
+        LaunchedEffect(Unit) {
+            if (SessionManager.user != null) {
+                viewModel.loadCartItems()
+            } else {
+                navController.navigate("userAuth") {
+                    popUpTo("cart") {
+                        inclusive = true
                     }
                 }
 
-                // Indicatore di pull-to-refresh
-                PullRefreshIndicator(
-                    refreshing = isRefreshing,
-                    state = refreshState,
-                    modifier = Modifier.align(Alignment.TopCenter)
+            }
+        }
+
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) }
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)  // Distribuisci lo spazio tra la parte superiore e la parte inferiore
+                        .fillMaxWidth()
+                        .pullRefresh(refreshState)
+                        .padding(16.dp)
+                ) {
+                    if (isLoading) {
+
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    } else {
+                        if (cartItems.isEmpty()) {
+
+                            Text(
+                                text = "Your cart is empty.",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        } else {
+
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(cartItems) { item ->
+                                    CartItem(
+                                        item = item,
+                                        onRemoveClick = { viewModel.removeItem(item) },
+                                        onQuantityChange = { newQuantity ->
+                                            viewModel.updateItemQuantity(item, newQuantity)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+
+                    PullRefreshIndicator(
+                        refreshing = isRefreshing,
+                        state = refreshState,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
+                }
+
+
+                TotalSection(
+                    totalAmount = totalAmount,
+                    onCheckoutClick = onCheckoutClick,
+                    isCheckoutEnabled = isCheckoutEnabled
                 )
             }
-
-            // Sezione totale e pulsante di Checkout, sempre visibili in fondo
-            TotalSection(totalAmount = totalAmount, onCheckoutClick = onCheckoutClick, isCheckoutEnabled = isCheckoutEnabled)
         }
     }
-}
 
 
 
-@Composable
-fun TotalSection(totalAmount: Double, onCheckoutClick: () -> Unit, isCheckoutEnabled: Boolean) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Total ", style = MaterialTheme.typography.titleMedium)
-            Text("$totalAmount €", style = MaterialTheme.typography.titleMedium)
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = onCheckoutClick,
-            modifier = Modifier.fillMaxWidth().background(
-                if (isCheckoutEnabled) MaterialTheme.colorScheme.primary else Color.Gray,  // Cambia il colore di sfondo se disabilitato
-            ),
-            enabled = isCheckoutEnabled
-        ) {
-            Text("Checkout")
+    @Composable
+    fun TotalSection(totalAmount: Double, onCheckoutClick: () -> Unit, isCheckoutEnabled: Boolean) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Total ", style = MaterialTheme.typography.titleMedium)
+                Text("$totalAmount €", style = MaterialTheme.typography.titleMedium)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onCheckoutClick,
+                modifier = Modifier.fillMaxWidth().background(
+                    if (isCheckoutEnabled) MaterialTheme.colorScheme.primary else Color.Gray,
+                ),
+                enabled = isCheckoutEnabled
+            ) {
+                Text("Checkout")
+            }
         }
     }
-}
