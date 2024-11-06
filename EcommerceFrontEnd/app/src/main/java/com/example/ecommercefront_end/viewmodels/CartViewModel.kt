@@ -15,6 +15,7 @@ import com.example.ecommercefront_end.model.CartItem
 import com.example.ecommercefront_end.model.ShoppingCart
 import com.example.ecommercefront_end.model.UserId
 import com.example.ecommercefront_end.repository.CartRepository
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -179,5 +180,12 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     fun setShowSnackbar(b: Boolean) {
         _showSnackbar.value = b
 
+    }
+
+    fun onLogout(){
+        //viewModelScope.cancel()
+        _cartItems.value = emptyList()
+        _shoppingCart.value = null
+        _totalAmount.value = 0.0
     }
 }

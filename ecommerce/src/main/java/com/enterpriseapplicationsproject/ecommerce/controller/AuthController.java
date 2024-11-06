@@ -50,13 +50,13 @@ public class AuthController {
     private final LoggedUserDetailsService loggedUserDetailsService;
 
 
-    @RateLimit
+    @RateLimit(type = "USER")
     @PostMapping(consumes = "application/json", path = "/register")
     public ResponseEntity<UserDetailsDto> registerUser(@Valid @RequestBody SaveUserDto userDto) {
         return ResponseEntity.ok(authService.registerUser(userDto));
     }
 
-    @RateLimit
+    @RateLimit(type = "USER")
     @PostMapping(consumes = "application/json", path = "/login")
     public ResponseEntity<Map<String, String>> login(@Valid @RequestBody CredentialDto credentials) {
         log.info("Received request for auth/login");

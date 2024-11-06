@@ -2,6 +2,7 @@ package com.example.ecommercefront_end.ui.user
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -51,7 +52,7 @@ import com.example.ecommercefront_end.viewmodels.AccountViewModel
 import com.example.ecommercefront_end.viewmodels.BookViewModel
 
 @Composable
-fun AccountManagerScreen(viewModel: AccountViewModel, bookViewModel: BookViewModel, navHostController: NavHostController) {
+fun AccountManagerScreen(viewModel: AccountViewModel, bookViewModel: BookViewModel, navHostController: NavHostController, onLogout: () -> Unit) {
 
     val userDetails by viewModel.userDetails.collectAsState()
 
@@ -88,7 +89,7 @@ fun AccountManagerScreen(viewModel: AccountViewModel, bookViewModel: BookViewMod
                         bookViewModel = bookViewModel,
                         navController = navHostController
                     )
-                Buttons(viewModel, navHostController)
+                Buttons(viewModel, navHostController, onLogout = onLogout)
             }
         }
     }
@@ -153,7 +154,8 @@ fun OptionsSection(navHostController: NavHostController){
 @Composable
 fun PurchasedHistory(history: List<Book>, bookViewModel: BookViewModel, navController: NavController){
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(16.dp), Arrangement.SpaceEvenly
     ) {
         Text(
@@ -164,7 +166,9 @@ fun PurchasedHistory(history: List<Book>, bookViewModel: BookViewModel, navContr
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        LazyRow(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+        LazyRow(modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)) {
             items(history, key = {it.id}) { book ->
                 BookCover(book, bookViewModel, navController)
             }
@@ -174,7 +178,7 @@ fun PurchasedHistory(history: List<Book>, bookViewModel: BookViewModel, navContr
 }
 
 @Composable
-fun Buttons(viewModel: AccountViewModel, navHostController: NavHostController){
+fun Buttons(viewModel: AccountViewModel, navHostController: NavHostController, onLogout: ()->Unit){
     val context = LocalContext.current
 
     Column {
@@ -189,9 +193,10 @@ fun Buttons(viewModel: AccountViewModel, navHostController: NavHostController){
         Spacer(modifier = Modifier.height(8.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             Button(onClick = {
+                Log.d("LOGOUT DEBUG", "User: ${SessionManager.getUser()}")
                 SessionManager.getUser().let { viewModel.logoutUser(it.userId, onLogout = {
+                    onLogout()
                     SessionManager.clearSession()
-                    (context as? Activity)?.recreate()
                     })
                 }
                 navHostController.navigate("home"){

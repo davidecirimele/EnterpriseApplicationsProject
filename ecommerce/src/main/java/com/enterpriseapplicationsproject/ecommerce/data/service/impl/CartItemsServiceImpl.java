@@ -7,9 +7,13 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
 import com.enterpriseapplicationsproject.ecommerce.data.service.CartItemsService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.ShoppingCartService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
+import com.enterpriseapplicationsproject.ecommerce.exception.ResourceNotFoundException;
+import com.enterpriseapplicationsproject.ecommerce.exception.ShoppingCartNotFoundException;
+import com.enterpriseapplicationsproject.ecommerce.exception.UnauthorizedAccessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,44 +38,44 @@ public class CartItemsServiceImpl implements CartItemsService {
 
     @Override
     public List<CartItemDto> getCartItems(UUID userId, Long cartId) {
+        try {
 
-        Optional<ShoppingCart> optionalCart = shoppingCartsDao.findByUserId(userId);
+            ShoppingCart cart = shoppingCartsDao.findByUserId(userId).orElseThrow(()->new ShoppingCartNotFoundException("Shopping Cart not found"));
 
-        if(optionalCart.isPresent()){
-            ShoppingCart cart = optionalCart.get();
-
-            if(cart.getId().equals(cartId)) {
+            if (cart.getId().equals(cartId)) {
                 List<CartItem> cartItems = cartItemsDao.findByCartId(cart);
                 return cartItems.stream().map(cartItem -> modelMapper.map(cartItem, CartItemDto.class)).toList();
+            } else {
+                throw new UnauthorizedAccessException("You can't access this resource");
             }
-            else{
-                throw new SecurityException("You can't access this resource");
-            }
-        }
-        else{
-            throw new RuntimeException("No cart found with id "+cartId);
+        }catch(Exception e){
+            log.error("Unexpected error while fetching cart items for user with ID: "+userId+", " + e);
+            throw new RuntimeException("Unexpected error occurred");
         }
     }
 
     @Override
     public CartItemDto save(CartItem cartitem) {
-        CartItem savedCartItem = cartItemsDao.save(cartitem);
-        return modelMapper.map(savedCartItem, CartItemDto.class);
+        try {
+            CartItem savedCartItem = cartItemsDao.save(cartitem);
+            return modelMapper.map(savedCartItem, CartItemDto.class);
+        }catch (DataIntegrityViolationException e) {
+            log.error("Data integrity violation while saving cart item: {}", cartitem, e);
+            throw new IllegalArgumentException("Data integrity violation: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("Unexpected error while saving cart item: {}", cartitem, e);
+            throw new RuntimeException("Unexpected error occurred while saving cart item");
+        }
     }
 
     @Override
     @Transactional
     public CartItemDto insert(QuantityCartItemDto insertCartItemDto, UUID userId, Long cartId, Long bookId) {
-        Optional<ShoppingCart> optionalCart = shoppingCartsDao.findByUserId(userId);
-        Optional<Book> optionalBook = booksDao.findById(bookId);
-        if(optionalCart.isPresent() && optionalBook.isPresent())
-        {
-            ShoppingCart cart = optionalCart.get();
-            System.out.println("shopping cart items: " +cart.getCartItems().size());
+        try {
+            ShoppingCart cart = shoppingCartsDao.findByUserId(userId).orElseThrow(()->new ShoppingCartNotFoundException("Shopping cart not found"));
+            Book book = booksDao.findById(bookId).orElseThrow(()->new ResourceNotFoundException("Resource not found"));
 
-            if(cart.getId().equals(cartId)) {
-                Book book = optionalBook.get();
-
+            if (cart.getId().equals(cartId)) {
                 for (CartItem c : cart.getCartItems()) {
                     if (c.getBookId().getId().equals(book.getId())) {
                         c.setQuantity(c.getQuantity() + insertCartItemDto.getQuantity());
@@ -81,7 +85,7 @@ public class CartItemsServiceImpl implements CartItemsService {
                         return modelMapper.map(c, CartItemDto.class);
                     }
                 }
-                System.out.println(cart.getTotal());
+
 
                 CartItem cartItem = new CartItem();
                 cartItem.setCartId(cart);
@@ -91,72 +95,63 @@ public class CartItemsServiceImpl implements CartItemsService {
                 cart.getCartItems().add(cartItem);
                 CartItem insertedItem = cartItemsDao.save(cartItem);
                 return modelMapper.map(insertedItem, CartItemDto.class);
+            } else {
+                throw new UnauthorizedAccessException("You can't access this resource");
             }
-            else{
-                throw new SecurityException("You can't access this resource");
-            }
-        }
-        else {
-            throw new RuntimeException("Error inserting item in Shopping Cart");
+        }catch(Exception e){
+            log.error("Unexpected error while inserting cart item: " + e);
+            throw new RuntimeException("Unexpected error occurred while inserting cart item");
         }
     }
 
     @Override
     public boolean delete(UUID userId, Long cartId, Long itemId) {
-        Optional<ShoppingCart> optionalCart = shoppingCartsDao.findByUserId(userId);
-        Optional<CartItem> optionalCartItem = cartItemsDao.findById(itemId);
+        try {
+            ShoppingCart shoppingCart = shoppingCartsDao.findByUserId(userId).orElseThrow(()->new ShoppingCartNotFoundException("Shopping cart not found"));
+            CartItem cartItem = cartItemsDao.findById(itemId).orElseThrow(()->new ResourceNotFoundException("Resource not found"));
 
-        if(optionalCart.isPresent() && optionalCartItem.isPresent())
-        {
-            ShoppingCart shoppingCart = optionalCart.get();
-            CartItem cartItem = optionalCartItem.get();
 
-            System.out.println("shoppingCart total before delete" + shoppingCart.getTotal());
+            log.info("found shoppingCart: " + shoppingCart.getId() + ", passed cartID: " + cartId + ", passed itemId: " + itemId + "foundItemCartID: " + cartItem.getCartId());
 
-            log.info("found shoppingCart: "+shoppingCart.getId()+", passed cartID: "+cartId+", passed itemId: "+itemId+"foundItemCartID: "+cartItem.getCartId());
             if (shoppingCart.getId().equals(cartId) && cartItem.getCartId().getId().equals(cartId)) {
                 //cartItemsDao.delete(optionalCartItem.get());
-                System.out.println("shoppingCart total after delete: " +shoppingCart.getTotal());
+
                 shoppingCart.getCartItems().remove(cartItem);
                 shoppingCartsDao.save(shoppingCart);
                 return true;
+            } else {
+                throw new UnauthorizedAccessException("You can't access this resource");
             }
-            else{
-                throw new SecurityException(("You can't access this resource"));
-            }
-        }
-        else{
-            throw new RuntimeException("Item with id " + itemId + " not found");
+        }catch(Exception e){
+            log.error("Unexpected error while deleting item from shopping cart with ID: {}", cartId, e);
+            throw new RuntimeException("Unexpected error occurred while deleting item from shopping cart");
         }
     }
 
     @Override
     public CartItemDto updateQuantity(UUID userId, Long cartId, Long id, QuantityCartItemDto quantityCartItem){
-        Optional<CartItem> optionalCartItem = cartItemsDao.findById(id);
-        Optional<ShoppingCart> optionalCart = shoppingCartsDao.findByUserId(userId);
+        try {
+            CartItem cartItem = cartItemsDao.findById(id).orElseThrow(()->new ResourceNotFoundException("Resource not found"));
+            ShoppingCart shoppingCart = shoppingCartsDao.findByUserId(userId).orElseThrow(()->new ShoppingCartNotFoundException("Shopping cart not found"));
 
-        if(optionalCart.isPresent() && optionalCartItem.isPresent())
-        {
-            ShoppingCart shoppingCart = optionalCart.get();
-            CartItem cartItem = optionalCartItem.get();
 
             if (shoppingCart.getId().equals(cartId) && cartItem.getCartId().getId().equals(cartId)) {
                 if (quantityCartItem.getQuantity() > 0) {
                     cartItem.setQuantity(quantityCartItem.getQuantity());
                     cartItemsDao.save(cartItem);
                     //shoppingCartsDao.save(shoppingCart);
-                    System.out.println("shoppingCart total after update: " +shoppingCart.getTotal());
+
                     return modelMapper.map(cartItem, CartItemDto.class);
                 } else {
                     cartItemsDao.delete(cartItem);
                     return null;
                 }
-            }else{
-                throw new SecurityException("You can't access this resource");
+            } else {
+                throw new UnauthorizedAccessException("You can't access this resource");
             }
-        }
-        else{
-            throw new RuntimeException("Item with id " + id + " not found");
+        }catch(Exception e){
+            log.error("Unexpected error while updating quantity for item with ID: {}", id, e);
+            throw new RuntimeException("Unexpected error occurred while updating quantity for a cart item");
         }
     }
 }

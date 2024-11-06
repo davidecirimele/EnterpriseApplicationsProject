@@ -18,6 +18,8 @@ import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.model.UserDetails
 import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.ui.checkout.PaymentMethodRow
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.forEach
@@ -218,4 +220,10 @@ class AccountViewModel(private val repository: AccountRepository): ViewModel() {
         }
     }
 
+    fun onLogout(){
+        //viewModelScope.cancel()
+        _userDetails.value = null
+        _userOrders.value = emptyList()
+        _purchasedBooks.value = emptyList()
+    }
 }

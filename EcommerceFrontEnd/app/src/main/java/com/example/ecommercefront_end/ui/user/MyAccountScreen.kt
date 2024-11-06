@@ -62,7 +62,7 @@ import com.example.ecommercefront_end.viewmodels.AddressViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: AddressViewModel, navController: NavController) {
+fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: AddressViewModel, navController: NavController, onLogout: ()->Unit) {
 
     val userDetails by accountViewModel.userDetails.collectAsState()
 
@@ -140,10 +140,10 @@ fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: Addres
                     confirmButton = {
                         Button(
                             onClick = {
-                                SessionManager.user?.let {
-                                    accountViewModel.deleteUser(it.id, onDelete = {
+                                SessionManager.getUser().let {
+                                    accountViewModel.deleteUser(it.userId, onDelete = {
+                                        onLogout()
                                         SessionManager.clearSession()
-                                        (context as? Activity)?.recreate()
                                     })
                                 }
                                 navController.navigate("home"){

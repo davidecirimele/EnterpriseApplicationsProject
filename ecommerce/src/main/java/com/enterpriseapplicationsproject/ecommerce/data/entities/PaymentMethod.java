@@ -19,7 +19,7 @@ public class PaymentMethod {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long paymentMethodId;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = false)
     private User user;
 

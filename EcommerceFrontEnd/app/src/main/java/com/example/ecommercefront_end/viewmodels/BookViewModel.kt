@@ -143,20 +143,29 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         minState: MutableStateFlow<T?>,
         maxState: MutableStateFlow<T?>? = null
     ) {
+        if((minState.value == null && maxState == null) || (minState.value == null && (maxState != null && maxState.value == null)))
         try {
+
             if (fetchMin.isSuccessful && fetchMin.body() != null) {
                 minState.value = fetchMin.body()
             } else {
                 throw Exception("Failed to fetch min value")
             }
 
-            if(fetchMax != null && maxState != null) {
+
+            if (fetchMax != null) {
                 if (fetchMax.isSuccessful && fetchMax.body() != null) {
-                    maxState.value = fetchMax.body()
+                    if (maxState != null) {
+                        maxState.value = fetchMax.body()
+                    }
+                    else{
+                        throw Exception("Failed to set max value")
+                    }
                 } else {
                     throw Exception("Failed to fetch max value")
                 }
             }
+
         } catch (e: Exception) {
             Log.d("BookDebug", "Error fetching values: ${e.message}")
         }
@@ -422,10 +431,6 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         return null
     }
 
-    fun onLogout() {
-        viewModelScope.cancel() // Annulla tutte le coroutine al logout
-    }
-
     suspend fun fetchHalloweenBooks() {
         try {
             _halloweenBooks.value = fetchBooksByFilter(BookFilter(genre = BookGenre.HORROR))
@@ -455,5 +460,11 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
             matchesTitle || matchesAuthor || matchesPublisher
         }
+    }
+
+    fun onLogout(){
+        //viewModelScope.cancel()
+        _sortOption.value = "Newest"
+        _bookFlow.value = null
     }
 }

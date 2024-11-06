@@ -22,6 +22,7 @@ import com.example.ecommercefront_end.model.UserId
 import com.example.ecommercefront_end.repository.AddressRepository
 import com.example.ecommercefront_end.repository.CheckoutRepository
 import com.example.ecommercefront_end.viewmodels.CartViewModel
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -504,6 +505,11 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
         _selectedAddress.value = null
         _selectedPaymentMethod.value = null
         _addresses.value = emptyList()
+    }
+
+    fun onLogout(){
+        //viewModelScope.cancel()
+        clearData()
     }
 
 }

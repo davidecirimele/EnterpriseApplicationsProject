@@ -35,11 +35,15 @@ fun AccountOptions(userId: UUID?=null, currentRoute: String, navController: NavC
                 }
             }
         }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
-            Button(onClick = { navController.navigate("payment-methods"){
-                popUpTo(currentRoute) { inclusive = true }
-            }}) {
-                Text(text = "Payment Methods")
+        else {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Button(onClick = {
+                    navController.navigate("payment-methods") {
+                        popUpTo(currentRoute) { inclusive = true }
+                    }
+                }) {
+                    Text(text = "Payment Methods")
+                }
             }
         }
 

@@ -154,11 +154,36 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()), req, ex.getMessage());
     }
 
+    @ExceptionHandler(UserRegistrationException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ServiceError onUserRegistrationException(WebRequest req, OrderCreationException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()), req, ex.getMessage());
+    }
+
+    @ExceptionHandler(TokenNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ServiceError onTokenNotFoundException(WebRequest req, OrderCreationException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.NOT_FOUND.value()), req, ex.getMessage());
+    }
+
+    @ExceptionHandler(RevokingTokenErrorException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ServiceError onRevokingTokenErrorException(WebRequest req, OrderCreationException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()), req, ex.getMessage());
+    }
+
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.BAD_GATEWAY)
     public String onResourceNotFoundException(WebRequest req, NullPointerException ex){
         log.error("Exception handler :::: {}", ex);
         return "NULLLLLLLLLLLLLLLLLLLLLLLLLLLLL POINTER!!!";
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ServiceError onRuntimeException(WebRequest req, RuntimeException ex) {
+        log.error("Internal server error: {}", ex.getMessage(), ex);
+        return errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, req, "Unexpected error occurred");
     }
 
     /*@ExceptionHandler(Exception.class)

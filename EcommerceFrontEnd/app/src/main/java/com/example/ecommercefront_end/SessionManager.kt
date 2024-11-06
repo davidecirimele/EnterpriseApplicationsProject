@@ -132,10 +132,12 @@ object SessionManager {
     }
 
     fun clearSession(){
+        Log.d("LOGOUT DEBUG", "clearSession: STO PULENDO LA SESSIONE")
         getPrefs().edit().clear().apply()
         authToken = null
         refreshToken = null
         user = null
+        Log.d("LOGOUT DEBUG", "clearSession: HO PULITO LA SESSIONE")
     }
 
     private fun decodeJwtToken(token: String): User? {

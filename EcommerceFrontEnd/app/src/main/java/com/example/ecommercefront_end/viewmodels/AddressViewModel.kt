@@ -11,6 +11,7 @@ import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.model.UserId
 import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.repository.AddressRepository
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,8 +19,8 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 class AddressViewModel(private val repository: AddressRepository): ViewModel() {
-    private val _addresses = MutableStateFlow<List<Address>?>(null)
-    val addresses: StateFlow<List<Address>?> = _addresses
+    private val _addresses = MutableStateFlow<List<Address>>(emptyList())
+    val addresses: StateFlow<List<Address>> = _addresses
 
     private val _defaultAddress = MutableStateFlow<Address?>(null)
     val defaultAddress: StateFlow<Address?> = _defaultAddress
@@ -36,13 +37,18 @@ class AddressViewModel(private val repository: AddressRepository): ViewModel() {
 
     suspend fun fetchUserAddresses(userId: UUID? = null){
         try {
-            if (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN") {
-                _addresses.value = repository.getAddresses(SessionManager.user!!.id)
-            }else if(SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN" && userId != null){
-                _addresses.value = repository.getAddresses(userId)
+            var user = SessionManager.user!!.id
+
+            if(userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
+                user = userId
+
+            val response = repository.getAddresses(user)
+
+            if(response.isSuccessful && !response.body().isNullOrEmpty()) {
+                _addresses.value = response.body()!!
             }
             else{
-                Log.d("UserDebug", "User is null")
+                _addresses.value = emptyList()
             }
         }catch (e: Exception){
             Log.e("AddressError", "Error loading default address", e)
@@ -51,15 +57,15 @@ class AddressViewModel(private val repository: AddressRepository): ViewModel() {
 
     suspend fun fetchAddressById(userId: UUID? = null, addressId: Long){
         try {
-            Log.d("AddressViewModel", "IM IN FABID")
-            if (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN") {
-                _addressToEdit.value = repository.getAddress(SessionManager.user!!.id, addressId)
-                Log.d("AddressViewModel", "Address fetched: ${_addressToEdit.value}")
-            } else if(SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN" && userId != null){
-                _addressToEdit.value = repository.getAddress(userId, addressId)
-            }
-            else{
-                Log.e("AddressViewModel", "SessionManager.user is null")
+            var user = SessionManager.user!!.id
+
+            if(userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
+                user = userId
+
+            val response = repository.getAddress(user, addressId)
+
+            if (response.isSuccessful && response.body() != null) {
+                _addressToEdit.value = response.body()
             }
         }catch(e : Exception){
             Log.d("UserDebug", "loadDefaultAddress: ${_addressToEdit.value}")
@@ -69,20 +75,21 @@ class AddressViewModel(private val repository: AddressRepository): ViewModel() {
     }
 
     suspend fun fetchDefaultAddress(userId: UUID? = null){
-        Log.d("AddressViewModel", "fetchDefaultAddress called")
         try {
-            if (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN") {
-                _defaultAddress.value = repository.getDefaultAddress(SessionManager.user!!.id)
-                Log.d("AddressViewModel", "Default address fetched: ${_defaultAddress.value}")
-            }else if(SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN" && userId != null){
-                _defaultAddress.value = repository.getDefaultAddress(userId)
-                Log.d("AddressViewModel", "Default address fetched: ${_defaultAddress.value}")
+            var user = SessionManager.user!!.id
+
+            if(userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
+                user = userId
+
+            val response = repository.getDefaultAddress(user)
+
+            if (response.isSuccessful && response.body()!= null) {
+                if(response.body()!!.id != null)
+                    _defaultAddress.value = response.body()
+                else
+                    _defaultAddress.value = null
             }
-            else {
-                _defaultAddress.value = null
-                Log.e("AddressViewModel", "SessionManager.user is null")
-            }
-        }catch(e : Exception){
+        } catch (e: Exception) {
             _defaultAddress.value = null
             Log.d("UserDebug", "loadDefaultAddress: ${_defaultAddress.value}")
         }
@@ -91,18 +98,16 @@ class AddressViewModel(private val repository: AddressRepository): ViewModel() {
     fun setDefaultAddress(userId: UUID? = null,address: Address){
         viewModelScope.launch {
             try {
-                if (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN") {
-                    repository.updateDefaultAddress(UserId(SessionManager.user!!.id), address.id)
-                    Log.d("AddressViewModel", "Default address setted: ${_defaultAddress.value}")
-                }else if(SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN" && userId != null){
-                    repository.updateDefaultAddress(UserId(userId), address.id)
-                    Log.d("AddressViewModel", "Default address setted: ${_defaultAddress.value}")
+                var user = SessionManager.user!!.id
+
+                if(userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
+                    user = userId
+
+                val response = repository.updateDefaultAddress(user, address.id)
+
+                if (response.isSuccessful && response.body() != null) {
+                    fetchDefaultAddress(user)
                 }
-                else{
-                    Log.d("UserDebug", "User is null")
-                    return@launch
-                }
-                fetchDefaultAddress(userId)
             } catch (e: Exception) {
                 Log.d("UserDebug", "Error updating default address")
             }
@@ -112,17 +117,15 @@ class AddressViewModel(private val repository: AddressRepository): ViewModel() {
     fun removeAddress(userId: UUID? = null, address: Address){
         viewModelScope.launch {
             try {
-                if (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN") {
-                    repository.deleteAddress(UserId(SessionManager.user!!.id), address.id)
-                }else if(SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN" && userId != null){
-                    repository.deleteAddress(UserId(userId), address.id)
-                }
-                else{
-                    Log.d("UserDebug", "User is null")
-                    return@launch
-                }
-                fetchUserAddresses(userId)
-                fetchDefaultAddress(userId)
+                var user = SessionManager.user!!.id
+
+                if(userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
+                    user = userId
+
+                repository.deleteAddress(user, address.id)
+
+                fetchUserAddresses(user)
+                fetchDefaultAddress(user)
             } catch (e: Exception) {
                 Log.d("UserDebug", "Error deleting address")
             }
@@ -132,19 +135,16 @@ class AddressViewModel(private val repository: AddressRepository): ViewModel() {
     fun insertAddress(userId: UUID?=null, address: SaveAddress){
         viewModelScope.launch {
             try {
-                if (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN") {
-                    repository.insertAddress(SessionManager.user!!.id, address)
-                }else if(SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN" && userId != null){
-                    repository.insertAddress(userId, address)
-                }
-                else{
-                    Log.d("UserDebug", "User is null")
-                    return@launch
-                }
+                var user = SessionManager.user!!.id
 
-                fetchUserAddresses(userId)
-                Log.d("AddressViewModel", "Address added: ${_addresses.value}")
+                if(userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
+                    user = userId
 
+                val response = repository.insertAddress(user, address)
+
+                if (response.isSuccessful && response.body()!=null) {
+                    fetchUserAddresses(user)
+                }
             } catch (e: Exception) {
                 Log.d("UserDebug", "Error adding address")
             }
@@ -154,20 +154,26 @@ class AddressViewModel(private val repository: AddressRepository): ViewModel() {
     fun editAddress(userId: UUID?, addressId: Long, address: SaveAddress){
         viewModelScope.launch {
             try {
-                if (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN") {
-                    repository.editAddress(SessionManager.user!!.id, addressId, address)
-                }else if(SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN" && userId != null){
-                    repository.editAddress(userId, addressId, address)
-                }
-                else{
-                    Log.d("UserDebug", "User is null")
-                    return@launch
-                }
+                var user = SessionManager.user!!.id
 
-                fetchUserAddresses(userId)
+                if(userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
+                    user = userId
+
+                val response = repository.editAddress(user, addressId, address)
+
+                if (response.isSuccessful && response.body()!=null) {
+                    fetchUserAddresses(user)
+                }
             } catch (e: Exception) {
                 Log.d("UserDebug", "Error editing address")
             }
         }
+    }
+
+    fun onLogout(){
+        //viewModelScope.cancel()
+        _addresses.value = emptyList()
+        _defaultAddress.value = null
+        _addressToEdit.value = null
     }
 }

@@ -19,8 +19,6 @@ public interface ShoppingCartService {
 
     boolean delete(UUID userId, Long cartId);
 
-    ShoppingCartDto saveCart(ShoppingCartDto shoppingCartDto);
-
     Double getTotal(UUID userId);
 
 

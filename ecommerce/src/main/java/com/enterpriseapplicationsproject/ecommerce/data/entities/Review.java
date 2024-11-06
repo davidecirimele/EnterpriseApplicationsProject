@@ -29,7 +29,7 @@ public class Review {
     @JoinColumn(name = "BOOK_ID", referencedColumnName = "ID", nullable = false)
     private Book book;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "USER_ID", referencedColumnName = "ID", nullable = false)
     private User user;
 

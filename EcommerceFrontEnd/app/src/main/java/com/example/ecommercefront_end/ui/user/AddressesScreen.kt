@@ -77,8 +77,8 @@ fun AddressesScreen(userId: UUID?=null, viewModel: AddressViewModel, navHostCont
                 .padding(paddingValues)
         ) {
             LazyColumn(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9f)) {
-                if (addresses != null && !addresses!!.isEmpty())
-                    for (address in addresses!!)
+                if (addresses.isNotEmpty())
+                    for (address in addresses)
                         item {
                             AddressView(
                                 address = address,
@@ -88,6 +88,17 @@ fun AddressesScreen(userId: UUID?=null, viewModel: AddressViewModel, navHostCont
                                 true
                             )
                         }
+                else
+                {
+                    item {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text("No addresses saved")
+                        }
+                    }
+                }
             }
             insertButton(userId, navHostController, onButtonClicked = {navHostController.navigate("insert-address/$userId") {
                 popUpTo("addresses/$userId") {
