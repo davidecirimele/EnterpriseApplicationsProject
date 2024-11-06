@@ -101,11 +101,11 @@ public class WishlistController {
 
 
     @RateLimit(type = "USER")
-    @PutMapping(consumes = "application/json", path = "/update")
-    @PreAuthorize("#wDto.getUser().getId() == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<WishlistDto> update(@RequestBody WishlistDto wDto) {
+    @PutMapping(consumes = "application/json", path = "/update/{idUser}")
+    //@PreAuthorize("#wDto.getUser().getId() == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<WishlistDto> update(@RequestBody WishlistDto wDto, @PathVariable UUID idUser) {
         System.out.println("WishlistDto userID: " + wDto.getUser().getId());
-        WishlistDto w = wishlistService.updateWishlist(wDto);
+        WishlistDto w = wishlistService.updateWishlist(wDto, idUser);
         if (w == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(w, HttpStatus.OK);

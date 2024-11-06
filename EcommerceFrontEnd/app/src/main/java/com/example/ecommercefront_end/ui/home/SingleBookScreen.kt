@@ -51,6 +51,7 @@ import com.example.ecommercefront_end.SessionManager.user
 import java.time.format.DateTimeFormatter
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.Wishlist
+import com.example.ecommercefront_end.model.WishlistPrivacy
 import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.repository.WishlistRepository
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
@@ -76,9 +77,6 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
 
     val cartShowSnackbar by cartViewModel.showSnackbar.collectAsState()
     val cartSnackbarMessage by cartViewModel.snackbarMessage.collectAsState()
-
-    val errorMessage = cartViewModel.errorMessage.collectAsState().value
-
 
 
 
@@ -194,7 +192,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
                         onClick = {
                             coroutineScope.launch {
 
-                                SessionManager.user?.let { user ->
+                                user?.let {
                                     cartViewModel.addItem( book)
                                 } ?: run {
                                     navController.navigate(route = "userAuth") {
@@ -260,7 +258,11 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
                             onDismissRequest = { wExpanded = false }
                         ) {
                             Log.d("Aggiung item", userWishlist.toString())
-                            userWishlist.forEach { w ->
+                            userWishlist.filter { w ->
+                                (w.user?.id  == user?.id) || (w.privacySetting == WishlistPrivacy.SHARED)
+
+                            }
+                            .forEach { w ->
                                 DropdownMenuItem(
                                     onClick = {
                                         selectedWishlist = w

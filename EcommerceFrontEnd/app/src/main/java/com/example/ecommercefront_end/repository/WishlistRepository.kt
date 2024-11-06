@@ -87,8 +87,8 @@ class WishlistRepository (private val wApiService : WishlistApiService, private 
     suspend fun addWishlist(wishlist: SaveWishlist, idUser: UUID) {
         wApiService.addWishlist(idUser, wishlist.name, wishlist.privacySetting)
     }
-    suspend fun updateWishlist(wishlist: Wishlist) {
-        wApiService.updateWishlist(wishlist)
+    suspend fun updateWishlist(wishlist: Wishlist, idUser: UUID): Response<Unit> {
+        return wApiService.updateWishlist(wishlist, idUser)
     }
 
     suspend fun addWishlistItem(bookId: Long, wishlistId: Long, idUser: UUID): Response<Unit> {

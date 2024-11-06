@@ -285,7 +285,7 @@ fun NavigationView(navController: NavHostController) {
                 //val user by adminViewModel.userFlow.collectAsState()
 
 
-                WishlistsScreen(wishlistViewModel = wishlistViewModel, bookViewModel= bookViewModel, cartViewModel = cartViewModel, navController = navController)
+                WishlistsScreen(wishlistViewModel = wishlistViewModel, groupViewModel = groupViewModel, bookViewModel= bookViewModel, cartViewModel = cartViewModel, navController = navController)
 
             }
             composable("wishlist") {
@@ -293,7 +293,7 @@ fun NavigationView(navController: NavHostController) {
                 LaunchedEffect(Unit) {
                     wishlistViewModel.fetchWishlists(null)
                 }
-                WishlistsScreen(wishlistViewModel = wishlistViewModel, bookViewModel= bookViewModel, cartViewModel = cartViewModel, navController = navController)
+                WishlistsScreen(wishlistViewModel = wishlistViewModel,groupViewModel = groupViewModel, bookViewModel= bookViewModel, cartViewModel = cartViewModel, navController = navController)
             }
 
             composable("userAuth") {

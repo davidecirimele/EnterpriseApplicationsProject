@@ -200,6 +200,8 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
         }
     }
 
+
+
     fun setShowSnackbar(b: Boolean) {
         _showSnackbar.value = b
 

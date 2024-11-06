@@ -24,4 +24,7 @@ public interface WishlistItemsService {
 
     void save(WishlistItem wishlistItem);
 
+    WishlistItemDto adminAddItem(Long idBook, Long idWishlist, UUID idUser);
+    WishlistItemDto adminDeleteItemById(Long idWishlistItem);
+
 }

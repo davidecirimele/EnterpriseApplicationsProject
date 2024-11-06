@@ -29,7 +29,7 @@ public interface WishlistsService {
 
     Group getGroupByWishlistId(Long wishlistId);
 
-    WishlistDto updateWishlist(WishlistDto wishlistDto);
+    WishlistDto updateWishlist(WishlistDto wishlistDto, UUID idUser);
 
     @Transactional
     Boolean JoinShareWishlist(UUID idUserToJoin, String wToken);

@@ -32,9 +32,9 @@ interface WishlistApiService {
     @RequiresAuth
     suspend fun getAllWishlist() : List<Wishlist>
 
-    @PUT("wishlists/update")
+    @PUT("wishlists/update/{idUser}")
     @RequiresAuth
-    suspend fun updateWishlist(@Body w: Wishlist): Response<Unit>
+    suspend fun updateWishlist(@Body w: Wishlist, @Path("idUser") idUser: UUID): Response<Unit>
 
     @DELETE("wishlists/delete/{idWishlist}/{idUser}")
     @RequiresAuth

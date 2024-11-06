@@ -2,6 +2,13 @@ package com.example.ecommercefront_end.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+
+val friendPublicWishlistColor = Color(0xFF90CAF9) // Blu chiaro
+val myWishlistColor = Color(0xFFEEEEEE) // Grigio chiaro
+val sharedWishlistColor = Color(0xFF4CAF50) // Verde
+val privateWishlistColor = Color(0xFF1A237E) // Marrone
+
+
 //  Tema Terracotta e Crema
 
 // Colori chiari
@@ -40,6 +47,8 @@ val TCsurfaceContainerLowLight = Color(0xFFF2F2F2) // Grigio chiarissimo
 val TCsurfaceContainerLight = Color(0xFFF2F2F2) // Grigio chiarissimo
 val TCsurfaceContainerHighLight = Color(0xFFF2F2F2) // Grigio chiarissimo
 val TCsurfaceContainerHighestLight = Color(0xFFF2F2F2) // Grigio chiarissimo
+
+
 
 // Colori scuri (adatta questi in base alle tue preferenze per la modalità scura)
 val TCprimaryDark = Color(0xFF1DB954) // Verde Spotify (può rimanere lo stesso)

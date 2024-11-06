@@ -237,7 +237,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                 var response : Unit ? = null
 
                 if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
-                    response  = currentUser?.let { wRepository.addWishlist(newWishlist, it.id) }
+                    response  = currentUser.let { wRepository.addWishlist(newWishlist, it.id) }
 
                 } else if (currentUser != null && currentUser.role == "ROLE_ADMIN") {
                     response  = userSelectedByAdmin.let { it.value?.let { it1 ->
@@ -265,44 +265,58 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
 
     fun updateWishlist(
         id: Long,
-        name: String,
-        privacySettings: WishlistPrivacy,
-        group: Group?
+        name: String?,
+        privacySettings: WishlistPrivacy?,
     ) {
         var message = ""
         viewModelScope.launch {
             try {
+                val currentUser = SessionManager.user
                 val wishlist = _wishlists.value.find { it.id == id }
                 if (wishlist != null) {
                     val updatedWishlist = wishlist.copy()
 
-                    if (!name.equals("")) {
+                    if (name!= null && name != "") {
                         updatedWishlist.name = name
                         Log.d(
                             "updateWishlistPrivacy",
                             "Nuovo Nome della wishlist ${updatedWishlist.name} aggiornato con successo"
                         )
                     }
-                    if (!privacySettings.equals("")) {
+                    if (privacySettings != null) {
                         updatedWishlist.privacySetting = privacySettings
                         Log.d(
                             "updateWishlistPrivacy",
                             "Nuove imp privacy ${updatedWishlist.privacySetting} aggiornato con successo"
                         )
                     }
-                    if (group != null) {
-                        updatedWishlist.group = group
-                        Log.d(
-                            "updateWishlistPrivacy",
-                            "Nuovo gruppo ${updatedWishlist.group?.groupName} aggiornato con successo"
-                        )
-                    }
-                    val response = wRepository.updateWishlist(updatedWishlist)
-                    _wishlists.value =
-                        _wishlists.value.map { if (it.id == id) updatedWishlist else it }
 
-                    Log.d("updateWishlistPrivacy", "Wishlist aggiornata con successo")
-                    triggerSnackbar("Wishlist updated successfully")
+                    var response : Response<Unit> ? = null
+                    if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
+                       response = SessionManager.user?.let { wRepository.updateWishlist(updatedWishlist, it.id) }
+
+                    }
+                    else if (currentUser != null && currentUser.role == "ROLE_ADMIN") {
+                        response = userSelectedByAdmin.let { it.value?.let { it1 ->
+                            wRepository.updateWishlist(updatedWishlist, it1)
+                        }
+                        }
+                    }
+
+                    if (response != null && response.isSuccessful) {
+                        _wishlists.value =
+                            _wishlists.value.map { if (it.id == id) updatedWishlist else it }
+
+                        Log.d("updateWishlistPrivacy", "Wishlist updated successfully")
+                        triggerSnackbar("Wishlist updated successfully")
+
+                    } else {
+                        if (response != null) {
+                            Log.e("updateWishlistPrivacy", "Wishlist error during updating: ${response.errorBody()}")
+                        }
+                        triggerSnackbar("Error during wishlist updating")
+
+                    }
 
                 } else {
                     Log.e("updateWishlistPrivacy", "Wishlist non trovata con id: $id")
@@ -357,8 +371,20 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
         viewModelScope.launch {
             try {
                 val currentUser = SessionManager.user
-                val response =
-                    currentUser?.let { wRepository.addWishlistItem(BookId, wishlistId, it.id) }
+                var response : Response<Unit>? = null
+
+                if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
+                    response =
+                        currentUser.let { wRepository.addWishlistItem(BookId, wishlistId, it.id) }
+                }
+                else if (currentUser != null && currentUser.role == "ROLE_ADMIN") {
+                    response =
+                        userSelectedByAdmin.let { it.value?.let { it1 ->
+                            wRepository.addWishlistItem(BookId, wishlistId,
+                                it1
+                            )
+                        } }
+                }
 
                 if (response != null) {
                     if (response.isSuccessful) {
@@ -396,7 +422,20 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
         viewModelScope.launch {
             try {
                 val currentUser = SessionManager.user
-                val response = currentUser?.let { wRepository.removeWishlistItem(id, it.id) }
+                var response : Response<Unit>? = null
+
+                if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
+                    response =
+                        currentUser.let { wRepository.removeWishlistItem(id, it.id) }
+                }
+                else if (currentUser != null && currentUser.role == "ROLE_ADMIN") {
+                    response =
+                        userSelectedByAdmin.let { it.value?.let { it1 ->
+                            wRepository.removeWishlistItem(id,
+                                it1
+                            )
+                        } }
+                }
                 if (response != null) {
                     if (response.isSuccessful) {
                         Log.d("rimosso WI con id", id.toString())
