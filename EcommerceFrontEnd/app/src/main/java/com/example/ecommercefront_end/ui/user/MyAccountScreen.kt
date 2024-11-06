@@ -69,7 +69,7 @@ fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: Addres
 
     val isDeletingAccount by accountViewModel.isDeletingAccount.collectAsState()
 
-    var showDialog by mutableStateOf(false)
+    var showDialog by remember{mutableStateOf(false)}
 
     Scaffold(topBar = {
         TopAppBar(
