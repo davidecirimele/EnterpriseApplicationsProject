@@ -1,6 +1,7 @@
 package com.example.ecommercefront_end.viewmodels
 
 import android.util.Log
+import androidx.compose.runtime.currentCompositionErrors
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ecommercefront_end.SessionManager
@@ -60,33 +61,22 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
 
     suspend fun fetchWishlists(idUser: UUID? = null) {
         viewModelScope.launch {
-            _isLoadingWishlist.value = true // Imposta il caricamento a vero all'inizio del processo
-            val currentUser = SessionManager.user
-
+            _isLoadingWishlist.value = true
             try {
-                if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
-                    _friendWishlists.value = wRepository.getFriendWishlist(currentUser.id)
-                    Log.d("Wishlist", "friendwishlist ${_friendWishlists.value}")
-                    _onlyMyWishlists.value = wRepository.getWishlistsByUser(currentUser.id)
-                    Log.d("Wishlist", "mywishlist ${_onlyMyWishlists.value}")
+                val userId = idUser ?: SessionManager.user?.id
+                userId?.let {
+                    val friendWishlists = wRepository.getFriendWishlist(it)
+                    val myWishlists = wRepository.getWishlistsByUser(it)
+                    _wishlists.value = myWishlists + friendWishlists
 
-                    _wishlists.value = _onlyMyWishlists.value + _friendWishlists.value
+                    if (SessionManager.user?.role == "ROLE_ADMIN") {
+                        _userSelectedByAdmin.value = it
+                    }
+                } ?: Log.d("UserDebug", "User is null")
 
-
-                } else if (currentUser != null && currentUser.role == "ROLE_ADMIN" && idUser != null) {
-                    _friendWishlists.value = wRepository.getFriendWishlist(idUser)
-                    _onlyMyWishlists.value = wRepository.getWishlistsByUser(idUser)
-
-                    _wishlists.value = _onlyMyWishlists.value + _friendWishlists.value
-                    _userSelectedByAdmin.value = idUser
-                }
-                else {
-                    Log.d("UserDebug", "User is null")
-                }
                 _isLoadingWishlist.value = false
-
             } catch (e: Exception) {
-                _error.value = "Error during wishlist fetching: ${e.message}"
+                _error.value = "Errorduring wishlist fetching: ${e.message}"
             }
         }
     }
@@ -96,13 +86,15 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
         viewModelScope.launch {
             _isLoadingItems.value = true
             val currentUser = SessionManager.user
+            val isAdmin = currentUser?.role == "ROLE_ADMIN"
             try {
-                if (currentUser != null && SessionManager.user!!.role != "ROLE_ADMIN") {
-                    _wishlistItems.value = wRepository.getWishlistItems(wishlistId, currentUser.id)
-
-                }
-                else if(SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN"){
-                    _wishlistItems.value = wRepository.getWishlistItems(wishlistId, userId)
+                if (currentUser != null){
+                    if (isAdmin) {
+                        _wishlistItems.value = wRepository.getWishlistItems(wishlistId, userId)
+                    }
+                    else {
+                        _wishlistItems.value = wRepository.getWishlistItems(wishlistId, currentUser.id)
+                    }
                 }
                 else{
                     Log.d("UserDebug", "User is null")
@@ -118,55 +110,36 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
     }
 
 
-
-     fun joinWishlist(token: String) {
+    fun joinWishlist(token: String) {
         viewModelScope.launch {
-            var message = ""
             try {
-                val currentUser = SessionManager.user
-                var response : Response<Int>? = null
-
-                if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
-                    Log.d("joinWishlist", "primo if, idUser = ${currentUser.id}")
-                    response = currentUser?.let { groupRepository.addUser(it.id, token) }
-
-                } else if (currentUser != null && currentUser.role == "ROLE_ADMIN") {
-                    Log.d("joinWishlist", "secondo if, idUser = ${currentUser.id} ${_userSelectedByAdmin}")
-
-                    response = _userSelectedByAdmin.value?.let { groupRepository.addUser(it, token) }
-
+                val userId = if (SessionManager.user?.role == "ROLE_ADMIN") {
+                    _userSelectedByAdmin.value
+                } else {SessionManager.user?.id
                 }
-                fetchWishlists(null)// DA SISTEMARE
 
-
-                if (response != null && response.isSuccessful) {
-                    if (response.body() == 1 ){
-                        Log.d("joinWishlist", "Utente aggiunto con successo alla wishlist")
-                        message = "You have successfully joined the wishlist"
-
-                    } else if (response.body() == 0) {
-                        //Log.e("joinWishlist", "Errore durante l'aggiunta dell'utente alla wishlist: ${response.errorBody()}")
-                        message = "You enjoined but at the moment the wishlist is private"
-                        Log.d("joinWishlist", "Utente aggiunto ma la wishlist è privata")
+                userId?.let {
+                    val response = groupRepository.addUser(it, token)
+                    if (response.isSuccessful) {
+                        val message = when (response.body()) {
+                            1 -> "You have successfully joined the wishlist"
+                            0 -> "You joined but at the moment the wishlist is private"
+                            else -> "Error during joining the wishlist: + ${response.errorBody()}"
+                        }
+                        triggerSnackbar(message)
+                    } else {
+                        triggerSnackbar("Error during joining the wishlist: + ${response.errorBody()}")
                     }
-                    triggerSnackbar(message)
+                } ?: triggerSnackbar("Error: User not found")
 
-
-                } else {
-                    //Log.e("joinWishlist", "Errore durante l'aggiunta dell'utente alla wishlist: ${response.errorBody()}")
-                    message = "Error during joining the wishlist: + ${response?.errorBody()}"
-                    triggerSnackbar(message)
-
-                }
+                if (SessionManager.user?.role == "ROLE_ADMIN") {
+                    fetchWishlists(userSelectedByAdmin.value)
+                } else
+                    fetchWishlists(null) // DA SISTEMARE
 
             } catch (e: Exception) {
-                Log.e(
-                    "joinWishlist",
-                    "Error during joining the wishlist: ${e.message}"
-                )
-                message = "Error during joining the wishlist ${e.message}"
-                triggerSnackbar(message)
-
+                Log.e("joinWishlist", "Error during joining the wishlist: ${e.message}")
+                triggerSnackbar("Error during joining the wishlist ${e.message}")
             }
         }
     }
@@ -177,24 +150,27 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
             try {
                 val currentUser = SessionManager.user
                 var response : Response<Boolean>? = null
+                val isAdmin = currentUser?.role == "ROLE_ADMIN"
 
-                if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
-                    response = currentUser?.let {
-                        wishlist.group?.let { it1 ->
-                            groupRepository.removeUser(
-                                it1.id, it.id, currentUser.id
-                            )
+                if (currentUser != null){
+                    if (isAdmin) {
+                        response  = userSelectedByAdmin?.let { it.value?.let { it1 ->
+                            wishlist.group?.let { it2 ->
+                                groupRepository.removeUser(
+                                    it2.id, it1, it1
+                                )
+                            }
+                        } }
+                    }
+                    else {
+                        response = currentUser?.let {
+                            wishlist.group?.let { it1 ->
+                                groupRepository.removeUser(
+                                    it1.id, it.id, currentUser.id
+                                )
+                            }
                         }
                     }
-                } else if (currentUser != null && currentUser.role == "ROLE_ADMIN") {
-
-                    response  = userSelectedByAdmin?.let { it.value?.let { it1 ->
-                        wishlist.group?.let { it2 ->
-                            groupRepository.removeUser(
-                                it2.id, it1, it1
-                            )
-                        }
-                    } }
                 }
 
                 if (response != null && response.isSuccessful) {
@@ -249,23 +225,45 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                 Log.e("addWishlist", newWishlist.toString())
 
                 val currentUser = SessionManager.user
-                var response : Unit ? = null
+                var response : Response<Boolean> ? = null
+                val isAdmin = currentUser?.role == "ROLE_ADMIN"
 
-                if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
-                    response  = currentUser.let { wRepository.addWishlist(newWishlist, it.id) }
+                if (currentUser != null){
 
-                } else if (currentUser != null && currentUser.role == "ROLE_ADMIN") {
-                    response  = userSelectedByAdmin.let { it.value?.let { it1 ->
-                        wRepository.addWishlist(newWishlist, it1)
-                    } }
+                    if (isAdmin) {
+                        response  = userSelectedByAdmin.let { it.value?.let { it1 ->
+                            wRepository.addWishlist(newWishlist, it1)
+                            }
+                        }
+                    }
+                    else {
+                        response  = currentUser.let { wRepository.addWishlist(newWishlist, it.id) }
+
+                    }
                 }
-
                 if (response != null) {
-                    Log.d("addWishlist", "Wishlist creata con successo")
-                    fetchWishlists()
-                    message = "Wishlist "  + newWishlist.name +  " created successfully"
-                    triggerSnackbar(message)
+                    if (response.isSuccessful) {
+                        Log.d("addWishlist", "Wishlist creata con successo")
+
+                        if (isAdmin) {
+                            fetchWishlists(userSelectedByAdmin.value)
+                            message = "Wishlist "  + newWishlist.name +  " created successfully"
+                        }
+                        else {
+                            fetchWishlists()
+                            message = "Wishlist "  + newWishlist.name +  " created successfully"
+                        }
+                    }
+                    else {
+                        Log.e(
+                            "addWishlist",
+                            "Errore durante la creazione della wishlist: ${response.errorBody()}"
+                        )
+                        message = "Error during wishlist creation"
+                    }
                 }
+                triggerSnackbar(message)
+
                 // Potresti aggiornare la lista delle wishlist nel ViewModel qui, se necessario
             } catch (e: Exception) {
                 // Gestisci l'errore
@@ -382,106 +380,53 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
 
 
     fun addWishlistItem(BookId: Long, wishlistId: Long) {
-        var message = ""
         viewModelScope.launch {
             try {
-                val currentUser = SessionManager.user
-                var response : Response<Unit>? = null
-
-                if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
-                    response =
-                        currentUser.let { wRepository.addWishlistItem(BookId, wishlistId, it.id) }
-                }
-                else if (currentUser != null && currentUser.role == "ROLE_ADMIN") {
-                    response =
-                        userSelectedByAdmin.let { it.value?.let { it1 ->
-                            wRepository.addWishlistItem(BookId, wishlistId,
-                                it1
-                            )
-                        } }
+                val userId = if (SessionManager.user?.role == "ROLE_ADMIN") {
+                    userSelectedByAdmin.value
+                } else {
+                    SessionManager.user?.id
                 }
 
-                if (response != null) {
+                userId?.let {
+                    val response = wRepository.addWishlistItem(BookId, wishlistId, it)
                     if (response.isSuccessful) {
-                        message = "Book added successfully to the wishlist"
-                        Log.d(
-                            "addWishlistItem",
-                            message
-                        )
-                        triggerSnackbar(message)
+                        triggerSnackbar("Book added successfully to the wishlist")
                     } else {
-                        message = "Error during the addition of the wishlist item ${response.errorBody()}"
-                        Log.e(
-                            "addWishlistItem",
-                            message
-                        )
-                        triggerSnackbar(message)
+                        triggerSnackbar("Error during the addition of the wishlist item ${response.errorBody()}")
                     }
-                }
+                } ?: triggerSnackbar("Error: User not found")
             } catch (e: Exception) {
-                message = "Error during the addition of the wishlist item ${e.message}"
-                Log.e(
-                    "addWishlistItem",
-                    message + {e.message}
-                )
-
-                triggerSnackbar(message)
-
+                triggerSnackbar("Error during the addition of the wishlistitem ${e.message}")
             }
         }
     }
 
 
     fun deleteWishlistItem(id: Long) {
-        var message = ""
         viewModelScope.launch {
             try {
-                val currentUser = SessionManager.user
-                var response : Response<Unit>? = null
+                val userId = if (SessionManager.user?.role == "ROLE_ADMIN") {
+                    userSelectedByAdmin.value
+                } else{
+                    SessionManager.user?.id
+                }
 
-                if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
-                    response =
-                        currentUser.let { wRepository.removeWishlistItem(id, it.id) }
-                }
-                else if (currentUser != null && currentUser.role == "ROLE_ADMIN") {
-                    response =
-                        userSelectedByAdmin.let { it.value?.let { it1 ->
-                            wRepository.removeWishlistItem(id,
-                                it1
-                            )
-                        } }
-                }
-                if (response != null) {
+                userId?.let {
+                    val response = wRepository.removeWishlistItem(id, it)
                     if (response.isSuccessful) {
-                        Log.d("rimosso WI con id", id.toString())
-                        _wishlistItems.value = _wishlistItems.value.filter { it.id != id }
-
-                        message = "Book removed successfully from the wishlist"
-                        Log.d(
-                            "removeWishlistItem",
-                            message
-                        )
-                        triggerSnackbar(message)
+                        _wishlistItems.value = _wishlistItems.value.filter { item -> item.id != id }
+                        triggerSnackbar("Book removed successfully from the wishlist")
                     } else {
-
-                        message = "Error during the removal of the wishlist item ${response.errorBody()}"
-                        Log.e(
-                            "removeWishlistItem",
-                            message + {response.errorBody()}
-                        )
-                        triggerSnackbar(message)
+                        triggerSnackbar("Error during the removal of the wishlist item ${response.errorBody()}")
                     }
-                }
-            } catch (e: Exception) {
-                Log.e(
-                    "removeWishlistItem",
-                    "Error during the removal of the wishlist item: ${e.message}"
-                )
+                } ?: triggerSnackbar("Error: User not found")
+            } catch (e: Exception){
                 triggerSnackbar("Error during the removal of the wishlist item: ${e.message}")
             }
         }
-
     }
+
 
     fun setShowSnackbar(b: Boolean) {
         _showSnackbar.value = b

@@ -199,7 +199,6 @@ public class GroupsServiceImpl implements GroupsService {
             }
         }
 
-
         group.getMembers().remove(userDao.findById(idUser)
                 .orElseThrow(() -> new RuntimeException(String.format("User not in the group or not found", idUser))));
         groupDao.save(group);
