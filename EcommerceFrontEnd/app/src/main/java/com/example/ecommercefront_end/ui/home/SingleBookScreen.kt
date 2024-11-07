@@ -78,7 +78,6 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
     val cartShowSnackbar by cartViewModel.showSnackbar.collectAsState()
     val cartSnackbarMessage by cartViewModel.snackbarMessage.collectAsState()
 
-    val errorMessage = cartViewModel.errorMessage.collectAsState().value
 
 
 
