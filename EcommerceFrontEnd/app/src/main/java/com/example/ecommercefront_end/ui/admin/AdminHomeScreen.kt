@@ -1,8 +1,6 @@
 package com.example.ecommercefront_end.ui.admin
 
-import android.graphics.drawable.Icon
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,8 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.PersonSearch
-import androidx.compose.material.icons.filled.Reviews
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -29,16 +25,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 
 //samu@gm.com   Ciaobello!10
 //lollo@gm.com   Ciaobello!10
 //admin@gm.com  Ciaobello!10
 
+//MmFjZDI5ZmMtNzc1MS00MzdhLTgwMGEtOGM4ZDkzZGYyOTdh
+//NjNlNjgzMTAtMTRkOS00OWZiLWFkYWQtYWQ2YTkzMTkxZTgy
 
 
 @Composable
@@ -56,7 +52,7 @@ fun AdminHomeScreen(navHostController: NavHostController){
             {
                 Column {
                     Row {
-                        optionButton(onButtonClicked = {
+                        OptionButton(onButtonClicked = {
                             navHostController.navigate("admin-catalogue") {
                                 popUpTo("admin-home") { saveState = true }
                             }
@@ -64,7 +60,7 @@ fun AdminHomeScreen(navHostController: NavHostController){
 
                         Spacer(modifier = Modifier.padding(10.dp))
 
-                        optionButton(onButtonClicked = {
+                        OptionButton(onButtonClicked = {
                             navHostController.navigate("admin-users-list") {
                                 popUpTo("admin-home") { saveState = true }
                             }
@@ -74,7 +70,7 @@ fun AdminHomeScreen(navHostController: NavHostController){
                     Spacer(modifier = Modifier.padding(vertical = 16.dp))
 
                     Row {
-                        optionButton(onButtonClicked = {
+                        OptionButton(onButtonClicked = {
                             navHostController.navigate("admin-orders") {
                                 popUpTo("admin-home") { saveState = true }
                             }
@@ -89,7 +85,7 @@ fun AdminHomeScreen(navHostController: NavHostController){
 }
 
 @Composable
-fun optionButton(onButtonClicked : () -> Unit, icon: ImageVector, contentDescription: String){
+fun OptionButton(onButtonClicked : () -> Unit, icon: ImageVector, contentDescription: String){
     Card(modifier = Modifier.width(150.dp).height(150.dp)
         .clickable(onClick = {
             onButtonClicked();

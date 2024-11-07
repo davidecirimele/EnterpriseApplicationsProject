@@ -140,7 +140,7 @@ public class GroupsServiceImpl implements GroupsService {
 
     @Override
     @Transactional
-    public boolean addUserToGroup(UUID idUser, String wToken) {
+    public int addUserToGroup(UUID idUser, String wToken) {
         Wishlist wishlistToJoin = wishlistDao.findWishlistByWishlistToken(wToken);
 
         if (wishlistToJoin == null) {
@@ -176,7 +176,10 @@ public class GroupsServiceImpl implements GroupsService {
 
         wishlistDao.save(wishlistToJoin);
         System.out.println("Wishlist saved");
-        return true;
+        if (wishlistToJoin.getPrivacySetting().equals(WishlistPrivacy.PRIVATE)){
+            return 0;
+        }
+        return 1;
     }
 
     @Override
@@ -186,20 +189,19 @@ public class GroupsServiceImpl implements GroupsService {
         if (wishlist == null) {
             throw new IllegalArgumentException("Wishlist not found");
         }
-
-        if (!idUsrLogged.equals(wishlist.getUserId().getId())) {
-            throw new IllegalArgumentException("User is not the owner of the wishlist");
-        }
-
         Group group = groupDao.findById(groupId)
                 .orElseThrow(() -> new RuntimeException(String.format("Group not found with id [%s]", groupId)));
 
-        if (!isAMember(group, idUser)) {
-            throw new IllegalArgumentException("User is not in the group");
+
+        if (!idUsrLogged.equals(wishlist.getUserId().getId())) {
+            if (!isAMember(group, idUsrLogged)) {
+                throw new IllegalArgumentException("User is not a member or the owner of the group");
+            }
         }
 
+
         group.getMembers().remove(userDao.findById(idUser)
-                .orElseThrow(() -> new RuntimeException(String.format("User not found with id [%s]", idUser))));
+                .orElseThrow(() -> new RuntimeException(String.format("User not in the group or not found", idUser))));
         groupDao.save(group);
 
         if(!idUsrLogged.equals(idUser)){ //Se l'utente viene cacciato dal gruppo, cambia il token della wishlist
@@ -212,10 +214,11 @@ public class GroupsServiceImpl implements GroupsService {
     }
 
     private boolean isAMember(Group group, UUID idUser) {
-        if (group == null ) {
+        if (group == null || idUser == null) {
             return false;
         }
         return group.getMembers().stream().anyMatch(user -> user.getId().equals(idUser));
+
 
     }
 

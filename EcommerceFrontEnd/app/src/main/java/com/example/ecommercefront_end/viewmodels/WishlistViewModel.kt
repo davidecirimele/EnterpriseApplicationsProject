@@ -124,7 +124,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
             var message = ""
             try {
                 val currentUser = SessionManager.user
-                var response : Response<Boolean>? = null
+                var response : Response<Int>? = null
 
                 if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
                     Log.d("joinWishlist", "primo if, idUser = ${currentUser.id}")
@@ -140,13 +140,24 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
 
 
                 if (response != null && response.isSuccessful) {
-                    Log.d("joinWishlist", "Utente aggiunto con successo alla wishlist")
-                    message = "You have successfully joined the wishlist"
+                    if (response.body() == 1 ){
+                        Log.d("joinWishlist", "Utente aggiunto con successo alla wishlist")
+                        message = "You have successfully joined the wishlist"
+
+                    } else if (response.body() == 0) {
+                        //Log.e("joinWishlist", "Errore durante l'aggiunta dell'utente alla wishlist: ${response.errorBody()}")
+                        message = "You enjoined but at the moment the wishlist is private"
+                        Log.d("joinWishlist", "Utente aggiunto ma la wishlist è privata")
+                    }
+                    triggerSnackbar(message)
+
+
                 } else {
                     //Log.e("joinWishlist", "Errore durante l'aggiunta dell'utente alla wishlist: ${response.errorBody()}")
                     message = "Error during joining the wishlist: + ${response?.errorBody()}"
+                    triggerSnackbar(message)
+
                 }
-                triggerSnackbar(message)
 
             } catch (e: Exception) {
                 Log.e(
@@ -189,6 +200,8 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                 if (response != null && response.isSuccessful) {
                     Log.d("unshareWishlist", "Wishlist non più condivisa con successo")
                     message = "Wishlist no longer shared successfully"
+                    fetchWishlists(null)
+
                 } else {
                     if (response != null) {
                         Log.e(
@@ -470,13 +483,10 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
 
     }
 
-
-
     fun setShowSnackbar(b: Boolean) {
         _showSnackbar.value = b
 
     }
-
 
     fun triggerSnackbar(message: String) {
         _snackbarMessage.value = message

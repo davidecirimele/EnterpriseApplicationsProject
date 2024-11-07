@@ -3,6 +3,7 @@ package com.example.ecommercefront_end.network
 import com.example.ecommercefront_end.model.Group
 import com.example.ecommercefront_end.model.RequiresAuth
 import com.example.ecommercefront_end.model.User
+import kotlinx.serialization.descriptors.PrimitiveKind
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -33,7 +34,7 @@ interface GroupApiService {
 
     @POST("groups/addUser/{idUser}/{token}")
     @RequiresAuth
-    suspend fun addUserToGroup( @Path("idUser") idUser: UUID, @Path("token") token: String): Response<Boolean>
+    suspend fun addUserToGroup( @Path("idUser") idUser: UUID, @Path("token") token: String): Response<Int>
 
     @DELETE("groups/removeUser/{idGroup}/{idUser}/{idUsrLogged}")
     @RequiresAuth

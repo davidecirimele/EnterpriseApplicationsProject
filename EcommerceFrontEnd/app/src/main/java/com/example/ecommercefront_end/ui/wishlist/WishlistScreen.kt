@@ -85,6 +85,9 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, groupViewModel : Group
     val cartShowSnackbar by cartViewModel.showSnackbar.collectAsState()
     val cartSnackbarMessage by cartViewModel.snackbarMessage.collectAsState()
 
+    val groupShowSnackbar by groupViewModel.showSnackbar.collectAsState()
+    val groupSnackbarMessage by groupViewModel.snackbarMessage.collectAsState()
+
     val errorMessage by cartViewModel.errorMessage.collectAsState(initial = "")
 
     // Gestione della selezione della wishlist
@@ -94,8 +97,7 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, groupViewModel : Group
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) {
-            paddingValues ->
+    ) { paddingValues ->
 
         if (isWishlistLoading) {
             Box(modifier = Modifier
@@ -136,34 +138,37 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, groupViewModel : Group
             }
         }
         LaunchedEffect(wShowSnackbar, cartShowSnackbar, errorMessage) {
+            snackbarHostState.currentSnackbarData?.dismiss() // Chiude la snackbar attuale, se presente
+
             if (wShowSnackbar) {
                 wishlistViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
-
                 snackbarHostState.showSnackbar(
                     message = wSnackbarMessage,
                     duration = SnackbarDuration.Short
                 )
-                wishlistViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
-
-            } else if (cartShowSnackbar) {
+            }
+            else if (groupShowSnackbar) {
+                groupViewModel.setShowSnackbar(false)
+                snackbarHostState.showSnackbar(
+                    message = groupSnackbarMessage,
+                    duration = SnackbarDuration.Short
+                )
+            }
+            else if (cartShowSnackbar) {
                 cartViewModel.setShowSnackbar(false)
-
                 snackbarHostState.showSnackbar(
                     message = cartSnackbarMessage,
                     duration = SnackbarDuration.Short
                 )
+            } else if (errorMessage.isNotEmpty()) {
                 cartViewModel.setShowSnackbar(false)
-            } else if (errorMessage != "") {
-                cartViewModel.setShowSnackbar(false)
-
-                errorMessage.let {
-                    snackbarHostState.showSnackbar(
-                        message = it,
-                        duration = SnackbarDuration.Short
-                    )
-                }
+                snackbarHostState.showSnackbar(
+                    message = errorMessage,
+                    duration = SnackbarDuration.Short
+                )
             }
         }
+
     }
 }
 
@@ -411,7 +416,8 @@ fun AddWishlistDialog(
                         onClick = {
                             onJoinWishlist(tokenShared)
                             showJoinWishlist = false
-                        }
+                        },
+                        enabled = tokenShared.length > 5 // Abilita il pulsante solo se il campo non è vuoto
                     ) {
                         Text("Join")
                     }

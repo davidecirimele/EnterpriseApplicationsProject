@@ -292,7 +292,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
             }
         }
 
-        LaunchedEffect(wShowSnackbar) {
+        LaunchedEffect(wShowSnackbar, cartShowSnackbar) {
             if (wShowSnackbar) {
                 snackbarHostState.showSnackbar(
                     message = wSnackbarMessage,
@@ -307,7 +307,6 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
                 )
                 cartViewModel.setShowSnackbar(false)
             }
-
 
             }
         }

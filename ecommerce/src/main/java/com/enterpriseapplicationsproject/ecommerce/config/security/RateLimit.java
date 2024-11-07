@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)  // L'annotazione sarà disponibile a runtime
 public @interface RateLimit {
 
-    int requests() default 35;  // Numero massimo di richieste consentite
+    int requests() default 37;  // Numero massimo di richieste consentite
     int timeWindow() default 45;  // Finestra di tempo in secondi
     String type() default "IP";  // Tipo di rate limit (per IP o per utente)
 

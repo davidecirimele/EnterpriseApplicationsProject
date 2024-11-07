@@ -54,8 +54,6 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
     val snackbarMessage: StateFlow<String> get() = _snackbarMessage
 
 
-
-
     fun loadCartItems() {
         viewModelScope.launch {
 
@@ -128,16 +126,21 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
                     if (response.isSuccessful) {
                         updateTotalAmount()
                             _errorMessage.emit(" Book added to cart.")
+
+                        triggerSnackbar("Book added to cart.")
                     }
                     else {
                         _errorMessage.emit("Error: ${response.message()}")
+                        triggerSnackbar("Error: ${response.message()}")
                     }
                 } else {
                     _errorMessage.emit("User ID not found.")
+                    triggerSnackbar("User ID not found.")
                 }
 
             } catch (e: Exception) {
                 _errorMessage.emit("An error occurred while adding the item.")
+                triggerSnackbar("An error occurred while adding the item.")
             }
         }
     }
@@ -173,6 +176,11 @@ class CartViewModel(private val repository: CartRepository) : ViewModel() {
 
     private fun updateTotalAmount() {
         _totalAmount.value = _cartItems.value.sumOf { it.bookId.price * it.quantity }
+    }
+
+    fun triggerSnackbar(message: String) {
+        _snackbarMessage.value = message
+        _showSnackbar.value = true
     }
 
     fun setShowSnackbar(b: Boolean) {

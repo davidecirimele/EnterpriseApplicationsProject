@@ -189,7 +189,9 @@ fun GroupDetails(
                 items(groupMembers) { member ->
                     GroupMemberCard(
                         member = member,
-                        onExpelMember = { groupViewModel.unshareWishlist(group.id) }, // Funzione per espellere il membro
+                        onExpelMember = {
+                            groupViewModel.unshareWishlist(group.id, member.id)
+                        }, // Funzione per espellere il membro
                         groupViewModel = groupViewModel,
                         navController = navController
                     )
@@ -211,7 +213,7 @@ fun GroupMemberCard(
         modifier = Modifier
             .padding(8.dp)
             .width(150.dp)
-            .height(130.dp) // Aumentato per migliorare la visualizzazione
+            .height(144.dp) // Aumentato per migliorare la visualizzazione
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -240,7 +242,7 @@ fun GroupMemberCard(
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
-                Text("Espelli", color = Color.White)
+                Text("Remove", color = Color.White)
             }
         }
     }

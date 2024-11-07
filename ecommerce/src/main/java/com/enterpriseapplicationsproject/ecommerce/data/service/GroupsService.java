@@ -22,7 +22,7 @@ public interface GroupsService {
 
     List<GroupDto> getAllGroups();
 
-    boolean addUserToGroup(UUID idUser, String token);
+    int addUserToGroup(UUID idUser, String token);
 
     boolean removeUserFromGroup(Long groupId, UUID userId, UUID idUsrLogged);
 

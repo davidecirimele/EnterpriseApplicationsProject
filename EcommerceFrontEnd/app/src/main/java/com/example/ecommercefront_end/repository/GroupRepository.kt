@@ -21,7 +21,7 @@ class GroupRepository (private val groupApiService: GroupApiService){
     }
 
 
-    suspend fun addUser(userId: UUID, token: String): Response<Boolean> {
+    suspend fun addUser(userId: UUID, token: String): Response<Int> {
         return groupApiService.addUserToGroup(userId, token)
     }
 
