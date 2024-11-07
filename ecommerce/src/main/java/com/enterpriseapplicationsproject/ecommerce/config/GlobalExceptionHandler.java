@@ -154,6 +154,30 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()), req, ex.getMessage());
     }
 
+    @ExceptionHandler(UserRegistrationException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ServiceError onUserRegistrationException(WebRequest req, UserRegistrationException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()), req, ex.getMessage());
+    }
+
+    @ExceptionHandler(TokenNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ServiceError onTokenNotFoundException(WebRequest req, TokenNotFoundException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.NOT_FOUND.value()), req, ex.getMessage());
+    }
+
+    @ExceptionHandler(RevokingTokenErrorException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ServiceError onRevokingTokenErrorException(WebRequest req, RevokingTokenErrorException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()), req, ex.getMessage());
+    }
+
+    @ExceptionHandler(IsTokenRevokedException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ServiceError onResourceNotFoundException(WebRequest req, IsTokenRevokedException ex){
+        return errorResponse(HttpStatus.valueOf(HttpStatus.NOT_FOUND.value()), req, ex.getMessage());
+    }
+
     @ExceptionHandler(NullPointerException.class)
     @ResponseStatus(HttpStatus.BAD_GATEWAY)
     public String onResourceNotFoundException(WebRequest req, NullPointerException ex){
@@ -161,6 +185,18 @@ public class GlobalExceptionHandler {
         return "NULLLLLLLLLLLLLLLLLLLLLLLLLLLLL POINTER!!!";
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ServiceError onRuntimeException(WebRequest req, RuntimeException ex) {
+        log.error("Internal server error: {}", ex.getMessage(), ex);
+        return errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, req, "Unexpected error occurred");
+    }
+
+    @ExceptionHandler(LoginException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ServiceError onLoginException(WebRequest req, LoginException ex) {
+        return errorResponse(HttpStatus.UNAUTHORIZED, req, ex.getMessage());
+    }
 
 
     private ServiceError errorResponse (HttpStatus httpStatus, WebRequest req, String message) {

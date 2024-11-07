@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Transaction
 import com.example.ecommercefront_end.repository.TransactionRepository
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -46,5 +47,10 @@ class TransactionViewModel(private val transactionRepository: TransactionReposit
 
     fun clearErrorMessage() {
         _errorMessage.value = null
+    }
+
+    fun onLogout(){
+        //viewModelScope.cancel()
+        _transactions.value = emptyList()
     }
 }

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Table(name = "Addresses")
 @Data
@@ -44,6 +46,8 @@ public class Address {
     @Column(name = "IS_VALID")
     private boolean valid;
 
+    @OneToMany(mappedBy = "address", cascade = CascadeType.REMOVE)
+    private List<Order> orders;
 
     public boolean isDefaultAddress(){
         return defaultAddress;

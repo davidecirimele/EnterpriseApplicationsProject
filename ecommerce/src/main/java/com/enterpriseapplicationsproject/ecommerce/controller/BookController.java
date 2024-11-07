@@ -56,6 +56,7 @@ public class BookController {
         return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
+    @RateLimit
     @GetMapping(path = "/get-catalogue")
     public ResponseEntity<List<BookDto>> getAllAvailable() {
         log.info("Received request for books/get-catalogue");
@@ -65,6 +66,7 @@ public class BookController {
         return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
+    @RateLimit
     @PostMapping("/get/filter")
     public ResponseEntity<List<Book>> filterBooks(@RequestBody BookSpecification.Filter filter) {
         log.info("Received request for books/get/filter -> "+filter);

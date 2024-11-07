@@ -40,7 +40,6 @@ public class CartItemsController {
     @PostMapping("/{userId}/{cartId}/{bookId}/insert")
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<CartItemDto> insertItem(@RequestBody QuantityCartItemDto quantityCartItemDto,@PathVariable Long cartId, @PathVariable Long bookId,  @PathVariable UUID userId) {
-        System.out.println("INSERTED CI: "+quantityCartItemDto);
         CartItemDto insertedItem = cartItemsService.insert(quantityCartItemDto, userId, cartId, bookId);
         return new ResponseEntity<>(insertedItem, HttpStatus.CREATED);
     }

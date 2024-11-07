@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -170,7 +171,7 @@ fun NavigationView(navController: NavHostController) {
 
     Scaffold(
         topBar = { TopBar(navController) },
-        bottomBar = { BottomBar(selectedIndex, navController) }
+        bottomBar = { BottomBar(selectedIndex, accountViewModel, navController) }
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -312,7 +313,17 @@ fun NavigationView(navController: NavHostController) {
 
                 val _userApiService = RetrofitClient.userApiService
                 val repository = AccountRepository(_userApiService)
-                AccountManagerScreen(viewModel = accountViewModel, bookViewModel, navController)
+                AccountManagerScreen(viewModel = accountViewModel, bookViewModel, navController, onLogout = {
+                    accountViewModel.onLogout()
+                    adminViewModel.onLogout()
+                    addressViewModel.onLogout()
+                    bookViewModel.onLogout()
+                    cartViewModel.onLogout()
+                    checkoutViewModel.onLogout()
+                    groupViewModel.onLogout()
+                    transactionViewModel.onLogout()
+                    wishlistViewModel.onLogout()
+                })
             }
             composable("my-account") {
                 LaunchedEffect(Unit) {
@@ -325,7 +336,17 @@ fun NavigationView(navController: NavHostController) {
                 }
                 MyAccountScreen(
                     accountViewModel = accountViewModel, addressViewModel = addressViewModel,
-                    navHostController = navController)
+                    navController = navController, onLogout = {
+                        accountViewModel.onLogout()
+                        adminViewModel.onLogout()
+                        addressViewModel.onLogout()
+                        bookViewModel.onLogout()
+                        cartViewModel.onLogout()
+                        checkoutViewModel.onLogout()
+                        groupViewModel.onLogout()
+                        transactionViewModel.onLogout()
+                        wishlistViewModel.onLogout()
+                    })
             }
             composable("groups") {
                 LaunchedEffect(Unit) {
@@ -464,108 +485,116 @@ fun TopBar(navHostController: NavHostController) {
 }
 
 @Composable
-fun BottomBar(selectedIndex: MutableState<Int>, navHostController: NavHostController) {
-    NavigationBar {
-        NavigationBarItem(
-            selected = selectedIndex.value == 0,
-            onClick = {
-                selectedIndex.value = 0
-                if(SessionManager.user == null || (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN")) {
-                    navHostController.navigate("home") {
-                        popUpTo(navHostController.graph.startDestinationId) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
-                else if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN"){
-                    navHostController.navigate("admin-home") {
-                        popUpTo(navHostController.graph.startDestinationId) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
-            },
-            icon = {
-                Icon(
-                    Icons.Filled.Home,
-                    contentDescription = stringResource(R.string.home)
-                )
-            }
-        )
-        NavigationBarItem(
-            selected = selectedIndex.value == 1,
-            onClick = {
-                selectedIndex.value = 1
-                if(SessionManager.user == null)
-                    navHostController.navigate("userAuth") {
-                        popUpTo(navHostController.graph.startDestinationId) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                else
-                    navHostController.navigate("account-manager") {
-                        popUpTo(navHostController.graph.startDestinationId) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+fun BottomBar(selectedIndex: MutableState<Int>, accountViewModel: AccountViewModel, navHostController: NavHostController) {
+    val isLoggingOut by accountViewModel.isLoggingOut.collectAsState()
 
-            },
-            icon = {
-                Icon(
-                    Icons.Filled.AccountCircle,
-                    contentDescription = stringResource(R.string.user)
-                )
-            }
-        )
-        if(SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN")
+    if(isLoggingOut) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+    }
+    else {
+        NavigationBar {
             NavigationBarItem(
-                selected = selectedIndex.value == 2,
+                selected = selectedIndex.value == 0,
                 onClick = {
-                    selectedIndex.value = 2
-                    navHostController.navigate("cart") {
-                        popUpTo(navHostController.graph.startDestinationId) {
-                            saveState = true
+                    selectedIndex.value = 0
+                    if (SessionManager.user == null || (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN")) {
+                        navHostController.navigate("home") {
+                            popUpTo(navHostController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = false
+                    } else if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
+                        navHostController.navigate("admin-home") {
+                            popUpTo(navHostController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 },
                 icon = {
                     Icon(
-                        Icons.Filled.ShoppingCart,
-                        contentDescription = stringResource(R.string.cart)
+                        Icons.Filled.Home,
+                        contentDescription = stringResource(R.string.home)
                     )
                 }
             )
-
-        if(SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN")
             NavigationBarItem(
-                selected = selectedIndex.value == 3,
+                selected = selectedIndex.value == 1,
                 onClick = {
-                    selectedIndex.value = 3
-                    navHostController.navigate("wishlist") {
-                        popUpTo(navHostController.graph.startDestinationId) {
-                            saveState = true
+                    selectedIndex.value = 1
+                    if (SessionManager.user == null)
+                        navHostController.navigate("userAuth") {
+                            popUpTo(navHostController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+                    else
+                        navHostController.navigate("account-manager") {
+                            popUpTo(navHostController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+
                 },
                 icon = {
                     Icon(
-                        Icons.Filled.Favorite,
-                        contentDescription = stringResource(R.string.favorite)
+                        Icons.Filled.AccountCircle,
+                        contentDescription = stringResource(R.string.user)
                     )
                 }
             )
+            if (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN")
+                NavigationBarItem(
+                    selected = selectedIndex.value == 2,
+                    onClick = {
+                        selectedIndex.value = 2
+                        navHostController.navigate("cart") {
+                            popUpTo(navHostController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = false
+                        }
+                    },
+                    icon = {
+                        Icon(
+                            Icons.Filled.ShoppingCart,
+                            contentDescription = stringResource(R.string.cart)
+                        )
+                    }
+                )
+
+            if (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN")
+                NavigationBarItem(
+                    selected = selectedIndex.value == 3,
+                    onClick = {
+                        selectedIndex.value = 3
+                        navHostController.navigate("wishlist") {
+                            popUpTo(navHostController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    icon = {
+                        Icon(
+                            Icons.Filled.Favorite,
+                            contentDescription = stringResource(R.string.favorite)
+                        )
+                    }
+                )
+        }
     }
 }
 

@@ -29,4 +29,7 @@ public class Group {
             inverseJoinColumns = @JoinColumn(name = "USER_ID")
     )
     private List<User> members = new ArrayList<>();
+
+    @OneToOne(mappedBy = "group", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Wishlist wishlist;
 }

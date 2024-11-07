@@ -43,4 +43,12 @@ interface UserApiService {
     @PUT("users/{id}/change-password")
     @RequiresAuth
     suspend fun changePassword(@Path("id") id: UUID, @Body password: PasswordUser) : Response<User>
+
+    @POST("users/{id}/logout")
+    @RequiresAuth
+    suspend fun logout(@Path("id") id: UUID) : Response<Boolean>
+
+    @DELETE("users/{id}/delete-account")
+    @RequiresAuth
+    suspend fun deleteAccount(@Path("id") id: UUID) : Response<Boolean>
 }

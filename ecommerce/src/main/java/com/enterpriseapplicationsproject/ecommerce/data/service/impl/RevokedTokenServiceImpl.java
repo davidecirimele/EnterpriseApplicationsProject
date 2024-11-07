@@ -4,22 +4,59 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.RevokedTokensDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.RevokedToken;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RevokedTokenService;
+import com.enterpriseapplicationsproject.ecommerce.exception.IsTokenRevokedException;
+import com.enterpriseapplicationsproject.ecommerce.exception.RevokingTokenErrorException;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+@Slf4j
 @Service
 public class RevokedTokenServiceImpl implements RevokedTokenService {
     @Autowired
     private RevokedTokensDao revokedTokensDao;
 
+    private String hashToken(String token) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] encodedHash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : encodedHash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error generating token hash", e);
+        }
+    }
     @Transactional
     public void revokeToken(String token) {
-        RevokedToken revokedToken = new RevokedToken(token);
-        revokedTokensDao.save(revokedToken);
+        try {
+            String hashedToken = hashToken(token);
+            if (!isTokenRevoked(token)) {
+                RevokedToken revokedToken = new RevokedToken(hashedToken);
+                revokedTokensDao.save(revokedToken);
+            }
+        }catch(Exception e){
+            log.error("Unexpected error while converting revoking token "+e);
+            throw new RevokingTokenErrorException("Unexpected error occurred");
+        }
     }
 
     public boolean isTokenRevoked(String token) {
-        return revokedTokensDao.existsByToken(token);
+        try {
+            String hashedToken = hashToken(token);
+            return revokedTokensDao.existsByToken(hashedToken);
+        }catch(Exception e){
+            log.error("Unexpected error while converting revoking token "+e);
+            throw new IsTokenRevokedException("Unexpected error occurred");
+        }
     }
 }

@@ -29,6 +29,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -83,15 +84,31 @@ fun HomeScreen(bookViewModel: BookViewModel, navController: NavController) {
 
     var searchValue by remember { mutableStateOf("") }
 
+    var isFilteringBooks by remember { mutableStateOf(false) }
+
     val colorScheme = androidx.compose.material3.MaterialTheme.colorScheme
 
     val coroutineScope = rememberCoroutineScope()
 
+    LaunchedEffect(Unit){
+        if (allProducts.isEmpty())
+            bookViewModel.fetchAllAvailableProducts()
+        isFilteringBooks = false
+    }
+
     LaunchedEffect(searchValue) {
-        filteredProducts = if (searchValue != "")
-            bookViewModel.fetchBooksByFilter(BookFilter(title = searchValue, author = searchValue, publisher = searchValue))
-        else
-            emptyList()
+        if (searchValue != "") {
+            filteredProducts = bookViewModel.localFilter(
+                allProducts,
+                BookFilter(title = searchValue, author = searchValue, publisher = searchValue)
+            )
+            isFilteringBooks = true
+        }
+        else {
+            filteredProducts = emptyList()
+            isFilteringBooks = false
+        }
+
     }
 
     Scaffold(topBar = {
@@ -105,11 +122,11 @@ fun HomeScreen(bookViewModel: BookViewModel, navController: NavController) {
     }) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)){
 
-            if (searchValue == "" && filteredProducts.isEmpty()) {
+            if (!isFilteringBooks) {
                 CatalogueScreen(allProducts, bookViewModel, navController)
             }
-            else{
-                FilteredBooksScreen(filteredProducts, onDismissOrderOptions = { bookViewModel.sortProducts(filteredProducts) } ,bookViewModel, navController)
+            else {
+                FilteredBooksScreen(filteredProducts, onDismissOrderOptions = { bookViewModel.sortProducts(filteredProducts) } , onFilterEnd = {isFilteringBooks = false},bookViewModel, navController)
             }
 
             if(filterOptions) {
@@ -117,6 +134,7 @@ fun HomeScreen(bookViewModel: BookViewModel, navController: NavController) {
                     viewModel = bookViewModel,
                     onSearchBooks = { filter ->
                         run {
+                            isFilteringBooks = true
                             coroutineScope.launch {
                                 filteredProducts = bookViewModel.fetchBooksByFilter(filter)
                             }
@@ -134,7 +152,7 @@ fun HomeScreen(bookViewModel: BookViewModel, navController: NavController) {
 
 
 @Composable
-fun FilteredBooksScreen(products: List<Book>, onDismissOrderOptions: ()->Unit, bookViewModel: BookViewModel, navController: NavController) {
+fun FilteredBooksScreen(products: List<Book>, onDismissOrderOptions: ()->Unit, onFilterEnd: ()->Unit, bookViewModel: BookViewModel, navController: NavController) {
 
     val isLoading by bookViewModel.isLoadingFilteredBooks.collectAsState()
 
@@ -154,8 +172,12 @@ fun FilteredBooksScreen(products: List<Book>, onDismissOrderOptions: ()->Unit, b
         }
     } else {
         if (products.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(modifier = Modifier.fillMaxSize(), Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("No products matches search requirements")
+
+                Button(onClick = { onFilterEnd() }) {
+                    Text(text = "Back to catalogue")
+                }
             }
         } else {
             val sortedProducts = bookViewModel.sortProducts(products);

@@ -22,11 +22,9 @@ public interface RefreshTokenService {
 
     void revokeRefreshTokenByUserId(UUID userId);
 
-    RefreshTokenDto findByToken(String refreshToken);
+    RefreshTokenDto findByToken(UUID userId, String refreshToken);
 
-    void revokeRefreshTokenByToken(String token);
+    void revokeRefreshTokenByToken(UUID userId, String token);
 
     List<RefreshTokenDto> getAll();
-
-    RefreshToken convertDto(RefreshTokenDto refreshTokenDto, User user);
 }

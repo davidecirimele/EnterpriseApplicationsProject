@@ -81,12 +81,6 @@ fun AdminHomeScreen(navHostController: NavHostController){
                         }, icon = Icons.Default.Payments, contentDescription = "Orders")
 
                         Spacer(modifier = Modifier.padding(10.dp))
-
-                        optionButton(onButtonClicked = {
-                            navHostController.navigate("my-account") {
-                                popUpTo("account-manager") { saveState = true }
-                            }
-                        }, icon = Icons.Default.Reviews, contentDescription = "Reviews")
                     }
                 }
             }

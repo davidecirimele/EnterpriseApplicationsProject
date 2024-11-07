@@ -5,6 +5,8 @@ import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.AddressService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
+import com.enterpriseapplicationsproject.ecommerce.exception.AddressNotFoundException;
+import com.enterpriseapplicationsproject.ecommerce.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -33,51 +35,52 @@ public class AddressController {
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AddressDto>> getAddresses() {
-        log.info("Received request for addresses/all");
+
         List<AddressDto> addresses = addressService.getAddresses();
+
+        if (addresses.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
         return new ResponseEntity<>(addresses, HttpStatus.OK);
+
     }
 
     @RateLimit(type ="USER")
     @GetMapping("/{id}")
     @PreAuthorize("#id == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<List<AddressDto>> getValidAddressesByUserId(@PathVariable UUID id) {
-        log.info("Received request for addresses/{id}");
         User user = userService.getUserById(id);
-        if (user != null) {
-            List<AddressDto> addresses = addressService.getValidAddressesByUserId(user.getId());
-            return new ResponseEntity<>(addresses, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        List<AddressDto> addresses = addressService.getValidAddressesByUserId(user.getId());
+        if (addresses.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+
+        return new ResponseEntity<>(addresses, HttpStatus.OK);
     }
 
     @RateLimit(type ="USER")
     @GetMapping("/{id}/default")
     @PreAuthorize("#id == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<AddressDto> getDefaultAddressByUserId(@PathVariable UUID id) {
-        log.info("Received request for addresses/{id}/default");
+
         User user = userService.getUserById(id);
-        if (user != null) {
-            AddressDto address = addressService.getAddressByUserIdAndDefaultTrue(user.getId());
-            return new ResponseEntity<>(address, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+
+        AddressDto address = addressService.getAddressByUserIdAndDefaultTrue(user.getId());
+
+        return new ResponseEntity<>(address, HttpStatus.OK);
+
     }
 
     @RateLimit(type ="USER")
     @GetMapping("/{userId}/{id}")
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<AddressDto> getValidAddressByUserId(@PathVariable UUID userId, @PathVariable Long id) {
-        log.info("Received request for addresses/{userId}/{id}");
-        User user = userService.getUserById(userId);
-        if (user != null) {
-            AddressDto address = addressService.getAddressById(id);
-            return new ResponseEntity<>(address, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+
+        AddressDto address = addressService.getAddressById(userId, id);
+
+        return new ResponseEntity<>(address, HttpStatus.OK);
     }
 
     @RateLimit(type ="USER")
@@ -86,12 +89,9 @@ public class AddressController {
     public ResponseEntity<List<AddressDto>> getAddressByUserId(@PathVariable UUID id) {
         log.info("Received request for addresses/all/{id}");
         User user = userService.getUserById(id);
-        if (user != null) {
-            List<AddressDto> addresses = addressService.getAddressesByUserId(user.getId());
-            return new ResponseEntity<>(addresses, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+
+        List<AddressDto> addresses = addressService.getAddressesByUserId(user.getId());
+        return new ResponseEntity<>(addresses, HttpStatus.OK);
     }
 
     @RateLimit(type ="USER")
@@ -106,22 +106,21 @@ public class AddressController {
 
 
     @RateLimit(type ="USER")
-    @DeleteMapping("/{addressId}/delete")
-    @PreAuthorize("#userId.userId == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<Boolean> deleteAddress(@PathVariable Long addressId, @RequestBody UserIdDto userId) {
+    @DeleteMapping("{userId}/{addressId}/delete")
+    @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<Boolean> deleteAddress(@PathVariable UUID userId, @PathVariable Long addressId) {
         log.info("Received request for addresses/{addressId}/delete");
-        boolean isRemoved = addressService.deleteAddress(addressId);
-        if (!isRemoved) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+
+        addressService.deleteAddress(userId, addressId);
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping("/{addressId}/update-default")
-    @PreAuthorize("#userId.userId == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<AddressDto> updateDefaultAddress(@PathVariable Long addressId, @RequestBody UserIdDto userId) {
+    @PutMapping("{userId}/{addressId}/update-default")
+    @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<AddressDto> updateDefaultAddress(@PathVariable UUID userId, @PathVariable Long addressId) {
         log.info("Received request for addresses/{addressId}/update-default");
-        AddressDto updatedAddress= addressService.updateDefaultAddress(addressId);
+        AddressDto updatedAddress= addressService.updateDefaultAddress(userId, addressId);
         return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
     }
 
@@ -131,7 +130,7 @@ public class AddressController {
     public ResponseEntity<AddressDto> updateAddress(@PathVariable UUID userId, @PathVariable Long addressId, @RequestBody SaveAddressDto addressDto) {
         log.info("Received request for addresses/{userId}/{addressId}/edit-address");
 
-        AddressDto updatedAddress = addressService.updateAddress(addressId, addressDto);
+        AddressDto updatedAddress = addressService.updateAddress(userId, addressId, addressDto);
         return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
     }
 }

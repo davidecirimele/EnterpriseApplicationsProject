@@ -87,7 +87,6 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, groupViewModel : Group
 
     val errorMessage by cartViewModel.errorMessage.collectAsState(initial = "")
 
-
     // Gestione della selezione della wishlist
     val selectedWishlist = remember(wLists) {
         mutableStateOf(wLists.firstOrNull())
@@ -96,7 +95,7 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, groupViewModel : Group
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
-        paddingValues ->
+            paddingValues ->
 
         if (isWishlistLoading) {
             Box(modifier = Modifier
@@ -144,6 +143,7 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, groupViewModel : Group
                     message = wSnackbarMessage,
                     duration = SnackbarDuration.Short
                 )
+                wishlistViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
 
             } else if (cartShowSnackbar) {
                 cartViewModel.setShowSnackbar(false)
@@ -152,7 +152,7 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, groupViewModel : Group
                     message = cartSnackbarMessage,
                     duration = SnackbarDuration.Short
                 )
-
+                cartViewModel.setShowSnackbar(false)
             } else if (errorMessage != "") {
                 cartViewModel.setShowSnackbar(false)
 
@@ -228,7 +228,7 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
         ) {
             items(
                 items = wishlists,
-                key = { item -> "${item.id}-${item.name}" }// Chiave a livello di items
+                //key = { item -> "${item.id}-${item.name}" }// Chiave a livello di items
             ) { wishlist ->
                 var isFriendWishlist: Boolean? = null
                 if (isAdmin){
@@ -542,8 +542,3 @@ fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit, isFriendWishlist:
         }
     }
 }
-
-
-
-
-

@@ -10,6 +10,7 @@ import com.example.ecommercefront_end.model.OrderSummary
 import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.model.UserDetails
 import com.example.ecommercefront_end.repository.AdminRepository
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -116,6 +117,14 @@ class AdminViewModel(private val repository: AdminRepository): ViewModel()  {
         if (currentPage > 0) {
             fetchOrders(currentPage - 1)
         }
+    }
+
+    fun onLogout(){
+        //viewModelScope.cancel()
+        _users.value = emptyList()
+        _filteredUsers.value = emptyList()
+        _orders.value = emptyList()
+        _userFlow.value = null
     }
 
 }

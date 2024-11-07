@@ -70,7 +70,9 @@ fun Modifier.bookEntryModifier(navController: NavController, bookId: Long) = com
 @Composable
 fun AdminCatalogueScreen(bookViewModel: BookViewModel, navController: NavController){
 
-    var products by remember { mutableStateOf(emptyList<Book>()) }
+    val allProducts by bookViewModel.allAvailableProducts.collectAsState()
+
+    var filteredProducts by remember { mutableStateOf(emptyList<Book>()) }
 
     var searchValue by remember { mutableStateOf("") }
 
@@ -79,12 +81,13 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navController: NavControl
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(searchValue) {
-        val filter = if (searchValue.isBlank()) {
-            BookFilter(title = null, author = null, publisher = null)
-        } else {
-            BookFilter(title = searchValue, author = searchValue, publisher = searchValue)
+        if(searchValue == "")
+            filteredProducts = allProducts
+        else {
+            val filter =
+                BookFilter(title = searchValue, author = searchValue, publisher = searchValue)
+            filteredProducts = bookViewModel.localFilter(allProducts, filter)
         }
-        products = bookViewModel.fetchBooksByFilter(filter)
     }
 
     Scaffold(topBar = {
@@ -106,7 +109,7 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navController: NavControl
                     onSearchBooks = { filter ->
                         run {
                             coroutineScope.launch {
-                                products = bookViewModel.fetchBooksByFilter(filter)
+                                filteredProducts = bookViewModel.fetchBooksByFilter(filter)
                             }
                         }
                     },
@@ -122,8 +125,8 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navController: NavControl
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                if (products.isNotEmpty()) {
-                    for ((index, product) in products.withIndex())
+                if (filteredProducts.isNotEmpty()) {
+                    for ((index, product) in filteredProducts.withIndex())
                         item {
                             Row(modifier = Modifier.fillMaxWidth()) {
                                 Text(

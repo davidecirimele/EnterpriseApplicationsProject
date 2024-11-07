@@ -11,15 +11,11 @@ public interface ShoppingCartService {
 
     ShoppingCartDto getByUserId(UUID userId);
 
-    ShoppingCartDto getByCartId(Long cartId);
-
     ShoppingCartDto save(ShoppingCart sc);
 
     List<ShoppingCartDto> getAll();
 
     boolean delete(UUID userId, Long cartId);
-
-    ShoppingCartDto saveCart(ShoppingCartDto shoppingCartDto);
 
     Double getTotal(UUID userId);
 

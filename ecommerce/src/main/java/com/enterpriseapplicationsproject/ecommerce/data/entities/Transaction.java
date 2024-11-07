@@ -27,7 +27,6 @@ public class Transaction {
     @ManyToOne(fetch = FetchType.LAZY)
     private PaymentMethod paymentMethod;
 
-
     @Column(name = "AMOUNT", nullable = false)
     private Double amount;
 

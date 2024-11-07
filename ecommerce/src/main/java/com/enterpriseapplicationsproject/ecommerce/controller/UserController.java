@@ -33,7 +33,6 @@ public class UserController {
     @GetMapping("/{id}")
     @PreAuthorize("#id == authentication.principal.getId() or hasRole('ADMIN')")
     public ResponseEntity<UserDetailsDto> getUserById(@PathVariable UUID id) {
-        System.out.println("ROLE: "+userService.getUserRole(id));
         UserDetailsDto user = userService.getUserDetailsById(id);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
@@ -51,15 +50,13 @@ public class UserController {
     @PutMapping(value = "{userId}/change-password", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<UserDto> updatePassword(@PathVariable UUID userId,@Valid @RequestBody PasswordUserDto password){
-        try{
-            log.info("Password: "+ password.getOldPassword()+", "+password.getNewPassword());
-            UserDto updatedUser= userService.updatePassword(userId, password);
-            String toRevoke = refreshTokenService.getTokenByUserId(userId).getToken();
-            revokedTokenService.revokeToken(toRevoke);
-            return new ResponseEntity<>(updatedUser, HttpStatus.OK);}
-        catch(UserRegistrationException e){
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+
+        UserDto updatedUser= userService.updatePassword(userId, password);
+        String toRevoke = refreshTokenService.getTokenByUserId(userId).getToken();
+        revokedTokenService.revokeToken(toRevoke);
+        refreshTokenService.revokeRefreshTokenByUserId(userId);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+
     }
 
     @RateLimit(type ="USER")
@@ -67,48 +64,48 @@ public class UserController {
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<UserDto> updateEmail(@PathVariable UUID userId, @Valid @RequestBody EmailUserDto userDto){
         log.info("Received request for user/change-email");
-        try{
-            log.info("Email is valid: "+userDto.getNewEmail());
-            UserDto updatedUser= userService.updateEmail(userId, userDto);
-            return new ResponseEntity<>(updatedUser, HttpStatus.OK);}
-        catch(UserRegistrationException e){
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+
+        UserDto updatedUser= userService.updateEmail(userId, userDto);
+        String toRevoke = refreshTokenService.getTokenByUserId(userId).getToken();
+        revokedTokenService.revokeToken(toRevoke);
+        refreshTokenService.revokeRefreshTokenByUserId(userId);
+
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
     @RateLimit(type ="USER")
     @PutMapping(value = "{userId}/change-phone-number", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("#userId == authentication.principal.getId()")
     public ResponseEntity<UserDto> updatePhoneNumber(@PathVariable UUID userId,@Valid @RequestBody PhoneNumberUserDto userDto){
-        log.info("Received request for user/change-phone-number");
-        try{
-            UserDto updatedUser= userService.updatePhoneNumber(userId, userDto);
-            return new ResponseEntity<>(updatedUser, HttpStatus.OK);}
-        catch(UserRegistrationException e){
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        UserDto updatedUser= userService.updatePhoneNumber(userId, userDto);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
 
     @RateLimit(type ="USER")
-    @DeleteMapping(value = "{userId}/delete-account", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "{userId}/delete-account")
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<UserDto> deleteAccount(@PathVariable UUID userId){
-        try{
-            userService.delete(userId);
-            return new ResponseEntity<>(HttpStatus.OK);}
-        catch(UserRegistrationException e){
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<Boolean> deleteAccount(@PathVariable UUID userId){
+        Boolean isDeleted = userService.delete(userId);
+        return new ResponseEntity<>(isDeleted, HttpStatus.OK);
     }
 
-    @RateLimit(type ="USER")
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String accessToken, @RequestBody String refreshToken) {
+    @PostMapping("{userId}/logout")
+    @PreAuthorize("#userId == authentication.principal.getId()")
+    public ResponseEntity<Boolean> logout(@RequestHeader("Authorization") String accessToken, @PathVariable UUID userId) {
+        Boolean isLoggedOut = false;
+
         accessToken = accessToken.replace("Bearer ", "");
-        revokedTokenService.revokeToken(accessToken);
-        revokedTokenService.revokeToken(refreshToken);
-        return ResponseEntity.ok().build();
-    }
 
+        revokedTokenService.revokeToken(accessToken);
+
+        String refreshToken = refreshTokenService.getTokenByUserId(userId).getToken();
+
+        revokedTokenService.revokeToken(refreshToken);
+
+        refreshTokenService.revokeRefreshTokenByUserId(userId);
+
+
+        return new ResponseEntity<>(isLoggedOut, HttpStatus.OK);
+    }
 }

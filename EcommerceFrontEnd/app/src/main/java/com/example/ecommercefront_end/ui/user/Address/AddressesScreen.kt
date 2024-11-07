@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.TopAppBar
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
@@ -37,8 +39,8 @@ fun AddressesScreen(userId: UUID?=null, viewModel: AddressViewModel, navHostCont
                 .padding(paddingValues)
         ) {
             LazyColumn(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9f)) {
-                if (addresses != null && !addresses!!.isEmpty())
-                    for (address in addresses!!)
+                if (addresses.isNotEmpty())
+                    for (address in addresses)
                         item {
                             AddressView(
                                 address = address,
@@ -48,6 +50,17 @@ fun AddressesScreen(userId: UUID?=null, viewModel: AddressViewModel, navHostCont
                                 true
                             )
                         }
+                else
+                {
+                    item {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text("No addresses saved")
+                        }
+                    }
+                }
             }
             insertButton(userId, navHostController, onButtonClicked = {navHostController.navigate("insert-address/$userId") {
                 popUpTo("addresses/$userId") {

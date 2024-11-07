@@ -14,27 +14,20 @@ public interface UserService {
 
     UserDto save(User user);
 
-    UserDto getByEmail(String email);
-
     List<UserDetailsDto> getAllDto();
 
     UserDetailsDto getUserDetailsById(UUID id);
 
     User getUserById(UUID id);
 
-    User getUserByEmail(String email);
 
     UserDto updatePassword(UUID userId, PasswordUserDto userDto);
-
-    User convertDto(UserDto userDto);
 
     UserDto updateEmail(UUID userId, EmailUserDto userDto);
 
     UserDto updatePhoneNumber(UUID userId, PhoneNumberUserDto userDto);
 
     boolean delete(UUID userId);
-
-    String getUserRole(UUID userId);
 
     List<User> getAll();
 }

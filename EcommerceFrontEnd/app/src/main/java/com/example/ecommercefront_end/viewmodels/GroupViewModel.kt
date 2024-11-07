@@ -12,6 +12,7 @@ import com.example.ecommercefront_end.model.WishlistItem
 import com.example.ecommercefront_end.model.WishlistPrivacy
 import com.example.ecommercefront_end.repository.GroupRepository
 import com.example.ecommercefront_end.repository.WishlistRepository
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,8 +21,6 @@ import retrofit2.Response
 import java.util.UUID
 
 class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel() {
-
-
 
     private val _groups = MutableStateFlow<List<Group>>(emptyList())
     val groups: StateFlow<List<Group>> = _groups.asStateFlow()
@@ -214,6 +213,11 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
         _showSnackbar.value = true
     }
 
-
+    fun onLogout(){
+        //viewModelScope.cancel()
+        _groups.value = emptyList()
+        _groupMembers.value = emptyList()
+        _userSelectedByAdmin.value = null
+    }
 
 }
