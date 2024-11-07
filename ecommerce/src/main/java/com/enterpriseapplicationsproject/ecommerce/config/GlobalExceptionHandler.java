@@ -198,6 +198,12 @@ public class GlobalExceptionHandler {
         return errorResponse(HttpStatus.UNAUTHORIZED, req, ex.getMessage());
     }
 
+    @ExceptionHandler(InvalidCardNumberException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ServiceError onInvalidCardNumberException(WebRequest req, InvalidCardNumberException ex) {
+        return errorResponse(HttpStatus.BAD_REQUEST, req, ex.getMessage());
+    }
+
 
     private ServiceError errorResponse (HttpStatus httpStatus, WebRequest req, String message) {
         HttpServletRequest httpreq = (HttpServletRequest) req.resolveReference("request");
