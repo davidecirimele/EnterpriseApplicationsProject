@@ -40,10 +40,6 @@ interface WishlistApiService {
     @RequiresAuth
     suspend fun deleteWishlist(@Path("idWishlist") idW: Long, @Path("idUser") idUser: UUID) : Response<Unit>
 
-    @GET("wishlists/share")
-    @RequiresAuth
-    suspend fun shareWishlist(@Body wishlist: Wishlist) : Map<String, String>
-
     @GET("wishlists/getOfFriend/{idUser}")
     @RequiresAuth
     suspend fun getFriendWishlists(@Path("idUser") idUser: UUID): List<Wishlist>

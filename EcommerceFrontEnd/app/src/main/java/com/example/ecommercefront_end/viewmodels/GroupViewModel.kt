@@ -163,15 +163,17 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
                 if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
                     response = currentUser.let {
                         groupRepository.removeUser(
-                            groupId, it.id
+                            groupId, it.id, currentUser.id
                         )
                     }
                 } else if (currentUser != null && currentUser.role == "ROLE_ADMIN") {
 
                     response  = userSelectedByAdmin?.let { it.value?.let { it1 ->
-                        groupRepository.removeUser(
-                            groupId, it1
-                        )
+                        userSelectedByAdmin.value?.let { it2 ->
+                            groupRepository.removeUser(
+                                groupId, it1, it2
+                            )
+                        }
                     } }
                 }
 

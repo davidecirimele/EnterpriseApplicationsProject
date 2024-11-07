@@ -84,7 +84,7 @@ fun WishlistDetails(
     var showMenu by remember { mutableStateOf(false) } // Per gestire la visibilità del menu a comparsa
 
     val isAdmin = user?.role == "ROLE_ADMIN"
-    val isOwnerOrAdmin = user?.id?.compareTo(wishlist.user?.id) == 0 || isAdmin
+    val isOwner= user?.id?.compareTo(wishlist.user?.id) == 0
     var isFriendWishlist : Boolean? = null
 
     if (isAdmin){
@@ -92,7 +92,8 @@ fun WishlistDetails(
         isFriendWishlist = idUserSelectedByAdmin?.compareTo(wishlist.user?.id) != 0
     }
     else{
-        isFriendWishlist = user?.id?.compareTo(wishlist.user?.id) != 0 && wishlist.privacySetting == WishlistPrivacy.SHARED
+        isFriendWishlist = !isOwner
+                && wishlist.privacySetting == WishlistPrivacy.SHARED
     }
 
 
@@ -149,7 +150,7 @@ fun WishlistDetails(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }
                     ) {
-                        if(isOwnerOrAdmin){
+                        if(isOwner || isAdmin){
                             DropdownMenuItem(
                                 text = { Text("Share") },
                                 onClick = {
@@ -169,7 +170,7 @@ fun WishlistDetails(
                                 }
                             )
                         }
-                        if (isOwnerOrAdmin || isFriendWishlist){
+                        if (isOwner || isAdmin || isFriendWishlist){
                             DropdownMenuItem(
                                 text = { Text("Rename") },
                                 onClick = {
@@ -187,7 +188,7 @@ fun WishlistDetails(
                             )
                         }
                         DropdownMenuItem(
-                            text = { Text(if (isOwnerOrAdmin) "Delete" else "Exit") },
+                            text = { Text(if (isOwner || isAdmin) "Delete" else "Exit") },
                             onClick = {
                                 showMenu = false
                                 // Azione per eliminare la wishlist
@@ -208,14 +209,14 @@ fun WishlistDetails(
                     AlertDialog(
                         onDismissRequest = { showDeleteConfirmation = false },
 
-                        title = { Text(if (isOwnerOrAdmin) "Delete Wishlist" else "Exit") },
+                        title = { Text(if (isOwner || isAdmin) "Delete Wishlist" else "Exit") },
 
-                        text = { Text(if (isOwnerOrAdmin) "Are you sure you want to delete this wishlist?" else "Are you sure you want to exit this wishlist?") },
+                        text = { Text(if (isOwner || isAdmin) "Are you sure you want to delete this wishlist?" else "Are you sure you want to exit this wishlist?") },
 
                         confirmButton = {
                             Button(onClick = {
                                 //onDeleteWishlist(wishlist) // Chiama il callback per eliminare la wishlist
-                                if(isOwnerOrAdmin){
+                                if(isOwner || isAdmin){
                                     wishlist.id?.let { user?.id?.let { it1 ->
                                         wishlistViewModel.deleteWishlist(it,
                                             it1
@@ -268,7 +269,7 @@ fun WishlistDetails(
             }
 
             //Proprietario
-            if (isFriendWishlist) {
+            if (! isOwner) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -300,7 +301,7 @@ fun WishlistDetails(
                         fontSize = 18.sp
                     )
                     Button(
-                        enabled = isOwnerOrAdmin,
+                        enabled = isOwner || isAdmin,
                         onClick = {
                             var privacySetting = wishlist.privacySetting
                             if (wishlist.privacySetting == WishlistPrivacy.PRIVATE)
@@ -362,7 +363,8 @@ fun WishlistDetails(
                     Column {
                         items.forEach { item ->
 
-                            WishlistItemCard(wishlistItem = item,
+                            WishlistItemCard(
+                                wishlistItem = item,
                                 navController = navController,
                                 onRemoveClick = {
                                     wishlistViewModel.deleteWishlistItem(item.id)
@@ -373,8 +375,7 @@ fun WishlistDetails(
                                     }
                                 },
                                 bookViewModel = bookViewModel,
-                                wishlistUpdateable = isOwnerOrAdmin || isFriendWishlist,
-                                isFriendWishlist = isFriendWishlist
+                                wishlistUpdateable = isOwner || isAdmin || isFriendWishlist,
                             )
                         }
                     }
@@ -399,7 +400,6 @@ fun WishlistItemCard(
     onRemoveClick: () -> Unit,
     onAddCartClick: () -> Unit,
     wishlistUpdateable: Boolean,
-    isFriendWishlist: Boolean,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val isAdmin = user?.role == "ROLE_ADMIN"
@@ -469,7 +469,6 @@ fun WishlistItemCard(
                         }
                     },
                     modifier = Modifier,
-                    enabled = wishlistUpdateable,
                 ) {
                     Icon(
                         imageVector = Icons.Filled.ShoppingCart, // Icona del carrello

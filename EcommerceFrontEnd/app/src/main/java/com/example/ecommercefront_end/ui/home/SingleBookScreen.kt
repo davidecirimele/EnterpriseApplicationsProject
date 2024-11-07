@@ -68,7 +68,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
     val coroutineScope = rememberCoroutineScope()
 
     var selectedWishlist by remember { mutableStateOf<Wishlist?>(null)}
-    val userWishlist by wishlistViewModel.onlyMyWishlists.collectAsState()
+    val userWishlist by wishlistViewModel.wishlists.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
 

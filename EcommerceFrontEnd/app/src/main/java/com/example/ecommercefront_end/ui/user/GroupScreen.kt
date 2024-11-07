@@ -89,7 +89,7 @@ fun GroupScreen(groupViewModel: GroupViewModel, navController: NavController) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Create a group to share your wishlist with friends and family",
+                        text = "Create a wishlist to start managing it with your friends",
                         fontSize = 22.sp,
                         textAlign = TextAlign.Center
                     )

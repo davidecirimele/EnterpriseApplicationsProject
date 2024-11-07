@@ -138,25 +138,29 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, groupViewModel : Group
         }
         LaunchedEffect(wShowSnackbar, cartShowSnackbar, errorMessage) {
             if (wShowSnackbar) {
+                wishlistViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
+
                 snackbarHostState.showSnackbar(
                     message = wSnackbarMessage,
                     duration = SnackbarDuration.Short
                 )
-                wishlistViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
 
             } else if (cartShowSnackbar) {
+                cartViewModel.setShowSnackbar(false)
+
                 snackbarHostState.showSnackbar(
                     message = cartSnackbarMessage,
                     duration = SnackbarDuration.Short
                 )
-                cartViewModel.setShowSnackbar(false)
+
             } else if (errorMessage != "") {
+                cartViewModel.setShowSnackbar(false)
+
                 errorMessage.let {
                     snackbarHostState.showSnackbar(
                         message = it,
                         duration = SnackbarDuration.Short
                     )
-                    cartViewModel.setShowSnackbar(false)
                 }
             }
         }

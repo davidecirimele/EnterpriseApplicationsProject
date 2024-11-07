@@ -80,14 +80,13 @@ public class WishlistItemsController {
 
 
     @RateLimit(type = "USER")
-    @DeleteMapping( path = "/delete/{idItem}/{idUser}")
+    @DeleteMapping( path = "/delete/{idItem}/{idUser}") //Controlli nel service
     public ResponseEntity<WishlistItemDto> deleteItem(@PathVariable Long idItem, @PathVariable UUID idUser) {
         WishlistItemDto wi = wishlistItemsService.deleteItemById(idItem, idUser);
         if (wi == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(wi, HttpStatus.OK);
     }
-
 
     /*
     @RateLimit(type = "USER")

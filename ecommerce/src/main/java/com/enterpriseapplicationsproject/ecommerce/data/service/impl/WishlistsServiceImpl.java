@@ -334,16 +334,34 @@ public class WishlistsServiceImpl implements WishlistsService {
         Wishlist wishlist = wishlistsDao.findById(wishlistDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));
 
-        if (!WishlistValidToUpdate(wishlist, idUser)) {
-            throw new IllegalArgumentException("User not authorized to update this wishlist");
+        if (wishlist == null) {
+            throw new IllegalArgumentException("Wishlist not found");
         }
 
-        wishlist.setName(wishlistDto.getName());
+        String newName = wishlistDto.getName();
+        boolean isAMember = isAMemberAndShared(wishlist, idUser);
 
-        System.out.println("PS in arrivo : " + wishlistDto.getPrivacySetting());
-        System.out.println("PS attuale : " + wishlist.getPrivacySetting());
+        if (!wishlist.getName().equals(newName)) {
+            if (!WishlistValidToUpdate(wishlist, idUser)) {
+                throw new IllegalArgumentException("Your are not the owner or a member of this wishlist");
+            }
+            wishlist.setName(wishlistDto.getName());
+        }
 
-        wishlist.setPrivacySetting(wishlistDto.getPrivacySetting());
+        WishlistPrivacy newPrivacySetting = wishlistDto.getPrivacySetting();
+
+        if (newPrivacySetting != null && !wishlist.getPrivacySetting().equals(newPrivacySetting)) {
+            if (isAMember) {
+                throw new IllegalArgumentException("User not authorized to change privacy setting of this wishlist");
+            }
+            if (!wishlist.getUserId().getId().equals(idUser)) {
+                throw new IllegalArgumentException("User not authorized to update this wishlist");
+            }
+            System.out.println("PS in arrivo : " + wishlistDto.getPrivacySetting());
+            System.out.println("PS attuale : " + wishlist.getPrivacySetting());
+
+            wishlist.setPrivacySetting(wishlistDto.getPrivacySetting());
+        }
 
         Wishlist savedWishlist = wishlistsDao.save(wishlist);
         System.out.println("PS Nuovo : " + savedWishlist.getPrivacySetting());
@@ -356,16 +374,22 @@ public class WishlistsServiceImpl implements WishlistsService {
             return false;
         }
         if (!wishlist.getUserId().getId().equals(idUser)) {
-            Group group = wishlist.getGroup();
-            if (group == null ) {
+            if (!isAMemberAndShared(wishlist, idUser)) {
                 return false;
             }
-            return group.getMembers().stream().anyMatch(user -> user.getId().equals(idUser))
-
-                    && wishlist.getPrivacySetting().equals(WishlistPrivacy.SHARED);
-
         }
-        else return true;
+        return true;
+    }
+
+    private boolean isAMemberAndShared(Wishlist wishlist, UUID idUser) {
+        Group group = wishlist.getGroup();
+        if (group == null ) {
+            return false;
+        }
+        return group.getMembers().stream().anyMatch(user -> user.getId().equals(idUser))
+
+                && wishlist.getPrivacySetting().equals(WishlistPrivacy.SHARED);
+
     }
 
 

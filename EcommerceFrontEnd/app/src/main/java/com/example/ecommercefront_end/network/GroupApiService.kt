@@ -35,9 +35,9 @@ interface GroupApiService {
     @RequiresAuth
     suspend fun addUserToGroup( @Path("idUser") idUser: UUID, @Path("token") token: String): Response<Boolean>
 
-    @DELETE("groups/removeUser/{idGroup}/{idUser}")
+    @DELETE("groups/removeUser/{idGroup}/{idUser}/{idUsrLogged}")
     @RequiresAuth
-    suspend fun removeUserFromGroup( @Path("idGroup") idGroup: Long, @Path("idUser") idUser: UUID): Response<Boolean>
+    suspend fun removeUserFromGroup( @Path("idGroup") idGroup: Long, @Path("idUser") idUser: UUID, @Path ("idUsrLogged") idUsrLogged: UUID): Response<Boolean>
 
     @DELETE("groups/{groupId}")
     @RequiresAuth

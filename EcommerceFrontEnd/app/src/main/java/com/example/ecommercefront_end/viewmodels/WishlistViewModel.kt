@@ -29,6 +29,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
     private val _friendWishlists = MutableStateFlow<List<Wishlist>>(emptyList())
     val friendWishlists: StateFlow<List<Wishlist>> = _friendWishlists.asStateFlow()
 
+
     private val _wishlistItems = MutableStateFlow<List<WishlistItem>>(emptyList())
     val wishlistItems: StateFlow<List<WishlistItem>> = _wishlistItems.asStateFlow()
 
@@ -169,7 +170,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                     response = currentUser?.let {
                         wishlist.group?.let { it1 ->
                             groupRepository.removeUser(
-                                it1.id, it.id
+                                it1.id, it.id, currentUser.id
                             )
                         }
                     }
@@ -178,7 +179,7 @@ class WishlistViewModel(private val wRepository: WishlistRepository, private val
                     response  = userSelectedByAdmin?.let { it.value?.let { it1 ->
                         wishlist.group?.let { it2 ->
                             groupRepository.removeUser(
-                                it2.id, it1
+                                it2.id, it1, it1
                             )
                         }
                     } }
