@@ -14,6 +14,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.RevokedTokenServ
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.AccessTokenValidationDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.RefreshTokenDto;
+import com.enterpriseapplicationsproject.ecommerce.exception.LoginException;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserAlreadyExistsException;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserNotFoundException;
 import io.jsonwebtoken.JwtException;
@@ -105,18 +106,18 @@ public class AuthServiceImpl implements  AuthService{
 
     @Override
     public Map<String, String> loginUser(CredentialDto loginDto) {
-        System.out.println("LoginDto: " + loginDto);
+
         try{
-            System.out.println("Attempting to create UsernamePasswordAuthenticationToken");
+
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     loginDto.getEmail(),
                     loginDto.getPassword()
             );
-            System.out.println("UsernamePasswordAuthenticationToken created successfully");
 
-            System.out.println("Attempting to authenticate");
+
+
             Authentication auth = authenticationManager.authenticate(authToken);
-            System.out.println("Authentication successful");
+
 
 
            LoggedUserDetails userDetails = (LoggedUserDetails) auth.getPrincipal();
@@ -132,8 +133,8 @@ public class AuthServiceImpl implements  AuthService{
         return Map.of("access_token", accessToken, "refresh_token", refreshToken);
 
     } catch (Exception e) {
-            e.printStackTrace();
-        throw new IllegalArgumentException("Invalid credentials");
+
+        throw new LoginException("Invalid credentials");
     }
     }
 

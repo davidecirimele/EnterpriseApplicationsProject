@@ -114,7 +114,6 @@ public class AuthController {
     }
     @PostMapping("/validate-token")
     public ResponseEntity<AccessTokenValidationDto> validateToken(@RequestBody AccessTokenValidationDto request) {
-        String token = request.getToken();
         return ResponseEntity.ok(authService.validateToken(request));
     }
 
