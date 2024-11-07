@@ -7,6 +7,7 @@ import com.enterpriseapplicationsproject.ecommerce.config.security.LoggedUserDet
 import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.service.AuthService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RefreshTokenService;
+import com.enterpriseapplicationsproject.ecommerce.data.service.RevokedTokenService;
 import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.AccessTokenValidationDto;
@@ -47,7 +48,7 @@ public class AuthController {
 
     private final RefreshTokenService refreshTokenService;
 
-
+    private final RevokedTokenService revokedTokenService;
     private final LoggedUserDetailsService loggedUserDetailsService;
 
 
@@ -85,19 +86,20 @@ public class AuthController {
             throw new RuntimeException("Refresh token is missing");
         }
     }*/
-    @PostMapping("/refreshToken")
-    public ResponseEntity<?> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
+    @PostMapping("/{userId}/refreshToken")
+    public ResponseEntity<?> refreshToken(@PathVariable("userId") UUID userId, @Valid @RequestBody TokenRefreshRequest request) {
         String refreshToken = request.getRefreshToken();
 
-        // Verifica se il refresh token esiste nel database
-        RefreshTokenDto storedToken = refreshTokenService.findByToken(refreshToken);
+        RefreshTokenDto storedToken = refreshTokenService.findByToken(userId, refreshToken);
 
         if (storedToken == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid refresh token");
         }
 
+        revokedTokenService.isTokenRevoked(storedToken.toString());
+
         if (jwtService.isTokenExpired(refreshToken)) {
-            refreshTokenService.revokeRefreshTokenByToken(refreshToken);
+            refreshTokenService.revokeRefreshTokenByToken(userId, refreshToken);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Refresh token is expired");
         }
 
@@ -107,11 +109,12 @@ public class AuthController {
         final String newAccessToken = jwtService.generateToken(userDetails);
         final String newRefreshToken = jwtService.generateRefreshToken(userDetails, 96);
 
-        refreshTokenService.revokeRefreshTokenByToken(refreshToken);
+        refreshTokenService.revokeRefreshTokenByToken(userId, refreshToken);
         refreshTokenService.save(new RefreshTokenDto(newRefreshToken), userDetails);
 
         return ResponseEntity.ok(new AuthenticationResponse(newAccessToken, newRefreshToken));
     }
+
     @PostMapping("/validate-token")
     public ResponseEntity<AccessTokenValidationDto> validateToken(@RequestBody AccessTokenValidationDto request) {
         return ResponseEntity.ok(authService.validateToken(request));

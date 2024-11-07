@@ -4,6 +4,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.RevokedTokensDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.RevokedToken;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.service.RevokedTokenService;
+import com.enterpriseapplicationsproject.ecommerce.exception.IsTokenRevokedException;
 import com.enterpriseapplicationsproject.ecommerce.exception.RevokingTokenErrorException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +56,7 @@ public class RevokedTokenServiceImpl implements RevokedTokenService {
             return revokedTokensDao.existsByToken(hashedToken);
         }catch(Exception e){
             log.error("Unexpected error while converting revoking token "+e);
-            throw new RevokingTokenErrorException("Unexpected error occurred");
+            throw new IsTokenRevokedException("Unexpected error occurred");
         }
     }
 }

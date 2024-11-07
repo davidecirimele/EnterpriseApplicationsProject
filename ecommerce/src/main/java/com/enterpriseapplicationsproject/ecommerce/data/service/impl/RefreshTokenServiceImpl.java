@@ -82,11 +82,14 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     @Override
-    public RefreshTokenDto findByToken(String token) {
+    public RefreshTokenDto findByToken(UUID userId, String token) {
         try {
             RefreshToken refreshToken = refreshTokenDao.findByToken(token).orElseThrow(() -> new TokenNotFoundException("Token not found"));
 
-            return modelMapper.map(refreshToken, RefreshTokenDto.class);
+            if(refreshToken.getUser().getId().equals(userId))
+                return modelMapper.map(refreshToken, RefreshTokenDto.class);
+            else
+                throw new UnauthorizedAccessException("Unauthorized");
         }catch(Exception e){
             log.error("Unexpected error while fetching refresh token "+e);
             throw new RuntimeException("Unexpected error occurred");
@@ -95,11 +98,14 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     @Transactional
-    public void revokeRefreshTokenByToken(String token) {
+    public void revokeRefreshTokenByToken(UUID userId, String token) {
         try {
             RefreshToken refreshToken = refreshTokenDao.findByToken(token).orElseThrow(() -> new TokenNotFoundException("Token not found"));
 
-            refreshTokenDao.deleteByToken(refreshToken.toString());
+            if(refreshToken.getUser().getId().equals(userId))
+                refreshTokenDao.deleteByToken(refreshToken.toString());
+            else
+                throw new UnauthorizedAccessException("Unauthorized");
         }catch(Exception e){
             log.error("Unexpected error while revoking refresh token "+e);
             throw new RuntimeException("Unexpected error occurred");

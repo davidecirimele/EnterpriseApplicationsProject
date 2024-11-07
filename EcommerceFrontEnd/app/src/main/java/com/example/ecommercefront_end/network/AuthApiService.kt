@@ -18,8 +18,8 @@ import java.util.UUID
 
 interface AuthApiService {
 
-    @POST("auth/refreshToken")
-    suspend fun refreshToken(@Body refreshToken: RefreshToken): Response<RefreshTokenResponse>
+    @POST("auth/{userId}/refreshToken")
+    suspend fun refreshToken(@Path("userId") userId: UUID,@Body refreshToken: RefreshToken): Response<RefreshTokenResponse>
 
     @Headers("Content-Type: application/json")
     @POST("auth/login")
