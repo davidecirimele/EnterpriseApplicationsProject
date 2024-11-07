@@ -1,6 +1,7 @@
 package com.example.ecommercefront_end.ui.wishlist
 
 import android.util.Log
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -115,6 +116,7 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, groupViewModel : Group
                     WishlistsList(
                         wishlists = wLists,
                         viewModel = wishlistViewModel,
+                        selectedWishlist = selectedWishlist.value,
                         onWishlistSelected = { wishlist ->
                             selectedWishlist.value = wishlist.copy()
                             wishlist.id?.let { wishlistViewModel.fetchWishlistItems(it, user!!.id) }
@@ -174,7 +176,9 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, groupViewModel : Group
 
 
 @Composable
-fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWishlistSelected: (Wishlist) -> Unit) {
+fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel,
+                  selectedWishlist: Wishlist?, onWishlistSelected: (Wishlist) -> Unit) {
+
     var showAddWishlistMain by remember { mutableStateOf(false) }
     val isAdmin = user?.role == "ROLE_ADMIN"
     val idUserSelectedByAdmin by viewModel.userSelectedByAdmin.collectAsState()
@@ -186,9 +190,13 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        val title = if (isAdmin && wishlists.isNotEmpty() && (wishlists[0].user?.id == idUserSelectedByAdmin)) {
+            "Wishlists of ${wishlists[0].user?.firstName} ${wishlists[0].user?.lastName}"
+        } else {
+            "Your wishlists"
+        }
         Text(
-            text = if (isAdmin && (wishlists.get(0).user?.id == idUserSelectedByAdmin) )
-                "Liste di ${wishlists.get(0).user?.firstName} ${wishlists.get(0).user?.lastName}" else "Your wishlists",
+            text = title,
 
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
@@ -245,11 +253,13 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
                     isFriendWishlist = ( wishlist.group?.members?.any { it.id == user?.id } == true )
                                                 && user?.id?.compareTo(wishlist.user?.id) != 0
                 }
-                WishlistThumbnail( // Rimuovi il secondo key qui
+                WishlistThumbnail(
                     wishlist = wishlist,
-                    onClick = { onWishlistSelected(wishlist) },
+                    onClick = {
+                        onWishlistSelected(wishlist) },
                     wishlistUpdatable = wishlist.privacySetting == WishlistPrivacy.SHARED || isAdmin,
-                    isFriendWishlist = isFriendWishlist?:false
+                    isFriendWishlist = isFriendWishlist?:false,
+                    isSelected = wishlist == selectedWishlist
 
                 )
             }
@@ -501,14 +511,26 @@ fun AddWishlistDialog(
 
 
 @Composable
-fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit, isFriendWishlist: Boolean, wishlistUpdatable: Boolean) {
+fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit, isFriendWishlist: Boolean,
+                      isSelected : Boolean, wishlistUpdatable: Boolean) {
+
     Log.d("WishlistThumbnail", "userId: ${user?.id}, wishlist.userId: ${wishlist.user?.id}")
+
     Card(
         modifier = Modifier
             .padding(8.dp)
             .width(150.dp)
             .height(70.dp) // Imposta l'altezza fissa per tutte le card
-            .clickable { onClick() },
+            .clickable { onClick() }
+            .then(
+                if (isSelected) Modifier.border(
+                    width = 1.dp,
+                    color = if (!isFriendWishlist) Color.Green
+                            else Color.Black, // Colore del bordo per la selezione
+                    shape = RoundedCornerShape(8.dp)
+                 ) else Modifier
+            ),
+
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(

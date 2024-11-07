@@ -458,7 +458,8 @@ fun TopBar(navHostController: NavHostController) {
             ) {
                 Text(
                     text = stringResource(R.string.app_name),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         },
