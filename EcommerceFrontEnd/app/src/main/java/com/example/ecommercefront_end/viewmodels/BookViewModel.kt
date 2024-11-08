@@ -44,32 +44,32 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     private val _allAvailableProducts = MutableStateFlow<List<Book>>(emptyList())
     val allAvailableProducts: StateFlow<List<Book>> = _allAvailableProducts.asStateFlow()
 
-    private val _minPrice = MutableStateFlow<Double?>(null)
-    val minPrice: StateFlow<Double?> = _minPrice
+    private val _minPrice = MutableStateFlow(1.0)
+    val minPrice: StateFlow<Double> = _minPrice
 
-    private val _maxPrice = MutableStateFlow<Double?>(null)
-    val maxPrice: StateFlow<Double?> = _maxPrice
+    private val _maxPrice = MutableStateFlow(1000.0)
+    val maxPrice: StateFlow<Double> = _maxPrice
 
-    private val _minAge = MutableStateFlow<Int?>(null)
-    val minAge: StateFlow<Int?> = _minAge
+    private val _minAge = MutableStateFlow(1)
+    val minAge: StateFlow<Int> = _minAge
 
-    private val _maxAge = MutableStateFlow<Int?>(null)
-    val maxAge: StateFlow<Int?> = _maxAge
+    private val _maxAge = MutableStateFlow(100)
+    val maxAge: StateFlow<Int> = _maxAge
 
-    private val _minPages = MutableStateFlow<Int?>(null)
-    val minPages: StateFlow<Int?> = _minPages
+    private val _minPages = MutableStateFlow(1)
+    val minPages: StateFlow<Int> = _minPages
 
-    private val _maxPages = MutableStateFlow<Int?>(null)
-    val maxPages: StateFlow<Int?> = _maxPages
+    private val _maxPages = MutableStateFlow(3000)
+    val maxPages: StateFlow<Int> = _maxPages
 
-    private val _minWeight = MutableStateFlow<Double?>(null)
-    val minWeight: StateFlow<Double?> = _minWeight
+    private val _minWeight = MutableStateFlow(0.1)
+    val minWeight: StateFlow<Double> = _minWeight
 
-    private val _maxWeight = MutableStateFlow<Double?>(null)
-    val maxWeight: StateFlow<Double?> = _maxWeight
+    private val _maxWeight = MutableStateFlow(4.0)
+    val maxWeight: StateFlow<Double> = _maxWeight
 
-    private val _startingPublicationYear = MutableStateFlow<LocalDate?>(null)
-    val startingPublicationYear: StateFlow<LocalDate?> = _startingPublicationYear
+    private val _startingPublicationYear = MutableStateFlow<LocalDate>(LocalDate.now().minusYears(100))
+    val startingPublicationYear: StateFlow<LocalDate> = _startingPublicationYear
 
     private val _sortOption = MutableStateFlow("Newest")
     val sortOption: StateFlow<String> = _sortOption
@@ -125,7 +125,6 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         viewModelScope.launch {
             try {
 
-                // Usa async per le chiamate parallele
                 val priceJob = async { fetchValues(repository.getMinPrice(), repository.getMaxPrice(), _minPrice,_maxPrice) }
                 val ageJob = async { fetchValues(repository.getMinAge(), repository.getMaxAge(), _minAge,_maxAge) }
                 val pagesJob = async { fetchValues(repository.getMinPages(), repository.getMaxPages(), _minPages,_maxPages) }
@@ -149,36 +148,36 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         }
     }
 
-    private suspend fun <T> fetchValues(
+    private fun <T> fetchValues(
         fetchMin: Response<T>,
         fetchMax: Response<T>? =  null,
-        minState: MutableStateFlow<T?>,
-        maxState: MutableStateFlow<T?>? = null
+        minState: MutableStateFlow<T>,
+        maxState: MutableStateFlow<T>? = null
     ) {
-        if((minState.value == null && maxState == null) || (minState.value == null && (maxState != null && maxState.value == null)))
-            try {
-                if (fetchMin.isSuccessful && fetchMin.body() != null) {
-                    minState.value = fetchMin.body()
-                } else {
-                     _errorMessage.value = "Failed to fetch min value"
-                }
 
-                if (fetchMax != null) {
-                    if (fetchMax.isSuccessful && fetchMax.body() != null) {
-                        if (maxState != null) {
-                            maxState.value = fetchMax.body()
-                        }
-                        else{
-                            _errorMessage.value = "Failed to fetch max value"
-                        }
-                    } else {
+        try {
+            if (fetchMin.isSuccessful) {
+                minState.value = fetchMin.body()!!
+            } else {
+                _errorMessage.value = "Failed to fetch min value"
+            }
+
+            if (fetchMax != null) {
+                if (fetchMax.isSuccessful) {
+                    if (maxState != null) {
+                        maxState.value = fetchMax.body()!!
+                    }
+                    else{
                         _errorMessage.value = "Failed to fetch max value"
                     }
+                } else {
+                    _errorMessage.value = "Failed to fetch max value"
                 }
-
-            } catch (e: Exception) {
-                throw e
             }
+
+        } catch (e: Exception) {
+            throw e
+        }
     }
 
     private suspend fun fetchAllProducts() {

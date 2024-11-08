@@ -42,167 +42,182 @@ class AddressViewModel(private val repository: AddressRepository): ViewModel() {
 
 
     suspend fun fetchUserAddresses(userId: UUID? = null){
-        try {
-            var user = SessionManager.user!!.id
+        if(SessionManager.user != null) {
+            try {
+                var user = SessionManager.user!!.id
 
-            if(userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
-                user = userId
+                if (userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
+                    user = userId
 
-            val response = repository.getAddresses(user)
+                val response = repository.getAddresses(user)
 
-            if(response.isSuccessful && !response.body().isNullOrEmpty()) {
-                _addresses.value = response.body()!!
+                if (response.isSuccessful && !response.body().isNullOrEmpty()) {
+                    _addresses.value = response.body()!!
+                } else {
+                    _addresses.value = emptyList()
+                }
+            } catch (e: Exception) {
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error while fetching the addresses: Connection problem."
+                else
+                    _errorMessage.value = "Error while fetching the address."
             }
-            else{
-                _addresses.value = emptyList()
-            }
-        }catch (e: Exception) {
-            if (e is SocketTimeoutException)
-                _errorMessage.value = "Error while fetching the addresses: Connection problem."
-            else
-                _errorMessage.value = "Error while fetching the address."
         }
     }
 
     suspend fun fetchAddressById(userId: UUID? = null, addressId: Long){
-        try {
-            var user = SessionManager.user!!.id
+        if(SessionManager.user != null) {
+            try {
+                var user = SessionManager.user!!.id
 
-            if(userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
-                user = userId
+                if (userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
+                    user = userId
 
-            val response = repository.getAddress(user, addressId)
+                val response = repository.getAddress(user, addressId)
 
-            if (response.isSuccessful && response.body() != null) {
-                _addressToEdit.value = response.body()
+                if (response.isSuccessful && response.body() != null) {
+                    _addressToEdit.value = response.body()
+                }
+            } catch (e: Exception) {
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error while fetching the address: Connection problem."
+                else
+                    _errorMessage.value = "Error while fetching the address."
+            } finally {
+                _isLoading.value =
+                    false // Imposta isLoading a false dopo il caricamento, indipendentemente dal risultato
             }
-        }catch (e: Exception) {
-            if (e is SocketTimeoutException)
-                _errorMessage.value = "Error while fetching the address: Connection problem."
-            else
-                _errorMessage.value = "Error while fetching the address."
-        }finally {
-            _isLoading.value = false // Imposta isLoading a false dopo il caricamento, indipendentemente dal risultato
         }
     }
 
     suspend fun fetchDefaultAddress(userId: UUID? = null){
-        if(addresses.value.isNotEmpty())
-        {
-            try {
-                var user = SessionManager.user!!.id
+        if(SessionManager.user != null) {
+            if (addresses.value.isNotEmpty()) {
+                try {
+                    var user = SessionManager.user!!.id
 
-                if(userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
-                    user = userId
+                    if (userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
+                        user = userId
 
-                val response = repository.getDefaultAddress(user)
+                    val response = repository.getDefaultAddress(user)
 
-                if (response.isSuccessful && response.body()!= null) {
-                    _defaultAddress.value = response.body()
+                    if (response.isSuccessful && response.body() != null) {
+                        _defaultAddress.value = response.body()
+                    }
+                } catch (e: Exception) {
+                    if (e is SocketTimeoutException)
+                        _errorMessage.value =
+                            "Error while fetching the default address: Connection problem."
+                    else
+                        _errorMessage.value = "Error while fetching the default address."
                 }
-            } catch (e: Exception) {
-                if (e is SocketTimeoutException)
-                    _errorMessage.value = "Error while fetching the default address: Connection problem."
-                else
-                    _errorMessage.value = "Error while fetching the default address."
             }
         }
     }
 
     fun setDefaultAddress(userId: UUID? = null,address: Address){
-        viewModelScope.launch {
-            try {
-                var user = SessionManager.user!!.id
+        if(SessionManager.user != null) {
+            viewModelScope.launch {
+                try {
+                    var user = SessionManager.user!!.id
 
-                if(userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
-                    user = userId
+                    if (userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
+                        user = userId
 
-                val response = repository.updateDefaultAddress(user, address.id)
+                    val response = repository.updateDefaultAddress(user, address.id)
 
-                if (response.isSuccessful && response.body() != null) {
-                    fetchDefaultAddress(user)
+                    if (response.isSuccessful && response.body() != null) {
+                        fetchDefaultAddress(user)
+                    }
+                } catch (e: Exception) {
+                    if (e is SocketTimeoutException)
+                        _errorMessage.value =
+                            "Error while updating the default address: Connection problem."
+                    else
+                        _errorMessage.value = "Error while updating the default address."
                 }
-            } catch (e: Exception) {
-                if (e is SocketTimeoutException)
-                    _errorMessage.value = "Error while updating the default address: Connection problem."
-                else
-                    _errorMessage.value = "Error while updating the default address."
             }
         }
     }
 
     fun removeAddress(userId: UUID? = null, address: Address){
-        viewModelScope.launch {
-            try {
-                var user = SessionManager.user!!.id
+        if(SessionManager.user != null) {
+            viewModelScope.launch {
+                try {
+                    var user = SessionManager.user!!.id
 
-                if(userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
-                    user = userId
+                    if (userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
+                        user = userId
 
-                repository.deleteAddress(user, address.id)
+                    repository.deleteAddress(user, address.id)
 
-                fetchUserAddresses(user)
-                fetchDefaultAddress(user)
-            } catch (e: Exception) {
-                if (e is SocketTimeoutException)
-                    _errorMessage.value = "Error while deleting the address: Connection problem."
-                else
-                    _errorMessage.value = "Error while deleting the address."
+                    fetchUserAddresses(user)
+                    fetchDefaultAddress(user)
+                } catch (e: Exception) {
+                    if (e is SocketTimeoutException)
+                        _errorMessage.value =
+                            "Error while deleting the address: Connection problem."
+                    else
+                        _errorMessage.value = "Error while deleting the address."
+                }
             }
         }
     }
 
     fun insertAddress(userId: UUID?=null, address: SaveAddress, onSuccess: ()->Unit){
-        viewModelScope.launch {
-            try {
-                var user = SessionManager.user!!.id
+        if(SessionManager.user != null) {
+            viewModelScope.launch {
+                try {
+                    var user = SessionManager.user!!.id
 
-                if(userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
-                    user = userId
+                    if (userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
+                        user = userId
 
-                val response = repository.insertAddress(user, address)
+                    val response = repository.insertAddress(user, address)
 
-                if (response.isSuccessful && response.body()!=null) {
-                    fetchUserAddresses(user)
-                    onSuccess()
+                    if (response.isSuccessful && response.body() != null) {
+                        fetchUserAddresses(user)
+                        onSuccess()
+                    } else {
+                        val errorBody = response.errorBody()?.string()
+
+                        _errorMessage.value = ErrorMessageParser(errorBody)
+                    }
+                } catch (e: Exception) {
+                    if (e is SocketTimeoutException)
+                        _errorMessage.value = "Error while saving the address: Connection problem."
+                    else
+                        _errorMessage.value = "Error while saving the address."
                 }
-                else{
-                    val errorBody = response.errorBody()?.string()
-
-                    _errorMessage.value = ErrorMessageParser(errorBody)
-                }
-            } catch (e: Exception) {
-                if (e is SocketTimeoutException)
-                    _errorMessage.value = "Error while saving the address: Connection problem."
-                else
-                    _errorMessage.value = "Error while saving the address."
             }
         }
     }
 
     fun editAddress(userId: UUID?, addressId: Long, address: SaveAddress, onSuccess: ()->Unit){
-        viewModelScope.launch {
-            try {
-                var user = SessionManager.user!!.id
+        if(SessionManager.user != null) {
+            viewModelScope.launch {
+                try {
+                    var user = SessionManager.user!!.id
 
-                if(userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
-                    user = userId
+                    if (userId != null && SessionManager.user!!.role == "ROLE_ADMIN")
+                        user = userId
 
-                val response = repository.editAddress(user, addressId, address)
+                    val response = repository.editAddress(user, addressId, address)
 
-                if (response.isSuccessful && response.body()!=null) {
-                    fetchUserAddresses(user)
-                    onSuccess()
-                } else{
-                    val errorBody = response.errorBody()?.string()
+                    if (response.isSuccessful && response.body() != null) {
+                        fetchUserAddresses(user)
+                        onSuccess()
+                    } else {
+                        val errorBody = response.errorBody()?.string()
 
-                    _errorMessage.value = ErrorMessageParser(errorBody)
+                        _errorMessage.value = ErrorMessageParser(errorBody)
+                    }
+                } catch (e: Exception) {
+                    if (e is SocketTimeoutException)
+                        _errorMessage.value = "Error while saving the address: Connection problem."
+                    else
+                        _errorMessage.value = "Error while saving the address."
                 }
-            } catch (e: Exception) {
-                if (e is SocketTimeoutException)
-                    _errorMessage.value = "Error while saving the address: Connection problem."
-                else
-                    _errorMessage.value = "Error while saving the address."
             }
         }
     }

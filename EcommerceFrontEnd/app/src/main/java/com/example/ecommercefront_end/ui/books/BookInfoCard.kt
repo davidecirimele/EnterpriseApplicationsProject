@@ -46,10 +46,10 @@ fun BookInfoCard(book: Book){
                     text = "Author",
                     modifier = Modifier
                         .weight(1f)
-                        .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+                        .background(Color.LightGray.copy(alpha = 0.2f))
                 )
                 Text(
-                    text = book!!.author,
+                    text = book.author,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -62,11 +62,11 @@ fun BookInfoCard(book: Book){
                     text = "ISBN",
                     modifier = Modifier
                         .weight(1f)
-                        .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+                        .background(Color.LightGray.copy(alpha = 0.2f))
 
                 )
                 Text(
-                    text = book!!.ISBN,
+                    text = book.ISBN,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -79,11 +79,11 @@ fun BookInfoCard(book: Book){
                     text = "Number of pages",
                     modifier = Modifier
                         .weight(1f)
-                        .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+                        .background(Color.LightGray.copy(alpha = 0.2f))
 
                 )
                 Text(
-                    text = "${book!!.pages}",
+                    text = "${book.pages}",
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -96,11 +96,11 @@ fun BookInfoCard(book: Book){
                     text = "Edition",
                     modifier = Modifier
                         .weight(1f)
-                        .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+                        .background(Color.LightGray.copy(alpha = 0.2f))
 
                 )
                 Text(
-                    text = book!!.edition,
+                    text = book.edition,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -113,10 +113,10 @@ fun BookInfoCard(book: Book){
                     text = "Format",
                     modifier = Modifier
                         .weight(1f)
-                        .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+                        .background(Color.LightGray.copy(alpha = 0.2f))
                 )
                 Text(
-                    text = book!!.format?.name ?: "",
+                    text = book.format.name ?: "",
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -129,11 +129,11 @@ fun BookInfoCard(book: Book){
                     text = "Genre",
                     modifier = Modifier
                         .weight(1f)
-                        .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+                        .background(Color.LightGray.copy(alpha = 0.2f))
 
                 )
                 Text(
-                    text = book!!.genre?.name ?: "",
+                    text = book.genre.name ?: "",
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -146,11 +146,11 @@ fun BookInfoCard(book: Book){
                     text = "Language",
                     modifier = Modifier
                         .weight(1f)
-                        .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+                        .background(Color.LightGray.copy(alpha = 0.2f))
 
                 )
                 Text(
-                    text = book!!.language?.name ?: "",
+                    text = book.language.name ?: "",
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -163,11 +163,11 @@ fun BookInfoCard(book: Book){
                     text = "Publisher",
                     modifier = Modifier
                         .weight(1f)
-                        .background(Color.LightGray.copy(alpha = 0.2f)) // Ombreggia la colonna di destra
+                        .background(Color.LightGray.copy(alpha = 0.2f))
 
                 )
                 Text(
-                    text = book!!.publisher,
+                    text = book.publisher,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -184,10 +184,10 @@ fun BookInfoCard(book: Book){
 
                 )
                 Text(
-                    text = if (book!!.age != null) {
-                        "${book!!.age}"
+                    text = if (book.age != null) {
+                        "${book.age}"
                     } else {
-                        "--" // O un altro messaggio di default
+                        "--"
                     },
                     modifier = Modifier.weight(1f)
                 )
@@ -206,7 +206,7 @@ fun BookInfoCard(book: Book){
                 )
                 Text(
                     text = if (book!!.publishDate != null) {
-                        book!!.publishDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                        book.publishDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                     } else {
                         "--" // O un altro messaggio di default
                     },
@@ -226,10 +226,10 @@ fun BookInfoCard(book: Book){
 
                 )
                 Text(
-                    if (book!!.weight != null) {
-                        "${book!!.weight} kg"
+                    if (book.weight != null) {
+                        "${book.weight} kg"
                     } else {
-                        " --" // O un altro messaggio di default
+                        " --"
                     },
                     modifier = Modifier.weight(1f)
                 )

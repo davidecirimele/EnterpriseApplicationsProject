@@ -57,7 +57,7 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
 
                 }
                 if (response != null) {
-                    if (response.isSuccessful) {
+                    if (response.isSuccessful && response.body()!=null) {
                         _groups.value = response.body()!!
 
                     } else {
@@ -89,13 +89,15 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
     }
 
     private suspend fun fetchGroupMembers(idGroup: Long) {
-        val response = groupRepository.getGroupMembersById(idGroup, SessionManager.user?.id!!)
-        if (response.isSuccessful) {
-            _groupMembers.value = response.body()!! // Aggiorna direttamente _groupMembers
-            Log.d("fetchGroupMembers", _groupMembers.value.toString())
-        } else {
-            val errorMsg = "Error during fetching group members: ${response.errorBody()}"
-            Log.e("fetchGroupMembers", errorMsg)
+        if(SessionManager.user != null) {
+            val response = groupRepository.getGroupMembersById(idGroup, SessionManager.user?.id!!)
+            if (response.isSuccessful && response.body() != null) {
+                _groupMembers.value = response.body()!! // Aggiorna direttamente _groupMembers
+                Log.d("fetchGroupMembers", _groupMembers.value.toString())
+            } else {
+                val errorMsg = "Error during fetching group members: ${response.errorBody()}"
+                Log.e("fetchGroupMembers", errorMsg)
+            }
         }
     }
 

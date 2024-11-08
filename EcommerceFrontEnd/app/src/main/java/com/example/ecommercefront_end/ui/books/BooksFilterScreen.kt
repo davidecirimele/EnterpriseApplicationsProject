@@ -139,8 +139,8 @@ fun BooksFilterScreen(viewModel: BookViewModel, onSearchBooks: (BookFilter) -> U
                             RangeSelector(
                                 viewModel,
                                 "Price (Euros)",
-                                minBookPrice!!.toFloat(),
-                                maxBookPrice!!.toFloat(),
+                                minBookPrice.toFloat(),
+                                maxBookPrice.toFloat(),
                                 onValueChange = { start, end ->
                                     val formattedStart =
                                         String.format(Locale.ITALY, "%.2f", start).replace(",", ".")
@@ -158,8 +158,8 @@ fun BooksFilterScreen(viewModel: BookViewModel, onSearchBooks: (BookFilter) -> U
                             RangeSelector(
                                 viewModel,
                                 "Age",
-                                minBookAge!!.toFloat(),
-                                maxBookAge!!.toFloat(),
+                                minBookAge.toFloat(),
+                                maxBookAge.toFloat(),
                                 onValueChange = { start, end ->
                                     val formattedStart =
                                         String.format(Locale.ITALY, "%.0f", start).replace(",", ".")
@@ -195,8 +195,8 @@ fun BooksFilterScreen(viewModel: BookViewModel, onSearchBooks: (BookFilter) -> U
                             RangeSelector(
                                 viewModel,
                                 "Number of pages",
-                                minBookPages!!.toFloat(),
-                                maxBookPages!!.toFloat(),
+                                minBookPages.toFloat(),
+                                maxBookPages.toFloat(),
                                 onValueChange = { start, end ->
                                     val formattedStart =
                                         String.format(Locale.ITALY, "%.0f", start).replace(",", ".")
@@ -215,8 +215,8 @@ fun BooksFilterScreen(viewModel: BookViewModel, onSearchBooks: (BookFilter) -> U
                             ValueSlider(
                                 viewModel,
                                 "Weight (Kg)",
-                                minWeight!!.toFloat(),
-                                maxWeight!!.toFloat(),
+                                minWeight.toFloat(),
+                                maxWeight.toFloat(),
                                 filterOptions.weight
                             );
 
@@ -259,7 +259,7 @@ fun BooksFilterScreen(viewModel: BookViewModel, onSearchBooks: (BookFilter) -> U
                             RangeSelector(
                                 viewModel,
                                 "Publication Year",
-                                startingPublicationYear!!.year.toFloat(),
+                                startingPublicationYear.year.toFloat(),
                                 LocalDate.now().year.toFloat(),
                                 onValueChange = { start, end ->
                                     val formattedStart =

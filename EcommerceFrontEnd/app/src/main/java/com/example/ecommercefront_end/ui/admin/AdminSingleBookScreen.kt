@@ -82,21 +82,25 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navController: NavContr
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
                 ) {
-                    Text(
-                        text = book!!.title,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp,
-                        modifier = Modifier
-                            .align(Alignment.Start)
-                            .padding(bottom = 8.dp)
-                    )
-                    Text(
-                        text = book!!.author,
-                        fontSize = 20.sp,
-                        modifier = Modifier
-                            .align(Alignment.Start)
-                            .padding(bottom = 8.dp)
-                    )
+                    book?.let {
+                        Text(
+                            text = it.title,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp,
+                            modifier = Modifier
+                                .align(Alignment.Start)
+                                .padding(bottom = 8.dp)
+                        )
+                    }
+                    book?.let {
+                        Text(
+                            text = it.author,
+                            fontSize = 20.sp,
+                            modifier = Modifier
+                                .align(Alignment.Start)
+                                .padding(bottom = 8.dp)
+                        )
+                    }
                 }
             }
 
@@ -117,7 +121,7 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navController: NavContr
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Row {
                                 Text(
-                                    text = "Price: € ${"%,.2f".format(book!!.price)}",
+                                    text = "Price: € ${"%,.2f".format(book?.price)}",
                                     modifier = Modifier.align(Alignment.CenterVertically)
                                 )
                             }
@@ -135,7 +139,7 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navController: NavContr
                                         .padding(16.dp)
                                 )
                             }
-                            if (showEditPriceField) {
+                            if (showEditPriceField && book != null) {
                                 Spacer(modifier = Modifier.padding(8.dp))
                                 Row {
                                     TextFieldWithSubmitButton({ newPrice ->
@@ -151,7 +155,7 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navController: NavContr
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Row {
                                 Text(
-                                    "Stock Quantity: ${book!!.stock}",
+                                    "Stock Quantity: ${book?.stock}",
                                     modifier = Modifier.align(Alignment.CenterVertically)
                                 )
                             }
@@ -169,7 +173,7 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navController: NavContr
                                         .padding(16.dp)
                                 )
                             }
-                            if (showRestockField) {
+                            if (showRestockField && book != null) {
                                 Spacer(modifier = Modifier.padding(8.dp))
                                 Row {
                                     TextFieldWithSubmitButton({ newStock ->
@@ -186,7 +190,7 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navController: NavContr
 
             item { Spacer(modifier = Modifier.height(8.dp)) }
 
-            if(book!!.available) {
+            if(book != null && book!!.available) {
                 item {
                     Column(
                         modifier = Modifier.fillMaxWidth()
@@ -232,7 +236,8 @@ fun AdminSingleBookScreen( bookViewModel: BookViewModel, navController: NavContr
             item { Spacer(modifier = Modifier.height(40.dp)) }
 
             item {
-                BookInfoCard(book!!)
+                if(book != null)
+                    BookInfoCard(book!!)
             }
         }
     }
