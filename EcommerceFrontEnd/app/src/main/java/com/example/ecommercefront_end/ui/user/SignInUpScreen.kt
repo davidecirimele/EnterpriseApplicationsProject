@@ -391,7 +391,11 @@ fun RegistrationStep1(registrationViewModel: RegistrationViewModel, onNext: () -
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegistrationStep2(registrationViewModel: RegistrationViewModel, onRegistrationComplete: () -> Unit, onNext: () -> Unit, onBack: () -> Unit) {
-    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+
+    val minYear = 1910
+    val maxDate = LocalDate.now().minusYears(16)
+
+    var selectedDate by remember { mutableStateOf(maxDate) }
     var showDatePicker by remember { mutableStateOf(false) }
     var phoneNumber by remember { mutableStateOf("") }
     var admin by remember { mutableStateOf("") }
@@ -447,20 +451,18 @@ fun RegistrationStep2(registrationViewModel: RegistrationViewModel, onRegistrati
                         }
                     }
                 ) {
+
+
                     val datePickerState = rememberDatePickerState(
                         initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.systemDefault())
                             .toInstant().toEpochMilli(),
-                        yearRange = IntRange(1900, LocalDate.now().year),
+                        yearRange = IntRange(minYear, maxDate.year),
                         selectableDates = object : SelectableDates {
                             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                                return Instant.ofEpochMilli(utcTimeMillis)
+                                val date = Instant.ofEpochMilli(utcTimeMillis)
                                     .atZone(ZoneId.systemDefault())
                                     .toLocalDate()
-                                    .isBefore(LocalDate.now()) ||
-                                        Instant.ofEpochMilli(utcTimeMillis)
-                                            .atZone(ZoneId.systemDefault())
-                                            .toLocalDate()
-                                            .isEqual(LocalDate.now())
+                                return !date.isAfter(maxDate)
                             }
                         }
                     )

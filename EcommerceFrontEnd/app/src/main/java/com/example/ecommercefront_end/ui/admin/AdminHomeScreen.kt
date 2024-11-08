@@ -32,10 +32,11 @@ import androidx.navigation.NavHostController
 //samu@gm.com   Ciaobello!10
 //lollo@gm.com   Ciaobello!10
 //admin@gm.com  Ciaobello!10
+//lucap@gm.com  Ciaobello!10
 
-//YjMzOGQ0ODYtNjhkZS00N2UwLWFmNWMtNTJlNTNhMTc5Yzlk
-//OTY2NjNhZjUtMDEyYS00MzUzLThmNDAtZWYzZGE3YzU4NTdi
-//NDgwYzhhZTgtMzQ1NS00NzAwLWFhYTktMTM1ZTBiMDAwNzg2
+//NmYzNjY1ZjAtYzFhNC00ZjM4LThjZTktMmFmNjg2NTcwNTcx
+//ZjlhNDcyZDItZjc3Zi00NDVmLWFlODUtZTIyNDNkZDI4NzQ2
+//YjM2OTIyNTItNzJmYi00MzQ4LWEyZmUtMjcxZTRiYTk0OTdh
 
 
 @Composable

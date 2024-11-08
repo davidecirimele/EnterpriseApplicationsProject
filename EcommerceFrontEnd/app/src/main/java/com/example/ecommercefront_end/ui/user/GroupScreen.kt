@@ -58,13 +58,18 @@ fun GroupScreen(groupViewModel: GroupViewModel, navController: NavController) {
     val snackbarMessage by groupViewModel.snackbarMessage.collectAsState()
 
     val selectedGroup = remember(groups) {
-        mutableStateOf<Group?>(null)
+        mutableStateOf(groups.firstOrNull())
     }
+
 
     LaunchedEffect(groups) {
         if (groups.isNotEmpty() && selectedGroup.value == null) {
             selectedGroup.value = groups.first()
-            groupViewModel.loadGroupMembers(selectedGroup.value!!.id) // Carica i membri del gruppo selezionato.?id) // Carica i membri del gruppo selezionato
+
+            val groupId = selectedGroup.value?.id // Carica i membri del gruppo selezionato.?id) // Carica i membri del gruppo selezionato
+            if (groupId != null) {
+                groupViewModel.loadGroupMembers(groupId)
+            }
         }
     }
 

@@ -160,7 +160,7 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                 if (fetchMin.isSuccessful && fetchMin.body() != null) {
                     minState.value = fetchMin.body()
                 } else {
-                    throw Exception("Failed to fetch min value")
+                     _errorMessage.value = "Failed to fetch min value"
                 }
 
                 if (fetchMax != null) {
@@ -169,10 +169,10 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                             maxState.value = fetchMax.body()
                         }
                         else{
-                            throw Exception("Failed to set max value")
+                            _errorMessage.value = "Failed to fetch max value"
                         }
                     } else {
-                        throw Exception("Failed to fetch max value")
+                        _errorMessage.value = "Failed to fetch max value"
                     }
                 }
 

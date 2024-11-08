@@ -65,7 +65,6 @@ public class Wishlist {
     public void setWToken(String wToken) {
         this.wToken = wToken;
     }*/
-    private String privacySetting;
 
     @CreatedDate
     @Column(name = "CREATED_DATE", updatable = false)

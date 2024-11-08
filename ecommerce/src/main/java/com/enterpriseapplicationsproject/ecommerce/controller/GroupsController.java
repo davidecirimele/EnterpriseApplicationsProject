@@ -32,7 +32,7 @@ public class GroupsController {
         if (groups != null) {
             return ResponseEntity.ok(groups);
         }
-        return ResponseEntity.ok(null);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
     @RateLimit
@@ -43,22 +43,10 @@ public class GroupsController {
         if (members != null) {
             return ResponseEntity.ok(members);
         }
-        return ResponseEntity.ok(null);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
-    @PutMapping("/{groupId}")
-    @PreAuthorize("hasRole('ADMIN')") //never used yet
-    public ResponseEntity<GroupDto> update(@PathVariable("groupId") Long id, @RequestBody GroupDto groupDto) {
-        GroupDto updatedGroup = groupsService.updateGroup(id, groupDto);
-        return ResponseEntity.ok(updatedGroup);
-    }
 
-    @PostMapping("/add")
-    @PreAuthorize("hasRole('ADMIN')") //never used yet
-    public ResponseEntity<GroupDto> add(@RequestBody GroupDto groupDto) {
-        GroupDto newGroup = groupsService.createGroup(groupDto);
-        return ResponseEntity.ok(newGroup);
-    }
 
     @RateLimit
     @PostMapping("/addUser/{idUser}/{token}")
@@ -70,7 +58,7 @@ public class GroupsController {
         if (resp == 0)  //aggiunto e privata
             return ResponseEntity.ok(0);
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(-1); //non aggiunto
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(-1); //non aggiunto
     }
 
 
@@ -82,7 +70,22 @@ public class GroupsController {
         if (resp)
             return ResponseEntity.ok(true);
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(false);
+    }
+
+    @PutMapping("/{groupId}")
+    @PreAuthorize("hasRole('ADMIN')") //never used yet
+    public ResponseEntity<GroupDto> update(@PathVariable("groupId") Long id, @RequestBody GroupDto groupDto) {
+        GroupDto updatedGroup = groupsService.updateGroup(id, groupDto);
+        return ResponseEntity.ok(updatedGroup);
+    }
+
+
+    @PostMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')") //never used yet
+    public ResponseEntity<GroupDto> add(@RequestBody GroupDto groupDto) {
+        GroupDto newGroup = groupsService.createGroup(groupDto);
+        return ResponseEntity.ok(newGroup);
     }
 
 

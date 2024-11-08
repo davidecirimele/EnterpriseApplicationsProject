@@ -45,7 +45,7 @@ public class WishlistController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<WishlistDto>> getAll() {
         List<WishlistDto> wishlists = wishlistService.getAllSorted();
-        if (wishlists.isEmpty())
+        if (wishlists == null || wishlists.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(wishlists, HttpStatus.OK);
     }
