@@ -3,6 +3,12 @@ package com.enterpriseapplicationsproject.ecommerce.data.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.LocalDateTime;
 
 import java.util.List;
 
@@ -46,8 +52,22 @@ public class Address {
     @Column(name = "IS_VALID")
     private boolean valid;
 
-    @OneToMany(mappedBy = "address", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
-    private List<Order> orders;
+    @CreatedDate
+    @Column(name = "CREATED_DATE", updatable = false)
+    private LocalDateTime createdDate;
+
+    @LastModifiedDate
+    @Column(name = "LAST_MODIFIED_DATE")
+    private LocalDateTime lastModifiedDate;
+
+    @CreatedBy
+    @Column(name = "CREATED_BY", updatable = false)
+    private String createdBy;
+
+    @LastModifiedBy
+    @Column(name = "LAST_MODIFIED_BY")
+    private String lastModifiedBy;
+
 
     public boolean isDefaultAddress(){
         return defaultAddress;

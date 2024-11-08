@@ -4,9 +4,14 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 @EqualsAndHashCode()
@@ -67,6 +72,23 @@ public class Book {
     private int age;
 
     @Column(name = "PUBLISH_DATE")
+    private Date publishDate;
+
+    @CreatedDate
+    @Column(name = "CREATED_DATE", updatable = false)
+    private LocalDateTime createdDate;
+
+    @LastModifiedDate
+    @Column(name = "LAST_MODIFIED_DATE")
+    private LocalDateTime lastModifiedDate;
+
+    @CreatedBy
+    @Column(name = "CREATED_BY", updatable = false)
+    private String createdBy;
+
+    @LastModifiedBy
+    @Column(name = "LAST_MODIFIED_BY")
+    private String lastModifiedBy;
     private LocalDate publishDate;
 
     @Column(name = "AVAILABLE")
