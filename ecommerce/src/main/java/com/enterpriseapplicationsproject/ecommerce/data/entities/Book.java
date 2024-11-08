@@ -89,7 +89,6 @@ public class Book {
     @LastModifiedBy
     @Column(name = "LAST_MODIFIED_BY")
     private String lastModifiedBy;
-    private LocalDate publishDate;
 
     @Column(name = "AVAILABLE")
     private boolean available;
