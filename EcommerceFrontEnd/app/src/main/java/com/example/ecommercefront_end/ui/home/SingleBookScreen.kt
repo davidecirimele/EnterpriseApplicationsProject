@@ -51,6 +51,7 @@ import com.example.ecommercefront_end.SessionManager.user
 import java.time.format.DateTimeFormatter
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.Wishlist
+import com.example.ecommercefront_end.model.WishlistPrivacy
 import com.example.ecommercefront_end.repository.CartRepository
 import com.example.ecommercefront_end.repository.WishlistRepository
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
@@ -67,7 +68,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
     val coroutineScope = rememberCoroutineScope()
 
     var selectedWishlist by remember { mutableStateOf<Wishlist?>(null)}
-    val userWishlist by wishlistViewModel.onlyMyWishlists.collectAsState()
+    val userWishlist by wishlistViewModel.wishlists.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -76,6 +77,9 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
 
     val cartShowSnackbar by cartViewModel.showSnackbar.collectAsState()
     val cartSnackbarMessage by cartViewModel.snackbarMessage.collectAsState()
+
+
+
 
 
     var wExpanded by remember { mutableStateOf(false) }
@@ -190,7 +194,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
                         onClick = {
                             coroutineScope.launch {
 
-                                SessionManager.user?.let { user ->
+                                user?.let {
                                     cartViewModel.addItem( book)
                                 } ?: run {
                                     navController.navigate(route = "userAuth") {
@@ -256,7 +260,11 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
                             onDismissRequest = { wExpanded = false }
                         ) {
                             Log.d("Aggiung item", userWishlist.toString())
-                            userWishlist.forEach { w ->
+                            userWishlist.filter { w ->
+                                (w.user?.id  == user?.id) || (w.privacySetting == WishlistPrivacy.SHARED)
+
+                            }
+                            .forEach { w ->
                                 DropdownMenuItem(
                                     onClick = {
                                         selectedWishlist = w
@@ -284,7 +292,7 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
             }
         }
 
-        LaunchedEffect(wShowSnackbar) {
+        LaunchedEffect(wShowSnackbar, cartShowSnackbar) {
             if (wShowSnackbar) {
                 snackbarHostState.showSnackbar(
                     message = wSnackbarMessage,
@@ -299,7 +307,6 @@ fun BookDetailsScreen(book: Book, bookViewModel: BookViewModel, cartViewModel: C
                 )
                 cartViewModel.setShowSnackbar(false)
             }
-
 
             }
         }

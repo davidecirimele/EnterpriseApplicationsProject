@@ -21,12 +21,12 @@ class GroupRepository (private val groupApiService: GroupApiService){
     }
 
 
-    suspend fun addUser(userId: UUID, token: String): Response<Boolean> {
+    suspend fun addUser(userId: UUID, token: String): Response<Int> {
         return groupApiService.addUserToGroup(userId, token)
     }
 
-    suspend fun removeUser(groupId: Long, userId: UUID): Response<Boolean> {
-        return groupApiService.removeUserFromGroup(groupId, userId)
+    suspend fun removeUser(groupId: Long, userId: UUID, idUsrLogged : UUID): Response<Boolean> {
+        return groupApiService.removeUserFromGroup(groupId, userId, idUsrLogged)
     }
 
     suspend fun deleteGroup(groupId: Long): Response<Unit> {

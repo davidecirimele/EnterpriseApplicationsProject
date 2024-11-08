@@ -89,26 +89,16 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
     }
 
     private suspend fun fetchGroupMembers(idGroup: Long) {
-        var message = ""
-        viewModelScope.launch {
-            val response = groupRepository.getGroupMembersById(idGroup, SessionManager.user?.id!!)
-            try {
-                if (response.isSuccessful) {
-                    _groupMembers.value = response.body()!!
-
-                } else {
-                    Log.e("fetchGroupMembers", "Error during fetching group members: ${response.errorBody()}")
-                    message = "Error during fetching group members: ${response.errorBody()}"
-                    triggerSnackbar(message)
-                }
-            } catch (e: Exception) {
-                Log.e("fetchGroupMembers", "Error during fetching group members: ${e.message}")
-                message = "Error during fetching group members: ${e.message}"
-                triggerSnackbar(message)
-            }
+        val response = groupRepository.getGroupMembersById(idGroup, SessionManager.user?.id!!)
+        if (response.isSuccessful) {
+            _groupMembers.value = response.body()!! // Aggiorna direttamente _groupMembers
+            Log.d("fetchGroupMembers", _groupMembers.value.toString())
+        } else {
+            val errorMsg = "Error during fetching group members: ${response.errorBody()}"
+            Log.e("fetchGroupMembers", errorMsg)
         }
-
     }
+
 
 
     fun joinWishlist(token: String) {
@@ -116,7 +106,7 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
             var message = ""
             try {
                 val currentUser = SessionManager.user
-                var response : Response<Boolean>? = null
+                var response : Response<Int>? = null
 
                 if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
                     Log.d("joinWishlist", "primo if, idUser = ${currentUser.id}")
@@ -130,13 +120,14 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
                 }
                 //fetchWishlists(null)// DA SISTEMARE
 
-
-                if (response != null && response.isSuccessful) {
-                    Log.d("joinWishlist", "User added to wishlist successfully")
-                    message = "You joined the wishlist successfully"
-                } else {
-                    //Log.e("joinWishlist", "Errore durante l'aggiunta dell'utente alla wishlist: ${response.errorBody()}")
-                    message = "Erro during joining the wishlist: + ${response?.errorBody()}"
+                if (response != null) {
+                    if (response.body() == 0 || response.body() == 1) {
+                        Log.d("joinWishlist", "User added to wishlist successfully")
+                        message = "You joined the wishlist successfully"
+                    } else {
+                        //Log.e("joinWishlist", "Errore durante l'aggiunta dell'utente alla wishlist: ${response.errorBody()}")
+                        message = "Erro during joining the wishlist: + ${response.errorBody()}"
+                    }
                 }
                 triggerSnackbar(message)
 
@@ -152,52 +143,41 @@ class GroupViewModel(private val groupRepository: GroupRepository) : ViewModel()
         }
     }
 
-    fun unshareWishlist(groupId: Long) {
-        var message = ""
+    fun unshareWishlist(groupId: Long, memeberId: UUID) {
         viewModelScope.launch {
+            var message = ""
             try {
                 val currentUser = SessionManager.user
-                var response : Response<Boolean>? = null
-
-                if (currentUser != null && currentUser.role != "ROLE_ADMIN") {
-                    response = currentUser.let {
-                        groupRepository.removeUser(
-                            groupId, it.id
-                        )
+                val response: Response<Boolean>? = when {
+                    currentUser != null && currentUser.role != "ROLE_ADMIN" -> {
+                        groupRepository.removeUser(groupId, memeberId, currentUser.id)
                     }
-                } else if (currentUser != null && currentUser.role == "ROLE_ADMIN") {
-
-                    response  = userSelectedByAdmin?.let { it.value?.let { it1 ->
-                        groupRepository.removeUser(
-                            groupId, it1
-                        )
-                    } }
+                    currentUser != null && currentUser.role == "ROLE_ADMIN" -> {
+                        userSelectedByAdmin.value?.let { selectedUserId ->
+                            groupRepository.removeUser(groupId, memeberId, selectedUserId)
+                        }
+                    }
+                    else -> null
                 }
 
                 if (response != null && response.isSuccessful) {
+                    // Aggiorna i membri dopo aver rimosso l'utente
                     fetchGroupMembers(groupId)
                     Log.d("unshareWishlist", "Wishlist non più condivisa con successo")
                     message = "Wishlist not shared anymore"
                 } else {
-                    if (response != null) {
-                        Log.e(
-                            "unshareWishlist",
-                            "Error during unsharing wishlist: ${response.errorBody()}"
-                        )
-                        message = "Error during unsharing wishlist: ${response.errorBody()}"
-                    }
+                    message = "Error during unsharing wishlist: ${response?.errorBody()}"
+                    Log.e("unshareWishlist", message)
                 }
                 triggerSnackbar(message)
             } catch (e: Exception) {
-                Log.e(
-                    "unshareWishlist",
-                    "Error during unsharing wishlist: ${e.message}"
-                )
                 message = "Error during unsharing wishlist: ${e.message}"
+                Log.e("unshareWishlist", message)
                 triggerSnackbar(message)
             }
         }
     }
+
 
     fun setShowSnackbar(b: Boolean) {
         _showSnackbar.value = b

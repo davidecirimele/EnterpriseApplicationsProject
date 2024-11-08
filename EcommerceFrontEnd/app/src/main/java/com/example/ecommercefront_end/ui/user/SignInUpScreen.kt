@@ -429,7 +429,7 @@ fun RegistrationStep2(registrationViewModel: RegistrationViewModel, onRegistrati
                 readOnly = true,
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {
-                        Icon(Icons.Filled.CalendarToday, contentDescription = "Seleziona data")
+                        Icon(Icons.Filled.CalendarToday, contentDescription = "Select data")
                     }
                 }
             )
@@ -488,7 +488,7 @@ fun RegistrationStep2(registrationViewModel: RegistrationViewModel, onRegistrati
                     phoneNumber = newValue.filter { it.isDigit() } // Accetta solo numeri
                     isPhoneNumberValid =  phoneNumber.isNotBlank() && italianPhoneNumberRegex.matches(phoneNumber)
                 },
-                label = { Text("Numero di telefono") },
+                label = { Text("Phone number") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -566,7 +566,7 @@ fun RegistrationStep2(registrationViewModel: RegistrationViewModel, onRegistrati
             },
                 enabled = isPhoneNumberValid
             ) {
-                Text("Completa Registrazione")
+                Text("Complete Sing Up")
             }
         }
       }

@@ -37,6 +37,9 @@ public class PaymentMethodsServiceImpl implements PaymentMethodsService {
     @Override
     public PaymentMethodDto addPaymentMethod(SavePaymentMethodDto paymentMethodDto) {
         User user = userDao.findById(paymentMethodDto.getUser().getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
+        if (paymentMethodDto.getCardNumber().length() != 16) {
+            throw new InvalidCardNumberException("Invalid card number");
+        }
         EncryptionUtils encryptionUtils = new EncryptionUtils(encryptionConfig.getSecretKey());
         String encryptedCardNumber;
         try {

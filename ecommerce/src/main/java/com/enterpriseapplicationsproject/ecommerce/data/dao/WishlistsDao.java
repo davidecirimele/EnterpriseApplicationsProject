@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistPrivacy.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,8 +26,8 @@ public interface WishlistsDao extends JpaRepository<Wishlist, Long>,
     @Query("SELECT w.group FROM Wishlist w WHERE w.id = :wishlistId")
     Group getGroupByWishlistId(@Param("wishlistId") Long wishlistId);
 
-    //and w.privacySetting <> com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistPrivacy.PRIVATE
-    @Query("SELECT distinct w FROM Wishlist w JOIN w.group.members m WHERE m.id = :userId  and w.userId.id <> :userId")
+    //@Query("SELECT distinct w FROM Wishlist w JOIN w.group.members m WHERE m.id = :userId and w.privacySetting <> 0  and w.userId.id <> :userId")
+    @Query("SELECT DISTINCT w FROM Wishlist w JOIN w.group g JOIN g.members m WHERE m.id = :userId AND w.privacySetting <> com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistPrivacy.PRIVATE")
     List<Wishlist> findFriendWishlists(@Param("userId")UUID userId);
 
     Wishlist findWishlistByGroup_Id(Long groupId);

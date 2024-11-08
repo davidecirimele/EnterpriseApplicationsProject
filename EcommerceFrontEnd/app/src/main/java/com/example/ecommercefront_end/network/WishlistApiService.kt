@@ -32,17 +32,13 @@ interface WishlistApiService {
     @RequiresAuth
     suspend fun getAllWishlist() : List<Wishlist>
 
-    @PUT("wishlists/update")
+    @PUT("wishlists/update/{idUser}")
     @RequiresAuth
-    suspend fun updateWishlist(@Body w: Wishlist): Response<Unit>
+    suspend fun updateWishlist(@Body w: Wishlist, @Path("idUser") idUser: UUID): Response<Unit>
 
     @DELETE("wishlists/delete/{idWishlist}/{idUser}")
     @RequiresAuth
     suspend fun deleteWishlist(@Path("idWishlist") idW: Long, @Path("idUser") idUser: UUID) : Response<Unit>
-
-    @GET("wishlists/share")
-    @RequiresAuth
-    suspend fun shareWishlist(@Body wishlist: Wishlist) : Map<String, String>
 
     @GET("wishlists/getOfFriend/{idUser}")
     @RequiresAuth

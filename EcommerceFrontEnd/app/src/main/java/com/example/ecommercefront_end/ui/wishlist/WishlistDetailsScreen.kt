@@ -80,27 +80,30 @@ fun WishlistDetails(
     cartViewModel: CartViewModel
 ) {
 
-    var privacyOptions by remember { mutableStateOf(wishlist.privacySetting) }
+    val privacyOptions by remember { mutableStateOf(wishlist.privacySetting) }
     var showMenu by remember { mutableStateOf(false) } // Per gestire la visibilità del menu a comparsa
 
     val isAdmin = user?.role == "ROLE_ADMIN"
-    val wishlistUpdatable = user?.id?.compareTo(wishlist.user?.id) == 0 || isAdmin
+    val isOwner= user?.id?.compareTo(wishlist.user?.id) == 0
     var isFriendWishlist : Boolean? = null
 
     if (isAdmin){
         val idUserSelectedByAdmin by wishlistViewModel.userSelectedByAdmin.collectAsState()
         isFriendWishlist = idUserSelectedByAdmin?.compareTo(wishlist.user?.id) != 0
-
     }
     else{
-        isFriendWishlist = user?.id?.compareTo(wishlist.user?.id) != 0
+        isFriendWishlist = !isOwner
+                && wishlist.privacySetting == WishlistPrivacy.SHARED
     }
 
 
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var itemToRemove by remember { mutableStateOf<WishlistItem?>(null) }
     var showRenameDialog by remember { mutableStateOf(false) }
-    var newWishlistName by remember { mutableStateOf(wishlist.name) }
+    var newWishlistName by remember(wishlist.name) {
+        mutableStateOf(wishlist.name)
+    }
+
 
     val isLoadingWishlist by wishlistViewModel.isLoadingWishlist.collectAsState()
     val isLoadingItems by wishlistViewModel.isLoadingItems.collectAsState()
@@ -133,7 +136,7 @@ fun WishlistDetails(
                 verticalAlignment = Alignment.CenterVertically,
             ){
                 Text(
-                    text = "${wishlist.name}",
+                    text = wishlist.name,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -147,44 +150,45 @@ fun WishlistDetails(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }
                     ) {
-                        if(wishlistUpdatable){
+                        if(isOwner || isAdmin){
                             DropdownMenuItem(
-                                text = { Text("Condividi") },
+                                text = { Text("Share") },
                                 onClick = {
                                     showMenu = false
                                     // Azione per condividere la wishlist
                                     val token = wishlist.wishlistToken
                                     clipboardManager.setText(AnnotatedString(token))
                                     Log.d("WishlistDetails", "Token da copiare: $token")
-                                    Toast.makeText(context, "Token copiato negli appunti!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Token pasted in clipboard!", Toast.LENGTH_SHORT).show()
                                 },
                                 leadingIcon = {
                                     Icon(
                                         imageVector = Icons.Filled.Share,
-                                        contentDescription = "Condividi",
+                                        contentDescription = "Share",
+                                        tint = Color.Blue
+                                    )
+                                }
+                            )
+                        }
+                        if (isOwner || isAdmin || isFriendWishlist){
+                            DropdownMenuItem(
+                                text = { Text("Rename") },
+                                onClick = {
+                                    showMenu = false
+                                    // Azione per rinominare la wishlist
+                                    showRenameDialog = true
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Filled.Edit,
+                                        contentDescription = "Rename",
                                         tint = Color.Blue
                                     )
                                 }
                             )
                         }
                         DropdownMenuItem(
-                            text = { Text("Rinomina") },
-                            onClick = {
-                                showMenu = false
-                                // Azione per rinominare la wishlist
-                                showRenameDialog = true
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Filled.Edit,
-                                    contentDescription = "Rinomina",
-                                    tint = Color.Blue
-                                )
-                            }
-                        )
-
-                        DropdownMenuItem(
-                            text = { Text(if (wishlistUpdatable) "Elimina" else "Esci") },
+                            text = { Text(if (isOwner || isAdmin) "Delete" else "Exit") },
                             onClick = {
                                 showMenu = false
                                 // Azione per eliminare la wishlist
@@ -193,7 +197,7 @@ fun WishlistDetails(
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Filled.Delete,
-                                    contentDescription = "Elimina",
+                                    contentDescription = "Delete",
                                     tint = Color.Red
                                 )
                             }
@@ -205,14 +209,14 @@ fun WishlistDetails(
                     AlertDialog(
                         onDismissRequest = { showDeleteConfirmation = false },
 
-                        title = { Text(if (wishlistUpdatable) "Elimina Wishlist" else "Esci") },
+                        title = { Text(if (isOwner || isAdmin) "Delete Wishlist" else "Exit") },
 
-                        text = { Text(if (wishlistUpdatable) "Sei sicuro di voler eliminare la wishlist?" else "Sei sicuro di voler uscire?") },
+                        text = { Text(if (isOwner || isAdmin) "Are you sure you want to delete this wishlist?" else "Are you sure you want to exit this wishlist?") },
 
                         confirmButton = {
                             Button(onClick = {
                                 //onDeleteWishlist(wishlist) // Chiama il callback per eliminare la wishlist
-                                if(wishlistUpdatable){
+                                if(isOwner || isAdmin){
                                     wishlist.id?.let { user?.id?.let { it1 ->
                                         wishlistViewModel.deleteWishlist(it,
                                             it1
@@ -224,12 +228,12 @@ fun WishlistDetails(
                                 }
                                 showDeleteConfirmation = false
                             }) {
-                                Text("Sì")
+                                Text("Ok")
                             }
                         },
                         dismissButton = {
                             Button(onClick = { showDeleteConfirmation = false }) {
-                                Text("No")
+                                Text("Cancel")
                             }
                         }
                     )
@@ -239,25 +243,25 @@ fun WishlistDetails(
                 if (showRenameDialog) {
                     AlertDialog(
                         onDismissRequest = { showRenameDialog = false },
-                        title = { Text("Rinomina Wishlist") },
+                        title = { Text("Rename Wishlist") },
                         text = {
                             OutlinedTextField(
                                 value = newWishlistName,
                                 onValueChange = { newWishlistName = it },
-                                label = { Text("Nuovo nome") }
+                                label = { Text("New name") }
                             )
                         },
                         confirmButton = {
                             Button(onClick = {
-                                wishlist.id?.let { wishlistViewModel.updateWishlist(it, newWishlistName, privacyOptions, null) } // Chiama il callback per rinominare la wishlist
+                                wishlist.id?.let { wishlistViewModel.updateWishlist(it, newWishlistName, null) } // Chiama il callback per rinominare la wishlist
                                 showRenameDialog = false
                             }) {
-                                Text("Rinomina")
+                                Text("Rename")
                             }
                         },
                         dismissButton = {
                             Button(onClick = { showRenameDialog = false }) {
-                                Text("Annulla")
+                                Text("Cancel")
                             }
                         }
                     )
@@ -265,7 +269,7 @@ fun WishlistDetails(
             }
 
             //Proprietario
-            if (isFriendWishlist){
+            if (! isOwner) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -275,7 +279,7 @@ fun WishlistDetails(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "Condivisa da: ${wishlist.user?.firstName} ${wishlist.user?.lastName}",
+                            text = "Owner: ${wishlist.user?.firstName} ${wishlist.user?.lastName}",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -297,7 +301,7 @@ fun WishlistDetails(
                         fontSize = 18.sp
                     )
                     Button(
-                        enabled = wishlistUpdatable,
+                        enabled = isOwner || isAdmin,
                         onClick = {
                             var privacySetting = wishlist.privacySetting
                             if (wishlist.privacySetting == WishlistPrivacy.PRIVATE)
@@ -309,7 +313,7 @@ fun WishlistDetails(
                             else if (wishlist.privacySetting == WishlistPrivacy.PUBLIC)
                                 privacySetting = WishlistPrivacy.PRIVATE
 
-                            wishlist.id?.let { wishlistViewModel.updateWishlist(it, "", privacySetting, null) }
+                            wishlist.id?.let { wishlistViewModel.updateWishlist(it, null, privacySetting) }
                         },
                         modifier = Modifier.height(36.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp)
@@ -324,12 +328,12 @@ fun WishlistDetails(
 
                             else Icons.Rounded.LockOpen,
 
-                            contentDescription = "Cambia Privacy",
+                            contentDescription = "Change Privacy",
                             modifier = Modifier.size(ButtonDefaults.IconSize)
                         )
                         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
 
-                        Text("${wishlist.privacySetting.name}",)
+                        Text(wishlist.privacySetting.name,)
                     }
                 }
 
@@ -343,13 +347,13 @@ fun WishlistDetails(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Ancora nessun libro aggiunto a questa lista.",
+                        text = "No book items added yet.",
                         fontSize = 18.sp,
                         textAlign = TextAlign.Center
                     )
                 }
             }
-           else{
+            else{
                 if (isLoadingItems) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
@@ -359,7 +363,8 @@ fun WishlistDetails(
                     Column {
                         items.forEach { item ->
 
-                            WishlistItemCard(wishlistItem = item,
+                            WishlistItemCard(
+                                wishlistItem = item,
                                 navController = navController,
                                 onRemoveClick = {
                                     wishlistViewModel.deleteWishlistItem(item.id)
@@ -370,8 +375,7 @@ fun WishlistDetails(
                                     }
                                 },
                                 bookViewModel = bookViewModel,
-                                wishlistUpdateable = wishlistUpdatable,
-                                isFriendWishlist = isFriendWishlist
+                                wishlistUpdateable = isOwner || isAdmin || isFriendWishlist,
                             )
                         }
                     }
@@ -396,9 +400,9 @@ fun WishlistItemCard(
     onRemoveClick: () -> Unit,
     onAddCartClick: () -> Unit,
     wishlistUpdateable: Boolean,
-    isFriendWishlist: Boolean,
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val isAdmin = user?.role == "ROLE_ADMIN"
 
     Card(
         modifier = Modifier
@@ -451,27 +455,28 @@ fun WishlistItemCard(
 
             ) {
                 Icon(imageVector = Icons.Rounded.Delete,
-                    contentDescription = "Rimuovi elemento",
+                    contentDescription = "Remove book",
                     tint = if (wishlistUpdateable) Color.Red  else Color.Gray,
                     modifier = Modifier.size(28.dp)
                 )
             }
 
-            IconButton(
-                onClick = {
-                    coroutineScope.launch {
-                        onAddCartClick()
-                    }
-                },
-                modifier = Modifier,
-                enabled = wishlistUpdateable,
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.ShoppingCart, // Icona del carrello
-                    contentDescription = "Aggiungi al carrello",
-                    tint = Color.Black,// Colore del pulsante,
-                    modifier = Modifier.size(28.dp)
-                )
+            if (!isAdmin){
+                IconButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            onAddCartClick()
+                        }
+                    },
+                    modifier = Modifier,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.ShoppingCart, // Icona del carrello
+                        contentDescription = "Add to cart", // Descrizione dell'icona
+                        tint = Color.Black,// Colore del pulsante,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
 
         }

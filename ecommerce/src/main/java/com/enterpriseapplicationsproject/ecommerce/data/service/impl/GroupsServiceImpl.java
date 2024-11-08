@@ -6,6 +6,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Group;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistPrivacy;
 import com.enterpriseapplicationsproject.ecommerce.data.service.GroupsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.GroupDto;
 import com.enterpriseapplicationsproject.ecommerce.dto.UserDto;
@@ -15,16 +16,12 @@ import org.hibernate.collection.spi.PersistentBag;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasRole;
 
 @Service
 @RequiredArgsConstructor
@@ -143,7 +140,7 @@ public class GroupsServiceImpl implements GroupsService {
 
     @Override
     @Transactional
-    public boolean addUserToGroup(UUID idUser, String wToken) {
+    public int addUserToGroup(UUID idUser, String wToken) {
         Wishlist wishlistToJoin = wishlistDao.findWishlistByWishlistToken(wToken);
 
         if (wishlistToJoin == null) {
@@ -162,71 +159,71 @@ public class GroupsServiceImpl implements GroupsService {
             group = new Group();
             group.setGroupName("Group " + wishlistToJoin.getName());
         }
+        else if(isAMember(group, idUser)){
+            throw new IllegalArgumentException("User is already in the group");
+        }
 
         User user = userDao.findById(idUser)
                 .orElseThrow(() -> new RuntimeException(String.format("User not found with id [%s]", idUser)));
 
-        List<User> members = group.getMembers();
 
-        if (members.contains(user)){
-            throw new IllegalArgumentException("User is already in the group");
-        }
-
-        members.add(user);
+        group.getMembers().add(user);
         groupDao.save(group);
         System.out.println("Group saved");
 
         wishlistToJoin.setGroup(group);
         System.out.println("Group set");
+
         wishlistDao.save(wishlistToJoin);
         System.out.println("Wishlist saved");
-        return true;
+        if (wishlistToJoin.getPrivacySetting().equals(WishlistPrivacy.PRIVATE)){
+            return 0;
+        }
+        return 1;
     }
 
     @Override
     @Transactional
-    public boolean removeUserFromGroup(Long groupId, UUID idUser) {
-
+    public boolean removeUserFromGroup(Long groupId, UUID idUser, UUID idUsrLogged) {
         Wishlist wishlist = wishlistDao.findWishlistByGroup_Id(groupId);
-
-        User user = userDao.findById(idUser)
-                .orElseThrow(() -> new RuntimeException(String.format("User not found with id [%s]", idUser)));
-
         if (wishlist == null) {
             throw new IllegalArgumentException("Wishlist not found");
         }
-
         Group group = groupDao.findById(groupId)
                 .orElseThrow(() -> new RuntimeException(String.format("Group not found with id [%s]", groupId)));
 
-        if (group == null) {
-            throw new IllegalArgumentException("Group not found");
+
+        if (!idUsrLogged.equals(wishlist.getUserId().getId())) {
+            if (!isAMember(group, idUsrLogged)) {
+                throw new IllegalArgumentException("User is not a member or the owner of the group");
+            }
         }
 
-        List<User> members = group.getMembers();
-
-        if (members == null || members.isEmpty()) {
-            throw new IllegalArgumentException("Group has no members");
-        }
-
-        if (!members.stream().anyMatch(usr -> usr.getId().equals(idUser))) {
-            throw new IllegalArgumentException("User is not in the group");
-        }
-
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//
-//        // Verifica se l'utente ha il ruolo ADMIN, da vedere se ha senso
-//        boolean isAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN"));
-
-        if (wishlist.getUserId().equals(idUser) ) {
-            throw new IllegalArgumentException("User is the owner of the wishlist");
-
-        }
-        members.remove(userDao.findById(idUser)
-                .orElseThrow(() -> new RuntimeException(String.format("User not found with id [%s]", idUser))));
+        group.getMembers().remove(userDao.findById(idUser)
+                .orElseThrow(() -> new RuntimeException(String.format("User not in the group or not found", idUser))));
         groupDao.save(group);
 
+        if(!idUsrLogged.equals(idUser)){ //Se l'utente viene cacciato dal gruppo, cambia il token della wishlist
+            wishlist.setWishlistToken(generateWToken());
+        }
+        wishlistDao.save(wishlist);
+
+        System.out.println("Token changed");
         return true;
+    }
+
+    private boolean isAMember(Group group, UUID idUser) {
+        if (group == null || idUser == null) {
+            return false;
+        }
+        return group.getMembers().stream().anyMatch(user -> user.getId().equals(idUser));
+
+
+    }
+
+    private String generateWToken() {
+        UUID uuid = UUID.randomUUID();
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(uuid.toString().getBytes());
     }
 
     @Override

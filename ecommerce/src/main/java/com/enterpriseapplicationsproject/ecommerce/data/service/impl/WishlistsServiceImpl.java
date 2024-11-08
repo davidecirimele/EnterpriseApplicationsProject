@@ -210,7 +210,7 @@ public class WishlistsServiceImpl implements WishlistsService {
 
         Wishlist wishlistToJoin = wishlistsDao.findWishlistByWishlistToken(wToken);
 
-        if(wishlistToJoin.getUserId().equals(idUserToJoin)){
+        if(wishlistToJoin.getUserId().getId().equals(idUserToJoin)){
             throw new IllegalArgumentException("User is the owner of the wishlist");
         }
 
@@ -328,26 +328,70 @@ public class WishlistsServiceImpl implements WishlistsService {
     }
 
 
-
-
     @Transactional
     @Override
-    public WishlistDto updateWishlist(WishlistDto wishlistDto) {
-        return wishlistsDao.findById(wishlistDto.getId())
-                .map(wishlist -> {
-                    wishlist.setName(wishlistDto.getName());
-
-                    System.out.println("PS in arrivo : " + wishlistDto.getPrivacySetting());
-                    System.out.println("PS attuale : " + wishlist.getPrivacySetting());
-
-                    wishlist.setPrivacySetting(wishlistDto.getPrivacySetting());
-
-                    Wishlist savedWishlist = wishlistsDao.save(wishlist);
-                    System.out.println("PS Nuovo : " + savedWishlist.getPrivacySetting());
-                    return modelMapper.map(savedWishlist, WishlistDto.class);
-                })
+    public WishlistDto updateWishlist(WishlistDto wishlistDto, UUID idUser ) {
+        Wishlist wishlist = wishlistsDao.findById(wishlistDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Wishlist not found"));
+
+        if (wishlist == null) {
+            throw new IllegalArgumentException("Wishlist not found");
+        }
+
+        String newName = wishlistDto.getName();
+        boolean isAMember = isAMemberAndShared(wishlist, idUser);
+
+        if (!wishlist.getName().equals(newName)) {
+            if (!WishlistValidToUpdate(wishlist, idUser)) {
+                throw new IllegalArgumentException("Your are not the owner or a member of this wishlist");
+            }
+            wishlist.setName(wishlistDto.getName());
+        }
+
+        WishlistPrivacy newPrivacySetting = wishlistDto.getPrivacySetting();
+
+        if (newPrivacySetting != null && !wishlist.getPrivacySetting().equals(newPrivacySetting)) {
+            if (isAMember) {
+                throw new IllegalArgumentException("User not authorized to change privacy setting of this wishlist");
+            }
+            if (!wishlist.getUserId().getId().equals(idUser)) {
+                throw new IllegalArgumentException("User not authorized to update this wishlist");
+            }
+            System.out.println("PS in arrivo : " + wishlistDto.getPrivacySetting());
+            System.out.println("PS attuale : " + wishlist.getPrivacySetting());
+
+            wishlist.setPrivacySetting(wishlistDto.getPrivacySetting());
+        }
+
+        Wishlist savedWishlist = wishlistsDao.save(wishlist);
+        System.out.println("PS Nuovo : " + savedWishlist.getPrivacySetting());
+        return modelMapper.map(savedWishlist, WishlistDto.class);
+
     }
+
+    private boolean WishlistValidToUpdate(Wishlist wishlist, UUID idUser) {
+        if (wishlist.getUserId() == null){
+            return false;
+        }
+        if (!wishlist.getUserId().getId().equals(idUser)) {
+            if (!isAMemberAndShared(wishlist, idUser)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isAMemberAndShared(Wishlist wishlist, UUID idUser) {
+        Group group = wishlist.getGroup();
+        if (group == null ) {
+            return false;
+        }
+        return group.getMembers().stream().anyMatch(user -> user.getId().equals(idUser))
+
+                && wishlist.getPrivacySetting().equals(WishlistPrivacy.SHARED);
+
+    }
+
 
     public String generateWToken() {
         UUID uuid = UUID.randomUUID();

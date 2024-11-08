@@ -1,14 +1,12 @@
 package com.enterpriseapplicationsproject.ecommerce.data.service.impl;
 
 import com.enterpriseapplicationsproject.ecommerce.data.dao.BooksDao;
+import com.enterpriseapplicationsproject.ecommerce.data.dao.GroupsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistItemsDao;
 import com.enterpriseapplicationsproject.ecommerce.data.dao.WishlistsDao;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Book;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.Wishlist;
-import com.enterpriseapplicationsproject.ecommerce.data.entities.WishlistItem;
+import com.enterpriseapplicationsproject.ecommerce.data.entities.*;
 import com.enterpriseapplicationsproject.ecommerce.data.service.WishlistItemsService;
 import com.enterpriseapplicationsproject.ecommerce.dto.WishlistItemDto;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -24,6 +22,7 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
 
     private final WishlistItemsDao wishlistItemsDao;
     private final BooksDao booksDao;
+    private final GroupsDao groupsDao;
     private final WishlistsDao wishlistsDao;
     private final ModelMapper modelMapper;
 
@@ -46,17 +45,15 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
         Wishlist wishlist = wishlistsDao.findById(idWishlist) //ESCE QUELLA ROBA STRANA
                 .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID: " + idWishlist));
 
+        if (!WishlistValidToUpdate(wishlist, idUser)) {
+            throw new IllegalArgumentException("User is not the owner of the wishlist or a member of the group");
+        }
+
         Book book = booksDao.findById(idBook)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
 
-        List<WishlistItem> wishlistItems = wishlistItemsDao.findByWishlistId(idWishlist);
-
-        if (wishlistItems != null){
-            for (WishlistItem wi : wishlistItems) {
-                if (wi.getBook().getId().equals(idBook)) {
-                    throw new IllegalArgumentException("Book already in wishlist");
-                }
-            }
+        if (ItemInWishlist(idWishlist, idBook)) {
+            throw new IllegalArgumentException("Book already in wishlist");
         }
 
         WishlistItem wishlistItem = new WishlistItem();
@@ -85,6 +82,13 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
         Wishlist wishlist = wishlistsDao.findById(wishlistItem.getWishlist().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID"));
 
+        if (!WishlistValidToUpdate(wishlist, idUser)) {
+            throw new IllegalArgumentException("User is not the owner of the wishlist or a member of the group");
+        }
+
+        if (!wishlist.getItems().contains(wishlistItem)) {
+            throw new IllegalArgumentException("Wishlist item not found in wishlist");
+        }
 
         wishlist.getItems().remove(wishlistItem);
         try {
@@ -120,7 +124,7 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
             throw new NullPointerException();
         }
         List<WishlistItem> wishlistItems = wishlistItemsDao.findAll();
-        if (wishlistItems == null || wishlistItems.isEmpty()) {
+        if (wishlistItems.isEmpty()) {
             System.out.println("No wishlistItems found!");
         } else {
             System.out.println("wishlistItems found!");
@@ -142,6 +146,90 @@ public class WishlistItemsServiceImpl implements WishlistItemsService {
     public void save(WishlistItem wishlistItem) {
         wishlistItemsDao.save(wishlistItem);
     }
+
+
+    private boolean WishlistValidToUpdate(Wishlist wishlist, UUID idUser) {
+        if (wishlist.getUserId() == null){
+            return false;
+        }
+        if (!wishlist.getUserId().getId().equals(idUser)) {
+            Group group = wishlist.getGroup();
+            if (group == null ) {
+                return false;
+            }
+            return group.getMembers().stream().anyMatch(user -> user.getId().equals(idUser))
+
+                    && wishlist.getPrivacySetting().equals(WishlistPrivacy.SHARED);
+
+        }
+        else return true;
+    }
+
+    private boolean ItemInWishlist(Long idWishlist, Long idBook) {
+        List<WishlistItem> wishlistItems = wishlistItemsDao.findByWishlistId(idWishlist);
+
+        if (wishlistItems != null){
+            for (WishlistItem wi : wishlistItems) {
+                if (wi.getBook().getId().equals(idBook)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+
+    }
+
+    @Override
+    public WishlistItemDto adminAddItem(Long idBook, Long idWishlist, UUID idUser) {
+        System.out.println("idw:(" + idWishlist + " ) idb:(" + idBook + ")idu:(" + idUser);
+        Wishlist wishlist = wishlistsDao.findById(idWishlist) //ESCE QUELLA ROBA STRANA
+                .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID: " + idWishlist));
+
+        Book book = booksDao.findById(idBook)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
+
+        if (ItemInWishlist(idWishlist, idBook)) {
+            throw new IllegalArgumentException("Book already in wishlist");
+        }
+
+        WishlistItem wishlistItem = new WishlistItem();
+
+        System.out.println("Setting book and wishlist");
+        wishlistItem.setBook(book);
+        wishlistItem.setWishlist(wishlist);
+
+        System.out.println("Saving wishlist item");
+        wishlistItemsDao.save(wishlistItem);
+        wishlist.getItems().add(wishlistItem);
+
+        System.out.println("Saving wishlist");
+        wishlistsDao.save(wishlist);
+        return modelMapper.map(wishlistItem, WishlistItemDto.class);
+    }
+
+    @Override
+    public WishlistItemDto adminDeleteItemById(Long idWishlistItem) {
+        WishlistItem wishlistItem = wishlistItemsDao.findById(idWishlistItem)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist item ID"));
+
+        Wishlist wishlist = wishlistsDao.findById(wishlistItem.getWishlist().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid wishlist ID"));
+
+        if (!wishlist.getItems().contains(wishlistItem)) {
+            throw new IllegalArgumentException("Wishlist item not found in wishlist");
+        }
+
+        wishlist.getItems().remove(wishlistItem);
+        try {
+            wishlistItemsDao.deleteById(idWishlistItem);
+            return modelMapper.map(wishlistItem, WishlistItemDto.class);
+
+            // Restituisci un codice di stato HTTP 204 (No Content) per indicare successo senza contenuto
+        } catch (EmptyResultDataAccessException e) {
+            throw new IllegalArgumentException("Invalid wishlist item ID");
+        }
+    }
+
 
 
 

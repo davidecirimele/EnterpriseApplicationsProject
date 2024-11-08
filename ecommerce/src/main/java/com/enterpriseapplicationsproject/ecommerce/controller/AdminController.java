@@ -2,10 +2,7 @@ package com.enterpriseapplicationsproject.ecommerce.controller;
 
 import com.enterpriseapplicationsproject.ecommerce.config.security.RateLimit;
 import com.enterpriseapplicationsproject.ecommerce.data.entities.User;
-import com.enterpriseapplicationsproject.ecommerce.data.service.AuthService;
-import com.enterpriseapplicationsproject.ecommerce.data.service.OrdersService;
-import com.enterpriseapplicationsproject.ecommerce.data.service.RefreshTokenService;
-import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
+import com.enterpriseapplicationsproject.ecommerce.data.service.*;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import com.enterpriseapplicationsproject.ecommerce.dto.security.RefreshTokenDto;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserRegistrationException;
@@ -34,6 +31,8 @@ public class AdminController {
     private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
     private final OrdersService ordersService;
+    private final WishlistItemsService wishlistItemsService;
+    private final WishlistsService wishlistService;
 
 
     @RateLimit
@@ -57,6 +56,39 @@ public class AdminController {
         Page<OrderSummaryDto> orders = ordersService.getAll(pageable);
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
+
+    @RateLimit(type = "USER")
+    @PutMapping(consumes = "application/json", path = "/update/{idUser}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<WishlistDto> update(@RequestBody WishlistDto wDto, @PathVariable UUID idUser) {
+        System.out.println("WishlistDto userID: " + wDto.getUser().getId());
+        WishlistDto w = wishlistService.updateWishlist(wDto, idUser);
+        if (w == null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(w, HttpStatus.OK);
+    }
+
+    @RateLimit(type = "USER")
+    @PostMapping(path = "/addWishlistItem/{idBook}/{idWishlist}/{idUser}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<WishlistItemDto> addItem(@PathVariable  Long idBook, @PathVariable Long idWishlist, @PathVariable UUID idUser) {
+        WishlistItemDto wi = wishlistItemsService.adminAddItem(idBook, idWishlist, idUser);
+        if (wi == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(wi, HttpStatus.OK);
+    }
+
+    @RateLimit(type = "USER")
+    @DeleteMapping( path = "/removeWishlist/delete/{idItem}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<WishlistItemDto> deleteItem(@PathVariable Long idItem) {
+        WishlistItemDto wi = wishlistItemsService.adminDeleteItemById(idItem);
+        if (wi == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(wi, HttpStatus.OK);
+    }
+
+
 
 
 

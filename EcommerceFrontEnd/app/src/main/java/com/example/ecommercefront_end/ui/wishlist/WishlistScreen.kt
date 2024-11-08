@@ -1,6 +1,7 @@
 package com.example.ecommercefront_end.ui.wishlist
 
 import android.util.Log
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,16 +58,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.SessionManager.user
 import com.example.ecommercefront_end.model.Wishlist
 import com.example.ecommercefront_end.model.WishlistPrivacy
+import com.example.ecommercefront_end.ui.theme.friendPublicWishlistColor
+import com.example.ecommercefront_end.ui.theme.myWishlistColor
+import com.example.ecommercefront_end.ui.theme.sharedWishlistColor
 import com.example.ecommercefront_end.viewmodels.BookViewModel
 import com.example.ecommercefront_end.viewmodels.CartViewModel
+import com.example.ecommercefront_end.viewmodels.GroupViewModel
 import com.example.ecommercefront_end.viewmodels.WishlistViewModel
 
 
 @Composable
-fun WishlistsScreen(wishlistViewModel: WishlistViewModel, bookViewModel : BookViewModel, cartViewModel: CartViewModel, navController: NavController) {
+fun WishlistsScreen(wishlistViewModel: WishlistViewModel, groupViewModel : GroupViewModel, bookViewModel : BookViewModel, cartViewModel: CartViewModel, navController: NavController) {
 
     val wLists by wishlistViewModel.wishlists.collectAsState()
     val wListItems by wishlistViewModel.wishlistItems.collectAsState()
@@ -80,6 +86,9 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, bookViewModel : BookVi
     val cartShowSnackbar by cartViewModel.showSnackbar.collectAsState()
     val cartSnackbarMessage by cartViewModel.snackbarMessage.collectAsState()
 
+    val groupShowSnackbar by groupViewModel.showSnackbar.collectAsState()
+    val groupSnackbarMessage by groupViewModel.snackbarMessage.collectAsState()
+
     val errorMessage by cartViewModel.errorMessage.collectAsState(initial = "")
 
     // Gestione della selezione della wishlist
@@ -89,24 +98,27 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, bookViewModel : BookVi
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) {
-            paddingValues ->
+    ) { paddingValues ->
 
         if (isWishlistLoading) {
-            Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         } else {
             // Ricarica gli elementi della wishlist selezionata
-            LazyColumn(modifier = Modifier.fillMaxSize()
+            LazyColumn(modifier = Modifier
+                .fillMaxSize()
                 .padding(paddingValues))
             {
                 item {
                     WishlistsList(
                         wishlists = wLists,
                         viewModel = wishlistViewModel,
+                        selectedWishlist = selectedWishlist.value,
                         onWishlistSelected = { wishlist ->
-                            selectedWishlist.value = wishlist
+                            selectedWishlist.value = wishlist.copy()
                             wishlist.id?.let { wishlistViewModel.fetchWishlistItems(it, user!!.id) }
                         }
                     )
@@ -128,40 +140,48 @@ fun WishlistsScreen(wishlistViewModel: WishlistViewModel, bookViewModel : BookVi
             }
         }
         LaunchedEffect(wShowSnackbar, cartShowSnackbar, errorMessage) {
+            snackbarHostState.currentSnackbarData?.dismiss() // Chiude la snackbar attuale, se presente
+
             if (wShowSnackbar) {
+                wishlistViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
                 snackbarHostState.showSnackbar(
                     message = wSnackbarMessage,
                     duration = SnackbarDuration.Short
                 )
-                wishlistViewModel.setShowSnackbar(false) // Resetta lo stato della Snackbar
-
-            } else if (cartShowSnackbar) {
+            }
+            else if (groupShowSnackbar) {
+                groupViewModel.setShowSnackbar(false)
+                snackbarHostState.showSnackbar(
+                    message = groupSnackbarMessage,
+                    duration = SnackbarDuration.Short
+                )
+            }
+            else if (cartShowSnackbar) {
+                cartViewModel.setShowSnackbar(false)
                 snackbarHostState.showSnackbar(
                     message = cartSnackbarMessage,
                     duration = SnackbarDuration.Short
                 )
+            } else if (errorMessage.isNotEmpty()) {
                 cartViewModel.setShowSnackbar(false)
-            } else if (errorMessage != "") {
-                errorMessage?.let {
-                    snackbarHostState.showSnackbar(
-                        message = it,
-                        duration = SnackbarDuration.Short
-                    )
-                    cartViewModel.setShowSnackbar(false)
-                }
+                snackbarHostState.showSnackbar(
+                    message = errorMessage,
+                    duration = SnackbarDuration.Short
+                )
             }
         }
+
     }
 }
 
 
 @Composable
-fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWishlistSelected: (Wishlist) -> Unit) {
+fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel,
+                  selectedWishlist: Wishlist?, onWishlistSelected: (Wishlist) -> Unit) {
+
     var showAddWishlistMain by remember { mutableStateOf(false) }
     val isAdmin = user?.role == "ROLE_ADMIN"
     val idUserSelectedByAdmin by viewModel.userSelectedByAdmin.collectAsState()
-
-
 
     Row(
         modifier = Modifier
@@ -170,9 +190,13 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        val title = if (isAdmin && wishlists.isNotEmpty() && (wishlists[0].user?.id == idUserSelectedByAdmin)) {
+            "Wishlists of ${wishlists[0].user?.firstName} ${wishlists[0].user?.lastName}"
+        } else {
+            "Your wishlists"
+        }
         Text(
-            text = if (isAdmin && (wishlists.get(0).user?.id == idUserSelectedByAdmin) )
-                "Liste di ${wishlists.get(0).user?.firstName} ${wishlists.get(0).user?.lastName}" else "Your wishlists",
+            text = title,
 
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
@@ -217,20 +241,25 @@ fun WishlistsList(wishlists: List<Wishlist>, viewModel: WishlistViewModel, onWis
         ) {
             items(
                 items = wishlists,
-                key = { item -> item.id?.toString() ?: "" } // Chiave a livello di items
+                //key = { item -> "${item.id}-${item.name}" }// Chiave a livello di items
             ) { wishlist ->
                 var isFriendWishlist: Boolean? = null
                 if (isAdmin){
-                    isFriendWishlist = idUserSelectedByAdmin?.compareTo(wishlist.user?.id) != 0
+                    //isFriendWishlist = idUserSelectedByAdmin?.compareTo(wishlist.user?.id) != 0
+                    isFriendWishlist = (wishlist.group?.members?.any { it.id == idUserSelectedByAdmin } == true )
+                                              && idUserSelectedByAdmin != wishlist.user?.id
                 }
                 else{
-                    isFriendWishlist = user?.id?.compareTo(wishlist.user?.id) != 0
+                    isFriendWishlist = ( wishlist.group?.members?.any { it.id == user?.id } == true )
+                                                && user?.id?.compareTo(wishlist.user?.id) != 0
                 }
-                WishlistThumbnail( // Rimuovi il secondo key qui
+                WishlistThumbnail(
                     wishlist = wishlist,
-                    onClick = { onWishlistSelected(wishlist) },
-                    wishlistUpdatable = user?.id?.compareTo(wishlist.user?.id) == 0 || isAdmin,
-                    isFriendWishlist = isFriendWishlist
+                    onClick = {
+                        onWishlistSelected(wishlist) },
+                    wishlistUpdatable = wishlist.privacySetting == WishlistPrivacy.SHARED || isAdmin,
+                    isFriendWishlist = isFriendWishlist?:false,
+                    isSelected = wishlist == selectedWishlist
 
                 )
             }
@@ -262,12 +291,15 @@ fun AddWishlistDialog(
             title = {
                 Text(
                     text = "Create a new wishlist",
-                    modifier = Modifier.fillMaxWidth().wrapContentSize(Alignment.Center)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.Center)
                 )
             },
             text = {
                 Box(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
                         .wrapContentSize(Alignment.Center)
                 ) {
                     Column(
@@ -336,7 +368,7 @@ fun AddWishlistDialog(
                     Button(
                         onClick = onDismissRequest,
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-                    )
+                        )
                     {
                         Text("Cancel")
 
@@ -344,7 +376,8 @@ fun AddWishlistDialog(
                 }
             },
             dismissButton = null,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .wrapContentSize(Alignment.Center)
                 .heightIn(max = 300.dp)
         )
@@ -393,7 +426,8 @@ fun AddWishlistDialog(
                         onClick = {
                             onJoinWishlist(tokenShared)
                             showJoinWishlist = false
-                        }
+                        },
+                        enabled = tokenShared.length > 5 // Abilita il pulsante solo se il campo non è vuoto
                     ) {
                         Text("Join")
                     }
@@ -415,7 +449,9 @@ fun AddWishlistDialog(
         AlertDialog(
             onDismissRequest = onDismissRequest,
             text = {
-                Box(modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center)) {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentSize(Alignment.Center)) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -425,7 +461,8 @@ fun AddWishlistDialog(
                         ) {
                             Button(
                                 onClick = { showCreateWishlist = true },
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier
+                                    .weight(1f)
                                     .width(190.dp) // Larghezza uniforme
                                     .height(75.dp) // Altezza uniforme
                                     .padding(horizontal = 2.dp),
@@ -437,7 +474,8 @@ fun AddWishlistDialog(
 
                             Button(
                                 onClick = { showJoinWishlist = true },
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier
+                                    .weight(1f)
                                     .width(190.dp)
                                     .height(75.dp) // Altezza uniforme
                                     .padding(horizontal = 4.dp)
@@ -462,7 +500,6 @@ fun AddWishlistDialog(
                     }
                 }
             },
-
             dismissButton = null,
             modifier = Modifier
                 .fillMaxWidth()
@@ -474,22 +511,39 @@ fun AddWishlistDialog(
 
 
 @Composable
-fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit, wishlistUpdatable: Boolean, isFriendWishlist: Boolean) {
+fun WishlistThumbnail(wishlist: Wishlist, onClick: () -> Unit, isFriendWishlist: Boolean,
+                      isSelected : Boolean, wishlistUpdatable: Boolean) {
+
     Log.d("WishlistThumbnail", "userId: ${user?.id}, wishlist.userId: ${wishlist.user?.id}")
+
     Card(
         modifier = Modifier
             .padding(8.dp)
             .width(150.dp)
             .height(70.dp) // Imposta l'altezza fissa per tutte le card
-            .clickable { onClick() },
+            .clickable { onClick() }
+            .then(
+                if (isSelected) Modifier.border(
+                    width = 1.dp,
+                    color = if (!isFriendWishlist) Color.Green
+                            else Color.Black, // Colore del bordo per la selezione
+                    shape = RoundedCornerShape(8.dp)
+                 ) else Modifier
+            ),
+
         shape = RoundedCornerShape(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(
             containerColor =
             if (isFriendWishlist) {
-                Color.Cyan
+                if (wishlist.privacySetting == WishlistPrivacy.SHARED){
+                    sharedWishlistColor
+                }
+                else {
+                    friendPublicWishlistColor
+                }
             } else {
-                Color.LightGray
+                myWishlistColor
             }
         ), // Colore di riempimento condizionale
 

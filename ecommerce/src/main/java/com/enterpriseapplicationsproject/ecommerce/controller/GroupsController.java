@@ -63,20 +63,22 @@ public class GroupsController {
     @RateLimit
     @PostMapping("/addUser/{idUser}/{token}")
     @PreAuthorize("#idUser == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<Boolean> addUser(@PathVariable("idUser") UUID idUser, @PathVariable("token") String token) {
-        boolean resp = groupsService.addUserToGroup(idUser, token);
-        if (resp)
-            return ResponseEntity.ok(true);
+    public ResponseEntity<Integer> addUser(@PathVariable("idUser") UUID idUser, @PathVariable("token") String token) {
+        int resp = groupsService.addUserToGroup(idUser, token);
+        if (resp == 1)  //aggiunto e non privata
+            return ResponseEntity.ok(1);
+        if (resp == 0)  //aggiunto e privata
+            return ResponseEntity.ok(0);
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(-1); //non aggiunto
     }
 
 
     @RateLimit
-    @DeleteMapping("/removeUser/{idGroup}/{idUser}")
-    @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
-    public ResponseEntity<Boolean> removeUser(@PathVariable("idGroup") Long idGroup, @PathVariable("idUser") UUID idUser) {
-        boolean resp = groupsService.removeUserFromGroup(idGroup, idUser);
+    @DeleteMapping("/removeUser/{idGroup}/{idUser}/{idUsrLogged}")
+    @PreAuthorize("#idUsrLogged == authentication.principal.getId() or hasRole('ADMIN')")
+    public ResponseEntity<Boolean> removeUser(@PathVariable("idGroup") Long idGroup, @PathVariable("idUser") UUID idUser, @PathVariable("idUsrLogged") UUID idUsrLogged) {
+        boolean resp = groupsService.removeUserFromGroup(idGroup, idUser, idUsrLogged);
         if (resp)
             return ResponseEntity.ok(true);
 
