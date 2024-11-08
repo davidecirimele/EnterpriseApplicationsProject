@@ -29,6 +29,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDefaults.contentColor
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -51,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.network.RetrofitClient
@@ -80,6 +84,24 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navController: NavControl
 
     val coroutineScope = rememberCoroutineScope()
 
+    val errorMessage by bookViewModel.errorMessage.collectAsState()
+
+    LaunchedEffect(errorMessage) {
+
+        errorMessage?.let { message ->
+            val result = bookViewModel.snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short,
+                withDismissAction = false,
+                )
+
+            if (result == SnackbarResult.Dismissed) {
+                bookViewModel.onSnackbarDismissed()
+            }
+        }
+
+    }
+
     LaunchedEffect(searchValue) {
         if(searchValue == "")
             filteredProducts = allProducts
@@ -98,7 +120,8 @@ fun AdminCatalogueScreen(bookViewModel: BookViewModel, navController: NavControl
         ){
             SearchBar(filterOptions,{ newValue -> filterOptions = newValue } , {value -> searchValue = value })
         }
-    }){ paddingValues ->
+
+    },snackbarHost = { SnackbarHost(bookViewModel.snackbarHostState) }){ paddingValues ->
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)) {

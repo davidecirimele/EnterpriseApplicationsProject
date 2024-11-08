@@ -3,6 +3,7 @@ package com.example.ecommercefront_end.viewmodels
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,14 +22,17 @@ import com.example.ecommercefront_end.model.SaveBook
 import com.example.ecommercefront_end.model.Stock
 
 import com.example.ecommercefront_end.repository.BookRepository
+import com.example.ecommercefront_end.utils.ErrorMessageParser
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import retrofit2.Response
 import java.io.File
+import java.net.SocketTimeoutException
 import java.time.LocalDate
 import kotlin.math.log
 
@@ -104,6 +108,11 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     private val _recentBooks = MutableStateFlow<List<Book>>(emptyList())
     val recentBooks: StateFlow<List<Book>> = _recentBooks
 
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
+
+    val snackbarHostState = SnackbarHostState()
+
     init {
         viewModelScope.launch {
             fetchAllAvailableProducts()
@@ -130,7 +139,10 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                 startingYearJob.await()
 
             } catch (e: Exception) {
-                Log.e("Book Error", "Error loading books data", e)
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error while fetching books data: Connection problem."
+                else
+                    _errorMessage.value = "Error while fetching books data."
             }finally {
                 _isLoadingData.value = false
             }
@@ -144,31 +156,29 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         maxState: MutableStateFlow<T?>? = null
     ) {
         if((minState.value == null && maxState == null) || (minState.value == null && (maxState != null && maxState.value == null)))
-        try {
-
-            if (fetchMin.isSuccessful && fetchMin.body() != null) {
-                minState.value = fetchMin.body()
-            } else {
-                throw Exception("Failed to fetch min value")
-            }
-
-
-            if (fetchMax != null) {
-                if (fetchMax.isSuccessful && fetchMax.body() != null) {
-                    if (maxState != null) {
-                        maxState.value = fetchMax.body()
-                    }
-                    else{
-                        throw Exception("Failed to set max value")
-                    }
+            try {
+                if (fetchMin.isSuccessful && fetchMin.body() != null) {
+                    minState.value = fetchMin.body()
                 } else {
-                    throw Exception("Failed to fetch max value")
+                    throw Exception("Failed to fetch min value")
                 }
-            }
 
-        } catch (e: Exception) {
-            Log.d("BookDebug", "Error fetching values: ${e.message}")
-        }
+                if (fetchMax != null) {
+                    if (fetchMax.isSuccessful && fetchMax.body() != null) {
+                        if (maxState != null) {
+                            maxState.value = fetchMax.body()
+                        }
+                        else{
+                            throw Exception("Failed to set max value")
+                        }
+                    } else {
+                        throw Exception("Failed to fetch max value")
+                    }
+                }
+
+            } catch (e: Exception) {
+                throw e
+            }
     }
 
     private suspend fun fetchAllProducts() {
@@ -183,7 +193,10 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
             }
 
         } catch (e: Exception) {
-            _error.value = "Errore durante il caricamento dei libri: ${e.message}" // Imposta il messaggio di errore
+            if (e is SocketTimeoutException)
+                _errorMessage.value = "Error while fetching all products: Connection problem."
+            else
+                _errorMessage.value = "Error while fetching all products."
         } finally {
             _isLoadingAllBooks.value = false
         }
@@ -202,7 +215,10 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
             }
 
         } catch (e: Exception) {
-            _error.value = "Errore durante il caricamento dei libri: ${e.message}" // Imposta il messaggio di errore
+            if (e is SocketTimeoutException)
+                _errorMessage.value = "Error while fetching all available products: Connection problem."
+            else
+                _errorMessage.value = "Error while fetching all available products."
         } finally {
             fetchHalloweenBooks()
             fetchRecentBooks()
@@ -218,11 +234,14 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
             if (response.isSuccessful && response.body() != null) {
                 return response.body()!!
             } else {
-                throw Exception("Error fetching products")
+                _errorMessage.value = "Error while fetching products."
             }
 
-        } catch (e: Exception) {
-            _error.value = "Errore durante il caricamento dei libri: ${e.message}" // Imposta il messaggio di errore
+        }catch (e: Exception) {
+            if (e is SocketTimeoutException)
+                _errorMessage.value = "Error while fetching products: Connection problem."
+            else
+                _errorMessage.value = "Error while fetching products."
         }finally {
             _isLoadingFilteredBooks.value = false
         }
@@ -261,7 +280,6 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                 _bookFlow.value = it
                 return
             }
-            Log.d("BookCover", "Carico il libro dal database")
 
             val response = repository.getBook(id)
 
@@ -270,12 +288,15 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                 _bookFlow.value?.let { bookCache.put(it.id,_bookFlow.value) }
             } else {
                 _bookFlow.value = null
-                throw Exception("Error fetching book with id $id")
+                _errorMessage.value = "Error while loading book."
             }
 
         } catch (e: Exception) {
-            _error.value = "Errore durante il caricamento del libro: ${e.message}" // Imposta il messaggio di errore
-        } finally {
+            if (e is SocketTimeoutException)
+                _errorMessage.value = "Error while loading book: Connection problem."
+            else
+                _errorMessage.value = "Error while loading book."
+        }finally {
             _isLoadingBook.value = false
         }
     }
@@ -289,12 +310,14 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
                     clearCache()
                     fetchAllAvailableProducts()
-                    Log.d("BookViewModel", "Book added: ${_allAvailableProducts.value}")
                 }
                 else
-                    Log.d("UserDebug", "User is null")
+                    _errorMessage.value = "Session Error."
             } catch (e: Exception) {
-                Log.d("UserDebug", "Error adding Book: $book")
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error inserting book: Connection problem."
+                else
+                    _errorMessage.value = "Error inserting book."
             }
         }
     }
@@ -303,17 +326,25 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         viewModelScope.launch {
             try {
                 if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
-                    Log.d("UserDebug", "NewPrice ${Price(newPrice)}")
-                    repository.updatePrice(bookId, Price(newPrice))
 
-                    clearCache()
+                    val response = repository.updatePrice(bookId, Price(newPrice))
 
-                    loadBook(bookId)
+                    if(response.isSuccessful) {
+                        clearCache()
+                        loadBook(bookId)
+                    }else{
+                        val errorBody = response.errorBody()?.string()
+
+                        _errorMessage.value = ErrorMessageParser(errorBody)
+                    }
                 }
                 else
-                    Log.d("UserDebug", "User is null")
+                    _errorMessage.value = "Session Error."
             } catch (e: Exception) {
-                e.message?.let { Log.d("UserDebug", it) }
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error updating book price: Connection problem."
+                else
+                    _errorMessage.value = "Error updating book price."
             }
         }
     }
@@ -322,16 +353,24 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
         viewModelScope.launch {
             try {
                 if (SessionManager.user != null && SessionManager.user!!.role == "ROLE_ADMIN") {
-                    Log.d("UserDebug", "NewStock $newStock")
-                    repository.updateStock(bookId, Stock(newStock))
+                    val response = repository.updateStock(bookId, Stock(newStock))
 
-                    clearCache()
-                    loadBook(bookId)
+                    if(response.isSuccessful) {
+                        clearCache()
+                        loadBook(bookId)
+                    }else{
+                        val errorBody = response.errorBody()?.string()
+
+                        _errorMessage.value = ErrorMessageParser(errorBody)
+                    }
                 }
                 else
-                    Log.d("UserDebug", "User is null")
+                    _errorMessage.value = "Session Error."
             } catch (e: Exception) {
-                Log.d("UserDebug", "Error updating Book stock")
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error updating book stock: Connection problem."
+                else
+                    _errorMessage.value = "Error updating book stock."
             }
         }
     }
@@ -349,10 +388,13 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                     loadBook(bookId)
                 }
                 else{
-                    throw Exception("Access Denied")
+                    _errorMessage.value = "Session Error."
                 }
             } catch (e: Exception) {
-                Log.d("UserDebug", "Error deleting Book with id $bookId")
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error while deleting book: Connection problem."
+                else
+                    _errorMessage.value = "Error while deleting book."
             }
         }
     }
@@ -369,10 +411,13 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                     loadBook(bookId)
                 }
                 else{
-                    throw Exception("Access Denied")
+                    _errorMessage.value = "Session Error."
                 }
             } catch (e: Exception) {
-                Log.d("UserDebug", "Error deleting Book with id $bookId")
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error while restoring book: Connection problem."
+                else
+                    _errorMessage.value = "Error while restoring book."
             }
         }
     }
@@ -387,10 +432,13 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                     loadBook(bookId)
                 }
                 else{
-                    throw Exception("Access Denied")
+                    _errorMessage.value = "Session Error."
                 }
             } catch (e: Exception) {
-                Log.d("UserDebug", "Error deleting Book with id $bookId")
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error while updating book cover: Connection problem."
+                else
+                    _errorMessage.value = "Error while updating book cover."
             }
         }
     }
@@ -422,11 +470,13 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
                 return bitmap
             }else{
-                Log.d("IMAGE DEBUG", "response is null")
-                throw Exception("Error fetching Image")
+                _errorMessage.value = "Error while fetching book cover."
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            if (e is SocketTimeoutException)
+                _errorMessage.value = "Error while fetching book cover: Connection problem."
+            else
+                _errorMessage.value = "Error while fetching book cover."
         }
         return null
     }
@@ -434,8 +484,11 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
     suspend fun fetchHalloweenBooks() {
         try {
             _halloweenBooks.value = fetchBooksByFilter(BookFilter(genre = BookGenre.HORROR))
-        }catch (e : Exception){
-            Log.d("Books", "fetchRecentBooks: ${e.message}")
+        }catch (e: Exception) {
+            if (e is SocketTimeoutException)
+                _errorMessage.value = "Error while fetching books: Connection problem."
+            else
+                _errorMessage.value = "Error while fetching books."
         }
     }
 
@@ -447,8 +500,11 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
                     minPublishDate = LocalDate.now().minusYears(4)
                 )
             )
-        }catch (e : Exception){
-            Log.d("Books", "fetchRecentBooks: ${e.message}")
+        }catch (e: Exception) {
+            if (e is SocketTimeoutException)
+                _errorMessage.value = "Error while fetching books: Connection problem."
+            else
+                _errorMessage.value = "Error while fetching books."
         }
     }
 
@@ -460,6 +516,10 @@ class BookViewModel(private val repository: BookRepository): ViewModel() {
 
             matchesTitle || matchesAuthor || matchesPublisher
         }
+    }
+
+    fun onSnackbarDismissed(){
+        _errorMessage.value = null
     }
 
     fun onLogout(){

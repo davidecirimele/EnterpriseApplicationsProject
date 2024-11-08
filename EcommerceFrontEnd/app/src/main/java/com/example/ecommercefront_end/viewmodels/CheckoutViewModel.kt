@@ -21,6 +21,7 @@ import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.model.UserId
 import com.example.ecommercefront_end.repository.AddressRepository
 import com.example.ecommercefront_end.repository.CheckoutRepository
+import com.example.ecommercefront_end.utils.ErrorMessageParser
 import com.example.ecommercefront_end.viewmodels.CartViewModel
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import org.json.JSONObject
 import java.net.SocketTimeoutException
 
 
@@ -111,8 +113,6 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing
-
-
 
 
     val isCheckoutEnabled: StateFlow<Boolean> = combine(
@@ -287,7 +287,7 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
 
     }
 
-    fun onAddPaymentMethodClick() {
+    fun onAddPaymentMethodClick(onSuccess: ()->Unit) {
         viewModelScope.launch {
 
             val user = SessionManager.getUser()
@@ -302,22 +302,33 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
 
             try {
                 val addResponse = checkoutRepository.addPaymentMethod(newPaymentMethod)
-                val paymentMethod = addResponse.body()
-                if (paymentMethod != null) {
-                    resetPaymentMethodForm()
 
+                if(addResponse.isSuccessful) {
+                    val paymentMethod = addResponse.body()
+                    if (paymentMethod != null) {
+                        resetPaymentMethodForm()
 
-                    val getResponse =
-                        checkoutRepository.getPaymentMethod(user.userId, paymentMethod.id)
-                    if (getResponse.isSuccessful) {
-                        getResponse.body()?.let { pm ->
-                            _paymentMethods.value = _paymentMethods.value.toMutableList().apply {
-                                add(pm)
+                        val getResponse =
+                            checkoutRepository.getPaymentMethod(user.userId, paymentMethod.id)
+                        if (getResponse.isSuccessful) {
+                            getResponse.body()?.let { pm ->
+                                _paymentMethods.value =
+                                    _paymentMethods.value.toMutableList().apply {
+                                        add(pm)
+                                    }
+                                _selectedPaymentMethod.value = pm
+                                onSuccess()
                             }
-                            _selectedPaymentMethod.value = pm
-                            println("selected payment method: ${_selectedPaymentMethod.value}")
+                        } else {
+                            val errorBody = getResponse.errorBody()?.string()
+
+                            _errorMessage.value = ErrorMessageParser(errorBody)
                         }
                     }
+                }else {
+                    val errorBody = addResponse.errorBody()?.string()
+
+                    _errorMessage.value = ErrorMessageParser(errorBody)
                 }
             }
             catch (e: Exception) {
@@ -505,6 +516,10 @@ class CheckoutViewModel(private val checkoutRepository: CheckoutRepository, priv
         _selectedAddress.value = null
         _selectedPaymentMethod.value = null
         _addresses.value = emptyList()
+    }
+
+    fun onSnackbarDismissed(){
+        _errorMessage.value = null
     }
 
     fun onLogout(){

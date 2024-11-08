@@ -245,7 +245,17 @@ fun NavigationView(navController: NavHostController) {
                 val user by adminViewModel.userFlow.collectAsState()
 
                 user?.let {
-                    AdminUserDetailsScreen(user = it, navController)
+                    AdminUserDetailsScreen(accountViewModel,user = it, navController, onDelete = {
+                        accountViewModel.onLogout()
+                        adminViewModel.onLogout()
+                        addressViewModel.onLogout()
+                        bookViewModel.onLogout()
+                        cartViewModel.onLogout()
+                        checkoutViewModel.onLogout()
+                        groupViewModel.onLogout()
+                        transactionViewModel.onLogout()
+                        wishlistViewModel.onLogout()
+                    })
                 } ?: Text("User not found")
             }
 
@@ -308,7 +318,7 @@ fun NavigationView(navController: NavHostController) {
                 selectedIndex.value = 1
 
                 LaunchedEffect(Unit) {
-                    accountViewModel.loadUserDetails(forceReload = true)
+                    accountViewModel.loadUserDetails()
                 }
 
                 val _userApiService = RetrofitClient.userApiService
@@ -328,7 +338,7 @@ fun NavigationView(navController: NavHostController) {
             composable("my-account") {
                 LaunchedEffect(Unit) {
                     Log.d("MyAccountScreen", "SessionManager.user: ${SessionManager.user}")
-                    val userDetailsJob = async {accountViewModel.loadUserDetails(forceReload = true)}
+                    val userDetailsJob = async {accountViewModel.loadUserDetails()}
                     val defaultAddress = async {addressViewModel.fetchDefaultAddress()}
 
                     userDetailsJob.await()

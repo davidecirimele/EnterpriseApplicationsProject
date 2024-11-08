@@ -14,6 +14,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,11 +24,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.UserDetails
 import com.example.ecommercefront_end.ui.user.AccountOptions
+import com.example.ecommercefront_end.viewmodels.AccountViewModel
 
 @Composable
-fun AdminUserDetailsScreen(user: UserDetails, navHostController: NavHostController){
+fun AdminUserDetailsScreen(accountViewModel: AccountViewModel, user: UserDetails, navHostController: NavHostController, onDelete: ()-> Unit){
 
     Card(modifier = Modifier.fillMaxSize().background(color = Color.Gray)) {
         LazyColumn(
@@ -146,7 +151,7 @@ fun AdminUserDetailsScreen(user: UserDetails, navHostController: NavHostControll
                 .weight(1f)
         ) {
             Button(
-                onClick = {/*TODO*/ },
+                onClick = { accountViewModel.deleteUser(userId = user.id, onDelete = {onDelete(); SessionManager.clearSession()}) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)

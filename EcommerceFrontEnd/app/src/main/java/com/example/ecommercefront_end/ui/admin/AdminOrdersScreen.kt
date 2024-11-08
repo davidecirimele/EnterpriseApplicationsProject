@@ -14,13 +14,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Button
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.OrderSummary
 import com.example.ecommercefront_end.viewmodels.AdminViewModel
 
@@ -31,6 +35,24 @@ fun AdminOrdersScreen(
 ) {
     val orders by viewModel.orders.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let { message ->
+            val result = viewModel.snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short,
+                actionLabel = "RETRY"
+            )
+
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.fetchOrders()
+            }
+            else if (result == SnackbarResult.Dismissed) {
+                viewModel.onSnackbarDismissed()
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         if (orders.isEmpty())
@@ -44,7 +66,7 @@ fun AdminOrdersScreen(
                 backgroundColor = Color(0xFF1F1F1F),
                 contentColor = Color.White
             )
-        }
+        },snackbarHost = {SnackbarHost(viewModel.snackbarHostState)}
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
             if (isLoading) {

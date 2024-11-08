@@ -20,6 +20,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,13 +54,29 @@ fun ChangePasswordScreen(viewModel: AccountViewModel, navController: NavHostCont
 
     var showClearPassword by remember{mutableStateOf(false)}
 
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let { message ->
+            val result = viewModel.snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short,
+                withDismissAction = false,
+            )
+
+            if (result == SnackbarResult.Dismissed) {
+                viewModel.onSnackbarDismissed()
+            }
+        }
+    }
+
     Scaffold(topBar = {
         TopAppBar(
             title = { androidx.compose.material.Text("Change Password") },
             backgroundColor = Color(0xFF1F1F1F),
             contentColor = Color.White
         )
-    }) {paddingValues->
+    },snackbarHost = { SnackbarHost(viewModel.snackbarHostState) }) {paddingValues->
         Box(modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues), contentAlignment = Alignment.TopCenter) {

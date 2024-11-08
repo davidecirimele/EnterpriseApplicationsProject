@@ -15,6 +15,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,6 +43,22 @@ fun EditAddressScreen(viewModel: AddressViewModel, navController: NavHostControl
 
     val address by viewModel.addressToEdit.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let { message ->
+            val result = viewModel.snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short,
+                withDismissAction = false,
+            )
+
+            if (result == SnackbarResult.Dismissed) {
+                viewModel.onSnackbarDismissed()
+            }
+        }
+    }
 
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -71,7 +90,7 @@ fun EditAddressScreen(viewModel: AddressViewModel, navController: NavHostControl
                 backgroundColor = Color(0xFF1F1F1F),
                 contentColor = Color.White
             )
-        }) {paddingValues->
+        },snackbarHost = { SnackbarHost(viewModel.snackbarHostState) }) {paddingValues->
             Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.TopCenter) {
                 Column(
                     modifier = Modifier
@@ -167,10 +186,11 @@ fun EditAddressScreen(viewModel: AddressViewModel, navController: NavHostControl
                                         state,
                                         postalCode,
                                         additionalInfo
-                                    )
+                                    ), onSuccess = {
+                                        navController.popBackStack()
+                                    }
                                 )
                             }
-                            navController.popBackStack()
                         },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = street.isNotBlank() && province.isNotBlank() && city.isNotBlank() && state.isNotBlank() && postalCode.isNotBlank()

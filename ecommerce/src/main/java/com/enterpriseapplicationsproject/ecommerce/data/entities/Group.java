@@ -30,6 +30,6 @@ public class Group {
     )
     private List<User> members = new ArrayList<>();
 
-    @OneToOne(mappedBy = "group", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "group", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private Wishlist wishlist;
 }

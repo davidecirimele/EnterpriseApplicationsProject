@@ -46,7 +46,7 @@ public class Address {
     @Column(name = "IS_VALID")
     private boolean valid;
 
-    @OneToMany(mappedBy = "address", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "address", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<Order> orders;
 
     public boolean isDefaultAddress(){

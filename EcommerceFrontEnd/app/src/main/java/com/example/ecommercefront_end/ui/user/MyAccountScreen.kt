@@ -29,6 +29,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -54,6 +57,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Address
+import com.example.ecommercefront_end.model.PasswordUser
 import com.example.ecommercefront_end.model.UserDetails
 import com.example.ecommercefront_end.ui.user.Address.AddressView
 import com.example.ecommercefront_end.viewmodels.AccountViewModel
@@ -71,13 +75,45 @@ fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: Addres
 
     var showDialog by remember{mutableStateOf(false)}
 
+    val accountErrorMessage by accountViewModel.errorMessage.collectAsState()
+
+    val addressErrorMessage by accountViewModel.errorMessage.collectAsState()
+
+    LaunchedEffect(accountErrorMessage) {
+        accountErrorMessage?.let { message ->
+            val result = accountViewModel.snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short,
+                withDismissAction = false,
+            )
+
+            if (result == SnackbarResult.Dismissed) {
+                accountViewModel.onSnackbarDismissed()
+            }
+        }
+    }
+
+    LaunchedEffect(addressErrorMessage) {
+        addressErrorMessage?.let { message ->
+            val result = addressViewModel.snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short,
+                withDismissAction = false,
+            )
+
+            if (result == SnackbarResult.Dismissed) {
+                addressViewModel.onSnackbarDismissed()
+            }
+        }
+    }
+
     Scaffold(topBar = {
         TopAppBar(
             title = { androidx.compose.material.Text("My Account") },
             backgroundColor = Color(0xFF1F1F1F),
             contentColor = Color.White
         )
-    }) { paddingValues ->
+    },snackbarHost = { SnackbarHost(accountViewModel.snackbarHostState) }) { paddingValues ->
         if (isDeletingAccount) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -97,7 +133,8 @@ fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: Addres
                         defaultAddress,
                         accountViewModel = accountViewModel,
                         addressViewModel,
-                        navController
+                        navController,
+                        onLogout
                     )
                 }
                 if (SessionManager.user != null && SessionManager.user!!.role != "ROLE_ADMIN") {
@@ -167,24 +204,17 @@ fun MyAccountScreen(accountViewModel: AccountViewModel, addressViewModel: Addres
 }
 
 @Composable
-fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewModel : AccountViewModel, addressViewModel: AddressViewModel, navController: NavController){
+fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?,accountViewModel: AccountViewModel, addressViewModel: AddressViewModel, navController: NavController, onLogout: () -> Unit){
     var isEditingEmail by remember { mutableStateOf(false) }
 
     var isEditingPhoneNumber by remember { mutableStateOf(false) }
-
-    var isErrorEmailTriggered by remember { mutableStateOf(false) }
-
-    var isErrorPhoneNumberTriggered by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier
         .fillMaxWidth()
         .pointerInput(Unit) {
             detectTapGestures(onTap = {
-                // Quando viene toccato qualsiasi punto al di fuori del campo di testo
                 isEditingPhoneNumber = false
                 isEditingEmail = false
-                isErrorPhoneNumberTriggered = false
-                isErrorEmailTriggered = false
             })
         }) {
         Row(modifier = Modifier.fillMaxWidth()){
@@ -219,12 +249,9 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
         }
         Spacer(modifier = Modifier.height(15.dp))
         Row(modifier = Modifier.fillMaxWidth()){
-            EditScreen("Email", isEditingEmail, isErrorEmailTriggered, accountViewModel = accountViewModel, onSuccess = {
-                    isEditingEmail = false
-                    navController.navigate("userAuth") {
-                        popUpTo("userAuth") { inclusive = true }
-                    }
-            }, onError = {isErrorEmailTriggered = true})
+            EditScreen("Email", isEditingEmail, accountViewModel, onSubmit = {isEditingEmail=false; onLogout(); SessionManager.clearSession(); navController.navigate("userAuth"){
+                popUpTo(0) {inclusive= true}
+            }})
         }
         Spacer(modifier = Modifier.height(30.dp))
 
@@ -251,10 +278,7 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
             }
             Spacer(modifier = Modifier.height(15.dp))
             Row(modifier = Modifier.fillMaxWidth()){
-                EditScreen("Phone Number", isEditingPhoneNumber, isErrorPhoneNumberTriggered, accountViewModel = accountViewModel, onSuccess = {
-                    isEditingPhoneNumber = false
-                    navController.popBackStack()
-            }, onError = {isErrorPhoneNumberTriggered = true})
+                EditScreen("Phone Number", isEditingPhoneNumber, accountViewModel, onSubmit = {isEditingPhoneNumber = false; accountViewModel.loadUserDetails()})
             }
         }
         if(SessionManager.user != null && SessionManager.user!!.role!="ROLE_ADMIN") {
@@ -299,18 +323,16 @@ fun UserInfo(userDetails: UserDetails?,defaultAddress: Address?, accountViewMode
 }
 
 @Composable
-fun EditScreen(key: String, isEditing: Boolean, isErrorTriggered: Boolean, accountViewModel: AccountViewModel, onSuccess: () -> Unit, onError: () -> Unit) {
+fun EditScreen(key: String, isEditing: Boolean, accountViewModel: AccountViewModel, onSubmit: ()->Unit) {
     var inputText by remember { mutableStateOf("") }
 
     var showDialog by remember { mutableStateOf(false)}
 
     Column{
 
-        // Se `isEditing` è true, mostra il campo di testo e il bottone "Submit"
         if (isEditing) {
-            Spacer(modifier = Modifier.height(16.dp)) // Spazio tra i componenti
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Campo di testo per inserire le modifiche
             TextField(
                 value = inputText,
                 onValueChange = { inputText = it },
@@ -320,11 +342,6 @@ fun EditScreen(key: String, isEditing: Boolean, isErrorTriggered: Boolean, accou
                     .fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
-
-            if(isErrorTriggered) {
-                Text(text = "Error changing the $key", fontWeight = FontWeight.Bold, color = Color.Red)
-                Spacer(modifier = Modifier.height(16.dp)) // Spazio tra i componenti
-            }
 
             // Bottone "Submit"
             Button(
@@ -359,10 +376,8 @@ fun EditScreen(key: String, isEditing: Boolean, isErrorTriggered: Boolean, accou
             confirmButton = {
                 Button(
                     onClick = {
-                        accountViewModel.viewModelScope.launch {
-                            accountViewModel.editFunction(key,inputText, onSuccess, onError)
-                        }
                         showDialog = false
+                        accountViewModel.editFunction(key, inputText, onSuccess = onSubmit)
                     }
                 ) {
                     Text("Confirm")

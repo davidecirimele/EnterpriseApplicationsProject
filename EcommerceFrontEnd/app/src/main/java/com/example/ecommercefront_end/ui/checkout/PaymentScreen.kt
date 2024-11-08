@@ -123,8 +123,7 @@ fun CheckoutPaymentScreen(viewModel: CheckoutViewModel, navController: NavContro
                                 onExpirationDateChange = { viewModel.onExpirationDateChange(it) },
                                 onCardProviderSelected = { viewModel.selectCardProvider(it) },
                                 onSaveClick = {
-                                    viewModel.onAddPaymentMethodClick()
-                                    navController.navigateUp() // Torna alla schermata precedente
+                                    viewModel.onAddPaymentMethodClick(onSuccess = {navController.navigateUp()})
                                 },
                                 selectedPaymentMethodType = viewModel.selectedPaymentMethodType.collectAsState().value,
                                 onPaymentMethodTypeSelected = { viewModel.selectPaymentMethodType(it) }

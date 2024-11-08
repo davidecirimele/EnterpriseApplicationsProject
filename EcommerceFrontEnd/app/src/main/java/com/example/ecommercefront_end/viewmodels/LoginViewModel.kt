@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.model.Credential
 import com.example.ecommercefront_end.repository.AuthRepository
+import com.example.ecommercefront_end.utils.ErrorMessageParser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -55,8 +56,11 @@ class LoginViewModel(private val loginRepository: AuthRepository) : ViewModel() 
                     Log.d("SessionManagerDebug", "user: ${SessionManager.user}")
                     onLoginSuccess()
                 } else {
-                    _loginError.value = "Login failed: ${response.message()}"
-                    triggerSnackbar("Login failed: ${response.message()}")
+                    val errorBody = response.errorBody()?.string()
+
+                    _loginError.value = ErrorMessageParser(errorBody)
+
+                    triggerSnackbar(ErrorMessageParser(errorBody))
                 }
             } catch (e: Exception) {
                 _loginError.value = "An error occurred: ${e.message}"

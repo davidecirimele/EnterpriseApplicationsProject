@@ -8,14 +8,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.TopAppBar
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
+import com.example.ecommercefront_end.SessionManager
 import com.example.ecommercefront_end.utils.insertButton
 import com.example.ecommercefront_end.viewmodels.AddressViewModel
 import java.util.UUID
@@ -26,13 +31,33 @@ fun AddressesScreen(userId: UUID?=null, viewModel: AddressViewModel, navHostCont
 
     val addresses by viewModel.addresses.collectAsState()
 
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let { message ->
+            val result = viewModel.snackbarHostState.showSnackbar(
+                message = message,
+                actionLabel = "RETRY",
+                duration = SnackbarDuration.Short
+            )
+
+            if (result == SnackbarResult.ActionPerformed) {
+                val id = userId ?: SessionManager.getUser().userId
+                viewModel.fetchUserAddresses(id)
+            }
+            else if (result == SnackbarResult.Dismissed) {
+                viewModel.onSnackbarDismissed()
+            }
+        }
+    }
+
     Scaffold(topBar = {
         TopAppBar(
             title = { androidx.compose.material.Text("Saved Addresses") },
             backgroundColor = Color(0xFF1F1F1F),
             contentColor = Color.White
         )
-    }) { paddingValues ->
+    },snackbarHost = { SnackbarHost(viewModel.snackbarHostState) }) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

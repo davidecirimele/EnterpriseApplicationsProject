@@ -1,6 +1,7 @@
 package com.example.ecommercefront_end.viewmodels
 
 import android.util.Log
+import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ecommercefront_end.SessionManager
@@ -15,12 +16,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.net.SocketTimeoutException
 import java.util.UUID
 
 class AdminViewModel(private val repository: AdminRepository): ViewModel()  {
 
-    private val _users = MutableStateFlow<List<UserDetails>?>(emptyList())//user si riferisce a UserDetails
-    val users: StateFlow<List<UserDetails>?> = _users
+    private val _users = MutableStateFlow<List<UserDetails>>(emptyList())//user si riferisce a UserDetails
+    val users: StateFlow<List<UserDetails>> = _users
 
     private val _filteredUsers = MutableStateFlow<List<UserDetails>?>(emptyList())
     val filteredUsers: StateFlow<List<UserDetails>?> = _filteredUsers
@@ -34,50 +36,67 @@ class AdminViewModel(private val repository: AdminRepository): ViewModel()  {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> get() = _isLoading
 
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
+
+    val snackbarHostState = SnackbarHostState()
+
     var currentPage = 0
     var totalPages = 1
 
-    suspend fun fetchUsers(forceReload: Boolean = false){
+    suspend fun fetchUsers(){
         try {
             var response = repository.getAllUsers()
 
             if (response != null) {
                 if(response.isSuccessful && response.body()!=null) {
-                    _users.value = response.body()
+                    _users.value = response.body()!!
                     _filteredUsers.value = response.body()
                 }
             }
             else{
-                throw Exception()
+                _errorMessage.value = "Error while fetching users."
             }
-        }catch (e: Exception){
-            Log.e("AdminError", "Error loading users", e)
+        }catch (e: Exception) {
+            if (e is SocketTimeoutException)
+                _errorMessage.value = "Error while fetching users: Connection problem."
+            else
+                _errorMessage.value = "Error while fetching users."
         }
     }
 
     fun loadUser(userId: UUID) {
         viewModelScope.launch {
-            val user = _users.value?.find { it.id == userId }
-            _userFlow.value = user
+            if(users.value.isNotEmpty()) {
+                val user = _users.value.find { it.id == userId }
+                _userFlow.value = user
+            }
+            else{
+                _errorMessage.value = "Error while loading user."
+            }
         }
     }
 
     fun filterUser(value : String? = null){
         viewModelScope.launch {
-            if (users.value != null) {
-                try {
-                    if (users.value!!.isNotEmpty()) {
-                        _filteredUsers.value = users.value?.filter { user ->
-                            (value == null ||
-                                    user.firstName?.contains(value, ignoreCase = true) ?: false ||
-                                    user.lastName?.contains(value, ignoreCase = true) ?: false ||
-                                    user.id?.toString()?.contains(value, ignoreCase = true) ?: false ||
-                                    user.email?.contains(value, ignoreCase = true) ?: false)
-                        }
+            try {
+                if (users.value.isNotEmpty()) {
+                    _filteredUsers.value = users.value.filter { user ->
+                        (value == null ||
+                                user.firstName.contains(value, ignoreCase = true) ?: false ||
+                                user.lastName.contains(value, ignoreCase = true) ?: false ||
+                                user.id.toString().contains(value, ignoreCase = true) ?: false ||
+                                user.email.contains(value, ignoreCase = true) ?: false)
                     }
-                } catch (e: Exception) {
-                    Log.e("AdminError", "Error filtering users", e)
                 }
+                else{
+                    _errorMessage.value = "Error while filtering users."
+                }
+            } catch (e: Exception) {
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error while filtering users: Connection problem."
+                else
+                    _errorMessage.value = "Error while filtering users."
             }
         }
     }
@@ -93,13 +112,16 @@ class AdminViewModel(private val repository: AdminRepository): ViewModel()  {
                         currentPage = page
                         totalPages = responseBody.totalPages
                     } ?: run {
-                        Log.e("AdminError", "Il corpo della risposta è nullo")
+                        _errorMessage.value = "Error while fetching orders."
                     }
                 } else {
-                    Log.e("AdminError", "Errore nella risposta: ${response?.code()}")
+                    _errorMessage.value = "Error while fetching orders."
                 }
             } catch (e: Exception) {
-                Log.e("AdminError", "Errore durante il caricamento degli ordini", e)
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error while fetching orders: Connection problem."
+                else
+                    _errorMessage.value = "Error while fetching orders."
             } finally {
                 _isLoading.value = false
             }
@@ -117,6 +139,10 @@ class AdminViewModel(private val repository: AdminRepository): ViewModel()  {
         if (currentPage > 0) {
             fetchOrders(currentPage - 1)
         }
+    }
+
+    fun onSnackbarDismissed(){
+        _errorMessage.value = null
     }
 
     fun onLogout(){

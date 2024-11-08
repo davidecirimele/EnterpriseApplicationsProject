@@ -23,6 +23,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -67,6 +70,22 @@ fun AdminUsersListScreen(viewModel: AdminViewModel, navHostController: NavHostCo
     val users by viewModel.filteredUsers.collectAsState()
     var searchValue by remember { mutableStateOf("") }
 
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let { message ->
+            val result = viewModel.snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short,
+                withDismissAction = false,
+            )
+
+            if (result == SnackbarResult.Dismissed) {
+                viewModel.onSnackbarDismissed()
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.fetchUsers()
     }
@@ -77,7 +96,7 @@ fun AdminUsersListScreen(viewModel: AdminViewModel, navHostController: NavHostCo
             backgroundColor = Color(0xFF1F1F1F),
             contentColor = Color.White
         )
-    }) { paddingValues ->
+    },snackbarHost = { SnackbarHost(viewModel.snackbarHostState) }) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
 
             Row(modifier = Modifier.fillMaxWidth(), Arrangement.SpaceBetween) {

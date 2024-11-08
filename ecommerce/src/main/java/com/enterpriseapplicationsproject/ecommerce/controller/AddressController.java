@@ -7,6 +7,7 @@ import com.enterpriseapplicationsproject.ecommerce.data.service.UserService;
 import com.enterpriseapplicationsproject.ecommerce.dto.*;
 import com.enterpriseapplicationsproject.ecommerce.exception.AddressNotFoundException;
 import com.enterpriseapplicationsproject.ecommerce.exception.UserNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -97,7 +98,7 @@ public class AddressController {
     @RateLimit(type ="USER")
     @PostMapping(consumes = "application/json", path = "/{userId}/insert-address")
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<AddressDto> insertAddress(@PathVariable UUID userId, @RequestBody SaveAddressDto addressDto){
+    public ResponseEntity<AddressDto> insertAddress(@PathVariable UUID userId, @Valid @RequestBody SaveAddressDto addressDto){
         log.info("Received request for addresses/{userId}/insert-address");
 
         AddressDto addedAddress = addressService.insertAddress(userId, addressDto);
@@ -127,7 +128,7 @@ public class AddressController {
     @RateLimit(type ="USER")
     @PutMapping("/{userId}/{addressId}/edit-address")
     @PreAuthorize("#userId == authentication.principal.getId() or hasRole('ADMIN')")
-    public ResponseEntity<AddressDto> updateAddress(@PathVariable UUID userId, @PathVariable Long addressId, @RequestBody SaveAddressDto addressDto) {
+    public ResponseEntity<AddressDto> updateAddress(@PathVariable UUID userId, @PathVariable Long addressId,@Valid @RequestBody SaveAddressDto addressDto) {
         log.info("Received request for addresses/{userId}/{addressId}/edit-address");
 
         AddressDto updatedAddress = addressService.updateAddress(userId, addressId, addressDto);

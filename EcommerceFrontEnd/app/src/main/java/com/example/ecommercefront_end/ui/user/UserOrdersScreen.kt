@@ -15,6 +15,9 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material3.Button
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,6 +40,22 @@ fun UserOrdersScreen(
     val orders by viewModel.userOrders.collectAsState()
     val isLoading by viewModel.isLoadingOrders.collectAsState()
 
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let { message ->
+            val result = viewModel.snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short,
+                withDismissAction = false,
+            )
+
+            if (result == SnackbarResult.Dismissed) {
+                viewModel.onSnackbarDismissed()
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.fetchOrders()
     }
@@ -48,7 +67,7 @@ fun UserOrdersScreen(
                 backgroundColor = Color(0xFF1F1F1F),
                 contentColor = Color.White
             )
-        }
+        },snackbarHost = { SnackbarHost(viewModel.snackbarHostState) }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
             if (isLoading) {

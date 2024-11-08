@@ -23,6 +23,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,6 +63,22 @@ fun AccountManagerScreen(viewModel: AccountViewModel, bookViewModel: BookViewMod
 
     val isLoggingOut by viewModel.isLoggingOut.collectAsState()
 
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let { message ->
+            val result = viewModel.snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short,
+                withDismissAction = false,
+            )
+
+            if (result == SnackbarResult.Dismissed) {
+                viewModel.onSnackbarDismissed()
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.fetchPurchasedBooks()
     }
@@ -70,7 +89,7 @@ fun AccountManagerScreen(viewModel: AccountViewModel, bookViewModel: BookViewMod
             backgroundColor = Color(0xFF1F1F1F),
             contentColor = Color.White
         )
-    }){ paddingValues ->
+    },snackbarHost = { SnackbarHost(bookViewModel.snackbarHostState); SnackbarHost(viewModel.snackbarHostState) }){ paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -139,10 +158,6 @@ fun OptionsSection(navHostController: NavHostController){
                         popUpTo("account-manager") { saveState = true }
                     }}) {
                         Text(text = "My Groups")
-                    }
-                    Spacer(modifier = Modifier.width(20.dp))
-                    Button(onClick = { /*TODO*/ }) {
-                        Text(text = "My Reviews")
                     }
                 }
             }

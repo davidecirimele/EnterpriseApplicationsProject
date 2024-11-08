@@ -38,23 +38,23 @@ public class User {
     @Embedded
     private Credential credential;
 
-    @OneToMany(mappedBy = "userId", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, orphanRemoval = true) // mappedBy indica il nome dell'attributo nella classe Address
+    @OneToMany(mappedBy = "userId", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true) // mappedBy indica il nome dell'attributo nella classe Address
     private List<Address> addresses;
 
     @Basic(optional = false)
     @Column(name = "PHONE_NUMBER", unique = true)
     private String phoneNumber;
 
-    @ManyToMany(mappedBy = "members", fetch = FetchType.EAGER) // mappedBy indica il nome dell'attributo nella classe Group
+    @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY) // mappedBy indica il nome dell'attributo nella classe Group
     private List<Group> groups = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<RefreshToken> refreshTokens = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PaymentMethod> paymentMethods;
 
-    @OneToMany(mappedBy = "userId", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Wishlist> wishlists;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

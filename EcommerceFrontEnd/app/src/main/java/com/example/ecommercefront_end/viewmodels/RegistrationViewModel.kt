@@ -17,6 +17,7 @@ import com.example.ecommercefront_end.model.Credential
 import com.example.ecommercefront_end.model.SaveUser
 import com.example.ecommercefront_end.model.UserDetails
 import com.example.ecommercefront_end.repository.AuthRepository
+import com.example.ecommercefront_end.utils.ErrorMessageParser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -113,8 +114,11 @@ class RegistrationViewModel(private val registrationRepository: AuthRepository) 
                     onRegistrationComplete()
 
                 } else {
-                    _registrationError.value = "Registration failed: ${response.message()}"
-                    triggerSnackbar("Registration failed: ${response.message()}")
+                    val errorBody = response.errorBody()?.string()
+
+                    _registrationError.value = ErrorMessageParser(errorBody)
+
+                    triggerSnackbar(ErrorMessageParser(errorBody))
                 }
 
             } catch (e: Exception) {

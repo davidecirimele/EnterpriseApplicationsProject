@@ -16,9 +16,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -37,13 +41,29 @@ fun InsertPaymentMethodScreen(viewModel: CheckoutViewModel, navController: NavCo
     val cardProvider by viewModel.selectedCardProvider.collectAsState()
     val selectedPaymentMethodType by viewModel.selectedPaymentMethodType.collectAsState()
 
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let { message ->
+            val result = viewModel.snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short,
+                withDismissAction = false,
+            )
+
+            if (result == SnackbarResult.Dismissed) {
+                viewModel.onSnackbarDismissed()
+            }
+        }
+    }
+
     Scaffold(topBar = {
         TopAppBar(
             title = { androidx.compose.material.Text("Insert Payment Method") },
             backgroundColor = Color(0xFF1F1F1F),
             contentColor = Color.White
         )
-    }) { paddingValues ->
+    },snackbarHost = { SnackbarHost(viewModel.snackbarHostState) }) { paddingValues ->
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)) {
@@ -116,9 +136,7 @@ fun InsertPaymentMethodScreen(viewModel: CheckoutViewModel, navController: NavCo
             }
             Button(
                 onClick = {
-                    viewModel.onAddPaymentMethodClick()
-
-                    navController.popBackStack()
+                    viewModel.onAddPaymentMethodClick(onSuccess = { navController.navigateUp() })
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = cardHolder.isNotBlank() && cardProvider != null && cardNumber.isNotBlank() && expirationDate.isNotBlank() && selectedPaymentMethodType != null

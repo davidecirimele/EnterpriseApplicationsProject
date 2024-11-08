@@ -2,6 +2,7 @@ package com.example.ecommercefront_end.viewmodels
 
 import android.content.ContentValues.TAG
 import android.util.Log
+import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,6 +19,7 @@ import com.example.ecommercefront_end.model.User
 import com.example.ecommercefront_end.model.UserDetails
 import com.example.ecommercefront_end.repository.AccountRepository
 import com.example.ecommercefront_end.ui.checkout.PaymentMethodRow
+import com.example.ecommercefront_end.utils.ErrorMessageParser
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +27,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.launch
 import retrofit2.Response
+import java.net.SocketTimeoutException
 import java.util.UUID
 
 class AccountViewModel(private val repository: AccountRepository): ViewModel() {
@@ -52,26 +55,27 @@ class AccountViewModel(private val repository: AccountRepository): ViewModel() {
     private val _isDeletingAccount = MutableStateFlow(false)
     val isDeletingAccount: StateFlow<Boolean> get() = _isDeletingAccount
 
-    fun loadUserDetails(forceReload : Boolean = false) {
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
 
-        if (_userDetails.value != null && !forceReload) {
-            return
-        }
+    val snackbarHostState = SnackbarHostState()
 
+    fun loadUserDetails() {
         viewModelScope.launch {
             try {
                 if (SessionManager.user != null) {
                     _userDetails.value = repository.getLoggedInUser(SessionManager.user!!.id)
-                    Log.d("UserDebug", "loadUserDetails: ${_userDetails.value}")
                 }
             } catch (e: Exception) {
-                // Gestisci eccezione
-                Log.e("UserDebug", "Errore durante il caricamento dei dati", e)
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error while fetching the user details: Connection problem."
+                else
+                    _errorMessage.value = "Error while fetching the user details."
             }
         }
     }
 
-    suspend fun editFunction(key:String, value : String, onSuccess : ()-> Unit, onError : ()-> Unit){
+    fun editFunction(key:String, value : String, onSuccess: ()->Unit){
         viewModelScope.launch {
             try {
                 val response: Response<User>?;
@@ -90,12 +94,19 @@ class AccountViewModel(private val repository: AccountRepository): ViewModel() {
                     if (response.isSuccessful && response.body() != null) {
                         onSuccess()
                     }
-                    else {
-                        onError()
+                    else{
+                        val errorBody = response.errorBody()?.string()
+
+                        _errorMessage.value = ErrorMessageParser(errorBody)
                     }
+                } else{
+                    _errorMessage.value = "Unexpected Error."
                 }
-            } catch (e: Exception) {
-                onError()
+            }catch (e: Exception) {
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error while changing user $key: Connection problem."
+                else
+                    _errorMessage.value = "Error while changing user $key."
             }
         }
     }
@@ -106,60 +117,61 @@ class AccountViewModel(private val repository: AccountRepository): ViewModel() {
             try {
                 val user = SessionManager.user
 
-                if(user != null && user.role != "ROLE_ADMIN") {
+                if (user != null && user.role != "ROLE_ADMIN") {
                     val response = repository.getUserOrders(user.id)
                     if (response.isSuccessful) {
                         val responseBody = response.body() as? List<OrderSummary>
                         if (responseBody != null) {
                             _userOrders.value = responseBody
-                        }
-                        else{
-                            throw Exception("Response is null")
+                        } else {
+                            _errorMessage.value = "Error while fetching the orders"
                         }
                     } else {
-                        Log.e("AdminError", "Errore nella risposta: ${response?.code()}")
+                        _errorMessage.value = "Error while fetching the orders"
                     }
-                } else{
-                    throw Exception("User is null")
+                } else {
+                    _errorMessage.value = "Session Error"
                 }
             } catch (e: Exception) {
-                Log.e("AdminError", "Errore durante il caricamento degli ordini", e)
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error while fetching the orders: Connection problem."
+                else
+                    _errorMessage.value = "Error while fetching the orders."
             } finally {
                 _isLoadingOrders.value = false
             }
         }
+
     }
 
     fun fetchPurchasedBooks(){
         viewModelScope.launch {
             _isLoadingPurchasedBooks.value = true
-            try{
+            try {
                 val user = SessionManager.user
-                if(user != null && user.role != "ROLE_ADMIN")
-                {
-                    val response = user?.let { repository.getPurchasedProducts(it.id) }
+                if (user != null && user.role != "ROLE_ADMIN") {
+                    val response = repository.getPurchasedProducts(user.id)
 
-                    if (response != null) {
-                        if(response.isSuccessful && response.body() != null)
-                        {
-                            _purchasedBooks.value = response.body()!!
-                        }
-                        else{
-                            throw Exception("Response Body is null")
-                        }
-                    } else{
-                        throw Exception("Response is null")
+
+                    if (response.isSuccessful && response.body() != null) {
+                        _purchasedBooks.value = response.body()!!
+                    } else {
+                        _errorMessage.value = "Error while fetching purchased books"
                     }
+                } else {
+                    _errorMessage.value = "Session Error"
                 }
-                else{
-                    throw Exception("Access Denied")
-                }
-            }catch(e: Exception){
-                Log.d(TAG, "fetchPurchasedBooks: ${e.message}")
-            }finally {
+            } catch (e: Exception) {
+                if (e is SocketTimeoutException)
+                    _errorMessage.value =
+                        "Error while fetching purchased books: Connection problem."
+                else
+                    _errorMessage.value = "Error while fetching purchased books."
+            } finally {
                 _isLoadingPurchasedBooks.value = false
             }
         }
+
     }
 
     fun changePassword(password: PasswordUser){
@@ -168,12 +180,21 @@ class AccountViewModel(private val repository: AccountRepository): ViewModel() {
                 val user = SessionManager.user
                 if (user != null) {
                     val response = repository.changePassword(user.id, password)
+
+                    if(!response.isSuccessful){
+                        val errorBody = response.errorBody()?.string()
+
+                        _errorMessage.value = ErrorMessageParser(errorBody)
+                    }
                 } else {
-                    throw Exception("Response is null")
+                    _errorMessage.value = "Session Error."
                 }
 
-            } catch (e: Exception) {
-                Log.d(TAG, "Password change: ${e.message}")
+            } catch(e: Exception){
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Error while updating password: Connection problem."
+                else
+                    _errorMessage.value = "Error while updating password."
             }
         }
     }
@@ -189,10 +210,13 @@ class AccountViewModel(private val repository: AccountRepository): ViewModel() {
                     onLogout()
                 }
                 else{
-                    throw Exception("Logout Failed")
+                    _errorMessage.value = "Logout Error."
                 }
-            }catch(e : Exception){
-
+            }catch(e: Exception){
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Logout Error: Connection problem."
+                else
+                    _errorMessage.value = "Logout Error."
             }finally{
                 _isLoggingOut.value = false
             }
@@ -210,14 +234,21 @@ class AccountViewModel(private val repository: AccountRepository): ViewModel() {
                     onDelete()
                 }
                 else{
-                    throw Exception("Deletion failed")
+                    _errorMessage.value = "Delete Error."
                 }
-            }catch(e : Exception){
-                throw e
+            }catch(e: Exception){
+                if (e is SocketTimeoutException)
+                    _errorMessage.value = "Delete Error: Connection problem."
+                else
+                    _errorMessage.value = "Delete Error."
             }finally{
                 _isDeletingAccount.value = false
             }
         }
+    }
+
+    fun onSnackbarDismissed(){
+        _errorMessage.value = null
     }
 
     fun onLogout(){

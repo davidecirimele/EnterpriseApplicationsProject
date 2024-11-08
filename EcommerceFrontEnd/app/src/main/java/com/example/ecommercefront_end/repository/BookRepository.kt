@@ -2,6 +2,7 @@ package com.example.ecommercefront_end.repository
 
 import android.util.Log
 import com.example.ecommercefront_end.model.Address
+import com.example.ecommercefront_end.model.Book
 import com.example.ecommercefront_end.model.BookFilter
 import com.example.ecommercefront_end.model.Price
 import com.example.ecommercefront_end.model.SaveAddress
@@ -14,6 +15,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.Response
 import java.io.File
 
 import java.util.UUID
@@ -21,8 +23,6 @@ import java.util.UUID
 class BookRepository(private val apiService : BooksApiService)  {
 
     suspend fun insertBook(book: SaveBook){
-        Log.d("ADDING_BOOK_DEBUG", "Inserting book: $book")
-
         val titlePart = book.title.toRequestBody("text/plain".toMediaTypeOrNull())
         val authorPart = book.author.toRequestBody("text/plain".toMediaTypeOrNull())
         val isbnPart = book.ISBN.toRequestBody("text/plain".toMediaTypeOrNull())
