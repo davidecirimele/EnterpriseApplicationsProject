@@ -3,8 +3,13 @@ package com.enterpriseapplicationsproject.ecommerce.data.entities;
 import com.enterpriseapplicationsproject.ecommerce.data.domain.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -36,5 +41,21 @@ public class Transaction {
 
     @Column(name = "DATE", nullable = false)
     private LocalDate date;
+
+    @CreatedDate
+    @Column(name = "CREATED_DATE", updatable = false)
+    private LocalDateTime createdDate;
+
+    @LastModifiedDate
+    @Column(name = "LAST_MODIFIED_DATE")
+    private LocalDateTime lastModifiedDate;
+
+    @CreatedBy
+    @Column(name = "CREATED_BY", updatable = false)
+    private String createdBy;
+
+    @LastModifiedBy
+    @Column(name = "LAST_MODIFIED_BY")
+    private String lastModifiedBy;
 
 }
